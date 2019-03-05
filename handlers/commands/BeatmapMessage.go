@@ -180,7 +180,7 @@ func srCalc(beatmap osuapi.Beatmap) (aim string, speed string, total string) {
 	file, err := os.Stat("./data/osuFiles/" + strconv.Itoa(beatmap.BeatmapID) + " " + beatmap.Artist + " - " + beatmap.Title + ".osu")
 	tools.ErrRead(err)
 
-	out, err := exec.Command("dotnet", "run", "-p", "./osu-tools/PerformanceCalculator", "simulate", "osu", "./data/osuFiles/"+file.Name(), "-a", fmt.Sprint(pp)).Output()
+	out, err := exec.Command("dotnet", "run", "-p", "./osu-tools/PerformanceCalculator", "difficulty", "./data/osuFiles/"+file.Name()).Output()
 	tools.ErrRead(err)
 	data := strings.Split(string(out), "\n")
 
