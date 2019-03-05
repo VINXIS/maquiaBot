@@ -21,7 +21,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	beatmapRegex, _ := regexp.Compile(`(osu|old).ppy.sh/(s|b|beatmaps(ets)?)/(\d+)(#(osu|taiko|fruits|mania)/(\d+)|\S+)?(\s)?(-n)?`)
+	beatmapRegex, _ := regexp.Compile(`(osu|old).ppy.sh/(s|b|beatmaps(ets)?)/(\d+)(#(osu|taiko|fruits|mania)/(\d+)|\S+)?(\s)*(-n)?(\s)*(-m (\S+))?`)
 	commandRegex, _ := regexp.Compile(`^\$(\S+)`)
 
 	// If message linked beatmap(s) TODO: Multiple maps linked in a message
