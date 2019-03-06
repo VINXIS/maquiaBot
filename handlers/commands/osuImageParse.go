@@ -31,19 +31,25 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 	tools.ErrRead(err, "30", "osuImageParse.go")
 
 	// Check if name already exists, create a seperate name instead if name is currently in use
-	if _, err := os.Stat("./" + name + ".jpg"); err != nil {
-		if !os.IsNotExist(err) {
+	_, err1 := os.Stat("./" + name + ".jpg")
+	_, err2 := os.Stat("./" + name + ".txt")
+	if err1 != nil || err2 != nil {
+		if !os.IsNotExist(err1) || !os.IsNotExist(err2) {
 			i := 1
 			for {
-				if _, err := os.Stat("./" + name + strconv.Itoa(i) + ".jpg"); err != nil {
-					if !os.IsNotExist(err) {
+				s.ChannelMessageEdit(message.ChannelID, message.ID, name+strconv.Itoa(i))
+				_, err1 := os.Stat("./" + name + strconv.Itoa(i) + ".jpg")
+				_, err2 := os.Stat("./" + name + strconv.Itoa(i) + ".txt")
+				if err1 != nil || err2 != nil {
+					if os.IsNotExist(err1) && os.IsNotExist(err2) {
 						name = name + strconv.Itoa(i)
 						break
 					} else {
 						i = i + 1
 					}
 				} else {
-					i = i + 1
+					name = name + strconv.Itoa(i)
+					break
 				}
 			}
 		}
@@ -51,21 +57,21 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 
 	// Create the file to write in
 	file, err := os.Create("./" + name + ".jpg")
-	tools.ErrRead(err, "53", "osuImageParse.go")
+	tools.ErrRead(err, "59", "osuImageParse.go")
 
 	// Dump the image data into the file
 	_, err = io.Copy(file, response.Body)
-	tools.ErrRead(err, "57", "osuImageParse.go")
+	tools.ErrRead(err, "63", "osuImageParse.go")
 	response.Body.Close()
 	file.Close()
 
 	// Run tesseract to parse the image
 	_, err = exec.Command("tesseract", "./"+name+".jpg", name).Output()
-	tools.ErrRead(err, "63", "osuImageParse.go")
+	tools.ErrRead(err, "69", "osuImageParse.go")
 
 	// Read result and parse it
 	text, err := ioutil.ReadFile(name + ".txt")
-	tools.ErrRead(err, "67", "osuImageParse.go")
+	tools.ErrRead(err, "73", "osuImageParse.go")
 
 	// Parse result
 	raw := string(text)
@@ -136,7 +142,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 				".osu",
 			"https://osu.ppy.sh/osu/"+
 				strconv.Itoa(beatmap.BeatmapID))
-		tools.ErrRead(err, "129", "osuImageParse.go")
+		tools.ErrRead(err, "135", "osuImageParse.go")
 
 		// Assign embed colour for different modes
 		var Color int
@@ -166,7 +172,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 		beatmaps, err = osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapSetID: beatmap.BeatmapSetID,
 		})
-		tools.ErrRead(err, "166", "osuImageParse.go")
+		tools.ErrRead(err, "172", "osuImageParse.go")
 
 		// Assign variables for map specs
 		totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
@@ -228,6 +234,6 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 
 func deleteFile(path string) {
 	var err = os.Remove(path)
-	tools.ErrRead(err, "230", "osuImageParse.go")
+	tools.ErrRead(err, "235", "osuImageParse.go")
 	return
 }
