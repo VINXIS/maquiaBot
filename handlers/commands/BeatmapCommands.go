@@ -42,6 +42,8 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 			}
 		}
 
+		log.Println("Someone linked a beatmap! The beatmap is " + strconv.Itoa(beatmap.BeatmapID) + " " + beatmap.Artist + " - " + beatmap.Title + " by " + beatmap.Creator)
+
 		// Assign embed colour for different modes
 		switch beatmap.Mode {
 		case osuapi.ModeOsu:
@@ -69,7 +71,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapSetID: beatmap.BeatmapSetID,
 		})
-		tools.ErrRead(err)
+		tools.ErrRead(err, "71", "BeatmapCommands.go")
 
 		// Assign variables for map specs
 		totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
@@ -135,13 +137,13 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 
 func beatmapParse(id string, format string, osu *osuapi.Client) (beatmap osuapi.Beatmap) {
 	mapID, err := strconv.Atoi(id)
-	tools.ErrRead(err)
+	tools.ErrRead(err, "139", "BeatmapCommands.go")
 	if format == "map" {
 		// Fetch the beatmap
 		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapID: mapID,
 		})
-		tools.ErrRead(err)
+		tools.ErrRead(err, "143", "BeatmapCommands.go")
 		beatmap = beatmaps[0]
 
 		// Download the .osu file for the map
@@ -155,13 +157,13 @@ func beatmapParse(id string, format string, osu *osuapi.Client) (beatmap osuapi.
 				".osu",
 			"https://osu.ppy.sh/osu/"+
 				strconv.Itoa(beatmap.BeatmapID))
-		tools.ErrRead(err)
+		tools.ErrRead(err, "150", "BeatmapCommands.go")
 	} else if format == "set" {
 		// Fetch the set
 		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapSetID: mapID,
 		})
-		tools.ErrRead(err)
+		tools.ErrRead(err, "163", "BeatmapCommands.go")
 
 		// Reorder the maps so that it returns the highest difficulty in the set
 		sort.Slice(beatmaps, func(i, j int) bool {
@@ -180,7 +182,7 @@ func beatmapParse(id string, format string, osu *osuapi.Client) (beatmap osuapi.
 					".osu",
 				"https://osu.ppy.sh/osu/"+
 					strconv.Itoa(diff.BeatmapID))
-			tools.ErrRead(err)
+			tools.ErrRead(err, "175", "BeatmapCommands.go")
 		}
 		beatmap = beatmaps[0]
 	}
@@ -190,10 +192,9 @@ func beatmapParse(id string, format string, osu *osuapi.Client) (beatmap osuapi.
 // SRCalc calcualtes the aim, speed, and total SR for a beatmap
 func SRCalc(beatmap osuapi.Beatmap, mods string) (aim string, speed string, total string) {
 	_, err := regexp.Compile(`pp             : (\d+)(\.\d+)?`)
-	tools.ErrRead(err)
+	tools.ErrRead(err, "194", "BeatmapCommands.go")
 
 	var commands []string
-	fmt.Println(beatmap.Mode.String())
 	commands = append(commands, "run", "-p", "./osu-tools/PerformanceCalculator", "difficulty", "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+beatmap.Artist+" - "+beatmap.Title+".osu")
 
 	// Check mods
@@ -228,7 +229,7 @@ func SRCalc(beatmap osuapi.Beatmap, mods string) (aim string, speed string, tota
 // PPCalc calculates the pp given by the beatmap with specified acc and mods TODO: More args
 func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string) (value string) {
 	regex, err := regexp.Compile(`pp             : (\d+)(\.\d+)?`)
-	tools.ErrRead(err)
+	tools.ErrRead(err, "231", "BeatmapCommands.go")
 
 	var data []string
 	var commands []string
@@ -238,19 +239,19 @@ func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string) (value string) {
 	if len(mods) > 0 && mods != "NM" {
 		var modResult strings.Builder
 		modList := tools.StringSplit(mods, 2)
-		for i := 0; i < len(modList); i++ {
+		for i := range modList {
 			modResult.WriteString("-m " + strings.ToLower(modList[i]) + " ")
 		}
 		commands = append(commands, strings.Split(modResult.String(), " ")[:]...)
 	}
 
 	out, err := exec.Command("dotnet", commands[:]...).Output()
-	tools.ErrRead(err)
+	tools.ErrRead(err, "248", "BeatmapCommands.go")
 	data = strings.Split(string(out), "\n")
 
 	res := regex.FindStringSubmatch(data[14])
 	ppValue, err := strconv.ParseFloat(res[1]+res[2], 64)
-	tools.ErrRead(err)
+	tools.ErrRead(err, "253", "BeatmapCommands.go")
 
 	value = fmt.Sprint(math.Round(ppValue)) + "pp"
 	return value

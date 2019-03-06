@@ -31,4 +31,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		fmt.Println(strings.Split(m.Content, " -"))
 	}
 
+	if len(m.Attachments) > 0 {
+		go commands.OsuImageParse(s, m, osu)
+	}
 }
