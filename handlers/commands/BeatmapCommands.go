@@ -104,11 +104,24 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 
 		// Calculate pp
 		s.ChannelMessageEdit(message.ChannelID, message.ID, "Calculating pp...")
-		ppSS := "**100%:** " + PPCalc(beatmap, 100.0, mods) + " | "
-		pp99 := "**99%:** " + PPCalc(beatmap, 99.0, mods) + " | "
-		pp98 := "**98%:** " + PPCalc(beatmap, 98.0, mods) + " | "
-		pp97 := "**97%:** " + PPCalc(beatmap, 97.0, mods) + " | "
-		pp95 := "**95%:** " + PPCalc(beatmap, 95.0, mods)
+		ppValues := make(chan int, 5)
+		var ppValueArray [5]int
+		go PPCalc(beatmap, 100.0, mods, ppValues)
+		go PPCalc(beatmap, 99.0, mods, ppValues)
+		go PPCalc(beatmap, 98.0, mods, ppValues)
+		go PPCalc(beatmap, 97.0, mods, ppValues)
+		go PPCalc(beatmap, 95.0, mods, ppValues)
+		for v := 0; v < 5; v++ {
+			ppValueArray[v] = <-ppValues
+		}
+		sort.Slice(ppValueArray[:], func(i, j int) bool {
+			return ppValueArray[i] > ppValueArray[j]
+		})
+		ppSS := "**100%:** " + strconv.Itoa(ppValueArray[0]) + "pp | "
+		pp99 := "**99%:** " + strconv.Itoa(ppValueArray[1]) + "pp | "
+		pp98 := "**98%:** " + strconv.Itoa(ppValueArray[2]) + "pp | "
+		pp97 := "**97%:** " + strconv.Itoa(ppValueArray[3]) + "pp | "
+		pp95 := "**95%:** " + strconv.Itoa(ppValueArray[4]) + "pp"
 
 		// Create embed
 		s.ChannelMessageEdit(message.ChannelID, message.ID, "Creating embed...")
@@ -230,7 +243,7 @@ func SRCalc(beatmap osuapi.Beatmap, mods string) (aim, speed, total string) {
 }
 
 // PPCalc calculates the pp given by the beatmap with specified acc and mods TODO: More args
-func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string) (value string) {
+func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string, store chan<- int) {
 	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
 
 	regex, err := regexp.Compile(`pp             : (\d+)(\.\d+)?`)
@@ -258,6 +271,6 @@ func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string) (value string) {
 	ppValue, err := strconv.ParseFloat(res[1]+res[2], 64)
 	tools.ErrRead(err, "257", "BeatmapCommands.go")
 
-	value = fmt.Sprint(math.Round(ppValue)) + "pp"
-	return value
+	value := int(math.Round(ppValue))
+	store <- value
 }

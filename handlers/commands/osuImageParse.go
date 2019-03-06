@@ -247,11 +247,24 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 		//aimRating, speedRating, totalRating := SRCalc(beatmap, "NM")
 
 		// Calculate pp
-		ppSS := "**100%:** " + PPCalc(beatmap, 100.0, "NM") + " | "
-		pp99 := "**99%:** " + PPCalc(beatmap, 99.0, "NM") + " | "
-		pp98 := "**98%:** " + PPCalc(beatmap, 98.0, "NM") + " | "
-		pp97 := "**97%:** " + PPCalc(beatmap, 97.0, "NM") + " | "
-		pp95 := "**95%:** " + PPCalc(beatmap, 95.0, "NM")
+		ppValues := make(chan int, 5)
+		var ppValueArray [5]int
+		go PPCalc(beatmap, 100.0, "NM", ppValues)
+		go PPCalc(beatmap, 99.0, "NM", ppValues)
+		go PPCalc(beatmap, 98.0, "NM", ppValues)
+		go PPCalc(beatmap, 97.0, "NM", ppValues)
+		go PPCalc(beatmap, 95.0, "NM", ppValues)
+		for v := 0; v < 5; v++ {
+			ppValueArray[v] = <-ppValues
+		}
+		sort.Slice(ppValueArray[:], func(i, j int) bool {
+			return ppValueArray[i] > ppValueArray[j]
+		})
+		ppSS := "**100%:** " + strconv.Itoa(ppValueArray[0]) + "pp | "
+		pp99 := "**99%:** " + strconv.Itoa(ppValueArray[1]) + "pp | "
+		pp98 := "**98%:** " + strconv.Itoa(ppValueArray[2]) + "pp | "
+		pp97 := "**97%:** " + strconv.Itoa(ppValueArray[3]) + "pp | "
+		pp95 := "**95%:** " + strconv.Itoa(ppValueArray[4]) + "pp"
 
 		embed := &discordgo.MessageEmbed{
 			Author: &discordgo.MessageEmbedAuthor{
