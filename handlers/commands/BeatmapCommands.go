@@ -123,7 +123,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 				status + "\n" +
 				download + "\n" +
 				diffs + "\n" + "\n" +
-				"**" + beatmap.DiffName + "** diff with mods: " + mods + "\n" +
+				"**[" + beatmap.DiffName + "]** with mods: " + mods + "\n" +
 				//aimRating + speedRating + totalRating + "\n" +
 				ppSS + pp99 + pp98 + pp97 + pp95,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
@@ -135,35 +135,36 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	}
 }
 
-func beatmapParse(id string, format string, osu *osuapi.Client) (beatmap osuapi.Beatmap) {
+func beatmapParse(id, format string, osu *osuapi.Client) (beatmap osuapi.Beatmap) {
+	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
+
 	mapID, err := strconv.Atoi(id)
-	tools.ErrRead(err, "139", "BeatmapCommands.go")
+	tools.ErrRead(err, "141", "BeatmapCommands.go")
 	if format == "map" {
 		// Fetch the beatmap
 		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapID: mapID,
 		})
-		tools.ErrRead(err, "143", "BeatmapCommands.go")
+		tools.ErrRead(err, "145", "BeatmapCommands.go")
 		beatmap = beatmaps[0]
 
 		// Download the .osu file for the map
-		err = tools.DownloadFile(
+		tools.DownloadFile(
 			"./data/osuFiles/"+
 				strconv.Itoa(beatmap.BeatmapID)+
 				" "+
-				beatmap.Artist+
+				replacer.ReplaceAllString(beatmap.Artist, "")+
 				" - "+
-				beatmap.Title+
+				replacer.ReplaceAllString(beatmap.Title, "")+
 				".osu",
 			"https://osu.ppy.sh/osu/"+
 				strconv.Itoa(beatmap.BeatmapID))
-		tools.ErrRead(err, "150", "BeatmapCommands.go")
 	} else if format == "set" {
 		// Fetch the set
 		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapSetID: mapID,
 		})
-		tools.ErrRead(err, "163", "BeatmapCommands.go")
+		tools.ErrRead(err, "164", "BeatmapCommands.go")
 
 		// Reorder the maps so that it returns the highest difficulty in the set
 		sort.Slice(beatmaps, func(i, j int) bool {
@@ -172,17 +173,16 @@ func beatmapParse(id string, format string, osu *osuapi.Client) (beatmap osuapi.
 
 		// Download the .osu files for the set
 		for _, diff := range beatmaps {
-			err = tools.DownloadFile(
+			tools.DownloadFile(
 				"./data/osuFiles/"+
 					strconv.Itoa(diff.BeatmapID)+
 					" "+
-					diff.Artist+
+					replacer.ReplaceAllString(diff.Artist, "")+
 					" - "+
-					diff.Title+
+					replacer.ReplaceAllString(diff.Title, "")+
 					".osu",
 				"https://osu.ppy.sh/osu/"+
 					strconv.Itoa(diff.BeatmapID))
-			tools.ErrRead(err, "175", "BeatmapCommands.go")
 		}
 		beatmap = beatmaps[0]
 	}
@@ -190,12 +190,14 @@ func beatmapParse(id string, format string, osu *osuapi.Client) (beatmap osuapi.
 }
 
 // SRCalc calcualtes the aim, speed, and total SR for a beatmap
-func SRCalc(beatmap osuapi.Beatmap, mods string) (aim string, speed string, total string) {
+func SRCalc(beatmap osuapi.Beatmap, mods string) (aim, speed, total string) {
+	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
+
 	_, err := regexp.Compile(`pp             : (\d+)(\.\d+)?`)
-	tools.ErrRead(err, "194", "BeatmapCommands.go")
+	tools.ErrRead(err, "196", "BeatmapCommands.go")
 
 	var commands []string
-	commands = append(commands, "run", "-p", "./osu-tools/PerformanceCalculator", "difficulty", "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+beatmap.Artist+" - "+beatmap.Title+".osu")
+	commands = append(commands, "run", "-p", "./osu-tools/PerformanceCalculator", "difficulty", "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+replacer.ReplaceAllString(beatmap.Artist, "")+" - "+replacer.ReplaceAllString(beatmap.Title, "")+".osu")
 
 	// Check mods
 	if len(mods) > 0 && mods != "NM" {
@@ -228,12 +230,14 @@ func SRCalc(beatmap osuapi.Beatmap, mods string) (aim string, speed string, tota
 
 // PPCalc calculates the pp given by the beatmap with specified acc and mods TODO: More args
 func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string) (value string) {
+	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
+
 	regex, err := regexp.Compile(`pp             : (\d+)(\.\d+)?`)
-	tools.ErrRead(err, "231", "BeatmapCommands.go")
+	tools.ErrRead(err, "235", "BeatmapCommands.go")
 
 	var data []string
 	var commands []string
-	commands = append(commands, "run", "-p", "./osu-tools/PerformanceCalculator", "simulate", "osu", "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+beatmap.Artist+" - "+beatmap.Title+".osu", "-a", fmt.Sprint(pp))
+	commands = append(commands, "run", "-p", "./osu-tools/PerformanceCalculator", "simulate", "osu", "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+replacer.ReplaceAllString(beatmap.Artist, "")+" - "+replacer.ReplaceAllString(beatmap.Title, "")+".osu", "-a", fmt.Sprint(pp))
 
 	// Check mods
 	if len(mods) > 0 && mods != "NM" {
@@ -246,12 +250,12 @@ func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string) (value string) {
 	}
 
 	out, err := exec.Command("dotnet", commands[:]...).Output()
-	tools.ErrRead(err, "248", "BeatmapCommands.go")
+	tools.ErrRead(err, "252", "BeatmapCommands.go")
 	data = strings.Split(string(out), "\n")
 
 	res := regex.FindStringSubmatch(data[14])
 	ppValue, err := strconv.ParseFloat(res[1]+res[2], 64)
-	tools.ErrRead(err, "253", "BeatmapCommands.go")
+	tools.ErrRead(err, "257", "BeatmapCommands.go")
 
 	value = fmt.Sprint(math.Round(ppValue)) + "pp"
 	return value

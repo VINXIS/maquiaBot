@@ -2,7 +2,8 @@ package commands
 
 import (
 	"fmt"
-	"io"
+	"image"
+	"image/png"
 	"io/ioutil"
 	"log"
 	"math"
@@ -10,8 +11,11 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/disintegration/imaging"
 
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -20,25 +24,64 @@ import (
 
 // OsuImageParse detects for an osu image
 func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi.Client) {
-	log.Println("Someone linked an image! the image URL is: " + m.Attachments[0].URL)
-	message, err := s.ChannelMessageSend(m.ChannelID, "Checking if image is from osu!...")
 
-	name := m.Attachments[0].Filename
-	url := m.Attachments[0].URL
+	// Create regexps for checks
+	mapperRegex, _ := regexp.Compile(`(?i)b?e?a?t?mapp?e?d? by (\S*)`)
+	titleRegex, _ := regexp.Compile(`\- (.*) \[`)
+	diagnosisRegex, _ := regexp.Compile(` -v`)
+
+	var (
+		name    string
+		url     string
+		message *discordgo.Message
+	)
+
+	if len(m.Attachments) > 0 {
+		log.Println("Someone sent an image! The image URL is: " + m.Attachments[0].URL)
+		message, _ = s.ChannelMessageSend(m.ChannelID, "Processing image...")
+
+		name = m.Attachments[0].Filename
+		url = m.Attachments[0].URL
+	} else {
+		regex, err := regexp.Compile(`https?:\/\/\S*`)
+		tools.ErrRead(err, "46", "osuImageParse.go")
+
+		link := regex.FindStringSubmatch(m.Content)[0]
+		log.Println("Someone sent a link! The URL is: " + link)
+		message, _ = s.ChannelMessageSend(m.ChannelID, "Processing link...")
+
+		name = "untitled"
+		url = link
+	}
 
 	// Fetch the image data
 	response, err := http.Get(url)
-	tools.ErrRead(err, "30", "osuImageParse.go")
+	tools.ErrRead(err, "58", "osuImageParse.go")
+	imgSrc, _, err := image.Decode(response.Body)
+	if err != nil {
+		if diagnosisRegex.MatchString(m.Content) {
+			s.ChannelMessageEdit(message.ChannelID, message.ID, "No luck... could not find a mapper not a title in the image!")
+		} else {
+			s.ChannelMessageDelete(message.ChannelID, message.ID)
+		}
+		return
+	}
 
-	// Check if name already exists, create a seperate name instead if name is currently in use
-	_, err1 := os.Stat("./" + name + ".jpg")
+	// Convert image to grayscale and raise contrast
+	newImg := imaging.AdjustSaturation(imgSrc, -100)
+	newImg = imaging.AdjustContrast(newImg, 100)
+	b := newImg.Bounds()
+	newImg = imaging.Crop(newImg, image.Rect(0, 0, int(2*b.Dx()/3), int(120*b.Dy()/969)))
+
+	// Check if name already exists, create a new name via integer suffix instead if target name is currently in use
+	_, err1 := os.Stat("./" + name + ".png")
 	_, err2 := os.Stat("./" + name + ".txt")
 	if err1 != nil || err2 != nil {
 		if !os.IsNotExist(err1) || !os.IsNotExist(err2) {
 			i := 1
 			for {
 				s.ChannelMessageEdit(message.ChannelID, message.ID, name+strconv.Itoa(i))
-				_, err1 := os.Stat("./" + name + strconv.Itoa(i) + ".jpg")
+				_, err1 := os.Stat("./" + name + strconv.Itoa(i) + ".png")
 				_, err2 := os.Stat("./" + name + strconv.Itoa(i) + ".txt")
 				if err1 != nil || err2 != nil {
 					if os.IsNotExist(err1) && os.IsNotExist(err2) {
@@ -56,61 +99,76 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 	}
 
 	// Create the file to write in
-	file, err := os.Create("./" + name + ".jpg")
-	tools.ErrRead(err, "59", "osuImageParse.go")
+	file, err := os.Create("./" + name + ".png")
+	tools.ErrRead(err, "102", "osuImageParse.go")
 
 	// Dump the image data into the file
-	_, err = io.Copy(file, response.Body)
-	tools.ErrRead(err, "63", "osuImageParse.go")
+	png.Encode(file, newImg)
+	tools.ErrRead(err, "106", "osuImageParse.go")
+
+	// Close file and res
 	response.Body.Close()
 	file.Close()
 
 	// Run tesseract to parse the image
-	_, err = exec.Command("tesseract", "./"+name+".jpg", name).Output()
-	tools.ErrRead(err, "69", "osuImageParse.go")
+	_, err = exec.Command("tesseract", "./"+name+".png", name).Output()
+	tools.ErrRead(err, "114", "osuImageParse.go")
 
 	// Read result and parse it
 	text, err := ioutil.ReadFile(name + ".txt")
-	tools.ErrRead(err, "73", "osuImageParse.go")
+	tools.ErrRead(err, "118", "osuImageParse.go")
 
 	// Parse result
 	raw := string(text)
 	str := strings.Split(raw, "\n")
-
-	// Create regexps for checks
-	mapperRegex, _ := regexp.Compile(`B?e?a?t?map by (\S*)`)
-	titleRegex, _ := regexp.Compile(`\- (.*) \[`)
-	diagnosisRegex, _ := regexp.Compile(`(-v)`)
-
 	if len(str) < 2 {
 		if diagnosisRegex.MatchString(m.Content) {
 			s.ChannelMessageEdit(message.ChannelID, message.ID, "No luck... could not find a mapper not a title in the image!")
 		} else {
 			s.ChannelMessageDelete(message.ChannelID, message.ID)
 		}
+		deleteFile("./" + name + ".png")
+		deleteFile("./" + name + ".txt")
 		return
 	}
-	title := str[0]
-	mapper := str[1]
+	var (
+		title  string
+		mapper string
+	)
 
-	// Check if the result was clean
-	if mapperRegex.MatchString(mapper) && titleRegex.MatchString(title) {
+	for _, line := range str {
+		if mapperRegex.MatchString(line) {
+			mapper = line
+		} else if titleRegex.MatchString(line) {
+			title = line
+		}
+	}
+
+	// See if the result was clean with a few checks
+	if mapper != "" && title != "" {
 		var beatmap osuapi.Beatmap
 		r := mapperRegex.FindStringSubmatch(mapper)
 		t := titleRegex.FindStringSubmatch(title)
-		s.ChannelMessageEdit(message.ChannelID, message.ID, "Possible beatmap match found! Doing an API call with `"+r[1]+"` as mapper, and `"+t[1]+"` as title...")
+		s.ChannelMessageEdit(message.ChannelID, message.ID, "Possible beatmap match found! Doing an API call with ** "+r[1]+" ** as mapper, and ** "+t[1]+" ** as title...")
 
 		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			Username: r[1],
 		})
 		if err != nil {
 			if diagnosisRegex.MatchString(m.Content) {
-				s.ChannelMessageEdit(message.ChannelID, message.ID, "No luck... the mapper line I parsed was `"+mapper+"` and the title line I parsed was `"+title+"`")
+				s.ChannelMessageEdit(message.ChannelID, message.ID, "No luck... the mapper line I parsed was ** "+mapper+" ** and the title line I parsed was ** "+title+" **")
 			} else {
 				s.ChannelMessageDelete(message.ChannelID, message.ID)
 			}
+			deleteFile("./" + name + ".png")
+			deleteFile("./" + name + ".txt")
 			return
 		}
+
+		// Reorder the maps so that it returns the highest difficulty in the set
+		sort.Slice(beatmaps, func(i, j int) bool {
+			return beatmaps[i].DifficultyRating > beatmaps[j].DifficultyRating
+		})
 
 		// Look for the beatmap in the results
 		for _, b := range beatmaps {
@@ -124,26 +182,27 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 		// Check if anything was actually found
 		if beatmap == (osuapi.Beatmap{}) || len(beatmaps) == 0 {
 			if diagnosisRegex.MatchString(m.Content) {
-				s.ChannelMessageEdit(message.ChannelID, message.ID, "No luck... the mapper line I parsed was `"+mapper+"` and the title line I parsed was `"+title+"`")
+				s.ChannelMessageEdit(message.ChannelID, message.ID, "No luck... the mapper line I parsed was ** "+mapper+" ** and the title line I parsed was ** "+title+" **")
 			} else {
 				s.ChannelMessageDelete(message.ChannelID, message.ID)
 			}
+			deleteFile("./" + name + ".png")
+			deleteFile("./" + name + ".txt")
 			return
 		}
 
 		// Download the .osu file for the map
-		err = tools.DownloadFile(
+		replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
+		tools.DownloadFile(
 			"./data/osuFiles/"+
 				strconv.Itoa(beatmap.BeatmapID)+
 				" "+
-				beatmap.Artist+
+				replacer.ReplaceAllString(beatmap.Artist, "")+
 				" - "+
-				beatmap.Title+
+				replacer.ReplaceAllString(beatmap.Title, "")+
 				".osu",
 			"https://osu.ppy.sh/osu/"+
 				strconv.Itoa(beatmap.BeatmapID))
-		tools.ErrRead(err, "135", "osuImageParse.go")
-
 		// Assign embed colour for different modes
 		var Color int
 		switch beatmap.Mode {
@@ -172,7 +231,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 		beatmaps, err = osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapSetID: beatmap.BeatmapSetID,
 		})
-		tools.ErrRead(err, "172", "osuImageParse.go")
+		tools.ErrRead(err, "231", "osuImageParse.go")
 
 		// Assign variables for map specs
 		totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
@@ -222,18 +281,18 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 		s.ChannelMessageEditEmbed(message.ChannelID, message.ID, embed)
 
 	} else if diagnosisRegex.MatchString(m.Content) {
-		s.ChannelMessageEdit(message.ChannelID, message.ID, "No luck... the mapper line I parsed was `"+mapper+"` and the title line I parsed was `"+title+"`")
+		s.ChannelMessageEdit(message.ChannelID, message.ID, "No luck... the mapper line I parsed was ** "+mapper+" ** and the title line I parsed was ** "+title+" **")
 	} else {
 		s.ChannelMessageDelete(message.ChannelID, message.ID)
 	}
 
 	// Close files
-	deleteFile("./" + name + ".jpg")
+	deleteFile("./" + name + ".png")
 	deleteFile("./" + name + ".txt")
 }
 
 func deleteFile(path string) {
 	var err = os.Remove(path)
-	tools.ErrRead(err, "235", "osuImageParse.go")
+	tools.ErrRead(err, "296", "osuImageParse.go")
 	return
 }

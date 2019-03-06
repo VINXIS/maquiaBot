@@ -23,6 +23,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	beatmapRegex, _ := regexp.Compile(`(osu|old).ppy.sh/(s|b|beatmaps(ets)?)/(\d+)(#(osu|taiko|fruits|mania)/(\d+)|\S+)?(\s)*(-n)?(\s)*(-m (\S+))?`)
 	commandRegex, _ := regexp.Compile(`^\$(\S+)`)
+	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
+	negateRegex, _ := regexp.Compile(`-n`)
+
+	if negateRegex.MatchString(m.Content) {
+		return
+	}
 
 	// If message linked beatmap(s) TODO: Multiple maps linked in a message
 	if beatmapRegex.MatchString(m.Content) {
@@ -31,7 +37,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		fmt.Println(strings.Split(m.Content, " -"))
 	}
 
-	if len(m.Attachments) > 0 {
+	if len(m.Attachments) > 0 || (linkRegex.MatchString(m.Content) && !beatmapRegex.MatchString(m.Content)) {
 		go commands.OsuImageParse(s, m, osu)
 	}
 }
