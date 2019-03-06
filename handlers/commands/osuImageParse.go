@@ -198,17 +198,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 			"https://osu.ppy.sh/osu/"+
 				strconv.Itoa(beatmap.BeatmapID))
 		// Assign embed colour for different modes
-		var Color int
-		switch beatmap.Mode {
-		case osuapi.ModeOsu:
-			Color = 0xD65288
-		case osuapi.ModeTaiko:
-			Color = 0xFF0000
-		case osuapi.ModeCatchTheBeat:
-			Color = 0x007419
-		case osuapi.ModeOsuMania:
-			Color = 0xff6200
-		}
+		Color := tools.ModeColour(beatmap.Mode)
 
 		// Temporary method to obtain mapper user id, once creator id is available, actual user avatars will be used for banned users
 		mapper, err := osu.GetUser(osuapi.GetUserOpts{
@@ -247,24 +237,40 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 		//aimRating, speedRating, totalRating := SRCalc(beatmap, "NM")
 
 		// Calculate pp
-		ppValues := make(chan int, 5)
-		var ppValueArray [5]int
-		go PPCalc(beatmap, 100.0, "NM", ppValues)
-		go PPCalc(beatmap, 99.0, "NM", ppValues)
-		go PPCalc(beatmap, 98.0, "NM", ppValues)
-		go PPCalc(beatmap, 97.0, "NM", ppValues)
-		go PPCalc(beatmap, 95.0, "NM", ppValues)
-		for v := 0; v < 5; v++ {
-			ppValueArray[v] = <-ppValues
+		var (
+			ppSS string
+			pp99 string
+			pp98 string
+			pp97 string
+			pp95 string
+		)
+		if beatmap.Mode != osuapi.ModeCatchTheBeat {
+			s.ChannelMessageEdit(message.ChannelID, message.ID, "Calculating pp...")
+			ppValues := make(chan int, 5)
+			var ppValueArray [5]int
+			go PPCalc(beatmap, 100.0, "NM", ppValues)
+			go PPCalc(beatmap, 99.0, "NM", ppValues)
+			go PPCalc(beatmap, 98.0, "NM", ppValues)
+			go PPCalc(beatmap, 97.0, "NM", ppValues)
+			go PPCalc(beatmap, 95.0, "NM", ppValues)
+			for v := 0; v < 5; v++ {
+				ppValueArray[v] = <-ppValues
+			}
+			sort.Slice(ppValueArray[:], func(i, j int) bool {
+				return ppValueArray[i] > ppValueArray[j]
+			})
+			ppSS = "**100%:** " + strconv.Itoa(ppValueArray[0]) + "pp | "
+			pp99 = "**99%:** " + strconv.Itoa(ppValueArray[1]) + "pp | "
+			pp98 = "**98%:** " + strconv.Itoa(ppValueArray[2]) + "pp | "
+			pp97 = "**97%:** " + strconv.Itoa(ppValueArray[3]) + "pp | "
+			pp95 = "**95%:** " + strconv.Itoa(ppValueArray[4]) + "pp"
+		} else {
+			ppSS = "pp is not available for ctb yet"
+			pp99 = ""
+			pp98 = ""
+			pp97 = ""
+			pp95 = ""
 		}
-		sort.Slice(ppValueArray[:], func(i, j int) bool {
-			return ppValueArray[i] > ppValueArray[j]
-		})
-		ppSS := "**100%:** " + strconv.Itoa(ppValueArray[0]) + "pp | "
-		pp99 := "**99%:** " + strconv.Itoa(ppValueArray[1]) + "pp | "
-		pp98 := "**98%:** " + strconv.Itoa(ppValueArray[2]) + "pp | "
-		pp97 := "**97%:** " + strconv.Itoa(ppValueArray[3]) + "pp | "
-		pp95 := "**95%:** " + strconv.Itoa(ppValueArray[4]) + "pp"
 
 		embed := &discordgo.MessageEmbed{
 			Author: &discordgo.MessageEmbedAuthor{
