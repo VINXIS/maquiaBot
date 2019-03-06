@@ -132,6 +132,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		}
 		s.ChannelMessageEdit(message.ChannelID, message.ID, "")
 		s.ChannelMessageEditEmbed(message.ChannelID, message.ID, embed)
+		return
 	}
 }
 
