@@ -12,6 +12,9 @@ import (
 	"github.com/thehowl/go-osuapi"
 )
 
+// Cache stores pp values for maps
+var Cache map[int][5]int
+
 // MessageHandler handles any incoming messages
 func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	osu := osuapi.NewClient(os.Getenv("OSU_API"))
@@ -32,12 +35,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// If message linked beatmap(s) TODO: Multiple maps linked in a message
 	if beatmapRegex.MatchString(m.Content) {
-		go commands.BeatmapMessage(s, m, beatmapRegex, osu)
+		go commands.BeatmapMessage(s, m, beatmapRegex, osu, Cache)
 	} else if commandRegex.MatchString(m.Content) {
 		fmt.Println(strings.Split(m.Content, " -"))
 	}
 
 	if len(m.Attachments) > 0 || (linkRegex.MatchString(m.Content) && !beatmapRegex.MatchString(m.Content)) {
-		go commands.OsuImageParse(s, m, osu)
+		go commands.OsuImageParse(s, m, osu, Cache)
 	}
 }
