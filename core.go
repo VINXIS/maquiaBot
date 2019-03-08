@@ -17,10 +17,6 @@ func main() {
 	discord, err := discordgo.New("Bot " + os.Getenv("DISCORD_BOT_TOKEN"))
 	tools.ErrRead(err)
 
-	cache := make(map[int][5]int)
-
-	handlers.Cache = cache
-
 	// Register the messageCreate func as a callback for MessageCreate events
 	discord.AddHandler(handlers.MessageHandler)
 

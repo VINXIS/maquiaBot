@@ -1,8 +1,9 @@
 package commands
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math"
 	"os/exec"
@@ -10,7 +11,9 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
+	structs "../../structs"
 	tools "../../tools"
 
 	"github.com/bwmarrin/discordgo"
@@ -18,7 +21,7 @@ import (
 )
 
 // BeatmapMessage is a handler executed when a message contains a beatmap link
-func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp, osu *osuapi.Client, hash map[int][5]int) {
+func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp, osu *osuapi.Client, cache []structs.MapData) {
 	submatches := regex.FindStringSubmatch(m.Content)
 
 	// Check if message wants the bot to send details or not before doing anything
@@ -39,6 +42,12 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 			} else {
 				beatmap = beatmapParse(submatches[4], "map", osu)
 			}
+		}
+
+		// Check if a beatmap was even obtained
+		if beatmap == (osuapi.Beatmap{}) {
+			s.ChannelMessageDelete(message.ChannelID, message.ID)
+			return
 		}
 
 		log.Println("Someone linked a beatmap! The beatmap is " + strconv.Itoa(beatmap.BeatmapID) + " " + beatmap.Artist + " - " + beatmap.Title + " by " + beatmap.Creator)
@@ -69,7 +78,6 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		hitMinutes := math.Floor(float64(beatmap.HitLength / 60))
 		hitSeconds := math.Mod(float64(beatmap.HitLength), float64(60))
 
-		starRating := "**SR:** " + fmt.Sprintf("%.2f", beatmap.DifficultyRating) + " "
 		length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 		bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 		combo := "**FC:** " + strconv.Itoa(beatmap.MaxCombo) + "x"
@@ -89,28 +97,59 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		}
 
 		// Calculate SR
-		//aimRating, speedRating, totalRating := SRCalc(beatmap, mods)
+		//SRCalc(beatmap, mods)
 
 		// Calculate pp
 		var (
-			ppSS string
-			pp99 string
-			pp98 string
-			pp97 string
-			pp95 string
+			starRating string
+			ppSS       string
+			pp99       string
+			pp98       string
+			pp97       string
+			pp95       string
 		)
-		values, check := hash[beatmap.BeatmapID]
-		if check {
-			ppValueArray := values
-			ppSS = "**100%:** " + strconv.Itoa(ppValueArray[0]) + "pp | "
-			pp99 = "**99%:** " + strconv.Itoa(ppValueArray[1]) + "pp | "
-			pp98 = "**98%:** " + strconv.Itoa(ppValueArray[2]) + "pp | "
-			pp97 = "**97%:** " + strconv.Itoa(ppValueArray[3]) + "pp | "
-			pp95 = "**95%:** " + strconv.Itoa(ppValueArray[4]) + "pp"
+		latest, update := false, false
+		index := 0
+		var PPData structs.PPData
+		var CacheData structs.MapData
+		twoDay, err := time.ParseDuration("48h")
+		tools.ErrRead(err)
+		for i := range cache {
+			if cache[i].Beatmap.BeatmapID == beatmap.BeatmapID {
+				if cache[i].Beatmap == beatmap && time.Now().Sub(cache[i].Time) < twoDay {
+					for j := range cache[i].PP {
+						if cache[i].PP[j].Mods == mods {
+							PPData = cache[i].PP[j]
+							latest = true
+							update = false
+							break
+						}
+					}
+					if !latest {
+						index = i
+						CacheData = cache[i]
+						update = true
+						break
+					}
+				} else {
+					index = i
+					CacheData = cache[i]
+					update = true
+					break
+				}
+			}
+		}
+		if latest {
+			starRating = "**SR:** " + PPData.SR + " "
+			ppSS = "**100%:** " + PPData.PPSS + "pp | "
+			pp99 = "**99%:** " + PPData.PP99 + "pp | "
+			pp98 = "**98%:** " + PPData.PP98 + "pp | "
+			pp97 = "**97%:** " + PPData.PP97 + "pp | "
+			pp95 = "**95%:** " + PPData.PP95 + "pp"
 		} else {
 			if beatmap.Mode != osuapi.ModeCatchTheBeat {
-				ppValues := make(chan int, 5)
-				var ppValueArray [5]int
+				ppValues := make(chan string, 5)
+				var ppValueArray [5]string
 				go PPCalc(beatmap, 100.0, mods, ppValues)
 				go PPCalc(beatmap, 99.0, mods, ppValues)
 				go PPCalc(beatmap, 98.0, mods, ppValues)
@@ -122,12 +161,59 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 				sort.Slice(ppValueArray[:], func(i, j int) bool {
 					return ppValueArray[i] > ppValueArray[j]
 				})
-				ppSS = "**100%:** " + strconv.Itoa(ppValueArray[0]) + "pp | "
-				pp99 = "**99%:** " + strconv.Itoa(ppValueArray[1]) + "pp | "
-				pp98 = "**98%:** " + strconv.Itoa(ppValueArray[2]) + "pp | "
-				pp97 = "**97%:** " + strconv.Itoa(ppValueArray[3]) + "pp | "
-				pp95 = "**95%:** " + strconv.Itoa(ppValueArray[4]) + "pp"
-				hash[beatmap.BeatmapID] = ppValueArray
+				starRating = "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
+				ppSS = "**100%:** " + ppValueArray[0] + "pp | "
+				pp99 = "**99%:** " + ppValueArray[1] + "pp | "
+				pp98 = "**98%:** " + ppValueArray[2] + "pp | "
+				pp97 = "**97%:** " + ppValueArray[3] + "pp | "
+				pp95 = "**95%:** " + ppValueArray[4] + "pp"
+				if update {
+					CacheData.Beatmap = beatmap
+					CacheData.Time = time.Now()
+					modExist := false
+					for j := range CacheData.PP {
+						if CacheData.PP[j].Mods == mods {
+							modExist = true
+							CacheData.PP[j].SR = strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64)
+							CacheData.PP[j].PPSS = ppValueArray[0]
+							CacheData.PP[j].PP99 = ppValueArray[1]
+							CacheData.PP[j].PP98 = ppValueArray[2]
+							CacheData.PP[j].PP97 = ppValueArray[3]
+							CacheData.PP[j].PP95 = ppValueArray[4]
+						}
+					}
+					if !modExist {
+						CacheData.PP = append(CacheData.PP, structs.PPData{
+							Mods: mods,
+							SR:   strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64),
+							PPSS: ppValueArray[0],
+							PP99: ppValueArray[1],
+							PP98: ppValueArray[2],
+							PP97: ppValueArray[3],
+							PP95: ppValueArray[4],
+						})
+					}
+					cache[index] = CacheData
+				} else {
+					var cachePPData []structs.PPData
+					cachePPData = append(cachePPData, structs.PPData{
+						Mods: mods,
+						SR:   strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64),
+						PPSS: ppValueArray[0],
+						PP99: ppValueArray[1],
+						PP98: ppValueArray[2],
+						PP97: ppValueArray[3],
+						PP95: ppValueArray[4],
+					})
+					cache = append(cache, structs.MapData{
+						Time:    time.Now(),
+						Beatmap: beatmap,
+						PP:      cachePPData,
+					})
+				}
+				jsonCache, err := json.Marshal(cache)
+				tools.ErrRead(err)
+				err = ioutil.WriteFile("./data/osuCache.json", jsonCache, 0644)
 			} else {
 				ppSS = "pp is not available for ctb yet"
 				pp99 = ""
@@ -173,7 +259,9 @@ func beatmapParse(id, format string, osu *osuapi.Client) (beatmap osuapi.Beatmap
 			BeatmapID: mapID,
 		})
 		tools.ErrRead(err)
-		beatmap = beatmaps[0]
+		if len(beatmaps) > 0 {
+			beatmap = beatmaps[0]
+		}
 
 		// Download the .osu file for the map
 		tools.DownloadFile(
@@ -211,43 +299,33 @@ func beatmapParse(id, format string, osu *osuapi.Client) (beatmap osuapi.Beatmap
 				"https://osu.ppy.sh/osu/"+
 					strconv.Itoa(diff.BeatmapID))
 		}
-		beatmap = beatmaps[0]
+		if len(beatmaps) > 0 {
+			beatmap = beatmaps[0]
+		}
 	}
 	return beatmap
 }
 
 // SRCalc calcualtes the aim, speed, and total SR for a beatmap
 func SRCalc(beatmap osuapi.Beatmap, mods string) (aim, speed, total string) {
-	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
-
-	_, err := regexp.Compile(`pp             : (\d+)(\.\d+)?`)
-	tools.ErrRead(err)
+	/*replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
+	//fileName := strconv.Itoa(rand.Intn(10000000))
 
 	var commands []string
-	commands = append(commands, "run", "-p", "./osu-tools/PerformanceCalculator", "difficulty", "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+replacer.ReplaceAllString(beatmap.Artist, "")+" - "+replacer.ReplaceAllString(beatmap.Title, "")+".osu")
-
-	// Check mods
-	if len(mods) > 0 && mods != "NM" {
-		var modResult strings.Builder
-		modList := tools.StringSplit(mods, 2)
-		for i := 0; i < len(modList); i++ {
-			modResult.WriteString("-m " + strings.ToLower(modList[i]) + " ")
+	commands = append(commands, "/C", "start", "dotnet", "run", "-p", "./osu-tools/PerformanceCalculator", "difficulty", "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+replacer.ReplaceAllString(beatmap.Artist, "")+" - "+replacer.ReplaceAllString(beatmap.Title, "")+".osu")
+	cmd := exec.Command("cmd", commands[:]...)
+	err := cmd.Start()
+	tools.ErrRead(err)
+	fmt.Println(string(res))
+	for {
+		if cmd.ProcessState.ExitCode() == 0 {
+			text, err := ioutil.ReadFile(fileName + ".txt")
+			tools.ErrRead(err)
+			fmt.Println(string(text))
+			tools.DeleteFile("./" + fileName + ".txt")
+			break
 		}
-		commands = append(commands, strings.Split(modResult.String(), " ")[:]...)
-	}
-
-	cmd := exec.Command("dotnet", commands[:]...)
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	err = cmd.Run()
-	if err != nil {
-		log.Fatal(fmt.Sprint(err) + ": " + stderr.String())
-		return
-	}
-	data := strings.Split(out.String(), "\n")
-	fmt.Println(data)
+	}*/
 
 	aim = "**Aim SR**: 0 "
 	speed = "**Speed SR**: 0 "
@@ -256,7 +334,7 @@ func SRCalc(beatmap osuapi.Beatmap, mods string) (aim, speed, total string) {
 }
 
 // PPCalc calculates the pp given by the beatmap with specified acc and mods TODO: More args
-func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string, store chan<- int) {
+func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string, store chan<- string) {
 	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
 
 	regex, err := regexp.Compile(`pp             : (\d+)(\.\d+)?`)
@@ -298,6 +376,6 @@ func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string, store chan<- int) {
 	ppValue, err := strconv.ParseFloat(res[1]+res[2], 64)
 	tools.ErrRead(err)
 
-	value := int(math.Round(ppValue))
+	value := strconv.FormatFloat(math.Round(ppValue), 'f', 0, 64)
 	store <- value
 }

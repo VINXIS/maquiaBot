@@ -1,23 +1,28 @@
 package handle
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
 
+	structs "../structs"
+	tools "../tools"
 	commands "./commands"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/thehowl/go-osuapi"
 )
 
-// Cache stores pp values for maps
-var Cache map[int][5]int
-
 // MessageHandler handles any incoming messages
 func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	osu := osuapi.NewClient(os.Getenv("OSU_API"))
+	cache := []structs.MapData{}
+	f, err := ioutil.ReadFile("./data/osuCache.json")
+	tools.ErrRead(err)
+	_ = json.Unmarshal(f, &cache)
 
 	// Ignore all messages created by the bot itself
 	if m.Author.ID == s.State.User.ID {
@@ -35,12 +40,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// If message linked beatmap(s) TODO: Multiple maps linked in a message
 	if beatmapRegex.MatchString(m.Content) {
-		go commands.BeatmapMessage(s, m, beatmapRegex, osu, Cache)
+		go commands.BeatmapMessage(s, m, beatmapRegex, osu, cache)
 	} else if commandRegex.MatchString(m.Content) {
 		fmt.Println(strings.Split(m.Content, " -"))
 	}
 
 	if len(m.Attachments) > 0 || (linkRegex.MatchString(m.Content) && !beatmapRegex.MatchString(m.Content)) {
-		go commands.OsuImageParse(s, m, osu, Cache)
+		go commands.OsuImageParse(s, m, osu, cache)
 	}
 }
