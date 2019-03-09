@@ -1,8 +1,7 @@
-package handle
+package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -10,6 +9,7 @@ import (
 
 	structs "../structs"
 	tools "../tools"
+	gencommands "./general-commands"
 	osucommands "./osu-commands"
 
 	"github.com/bwmarrin/discordgo"
@@ -27,7 +27,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	_ = json.Unmarshal(f, &mapCache)
 
 	// Obtain profile cache data
-	profileCache := []structs.MapData{}
+	profileCache := []structs.PlayerData{}
 	f, err = ioutil.ReadFile("./data/osuData/profileCache.json")
 	tools.ErrRead(err)
 	_ = json.Unmarshal(f, &profileCache)
@@ -41,24 +41,31 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	beatmapRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh/(s|b|beatmaps(ets)?)/(\d+)(#(osu|taiko|fruits|mania)/(\d+)|\S+)?(\s)*(-n)?(\s)*(-m (\S+))?`)
 	commandRegex, _ := regexp.Compile(`^\$(\S+)`)
 	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
-	negateRegex, _ := regexp.Compile(`-n`)
+	negateRegex, _ := regexp.Compile(`-n\W`)
 
 	if negateRegex.MatchString(m.Content) {
 		return
 	}
 
-	// If message linked beatmap(s) TODO: Multiple maps linked in a message
-	if beatmapRegex.MatchString(m.Content) {
+	if beatmapRegex.MatchString(m.Content) { // If a beatmap is linked
 		go osucommands.BeatmapMessage(s, m, beatmapRegex, osuAPI, mapCache)
 		return
-	} else if commandRegex.MatchString(m.Content) {
-		fmt.Println(strings.Split(m.Content, " -"))
-		return
-	} else if profileRegex.MatchString(m.Content) {
+	} else if profileRegex.MatchString(m.Content) { // if a profile was linked
 		go osucommands.ProfileMessage(s, m, profileRegex, osuAPI, profileCache)
 		return
+	} else if commandRegex.MatchString(m.Content) { // If a command was linked
+		args := strings.Split(m.Content, " ")
+		command := args[0]
+		switch command {
+		case "$osu", "$o":
+			go OsuHandle(s, m, args, osuAPI, profileCache)
+		case "$avatar":
+			go gencommands.Avatar(s, m)
+		case "$rs":
+			go osucommands.Recent(s, m, args, osuAPI, profileCache)
+		}
+		return
 	}
-
 	if len(m.Attachments) > 0 || (linkRegex.MatchString(m.Content) && !beatmapRegex.MatchString(m.Content)) {
 		go osucommands.OsuImageParse(s, m, linkRegex, osuAPI, mapCache)
 		return

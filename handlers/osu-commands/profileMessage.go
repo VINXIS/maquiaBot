@@ -13,23 +13,29 @@ import (
 )
 
 // ProfileMessage gets the information for the specified profile linked
-func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileRegex *regexp.Regexp, osuAPI *osuapi.Client, cache []structs.MapData) {
+func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileRegex *regexp.Regexp, osuAPI *osuapi.Client, cache []structs.PlayerData) {
 	modeRegex, _ := regexp.Compile(`-m (\S+)`)
 	bestRegex, _ := regexp.Compile(` -b`)
 	var mode osuapi.Mode
+	imgMode := "0"
 
 	if modeRegex.MatchString(m.Content) {
 		mValue := strings.ToLower(modeRegex.FindStringSubmatch(m.Content)[1])
 		switch mValue {
 		case "osu", "osu!", "std", "osu!std", "0", "o":
+			imgMode = "0"
 			mode = osuapi.ModeOsu
 		case "taiko", "tko", "1", "t":
+			imgMode = "1"
 			mode = osuapi.ModeTaiko
 		case "catch", "ctb", "2", "c":
+			imgMode = "2"
 			mode = osuapi.ModeCatchTheBeat
 		case "mania", "man", "3", "m":
+			imgMode = "3"
 			mode = osuapi.ModeOsuMania
 		default:
+			imgMode = "0"
 			mode = osuapi.ModeOsu
 		}
 	} else {
@@ -60,6 +66,8 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		}
 	}
 
+	go osutools.PlayerCache(*user, cache)
+
 	// Get the user's best scores
 	userBest, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 		UserID: user.UserID,
@@ -73,10 +81,12 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 	rank := "**Rank:** #" + strconv.Itoa(user.Rank) + " (" + user.Country + "#" + strconv.Itoa(user.CountryRank) + ")"
 	accuracy := "**Acc:** " + strconv.FormatFloat(user.Accuracy, 'f', 2, 64) + "% "
 	pc := "**Playcount:** " + strconv.Itoa(user.Playcount)
+	imgURL := "https://lemmmy.pw/osusig/sig.php?uname=" + strconv.Itoa(user.UserID) + "&pp=2&mode=" + imgMode
 	topPlayFooter := ""
 
 	var mapList []*discordgo.MessageEmbedField
 	if bestRegex.MatchString(m.Content) {
+		imgURL = ""
 		topPlayFooter = "**Top plays:**" + "\n" + `\_\_\_\_\_\_\_\_\_\_`
 		for i := 0; i < 5; i++ {
 			score := userBest[i]
@@ -117,6 +127,9 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			URL: "https://a.ppy.sh/" + strconv.Itoa(user.UserID),
 		},
 		Fields: mapList,
+		Image: &discordgo.MessageEmbedImage{
+			URL: imgURL,
+		},
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	return

@@ -13,7 +13,7 @@ import (
 	"github.com/thehowl/go-osuapi"
 )
 
-// BeatmapCache checks to see if the altest beatmap information is already saved, otherwise it will calculate the SR and PP of the map
+// BeatmapCache checks to see if the latest beatmap information is already saved, otherwise it will calculate the SR and PP of the map
 func BeatmapCache(mods string, beatmap osuapi.Beatmap, cache []structs.MapData) (starRating, ppSS, pp99, pp98, pp97, pp95 string) {
 
 	latest, update := false, false
@@ -121,7 +121,8 @@ func BeatmapCache(mods string, beatmap osuapi.Beatmap, cache []structs.MapData) 
 			}
 			jsonCache, err := json.Marshal(cache)
 			tools.ErrRead(err)
-			err = ioutil.WriteFile("./data/osuCache.json", jsonCache, 0644)
+			err = ioutil.WriteFile("./data/osuData/mapCache.json", jsonCache, 0644)
+			tools.ErrRead(err)
 		} else {
 			ppSS = "pp is not available for ctb yet"
 			pp99 = ""
