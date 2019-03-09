@@ -1,4 +1,4 @@
-package tools
+package osutools
 
 import (
 	"github.com/thehowl/go-osuapi"

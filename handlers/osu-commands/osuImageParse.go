@@ -1,7 +1,6 @@
-package commands
+package osucommands
 
 import (
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/png"
@@ -16,10 +15,10 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/disintegration/imaging"
 
+	osutools "../../osu-functions"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -27,7 +26,7 @@ import (
 )
 
 // OsuImageParse detects for an osu image
-func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi.Client, cache []structs.MapData) {
+func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp, osuAPI *osuapi.Client, cache []structs.MapData) {
 
 	// Create regexps for checks
 	mapperRegex, _ := regexp.Compile(`(?i)b?e?a?t?mapp?e?d? by (\S*)`)
@@ -45,10 +44,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 		name = strconv.Itoa(rand.Intn(10000000))
 		url = m.Attachments[0].URL
 	} else {
-		regex, err := regexp.Compile(`https?:\/\/\S*`)
-		tools.ErrRead(err)
-
-		link := regex.FindStringSubmatch(m.Content)[0]
+		link := linkRegex.FindStringSubmatch(m.Content)[0]
 		log.Println("Someone sent a link! The URL is: " + link)
 
 		name = strconv.Itoa(rand.Intn(10000000))
@@ -131,7 +127,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 	if mapperName != "" && title != "" {
 		message, _ := s.ChannelMessageSend(m.ChannelID, "Processing image...")
 		var beatmap osuapi.Beatmap
-		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
+		beatmaps, err := osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			Username: mapperName,
 		})
 		if err != nil {
@@ -183,21 +179,21 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 			"https://osu.ppy.sh/osu/"+
 				strconv.Itoa(beatmap.BeatmapID))
 		// Assign embed colour for different modes
-		Color := tools.ModeColour(beatmap.Mode)
+		Color := osutools.ModeColour(beatmap.Mode)
 
 		// Temporary method to obtain mapper user id, once creator id is available, actual user avatars will be used for banned users
-		mapper, err := osu.GetUser(osuapi.GetUserOpts{
+		mapper, err := osuAPI.GetUser(osuapi.GetUserOpts{
 			Username: beatmap.Creator,
 		})
 		if err != nil {
-			mapper, err = osu.GetUser(osuapi.GetUserOpts{
+			mapper, err = osuAPI.GetUser(osuapi.GetUserOpts{
 				UserID: 3,
 			})
 			mapper.Username = beatmap.Creator
 		}
 
 		// Obtain whole set
-		beatmaps, err = osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
+		beatmaps, err = osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapSetID: beatmap.BeatmapSetID,
 		})
 		tools.ErrRead(err)
@@ -217,133 +213,10 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 		download := "**Download:** [osz link](https://osu.ppy.sh/d/" + strconv.Itoa(beatmap.BeatmapSetID) + ")" + " | <osu://dl/" + strconv.Itoa(beatmap.BeatmapSetID) + ">"
 		diffs := "**" + strconv.Itoa(len(beatmaps)) + `** difficulties <:ahFuck:550808614202245131>`
 
-		// Calculate SR
-		//aimRating, speedRating, totalRating := SRCalc(beatmap, "NM")
+		// Calculate SR and PP
+		starRating, ppSS, pp99, pp98, pp97, pp95 := osutools.BeatmapCache("NM", beatmap, cache)
 
-		// Calculate pp
-		var (
-			starRating string
-			ppSS       string
-			pp99       string
-			pp98       string
-			pp97       string
-			pp95       string
-		)
-		latest, update := false, false
-		index := 0
-		var PPData structs.PPData
-		var CacheData structs.MapData
-		twoDay, err := time.ParseDuration("48h")
-		tools.ErrRead(err)
-		for i := range cache {
-			if cache[i].Beatmap.BeatmapID == beatmap.BeatmapID {
-				if cache[i].Beatmap == beatmap && time.Now().Sub(cache[i].Time) < twoDay {
-					for j := range cache[i].PP {
-						if cache[i].PP[j].Mods == "NM" {
-							PPData = cache[i].PP[j]
-							latest = true
-							update = false
-							break
-						}
-					}
-					if !latest {
-						index = i
-						CacheData = cache[i]
-						update = true
-						break
-					}
-				} else {
-					index = i
-					CacheData = cache[i]
-					update = true
-					break
-				}
-			}
-		}
-		if latest {
-			starRating = "**SR:** " + PPData.SR + " "
-			ppSS = "**100%:** " + PPData.PPSS + "pp | "
-			pp99 = "**99%:** " + PPData.PP99 + "pp | "
-			pp98 = "**98%:** " + PPData.PP98 + "pp | "
-			pp97 = "**97%:** " + PPData.PP97 + "pp | "
-			pp95 = "**95%:** " + PPData.PP95 + "pp"
-		} else {
-			if beatmap.Mode != osuapi.ModeCatchTheBeat {
-				ppValues := make(chan string, 5)
-				var ppValueArray [5]string
-				go PPCalc(beatmap, 100.0, "NM", ppValues)
-				go PPCalc(beatmap, 99.0, "NM", ppValues)
-				go PPCalc(beatmap, 98.0, "NM", ppValues)
-				go PPCalc(beatmap, 97.0, "NM", ppValues)
-				go PPCalc(beatmap, 95.0, "NM", ppValues)
-				for v := 0; v < 5; v++ {
-					ppValueArray[v] = <-ppValues
-				}
-				sort.Slice(ppValueArray[:], func(i, j int) bool {
-					return ppValueArray[i] > ppValueArray[j]
-				})
-				starRating = "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
-				ppSS = "**100%:** " + ppValueArray[0] + "pp | "
-				pp99 = "**99%:** " + ppValueArray[1] + "pp | "
-				pp98 = "**98%:** " + ppValueArray[2] + "pp | "
-				pp97 = "**97%:** " + ppValueArray[3] + "pp | "
-				pp95 = "**95%:** " + ppValueArray[4] + "pp"
-				if update {
-					CacheData.Beatmap = beatmap
-					CacheData.Time = time.Now()
-					modExist := false
-					for j := range CacheData.PP {
-						if CacheData.PP[j].Mods == "NM" {
-							modExist = true
-							CacheData.PP[j].SR = strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64)
-							CacheData.PP[j].PPSS = ppValueArray[0]
-							CacheData.PP[j].PP99 = ppValueArray[1]
-							CacheData.PP[j].PP98 = ppValueArray[2]
-							CacheData.PP[j].PP97 = ppValueArray[3]
-							CacheData.PP[j].PP95 = ppValueArray[4]
-						}
-					}
-					if !modExist {
-						CacheData.PP = append(CacheData.PP, structs.PPData{
-							Mods: "NM",
-							SR:   strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64),
-							PPSS: ppValueArray[0],
-							PP99: ppValueArray[1],
-							PP98: ppValueArray[2],
-							PP97: ppValueArray[3],
-							PP95: ppValueArray[4],
-						})
-					}
-					cache[index] = CacheData
-				} else {
-					var cachePPData []structs.PPData
-					cachePPData = append(cachePPData, structs.PPData{
-						Mods: "NM",
-						SR:   strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64),
-						PPSS: ppValueArray[0],
-						PP99: ppValueArray[1],
-						PP98: ppValueArray[2],
-						PP97: ppValueArray[3],
-						PP95: ppValueArray[4],
-					})
-					cache = append(cache, structs.MapData{
-						Time:    time.Now(),
-						Beatmap: beatmap,
-						PP:      cachePPData,
-					})
-				}
-				jsonCache, err := json.Marshal(cache)
-				tools.ErrRead(err)
-				err = ioutil.WriteFile("./data/osuCache.json", jsonCache, 0644)
-			} else {
-				ppSS = "pp is not available for ctb yet"
-				pp99 = ""
-				pp98 = ""
-				pp97 = ""
-				pp95 = ""
-			}
-		}
-
+		// Create embed
 		embed := &discordgo.MessageEmbed{
 			Author: &discordgo.MessageEmbedAuthor{
 				URL:     "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
@@ -356,7 +229,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, osu *osuapi
 				download + "\n" +
 				diffs + "\n" + "\n" +
 				"**[" + beatmap.DiffName + "]**\n" +
-				//aimRating + speedRating + totalRating + "\n" +
+				//aimRating + speedRating + totalRating + "\n" + TODO: Make SR calc work
 				ppSS + pp99 + pp98 + pp97 + pp95,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
 				URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
