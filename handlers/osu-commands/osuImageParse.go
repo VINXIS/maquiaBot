@@ -238,10 +238,6 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		s.ChannelMessageEdit(message.ChannelID, message.ID, "")
 		s.ChannelMessageEditEmbed(message.ChannelID, message.ID, embed)
 
-	} else {
-		tools.DeleteFile("./" + name + ".png")
-		tools.DeleteFile("./" + name + ".txt")
-		return
 	}
 
 	// Close files

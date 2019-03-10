@@ -20,8 +20,8 @@ func BeatmapCache(mods string, beatmap osuapi.Beatmap, cache []structs.MapData) 
 	index := 0
 	var PPData structs.PPData
 	var CacheData structs.MapData
-	twoDay, err := time.ParseDuration("48h")
-	tools.ErrRead(err)
+	twoDay := 48 * time.Hour
+
 	for i := range cache {
 		if cache[i].Beatmap.BeatmapID == beatmap.BeatmapID {
 			if cache[i].Beatmap == beatmap && time.Now().Sub(cache[i].Time) < twoDay {
@@ -58,11 +58,11 @@ func BeatmapCache(mods string, beatmap osuapi.Beatmap, cache []structs.MapData) 
 		if beatmap.Mode != osuapi.ModeCatchTheBeat {
 			ppValues := make(chan string, 5)
 			var ppValueArray [5]string
-			go PPCalc(beatmap, 100.0, mods, ppValues)
-			go PPCalc(beatmap, 99.0, mods, ppValues)
-			go PPCalc(beatmap, 98.0, mods, ppValues)
-			go PPCalc(beatmap, 97.0, mods, ppValues)
-			go PPCalc(beatmap, 95.0, mods, ppValues)
+			go PPCalc(beatmap, 100.0, "", "", mods, ppValues)
+			go PPCalc(beatmap, 99.0, "", "", mods, ppValues)
+			go PPCalc(beatmap, 98.0, "", "", mods, ppValues)
+			go PPCalc(beatmap, 97.0, "", "", mods, ppValues)
+			go PPCalc(beatmap, 95.0, "", "", mods, ppValues)
 			for v := 0; v < 5; v++ {
 				ppValueArray[v] = <-ppValues
 			}

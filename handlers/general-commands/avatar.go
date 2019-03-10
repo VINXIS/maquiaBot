@@ -19,18 +19,17 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		s.ChannelMessageSend(m.ChannelID, "Your avatar is: "+m.Author.AvatarURL(""))
 		return
-	} else {
-		var avatarURLs strings.Builder
-		if negateRegex.MatchString(m.Content) {
-			for _, mention := range users {
-				avatarURLs.WriteString(mention.Username + "'s avatar is: <" + mention.AvatarURL("") + ">\n")
-			}
-		} else {
-			for _, mention := range users {
-				avatarURLs.WriteString(mention.Username + "'s avatar is: " + mention.AvatarURL("") + "\n")
-			}
-		}
-		s.ChannelMessageSend(m.ChannelID, avatarURLs.String())
-		return
 	}
+	var avatarURLs strings.Builder
+	if negateRegex.MatchString(m.Content) {
+		for _, mention := range users {
+			avatarURLs.WriteString(mention.Username + "'s avatar is: <" + mention.AvatarURL("") + ">\n")
+		}
+	} else {
+		for _, mention := range users {
+			avatarURLs.WriteString(mention.Username + "'s avatar is: " + mention.AvatarURL("") + "\n")
+		}
+	}
+	s.ChannelMessageSend(m.ChannelID, avatarURLs.String())
+	return
 }

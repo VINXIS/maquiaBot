@@ -5,7 +5,6 @@ import (
 	"log"
 	"math"
 	"regexp"
-	"sort"
 	"strconv"
 
 	osutools "../../osu-functions"
@@ -28,15 +27,15 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		// These if statements check if the format uses a /b/, /s/, /beatmaps/, or /beatmapsets/ link
 		if len(submatches[3]) > 0 {
 			if len(submatches[7]) > 0 {
-				beatmap = beatmapParse(submatches[7], "map", osuAPI)
+				beatmap = osutools.BeatmapParse(submatches[7], "map", osuAPI)
 			} else {
-				beatmap = beatmapParse(submatches[4], "set", osuAPI)
+				beatmap = osutools.BeatmapParse(submatches[4], "set", osuAPI)
 			}
 		} else {
 			if submatches[2] == "s" {
-				beatmap = beatmapParse(submatches[4], "set", osuAPI)
+				beatmap = osutools.BeatmapParse(submatches[4], "set", osuAPI)
 			} else {
-				beatmap = beatmapParse(submatches[4], "map", osuAPI)
+				beatmap = osutools.BeatmapParse(submatches[4], "map", osuAPI)
 			}
 		}
 
@@ -70,11 +69,17 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 
 		// Assign variables for map specs
 		totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
-		totalSeconds := math.Mod(float64(beatmap.TotalLength), float64(60))
+		totalSeconds := fmt.Sprint(math.Mod(float64(beatmap.TotalLength), float64(60)))
+		if len(totalSeconds) == 1 {
+			totalSeconds = "0" + totalSeconds
+		}
 		hitMinutes := math.Floor(float64(beatmap.HitLength / 60))
-		hitSeconds := math.Mod(float64(beatmap.HitLength), float64(60))
+		hitSeconds := fmt.Sprint(math.Mod(float64(beatmap.HitLength), float64(60)))
+		if len(hitSeconds) == 1 {
+			hitSeconds = "0" + hitSeconds
+		}
 
-		length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
+		length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + totalSeconds + " (" + fmt.Sprint(hitMinutes) + ":" + hitSeconds + ") "
 		bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 		combo := "**FC:** " + strconv.Itoa(beatmap.MaxCombo) + "x"
 
@@ -118,62 +123,4 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		s.ChannelMessageEditEmbed(message.ChannelID, message.ID, embed)
 		return
 	}
-}
-
-func beatmapParse(id, format string, osu *osuapi.Client) (beatmap osuapi.Beatmap) {
-	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
-
-	mapID, err := strconv.Atoi(id)
-	tools.ErrRead(err)
-	if format == "map" {
-		// Fetch the beatmap
-		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
-			BeatmapID: mapID,
-		})
-		tools.ErrRead(err)
-		if len(beatmaps) > 0 {
-			beatmap = beatmaps[0]
-		}
-
-		// Download the .osu file for the map
-		tools.DownloadFile(
-			"./data/osuFiles/"+
-				strconv.Itoa(beatmap.BeatmapID)+
-				" "+
-				replacer.ReplaceAllString(beatmap.Artist, "")+
-				" - "+
-				replacer.ReplaceAllString(beatmap.Title, "")+
-				".osu",
-			"https://osu.ppy.sh/osu/"+
-				strconv.Itoa(beatmap.BeatmapID))
-	} else if format == "set" {
-		// Fetch the set
-		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
-			BeatmapSetID: mapID,
-		})
-		tools.ErrRead(err)
-
-		// Reorder the maps so that it returns the highest difficulty in the set
-		sort.Slice(beatmaps, func(i, j int) bool {
-			return beatmaps[i].DifficultyRating > beatmaps[j].DifficultyRating
-		})
-
-		// Download the .osu files for the set
-		for _, diff := range beatmaps {
-			tools.DownloadFile(
-				"./data/osuFiles/"+
-					strconv.Itoa(diff.BeatmapID)+
-					" "+
-					replacer.ReplaceAllString(diff.Artist, "")+
-					" - "+
-					replacer.ReplaceAllString(diff.Title, "")+
-					".osu",
-				"https://osu.ppy.sh/osu/"+
-					strconv.Itoa(diff.BeatmapID))
-		}
-		if len(beatmaps) > 0 {
-			beatmap = beatmaps[0]
-		}
-	}
-	return beatmap
 }

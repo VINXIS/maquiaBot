@@ -14,7 +14,7 @@ import (
 )
 
 // PPCalc calculates the pp given by the beatmap with specified acc and mods TODO: More args
-func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string, store chan<- string) {
+func PPCalc(beatmap osuapi.Beatmap, acc float64, combo string, misses string, mods string, store chan<- string) {
 	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
 
 	regex, err := regexp.Compile(`pp             : (\d+)(\.\d+)?`)
@@ -31,18 +31,28 @@ func PPCalc(beatmap osuapi.Beatmap, pp float64, mods string, store chan<- string
 	case osuapi.ModeTaiko:
 		mode = "taiko"
 	}
-	commands = append(commands, "run", "-p", "./osu-tools/PerformanceCalculator", "simulate", mode, "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+replacer.ReplaceAllString(beatmap.Artist, "")+" - "+replacer.ReplaceAllString(beatmap.Title, "")+".osu", "-a", fmt.Sprint(pp))
+	commands = append(commands, "run", "-p", "./osu-tools/PerformanceCalculator", "simulate", mode, "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+replacer.ReplaceAllString(beatmap.Artist, "")+" - "+replacer.ReplaceAllString(beatmap.Title, "")+".osu", "-a", fmt.Sprint(acc))
+
+	var argResult strings.Builder
+
+	// Check combo and misses
+	if combo != "" {
+		argResult.WriteString("-c " + combo + " ")
+	}
+
+	if misses != "" {
+		argResult.WriteString("-X " + misses + " ")
+	}
 
 	// Check mods
 	if len(mods) > 0 && mods != "NM" {
-		var modResult strings.Builder
 		modList := tools.StringSplit(mods, 2)
 		for i := range modList {
-			modResult.WriteString("-m " + strings.ToLower(modList[i]) + " ")
+			argResult.WriteString("-m " + strings.ToLower(modList[i]) + " ")
 		}
-		commands = append(commands, strings.Split(modResult.String(), " ")[:]...)
 	}
 
+	commands = append(commands, strings.Split(argResult.String(), " ")[:]...)
 	out, err := exec.Command("dotnet", commands[:]...).Output()
 	tools.ErrRead(err)
 	data = strings.Split(string(out), "\n")

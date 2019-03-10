@@ -18,6 +18,13 @@ import (
 
 // MessageHandler handles any incoming messages
 func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+	negateRegex, _ := regexp.Compile(`-n\W`)
+
+	// Ignore all messages created by the bot itself
+	if m.Author.ID == s.State.User.ID || negateRegex.MatchString(m.Content) {
+		return
+	}
+
 	osuAPI := osuapi.NewClient(os.Getenv("OSU_API"))
 
 	// Obtain map cache data
@@ -32,20 +39,28 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	tools.ErrRead(err)
 	_ = json.Unmarshal(f, &profileCache)
 
-	// Ignore all messages created by the bot itself
-	if m.Author.ID == s.State.User.ID {
-		return
+	// Obtain server data
+	serverData := structs.ServerData{}
+	_, err = os.Stat("./data/serverData/" + m.GuildID + ".json")
+	if err == nil {
+		f, err = ioutil.ReadFile("./data/serverData/" + m.GuildID + ".json")
+		tools.ErrRead(err)
+		_ = json.Unmarshal(f, &serverData)
+	}
+
+	// Check for custom prefix
+	serverPrefix := `$`
+	serverRegex := `^\` + serverPrefix + `(\S+)`
+	emptyServerData := structs.ServerData{}
+	if serverData.Server.ID != emptyServerData.Server.ID {
+		serverPrefix = serverData.Prefix
+		serverRegex = `^\` + serverPrefix + `(\S+)`
 	}
 
 	profileRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh/u(sers)?/(\d+|\S+)`)
 	beatmapRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh/(s|b|beatmaps(ets)?)/(\d+)(#(osu|taiko|fruits|mania)/(\d+)|\S+)?(\s)*(-n)?(\s)*(-m (\S+))?`)
-	commandRegex, _ := regexp.Compile(`^\$(\S+)`)
+	commandRegex, _ := regexp.Compile(serverRegex)
 	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
-	negateRegex, _ := regexp.Compile(`-n\W`)
-
-	if negateRegex.MatchString(m.Content) {
-		return
-	}
 
 	if beatmapRegex.MatchString(m.Content) { // If a beatmap is linked
 		go osucommands.BeatmapMessage(s, m, beatmapRegex, osuAPI, mapCache)
@@ -57,12 +72,16 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		args := strings.Split(m.Content, " ")
 		command := args[0]
 		switch command {
-		case "$osu", "$o":
-			go OsuHandle(s, m, args, osuAPI, profileCache)
-		case "$avatar":
+		case serverPrefix + "osu", serverPrefix + "o":
+			go OsuHandle(s, m, args, osuAPI, profileCache, mapCache)
+		case serverPrefix + "avatar":
 			go gencommands.Avatar(s, m)
-		case "$rs":
-			go osucommands.Recent(s, m, args, osuAPI, profileCache)
+		case serverPrefix + "prefix":
+			go gencommands.NewPrefix(s, m, args)
+		case serverPrefix + "rs":
+			go osucommands.Recent(s, m, args, osuAPI, profileCache, "recent", mapCache)
+		case serverPrefix + "rb":
+			go osucommands.Recent(s, m, args, osuAPI, profileCache, "best", mapCache)
 		}
 		return
 	}
