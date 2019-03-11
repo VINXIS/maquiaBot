@@ -16,8 +16,8 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 	discordUser := m.Author
 	osuUsername := args[2]
 
-	for _, player := range cache {
-		if player.Discord == *discordUser {
+	for i, player := range cache {
+		if player.Discord.ID == discordUser.ID {
 			if player.Osu.Username == osuUsername {
 				s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** already assigned to this account!")
 				return
@@ -32,6 +32,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 			}
 			player.Time = time.Now()
 			player.Osu = *user
+			cache[i] = player
 
 			jsonCache, err := json.Marshal(cache)
 			tools.ErrRead(err)
@@ -39,12 +40,12 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 			err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
 			tools.ErrRead(err)
 
-			s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** has now been assigned to this account!")
+			s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** has now been changed to this account!")
 			return
 		}
-		emptyDiscordUser := discordgo.User{}
-		if player.Osu.Username == osuUsername && player.Discord == emptyDiscordUser {
+		if player.Osu.Username == osuUsername && player.Discord.ID == "" {
 			player.Discord = *discordUser
+			cache[i] = player
 
 			jsonCache, err := json.Marshal(cache)
 			tools.ErrRead(err)
@@ -76,6 +77,6 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
 	tools.ErrRead(err)
 
-	s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** has now been assigned to this account!")
+	s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** has now been created and linked to this account!")
 	return
 }
