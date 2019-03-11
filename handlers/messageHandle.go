@@ -68,7 +68,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	} else if profileRegex.MatchString(m.Content) { // if a profile was linked
 		go osucommands.ProfileMessage(s, m, profileRegex, osuAPI, profileCache)
 		return
-	} else if commandRegex.MatchString(m.Content) { // If a command was linked
+	} else if commandRegex.MatchString(m.Content) { // If a command was written
 		args := strings.Split(m.Content, " ")
 		command := args[0]
 		switch command {

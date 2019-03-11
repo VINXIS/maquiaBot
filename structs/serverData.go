@@ -6,7 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// ServerData stores information regarding the discord server, so thta server specific customizations may be used.
+// ServerData stores information regarding the discord server, so that server specific customizations may be used.
 type ServerData struct {
 	Time   time.Time
 	Server discordgo.Guild

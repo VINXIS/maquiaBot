@@ -14,17 +14,43 @@ import (
 
 // NewPrefix sets a new prefix for the bot
 func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
+	server, err := s.Guild(m.GuildID)
+	tools.ErrRead(err)
+
+	member := &discordgo.Member{}
+	for _, guildMember := range server.Members {
+		if guildMember.User.ID == m.Author.ID {
+			member = guildMember
+		}
+	}
+
+	if member.User.ID == "" {
+		return
+	}
+
+	admin := false
+	for _, roleID := range member.Roles {
+		role, err := s.State.Role(m.GuildID, roleID)
+		tools.ErrRead(err)
+		if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
+			admin = true
+			break
+		}
+	}
+
+	if !admin {
+		s.ChannelMessageSend(m.ChannelID, "You are not an admin!")
+		return
+	}
+
 	// Obtain server data
 	serverData := structs.ServerData{}
-	_, err := os.Stat("./data/serverData/" + m.GuildID + ".json")
+	_, err = os.Stat("./data/serverData/" + m.GuildID + ".json")
 	if err == nil {
 		f, err := ioutil.ReadFile("./data/serverData/" + m.GuildID + ".json")
 		tools.ErrRead(err)
 		_ = json.Unmarshal(f, &serverData)
 	} else if os.IsNotExist(err) {
-		server, err := s.Guild(m.GuildID)
-		tools.ErrRead(err)
-
 		serverData.Server = *server
 	} else {
 		tools.ErrRead(err)
