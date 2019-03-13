@@ -75,7 +75,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		command := args[0]
 		switch command {
 		case serverPrefix + "osu", serverPrefix + "o":
-			go OsuHandle(s, m, args, osuAPI, profileCache, mapCache)
+			go OsuHandle(s, m, args, osuAPI, profileCache, mapCache, serverPrefix)
 		case serverPrefix + "avatar":
 			go gencommands.Avatar(s, m)
 		case serverPrefix + "help":
