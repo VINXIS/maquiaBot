@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"syscall"
 
@@ -24,6 +25,18 @@ func main() {
 	err = discord.Open()
 	tools.ErrRead(err)
 	fmt.Println("Bot is now running in " + strconv.Itoa(len(discord.State.Guilds)) + " servers.")
+
+	var servers []string
+
+	err = filepath.Walk("./data/channelData", func(path string, info os.FileInfo, err error) error {
+		tools.ErrRead(err)
+		servers = append(servers, path)
+		return nil
+	})
+	tools.ErrRead(err)
+	for _, server := range servers {
+		fmt.Println(server)
+	}
 
 	// Create a channel to keep the bot running until a prompt is given to close
 	sc := make(chan os.Signal, 1)

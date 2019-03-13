@@ -25,6 +25,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	go ML(s, m)
+
 	osuAPI := osuapi.NewClient(os.Getenv("OSU_API"))
 
 	// Obtain map cache data
@@ -76,11 +78,13 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go OsuHandle(s, m, args, osuAPI, profileCache, mapCache)
 		case serverPrefix + "avatar":
 			go gencommands.Avatar(s, m)
+		case serverPrefix + "help":
+			go gencommands.Help(s, m, serverPrefix)
 		case serverPrefix + "prefix":
 			go gencommands.NewPrefix(s, m, args)
-		case serverPrefix + "rs":
+		case serverPrefix + "r", serverPrefix + "rs", serverPrefix + "recent":
 			go osucommands.Recent(s, m, args, osuAPI, profileCache, "recent", mapCache)
-		case serverPrefix + "rb":
+		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
 			go osucommands.Recent(s, m, args, osuAPI, profileCache, "best", mapCache)
 		}
 		return

@@ -200,9 +200,15 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 
 		// Assign variables for map specs
 		totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
-		totalSeconds := math.Mod(float64(beatmap.TotalLength), float64(60))
+		totalSeconds := fmt.Sprint(math.Mod(float64(beatmap.TotalLength), float64(60)))
+		if len(totalSeconds) == 1 {
+			totalSeconds = "0" + totalSeconds
+		}
 		hitMinutes := math.Floor(float64(beatmap.HitLength / 60))
-		hitSeconds := math.Mod(float64(beatmap.HitLength), float64(60))
+		hitSeconds := fmt.Sprint(math.Mod(float64(beatmap.HitLength), float64(60)))
+		if len(hitSeconds) == 1 {
+			hitSeconds = "0" + hitSeconds
+		}
 
 		length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 		bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
