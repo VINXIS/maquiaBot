@@ -266,7 +266,9 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 					ppValueArray[v] = <-ppValues
 				}
 				sort.Slice(ppValueArray[:], func(i, j int) bool {
-					return ppValueArray[i] > ppValueArray[j]
+					pp1, _ := strconv.Atoi(ppValueArray[i])
+					pp2, _ := strconv.Atoi(ppValueArray[j])
+					return pp1 > pp2
 				})
 				if objCount != playObjCount {
 					pp = "~~**" + ppValueArray[1] + "pp**~~/" + ppValueArray[0] + "pp "

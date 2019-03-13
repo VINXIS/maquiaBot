@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strconv"
@@ -15,6 +16,9 @@ import (
 )
 
 func main() {
+	_, err := exec.Command("dotnet", "build", "./osu-tools/PerformanceCalculator").Output()
+	tools.ErrRead(err)
+
 	discord, err := discordgo.New("Bot " + os.Getenv("DISCORD_BOT_TOKEN"))
 	tools.ErrRead(err)
 

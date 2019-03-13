@@ -1,7 +1,6 @@
 package osutools
 
 import (
-	"fmt"
 	"math"
 	"os/exec"
 	"regexp"
@@ -52,7 +51,6 @@ func PPCalc(beatmap osuapi.Beatmap, acc float64, combo string, misses string, mo
 
 	out, err := exec.Command("dotnet", args...).Output()
 	tools.ErrRead(err)
-	fmt.Println(string(out))
 	data = strings.Split(string(out), "\n")
 
 	var res []string
