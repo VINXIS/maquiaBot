@@ -16,7 +16,7 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 	s.ChannelMessageSendEmbed(dm.ID, &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://discordapp.com/oauth2/authorize?&client_id=551667572723023893&scope=bot&permissions=0",
-			Name:    "Click here to invite the bot!",
+			Name:    "Click here to invite MaquiaBot!",
 			IconURL: s.State.User.AvatarURL(""),
 		},
 		Color: osutools.ModeColour(osuapi.ModeOsu),
@@ -25,7 +25,7 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 				Name: "general",
 				Value: "`" + prefix + "avatar [@user]` - Returns the avatar of the user" + "\n" +
 					"`" + prefix + "help` - Returns the list of commands" + "\n" +
-					"`" + prefix + "newPrefix <prefix>` - Creates a new prefix for this bot" + "\n",
+					"`" + prefix + "newPrefix <prefix>` or `maquiaprefix <prefix>` - Creates a new prefix for this bot" + "\n",
 			},
 			&discordgo.MessageEmbedField{
 				Name: "osu!",

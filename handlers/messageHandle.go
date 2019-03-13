@@ -59,6 +59,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		serverRegex = `^\` + serverPrefix + `(\S+)`
 	}
 
+	// Generate regexes for message parsing
 	profileRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh/u(sers)?/(\d+|\S+)`)
 	beatmapRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh/(s|b|beatmaps(ets)?)/(\d+)(#(osu|taiko|fruits|mania)/(\d+)|\S+)?(\s)*(-n)?(\s)*(-m (\S+))?`)
 	commandRegex, _ := regexp.Compile(serverRegex)
@@ -70,7 +71,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	} else if profileRegex.MatchString(m.Content) { // if a profile was linked
 		go osucommands.ProfileMessage(s, m, profileRegex, osuAPI, profileCache)
 		return
-	} else if commandRegex.MatchString(m.Content) { // If a command was written
+	} else if commandRegex.MatchString(m.Content) { // If a command was declared
 		args := strings.Split(m.Content, " ")
 		command := args[0]
 		switch command {
@@ -80,15 +81,17 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Avatar(s, m)
 		case serverPrefix + "help":
 			go gencommands.Help(s, m, serverPrefix)
-		case serverPrefix + "prefix":
+		case serverPrefix + "prefix", "maquiaprefix":
 			go gencommands.NewPrefix(s, m, args)
 		case serverPrefix + "r", serverPrefix + "rs", serverPrefix + "recent":
-			go osucommands.Recent(s, m, args, osuAPI, profileCache, "recent", mapCache)
+			go osucommands.Recent(s, m, args, osuAPI, profileCache, "recent", mapCache, serverPrefix)
 		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
-			go osucommands.Recent(s, m, args, osuAPI, profileCache, "best", mapCache)
+			go osucommands.Recent(s, m, args, osuAPI, profileCache, "best", mapCache, serverPrefix)
 		}
 		return
 	}
+
+	// Check if an image was linked
 	if len(m.Attachments) > 0 || (linkRegex.MatchString(m.Content) && !beatmapRegex.MatchString(m.Content)) {
 		go osucommands.OsuImageParse(s, m, linkRegex, osuAPI, mapCache)
 		return

@@ -21,7 +21,7 @@ func PPCalc(beatmap osuapi.Beatmap, acc float64, combo string, misses string, mo
 	tools.ErrRead(err)
 
 	var data []string
-	var commands []string
+	var args []string
 	var mode string
 	switch beatmap.Mode {
 	case osuapi.ModeOsu:
@@ -31,30 +31,28 @@ func PPCalc(beatmap osuapi.Beatmap, acc float64, combo string, misses string, mo
 	case osuapi.ModeTaiko:
 		mode = "taiko"
 	}
-	commands = append(commands, "run", "-p", "./osu-tools/PerformanceCalculator", "simulate", mode, "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+replacer.ReplaceAllString(beatmap.Artist, "")+" - "+replacer.ReplaceAllString(beatmap.Title, "")+".osu", "-a", fmt.Sprint(acc))
-
-	var argResult strings.Builder
+	args = append(args, "./osu-tools/PerformanceCalculator/bin/Debug/netcoreapp2.0/PerformanceCalculator.dll", "simulate", mode, "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+replacer.ReplaceAllString(beatmap.Artist, "")+" - "+replacer.ReplaceAllString(beatmap.Title, "")+".osu", "-a", strconv.FormatFloat(acc, 'f', 2, 64))
 
 	// Check combo and misses
 	if combo != "" {
-		argResult.WriteString("-c " + combo + " ")
+		args = append(args, "-c", combo)
 	}
 
 	if misses != "" {
-		argResult.WriteString("-X " + misses + " ")
+		args = append(args, "-X", misses)
 	}
 
 	// Check mods
 	if len(mods) > 0 && mods != "NM" {
 		modList := tools.StringSplit(mods, 2)
 		for i := range modList {
-			argResult.WriteString("-m " + strings.ToLower(modList[i]) + " ")
+			args = append(args, "-m", strings.ToLower(modList[i]))
 		}
 	}
 
-	commands = append(commands, strings.Split(argResult.String(), " ")[:]...)
-	out, err := exec.Command("dotnet", commands[:]...).Output()
+	out, err := exec.Command("dotnet", args...).Output()
 	tools.ErrRead(err)
+	fmt.Println(string(out))
 	data = strings.Split(string(out), "\n")
 
 	var res []string

@@ -16,30 +16,50 @@ import (
 )
 
 // Recent gets the most recent score done/nth score done
-func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI *osuapi.Client, cache []structs.PlayerData, option string, mapCache []structs.MapData) {
+func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI *osuapi.Client, cache []structs.PlayerData, option string, mapCache []structs.MapData, serverPrefix string) {
 	emptyUser := osuapi.User{}
 	index := 1
 	username := ""
 
 	if len(args) > 1 {
-		check, err := strconv.Atoi(args[1])
-		if err != nil {
-			username = args[1]
+		if args[0] == serverPrefix+"osu" {
 			if len(args) > 2 {
-				check, err = strconv.Atoi(args[2])
+				check, err := strconv.Atoi(args[2])
 				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, "Please use _ for username spaces!")
-					return
+					username = args[2]
+					if len(args) > 4 {
+						check, err = strconv.Atoi(args[3])
+						if err != nil {
+							s.ChannelMessageSend(m.ChannelID, "Please use _ for username spaces!")
+							return
+						}
+					} else {
+						check = 1
+					}
 				}
-			} else {
-				check = 1
+				index = check
 			}
+		} else {
+			check, err := strconv.Atoi(args[1])
+			if err != nil {
+				username = args[1]
+				if len(args) > 2 {
+					check, err = strconv.Atoi(args[2])
+					if err != nil {
+						s.ChannelMessageSend(m.ChannelID, "Please use _ for username spaces!")
+						return
+					}
+				} else {
+					check = 1
+				}
+			}
+			index = check
 		}
-		index = check
 	}
 
 	for _, player := range cache {
 		if username != "" || (m.Author.ID == player.Discord.ID && player.Osu.Username != emptyUser.Username) {
+			// Check for user
 			user := osuapi.User{}
 			if username == "" {
 				username = player.Osu.Username
@@ -105,13 +125,11 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 
 			// Get beatmap, acc, and mods
 			beatmap := osutools.BeatmapParse(strconv.Itoa(score.BeatmapID), "map", osuAPI)
-
+			accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 			mods := "NM"
 			if score.Mods != 0 {
 				mods = score.Mods.String()
 			}
-
-			accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 
 			// Count number of tries
 			try := 1
@@ -122,6 +140,10 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 					break
 				}
 			}
+
+			// Count number of objs
+			objCount := osutools.CountObjs(beatmap)
+			playObjCount := score.CountMiss + score.Count100 + score.Count300 + score.Count50
 
 			// Get time since play
 			timeParse, err := time.Parse("2006-01-02 15:04:05", score.Date.String())
@@ -191,7 +213,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 				time = seconds + " ago."
 			}
 
-			// Assign variables for map specs
+			// Assign timing variables for map specs
 			totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
 			totalSeconds := fmt.Sprint(math.Mod(float64(beatmap.TotalLength), float64(60)))
 			if len(totalSeconds) == 1 {
@@ -203,17 +225,20 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 				hitSeconds = "0" + hitSeconds
 			}
 
+			// Assign misc variables
 			Color := osutools.ModeColour(osuapi.ModeOsu)
 			sr, _, _, _, _, _ := osutools.BeatmapCache(mods, beatmap, mapCache)
 			length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 			bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
+			scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
+			var combo string
+			var mapCompletion string
 
 			if strings.Contains(mods, "DTNC") {
 				mods = strings.Replace(mods, "DTNC", "NC", 1)
 			}
 			mods = " **+" + mods + "** "
-			scorePrint := " **" + strconv.FormatInt(score.Score.Score, 10) + "** "
-			var combo string
+
 			if score.MaxCombo == beatmap.MaxCombo {
 				if accCalc == 100.0 {
 					combo = " **SS** "
@@ -224,9 +249,14 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 				combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
 			}
 
+			if objCount != playObjCount {
+				completed := float64(playObjCount) / float64(objCount)
+				mapCompletion = "**" + strconv.FormatFloat(completed, 'f', 2, 64) + "%** completed \n"
+			}
+
 			// Get pp values
 			var pp string
-			if score.PP == 0 {
+			if score.PP == 0 { // If map was not finished
 				ppValues := make(chan string, 2)
 				var ppValueArray [2]string
 				accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300+score.CountMiss)) / (300.0 * float64(score.Count50+score.Count100+score.Count300)) * 100.0
@@ -238,10 +268,14 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 				sort.Slice(ppValueArray[:], func(i, j int) bool {
 					return ppValueArray[i] > ppValueArray[j]
 				})
-				pp = "~~**" + ppValueArray[1] + "pp**~~/" + ppValueArray[0] + "pp "
-			} else if score.Score.FullCombo {
+				if objCount != playObjCount {
+					pp = "~~**" + ppValueArray[1] + "pp**~~/" + ppValueArray[0] + "pp "
+				} else {
+					pp = "**" + ppValueArray[1] + "pp**/" + ppValueArray[0] + "pp "
+				}
+			} else if score.Score.FullCombo { // If play was a perfect combo
 				pp = "**" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp**/" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp "
-			} else {
+			} else { // If map was finished, but play was not a perfect combo
 				ppValues := make(chan string, 1)
 				accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300+score.CountMiss)) / (300.0 * float64(score.Count50+score.Count100+score.Count300)) * 100.0
 				go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", score.Mods.String(), ppValues)
@@ -286,7 +320,8 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 					URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 				},
 				Description: sr + length + bpm + "\n\n" +
-					scorePrint + mods + combo + "\n\n" +
+					scorePrint + mods + combo + "\n" +
+					mapCompletion + "\n" +
 					pp + acc + hits + "\n\n",
 				Footer: &discordgo.MessageEmbedFooter{
 					Text: "Try #" + strconv.Itoa(try) + " | " + time,
