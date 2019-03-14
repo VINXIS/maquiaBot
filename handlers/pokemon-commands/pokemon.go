@@ -1,11 +1,15 @@
 package pokemoncommands
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/wcharczuk/go-chart"
 
 	pokemontools "../../pokemon-functions"
 	tools "../../tools"
@@ -78,6 +82,11 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 		s.ChannelMessageSend(m.ChannelID, "Too many args! Please use _ for spaces in the pokemon name!")
 	}
 
+	// If deoxys change to id lol
+	if strings.ToLower(args[1]) == "deoxys" {
+		args[1] = "386"
+	}
+
 	// Obtain data
 	res, err := http.Get("https://pokeapi.co/api/v2/pokemon/" + strings.ToLower(args[1]))
 	tools.ErrRead(err)
@@ -118,6 +127,7 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 		}
 	}
 
+	// Create ability string
 	abilities := "List of abilities: "
 	if len(pokemon.Items) == 0 {
 		abilities = abilities + "**None**"
@@ -139,15 +149,25 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 		}
 	}
 
+	// Create fields for stats + EV
 	fields := []*discordgo.MessageEmbedField{}
+	graph := chart.PieChart{}
 	for _, pokemonStat := range pokemon.Stats {
+		graph.Values = append(graph.Values, chart.Value{
+			Value: float64(pokemonStat.BaseStat),
+			Label: pokemonStat.Stat.Name + " = " + strconv.Itoa(pokemonStat.BaseStat),
+		})
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   "**" + strings.Title(pokemonStat.Stat.Name) + "**",
 			Value:  strconv.Itoa(pokemonStat.BaseStat) + " (" + strconv.Itoa(pokemonStat.Effort) + " EV)",
 			Inline: true,
 		})
 	}
+	buffer := bytes.NewBuffer([]byte{})
+	err = graph.Render(chart.PNG, buffer)
+	tools.ErrRead(err)
 
+	// Create type string
 	types := ""
 	if len(pokemon.Types) == 1 {
 		types = types + "**" + strings.Title(pokemon.Types[0].Type.Name) + "**"
@@ -164,7 +184,6 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 	// Create the embed and message and send
 	embed := &discordgo.MessageEmbed{
 		Title: strings.Title(pokemon.Name) + " (#" + strconv.Itoa(pokemon.ID) + ")",
-		URL:   "https://bulbapedia.bulbagarden.net/wiki/" + strings.Title(pokemon.Name) + "_(Pok%C3%A9mon)",
 		Color: pokemontools.TypeColour(pokemon.Types[0].Type.Name),
 		Description: "In **" + strconv.Itoa(len(pokemon.Games)) + "** Pokemon games\n\n" +
 			weight + height + types + "\n\n" +
@@ -173,9 +192,20 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 			abilities,
 		Fields: fields,
 		Image: &discordgo.MessageEmbedImage{
-			URL: pokemon.Sprites.FrontDefault,
+			URL: "https://www.smogon.com/dex/media/sprites/xy/" + pokemon.Name + ".gif",
 		},
 	}
+	formRegex, _ := regexp.Compile(`(.+)-.+`)
+	if formRegex.MatchString(pokemon.Name) {
+		embed.URL = "https://bulbapedia.bulbagarden.net/wiki/" + strings.Title(formRegex.FindStringSubmatch(pokemon.Name)[1]) + "_(Pok%C3%A9mon)"
+	} else {
+		embed.URL = "https://bulbapedia.bulbagarden.net/wiki/" + strings.Title(pokemon.Name) + "_(Pok%C3%A9mon)"
+	}
 
-	s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+		Embed: embed,
+		File: &discordgo.File{
+			Reader: buffer,
+		},
+	})
 }
