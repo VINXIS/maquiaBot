@@ -99,6 +99,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go osucommands.Recent(s, m, args, osuAPI, profileCache, "recent", serverPrefix, mapCache)
 		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
 			go osucommands.Recent(s, m, args, osuAPI, profileCache, "best", serverPrefix, mapCache)
+		case serverPrefix + "c", serverPrefix + "compare":
+			go osucommands.Compare(s, m, args, osuAPI, profileCache, serverPrefix, mapCache)
 		}
 		return
 	}
