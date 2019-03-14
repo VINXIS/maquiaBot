@@ -56,7 +56,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	emptyServerData := structs.ServerData{}
 	if serverData.Server.ID != emptyServerData.Server.ID {
 		serverPrefix = serverData.Prefix
-		serverRegex = `^\` + serverPrefix + `(\S+)`
+		charCheck, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
+		if charCheck.MatchString(serverPrefix) {
+			serverRegex = `^` + charCheck.ReplaceAllString(serverPrefix, `\`+serverPrefix) + `(\S+)`
+		} else {
+			serverRegex = `^` + serverPrefix + `(\S+)`
+		}
 	}
 
 	// Generate regexes for message parsing
@@ -65,7 +70,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	commandRegex, _ := regexp.Compile(serverRegex)
 	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
 
-	if beatmapRegex.MatchString(m.Content) { // If a beatmap is linked
+	if strings.HasPrefix(m.Content, "maquiaprefix") {
+		args := strings.Split(m.Content, " ")
+		go gencommands.NewPrefix(s, m, args, serverPrefix)
+	} else if beatmapRegex.MatchString(m.Content) { // If a beatmap is linked
 		go osucommands.BeatmapMessage(s, m, beatmapRegex, osuAPI, mapCache)
 		return
 	} else if profileRegex.MatchString(m.Content) { // if a profile was linked
@@ -77,16 +85,20 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		switch command {
 		case serverPrefix + "osu", serverPrefix + "o":
 			go OsuHandle(s, m, args, osuAPI, profileCache, mapCache, serverPrefix)
+		case serverPrefix + "pokemon", serverPrefix + "p":
+			go PokemonHandle(s, m, args, serverPrefix)
 		case serverPrefix + "avatar":
 			go gencommands.Avatar(s, m)
 		case serverPrefix + "help":
 			go gencommands.Help(s, m, serverPrefix)
-		case serverPrefix + "prefix", "maquiaprefix":
-			go gencommands.NewPrefix(s, m, args)
+		case serverPrefix + "src", serverPrefix + "source":
+			s.ChannelMessageSend(m.ChannelID, "https://github.com/VINXIS/maquiaBot")
+		case serverPrefix + "prefix":
+			go gencommands.NewPrefix(s, m, args, serverPrefix)
 		case serverPrefix + "r", serverPrefix + "rs", serverPrefix + "recent":
-			go osucommands.Recent(s, m, args, osuAPI, profileCache, "recent", mapCache, serverPrefix)
+			go osucommands.Recent(s, m, args, osuAPI, profileCache, "recent", serverPrefix, mapCache)
 		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
-			go osucommands.Recent(s, m, args, osuAPI, profileCache, "best", mapCache, serverPrefix)
+			go osucommands.Recent(s, m, args, osuAPI, profileCache, "best", serverPrefix, mapCache)
 		}
 		return
 	}

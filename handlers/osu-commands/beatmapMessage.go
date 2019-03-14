@@ -86,7 +86,12 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		status := "**Rank Status:** " + beatmap.Approved.String()
 
 		download := "**Download:** [osz link](https://osu.ppy.sh/d/" + strconv.Itoa(beatmap.BeatmapSetID) + ")" + " | <osu://dl/" + strconv.Itoa(beatmap.BeatmapSetID) + ">"
-		diffs := "**" + strconv.Itoa(len(beatmaps)) + `** difficulties <:ahFuck:550808614202245131>`
+		var diffs string
+		if len(beatmaps) == 1 {
+			diffs = "**" + strconv.Itoa(len(beatmaps)) + `** difficulty <:ahFuck:550808614202245131>`
+		} else {
+			diffs = "**" + strconv.Itoa(len(beatmaps)) + `** difficulties <:ahFuck:550808614202245131>`
+		}
 
 		// Get requested mods
 		mods := "NM"

@@ -13,7 +13,7 @@ import (
 )
 
 // NewPrefix sets a new prefix for the bot
-func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
+func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string, serverPrefix string) {
 	server, err := s.Guild(m.GuildID)
 	tools.ErrRead(err)
 
@@ -67,6 +67,6 @@ func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string) 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
 	tools.ErrRead(err)
 
-	s.ChannelMessageSend(m.ChannelID, "Prefix changed from "+string([]rune(args[0])[0])+" to "+args[1])
+	s.ChannelMessageSend(m.ChannelID, "Prefix changed from "+serverPrefix+" to "+args[1])
 	return
 }

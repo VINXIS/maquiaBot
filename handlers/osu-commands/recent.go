@@ -16,7 +16,7 @@ import (
 )
 
 // Recent gets the most recent score done/nth score done
-func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI *osuapi.Client, cache []structs.PlayerData, option string, mapCache []structs.MapData, serverPrefix string) {
+func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI *osuapi.Client, cache []structs.PlayerData, option, serverPrefix string, mapCache []structs.MapData) {
 	emptyUser := osuapi.User{}
 	index := 1
 	username := ""
@@ -250,7 +250,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 			}
 
 			if objCount != playObjCount {
-				completed := float64(playObjCount) / float64(objCount)
+				completed := float64(playObjCount) / float64(objCount) * 100.0
 				mapCompletion = "**" + strconv.FormatFloat(completed, 'f', 2, 64) + "%** completed \n"
 			}
 

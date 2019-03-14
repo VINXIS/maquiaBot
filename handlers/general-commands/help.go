@@ -25,13 +25,18 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 				Name: "general",
 				Value: "`" + prefix + "avatar [@user]` - Returns the avatar of the user" + "\n" +
 					"`" + prefix + "help` - Returns the list of commands" + "\n" +
-					"`" + prefix + "newPrefix <prefix>` or `maquiaprefix <prefix>` - Creates a new prefix for this bot" + "\n",
+					"`" + prefix + "newPrefix <prefix>` or `maquiaprefix <prefix>` - Creates a new prefix for this bot" + "\n" +
+					"`" + prefix + "source` - Links source code" + "\n",
 			},
 			&discordgo.MessageEmbedField{
 				Name: "osu!",
 				Value: "`" + prefix + "link <username>` - Links an osu! profile to your discord account" + "\n" +
 					"`" + prefix + "rs [username] [n]` - Checks the nth recent score for either the account linked to your discord, or the username if given" + "\n" +
 					"`" + prefix + "rb [username] [n]` - Checks the nth recent top performance play for either the account linked to your discord, or the username if given",
+			},
+			&discordgo.MessageEmbedField{
+				Name:  "pokemon",
+				Value: "`" + prefix + "pokemon <pokemon name/id>` - Gives brief information regarding a pokemon",
 			},
 		},
 	})

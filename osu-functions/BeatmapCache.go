@@ -67,7 +67,9 @@ func BeatmapCache(mods string, beatmap osuapi.Beatmap, cache []structs.MapData) 
 				ppValueArray[v] = <-ppValues
 			}
 			sort.Slice(ppValueArray[:], func(i, j int) bool {
-				return ppValueArray[i] > ppValueArray[j]
+				pp1, _ := strconv.Atoi(ppValueArray[i])
+				pp2, _ := strconv.Atoi(ppValueArray[j])
+				return pp1 > pp2
 			})
 			starRating = "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
 			ppSS = "**100%:** " + ppValueArray[0] + "pp | "

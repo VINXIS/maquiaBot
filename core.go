@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"syscall"
 
 	handlers "./handlers"
@@ -30,16 +31,18 @@ func main() {
 	tools.ErrRead(err)
 	fmt.Println("Bot is now running in " + strconv.Itoa(len(discord.State.Guilds)) + " servers.")
 
-	var servers []string
+	var channels []string
 
 	err = filepath.Walk("./data/channelData", func(path string, info os.FileInfo, err error) error {
 		tools.ErrRead(err)
-		servers = append(servers, path)
+		channels = append(channels, path)
 		return nil
 	})
 	tools.ErrRead(err)
-	for _, server := range servers {
-		fmt.Println(server)
+	for _, channel := range channels {
+		if strings.HasSuffix(channel, ".json") {
+			fmt.Println(channel)
+		}
 	}
 
 	// Create a channel to keep the bot running until a prompt is given to close
