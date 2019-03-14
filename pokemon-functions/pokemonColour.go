@@ -3,8 +3,6 @@ package pokemontools
 // TypeColour assigns a colour based on the pokemon's type (Colours referred to via https://bulbapedia.bulbagarden.net/wiki/Category:Type_color_templates)
 func TypeColour(pokemonType string) (Colour int) {
 	switch pokemonType {
-	case "normal":
-		Colour = 0xA8A878
 	case "fighting":
 		Colour = 0xC03028
 	case "flying":
