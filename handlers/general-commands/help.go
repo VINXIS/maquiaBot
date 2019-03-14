@@ -19,7 +19,8 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 			Name:    "Click here to invite MaquiaBot!",
 			IconURL: s.State.User.AvatarURL(""),
 		},
-		Color: osutools.ModeColour(osuapi.ModeOsu),
+		Description: "All commands in PM will use the default `$` instead! The prefix used below was assigned by the server owner(s)!",
+		Color:       osutools.ModeColour(osuapi.ModeOsu),
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
 				Name: "general",

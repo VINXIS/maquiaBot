@@ -244,6 +244,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 	combo := "**FC:** " + strconv.Itoa(beatmap.MaxCombo) + "x"
+	mapStats := "**CS:** " + strconv.FormatFloat(beatmap.CircleSize, 'f', 1, 64) + " **AR:** " + strconv.FormatFloat(beatmap.ApproachRate, 'f', 1, 64) + " **OD:** " + strconv.FormatFloat(beatmap.OverallDifficulty, 'f', 1, 64) + " **HP:** " + strconv.FormatFloat(beatmap.HPDrain, 'f', 1, 64)
 
 	status := "**Rank Status:** " + beatmap.Approved.String()
 
@@ -267,6 +268,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		},
 		Color: Color,
 		Description: starRating + length + bpm + combo + "\n" +
+			mapStats + "\n" +
 			status + "\n" +
 			download + "\n" +
 			diffs + "\n" + "\n" +

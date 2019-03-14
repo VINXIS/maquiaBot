@@ -143,6 +143,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 	scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
+	mapStats := "**CS:** " + strconv.FormatFloat(beatmap.CircleSize, 'f', 1, 64) + " **AR:** " + strconv.FormatFloat(beatmap.ApproachRate, 'f', 1, 64) + " **OD:** " + strconv.FormatFloat(beatmap.OverallDifficulty, 'f', 1, 64) + " **HP:** " + strconv.FormatFloat(beatmap.HPDrain, 'f', 1, 64)
 	var combo string
 
 	if strings.Contains(mods, "DTNC") {
@@ -186,7 +187,8 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 		},
-		Description: sr + length + bpm + "\n\n" +
+		Description: sr + length + bpm + "\n" +
+			mapStats + "\n\n" +
 			scorePrint + mods + combo + "\n\n" +
 			pp + acc + hits + "\n\n",
 		Footer: &discordgo.MessageEmbedFooter{

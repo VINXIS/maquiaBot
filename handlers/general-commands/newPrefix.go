@@ -15,7 +15,10 @@ import (
 // NewPrefix sets a new prefix for the bot
 func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string, serverPrefix string) {
 	server, err := s.Guild(m.GuildID)
-	tools.ErrRead(err)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "This is not a guild so custom prefixes are unavailable! Please use `$` instead for commands!")
+		return
+	}
 
 	member := &discordgo.Member{}
 	for _, guildMember := range server.Members {

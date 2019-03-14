@@ -1,15 +1,12 @@
 package pokemoncommands
 
 import (
-	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/wcharczuk/go-chart"
 
 	pokemontools "../../pokemon-functions"
 	tools "../../tools"
@@ -151,21 +148,13 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 
 	// Create fields for stats + EV
 	fields := []*discordgo.MessageEmbedField{}
-	graph := chart.PieChart{}
 	for _, pokemonStat := range pokemon.Stats {
-		graph.Values = append(graph.Values, chart.Value{
-			Value: float64(pokemonStat.BaseStat),
-			Label: pokemonStat.Stat.Name + " = " + strconv.Itoa(pokemonStat.BaseStat),
-		})
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   "**" + strings.Title(pokemonStat.Stat.Name) + "**",
 			Value:  strconv.Itoa(pokemonStat.BaseStat) + " (" + strconv.Itoa(pokemonStat.Effort) + " EV)",
 			Inline: true,
 		})
 	}
-	buffer := bytes.NewBuffer([]byte{})
-	err = graph.Render(chart.PNG, buffer)
-	tools.ErrRead(err)
 
 	// Create type string
 	types := ""
@@ -185,7 +174,7 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 	embed := &discordgo.MessageEmbed{
 		Title: strings.Title(pokemon.Name) + " (#" + strconv.Itoa(pokemon.ID) + ")",
 		Color: pokemontools.TypeColour(pokemon.Types[0].Type.Name),
-		Description: "In **" + strconv.Itoa(len(pokemon.Games)) + "** Pokemon games\n\n" +
+		Description: "In around **" + strconv.Itoa(len(pokemon.Games)) + "** Pokemon games\n\n" +
 			weight + height + types + "\n\n" +
 			exp + "\n" +
 			items + "\n" +
@@ -202,10 +191,5 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 		embed.URL = "https://bulbapedia.bulbagarden.net/wiki/" + strings.Title(pokemon.Name) + "_(Pok%C3%A9mon)"
 	}
 
-	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-		Embed: embed,
-		File: &discordgo.File{
-			Reader: buffer,
-		},
-	})
+	s.ChannelMessageSendEmbed(m.ChannelID, embed)
 }
