@@ -118,70 +118,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	// Get time since play
 	timeParse, err := time.Parse("2006-01-02 15:04:05", score.Date.String())
 	tools.ErrRead(err)
-	timeSince := time.Since(timeParse)
-	time := ""
-	if timeSince.Hours() > 24 {
-		days := strconv.FormatFloat(math.Floor(timeSince.Hours()/24.0), 'f', 0, 64)
-		hours := strconv.FormatFloat(math.Mod(timeSince.Hours(), 24), 'f', 0, 64)
-
-		if days == "1" {
-			days = days + " day"
-		} else {
-			days = days + " days"
-		}
-
-		if hours == "1" {
-			hours = hours + " hour"
-		} else {
-			hours = hours + " hours"
-		}
-
-		time = days + " and " + hours + " ago."
-	} else if timeSince.Hours() > 1 {
-		hours := strconv.FormatFloat(timeSince.Hours(), 'f', 0, 64)
-		minutes := strconv.FormatFloat(math.Mod(timeSince.Minutes(), 60), 'f', 0, 64)
-
-		if hours == "1" {
-			hours = hours + " hour"
-		} else {
-			hours = hours + " hours"
-		}
-
-		if minutes == "1" {
-			minutes = minutes + " minute"
-		} else {
-			minutes = minutes + " minutes"
-		}
-
-		time = hours + " and " + minutes + " ago."
-	} else if timeSince.Minutes() > 1 {
-		minutes := strconv.FormatFloat(timeSince.Minutes(), 'f', 0, 64)
-		seconds := strconv.FormatFloat(math.Mod(timeSince.Seconds(), 60), 'f', 0, 64)
-
-		if minutes == "1" {
-			minutes = minutes + " minute"
-		} else {
-			minutes = minutes + " minutes"
-		}
-
-		if seconds == "1" {
-			seconds = seconds + " second"
-		} else {
-			seconds = seconds + " seconds"
-		}
-
-		time = minutes + " and " + seconds + " ago."
-	} else {
-		seconds := strconv.FormatFloat(timeSince.Seconds(), 'f', 0, 64)
-
-		if seconds == "1" {
-			seconds = seconds + " second"
-		} else {
-			seconds = seconds + " seconds"
-		}
-
-		time = seconds + " ago."
-	}
+	time := tools.TimeSince(timeParse)
 
 	// Assign timing variables for map specs
 	totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
