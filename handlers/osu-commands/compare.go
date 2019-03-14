@@ -175,7 +175,8 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 
 	hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 
-	s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+	// Create embed
+	embed := &discordgo.MessageEmbed{
 		Color: Color,
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://osu.ppy.sh/users/" + strconv.Itoa(user.UserID),
@@ -194,6 +195,12 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: time,
 		},
-	})
+	}
+	if beatmap.Title == "Crab Rave" {
+		embed.Image = &discordgo.MessageEmbedImage{
+			URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
+		}
+	}
+	s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	return
 }

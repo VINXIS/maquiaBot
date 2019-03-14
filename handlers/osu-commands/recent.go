@@ -225,30 +225,8 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 
 			hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 
-			if option == "best" {
-				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Color: Color,
-					Author: &discordgo.MessageEmbedAuthor{
-						URL:     "https://osu.ppy.sh/users/" + strconv.Itoa(user.UserID),
-						Name:    user.Username,
-						IconURL: "https://a.ppy.sh/" + strconv.Itoa(user.UserID),
-					},
-					Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,
-					URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
-					Thumbnail: &discordgo.MessageEmbedThumbnail{
-						URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
-					},
-					Description: sr + length + bpm + "\n" +
-						mapStats + "\n\n" +
-						scorePrint + mods + combo + "\n\n" +
-						pp + acc + hits + "\n\n",
-					Footer: &discordgo.MessageEmbedFooter{
-						Text: time,
-					},
-				})
-				return
-			}
-			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+			// Create embed
+			embed := &discordgo.MessageEmbed{
 				Color: Color,
 				Author: &discordgo.MessageEmbedAuthor{
 					URL:     "https://osu.ppy.sh/users/" + strconv.Itoa(user.UserID),
@@ -260,15 +238,31 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 				Thumbnail: &discordgo.MessageEmbedThumbnail{
 					URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 				},
-				Description: sr + length + bpm + "\n" +
+			}
+			if beatmap.Title == "Crab Rave" {
+				embed.Image = &discordgo.MessageEmbedImage{
+					URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
+				}
+			}
+			if option == "best" {
+				embed.Description = sr + length + bpm + "\n" +
+					mapStats + "\n\n" +
+					scorePrint + mods + combo + "\n\n" +
+					pp + acc + hits + "\n\n"
+				embed.Footer = &discordgo.MessageEmbedFooter{
+					Text: time,
+				}
+			} else if option == "recent" {
+				embed.Description = sr + length + bpm + "\n" +
 					mapStats + "\n\n" +
 					scorePrint + mods + combo + "\n" +
 					mapCompletion + "\n" +
-					pp + acc + hits + "\n\n",
-				Footer: &discordgo.MessageEmbedFooter{
+					pp + acc + hits + "\n\n"
+				embed.Footer = &discordgo.MessageEmbedFooter{
 					Text: "Try #" + strconv.Itoa(try) + " | " + time,
-				},
-			})
+				}
+			}
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
 			return
 		}
 	}
