@@ -31,6 +31,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	// Create regexps for checks
 	mapperRegex, _ := regexp.Compile(`(?i)b?e?a?t?mapp?e?d? by (\S*)`)
 	titleRegex, _ := regexp.Compile(`\- (.*) \[`)
+	diffRegex, _ := regexp.Compile(`\[(.*)\]`)
 	diagnosisRegex, _ := regexp.Compile(` -v`)
 
 	var (
@@ -63,7 +64,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	newImg := imaging.AdjustSaturation(imgSrc, -100)
 	newImg = imaging.AdjustContrast(newImg, 100)
 	b := newImg.Bounds()
-	newImg = imaging.Crop(newImg, image.Rect(0, 0, int(math.Max(2.0*float64(b.Dx())/3.0, 1280.0)), int(math.Max(120.0*float64(b.Dy())/969.0, 120.0))))
+	newImg = imaging.Crop(newImg, image.Rect(0, 0, b.Dx(), int(math.Max(120.0*float64(b.Dy())/969.0, 120.0))))
 
 	// Check if name already exists, create a new name via integer suffix instead if target name is currently in use
 	_, err1 := os.Stat("./" + name + ".png")
@@ -113,6 +114,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	var (
 		title      string
 		mapperName string
+		diff       string
 	)
 
 	for _, line := range str {
@@ -120,8 +122,16 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			mapperName = mapperRegex.FindStringSubmatch(line)[1]
 		} else if titleRegex.MatchString(line) {
 			title = titleRegex.FindStringSubmatch(line)[1]
+			if diffRegex.MatchString(line) {
+				diff = diffRegex.FindStringSubmatch(line)[1]
+			}
+		} else if diffRegex.MatchString(line) {
+			diff = diffRegex.FindStringSubmatch(line)[1]
 		}
 	}
+
+	fmt.Println(diff)
+	fmt.Println(str)
 
 	// See if the result was clean with a few checks
 	if mapperName != "" && title != "" {
@@ -147,10 +157,29 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		})
 
 		// Look for the beatmap in the results
+		warning := ""
 		for _, b := range beatmaps {
 			if b.Title == title {
-				beatmap = b
-				break
+				if diff != "" {
+					if b.DiffName == diff {
+						beatmap = b
+						break
+					}
+				} else {
+					beatmap = b
+					break
+				}
+			}
+		}
+
+		// Run it again in case no map with the diff name was found due to possible image parsing errors
+		if beatmap == (osuapi.Beatmap{}) {
+			warning = "**WARNING** Diff name could not be found. Showing information for top diff."
+			for _, b := range beatmaps {
+				if b.Title == title {
+					beatmap = b
+					break
+				}
 			}
 		}
 
@@ -234,7 +263,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 				status + "\n" +
 				download + "\n" +
 				diffs + "\n" + "\n" +
-				"**[" + beatmap.DiffName + "]**\n" +
+				"**[" + beatmap.DiffName + "]**" + warning + "\n" +
 				//aimRating + speedRating + totalRating + "\n" + TODO: Make SR calc work
 				ppSS + pp99 + pp98 + pp97 + pp95,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
