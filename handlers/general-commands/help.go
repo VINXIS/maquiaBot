@@ -51,7 +51,7 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 		},
 	}
 
-	switch rand.Intn(12) {
+	switch rand.Intn(11) {
 	case 0:
 		embed.Image = &discordgo.MessageEmbedImage{
 			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555994312760885248/epicAnimeScene.gif",
@@ -60,23 +60,23 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 		embed.Image = &discordgo.MessageEmbedImage{
 			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555996915884490752/epicAnimeGifTWO.gif",
 		}
-	case 2, 3:
+	case 2:
 		embed.Image = &discordgo.MessageEmbedImage{
-			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998614892183553/tumblr_phjkel3lgn1xlyyvto4_1280.png",
+			URL: "https://cdn.discordapp.com/attachments/555493588465877012/556000178406948875/epicAnimeGif5.gif",
 		}
-	case 4, 5:
+	case 3, 4:
 		embed.Image = &discordgo.MessageEmbedImage{
 			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998627940532237/tumblr_phjkel3lgn1xlyyvto1_1280.png",
 		}
-	case 6, 7:
+	case 5, 6:
 		embed.Image = &discordgo.MessageEmbedImage{
 			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998640142024704/tumblr_phjkel3lgn1xlyyvto2_1280.png",
 		}
-	case 8, 9:
+	case 7, 8:
 		embed.Image = &discordgo.MessageEmbedImage{
 			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998669761937418/tumblr_phjkel3lgn1xlyyvto3_1280.png",
 		}
-	case 10, 11:
+	case 9, 10:
 		embed.Image = &discordgo.MessageEmbedImage{
 			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998681375965194/tumblr_phjkel3lgn1xlyyvto5_1280.png",
 		}
