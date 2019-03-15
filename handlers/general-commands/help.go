@@ -1,6 +1,8 @@
 package gencommands
 
 import (
+	"math/rand"
+
 	osutools "../../osu-functions"
 	tools "../../tools"
 
@@ -12,8 +14,7 @@ import (
 func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 	dm, err := s.UserChannelCreate(m.Author.ID)
 	tools.ErrRead(err)
-
-	s.ChannelMessageSendEmbed(dm.ID, &discordgo.MessageEmbed{
+	embed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://discordapp.com/oauth2/authorize?&client_id=551667572723023893&scope=bot&permissions=0",
 			Name:    "Click here to invite MaquiaBot!",
@@ -48,9 +49,38 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 				Value: "`" + prefix + "pokemon <pokemon name/id>` - Gives brief information regarding a pokemon",
 			},
 		},
-		Image: &discordgo.MessageEmbedImage{
+	}
+
+	switch rand.Intn(12) {
+	case 0:
+		embed.Image = &discordgo.MessageEmbedImage{
 			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555994312760885248/epicAnimeScene.gif",
-		},
-	})
+		}
+	case 1:
+		embed.Image = &discordgo.MessageEmbedImage{
+			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555996915884490752/epicAnimeGifTWO.gif",
+		}
+	case 2, 3:
+		embed.Image = &discordgo.MessageEmbedImage{
+			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998614892183553/tumblr_phjkel3lgn1xlyyvto4_1280.png",
+		}
+	case 4, 5:
+		embed.Image = &discordgo.MessageEmbedImage{
+			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998627940532237/tumblr_phjkel3lgn1xlyyvto1_1280.png",
+		}
+	case 6, 7:
+		embed.Image = &discordgo.MessageEmbedImage{
+			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998640142024704/tumblr_phjkel3lgn1xlyyvto2_1280.png",
+		}
+	case 8, 9:
+		embed.Image = &discordgo.MessageEmbedImage{
+			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998669761937418/tumblr_phjkel3lgn1xlyyvto3_1280.png",
+		}
+	case 10, 11:
+		embed.Image = &discordgo.MessageEmbedImage{
+			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998681375965194/tumblr_phjkel3lgn1xlyyvto5_1280.png",
+		}
+	}
+	s.ChannelMessageSendEmbed(dm.ID, embed)
 	return
 }
