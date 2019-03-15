@@ -51,6 +51,7 @@ func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate, mapCache []st
 	_, err = os.Stat("./data/channelData/" + m.ChannelID + ".json")
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "No tracking information currently for this channel!")
+		return
 	}
 	f, err := ioutil.ReadFile("./data/channelData/" + m.ChannelID + ".json")
 	tools.ErrRead(err)
