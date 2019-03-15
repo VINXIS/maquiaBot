@@ -190,6 +190,30 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 			if objCount != playObjCount {
 				completed := float64(playObjCount) / float64(objCount) * 100.0
 				mapCompletion = "**" + strconv.FormatFloat(completed, 'f', 2, 64) + "%** completed \n"
+			} else {
+				if option == "best" {
+					orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+						Username: username,
+						Limit:    100,
+					})
+					tools.ErrRead(err)
+					for i, orderedScore := range orderedScores {
+						if score.BeatmapID == orderedScore.BeatmapID {
+							mapCompletion = "**#" + strconv.Itoa(i+1) + "** in top performances! \n"
+						}
+					}
+				} else if option == "recent" {
+					mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
+						BeatmapID: beatmap.BeatmapID,
+						Limit:     100,
+					})
+					tools.ErrRead(err)
+					for i, mapScore := range mapScores {
+						if score.UserID == mapScore.UserID {
+							mapCompletion = "**#" + strconv.Itoa(i+1) + "** on leaderboard! \n"
+						}
+					}
+				}
 			}
 
 			// Get pp values
@@ -221,7 +245,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 				go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", score.Mods.String(), ppValues)
 				pp = "**" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp**/" + <-ppValues + "pp "
 			}
-			acc := "**Acc:** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "% "
+			acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 
 			hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 
@@ -235,29 +259,25 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osu
 				},
 				Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,
 				URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
+				Description: sr + length + bpm + "\n" +
+					mapStats + "\n\n" +
+					scorePrint + mods + combo + acc + "\n" +
+					mapCompletion + "\n" +
+					pp + hits + "\n\n",
 				Thumbnail: &discordgo.MessageEmbedThumbnail{
 					URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 				},
 			}
-			if beatmap.Title == "Crab Rave" {
+			if strings.ToLower(beatmap.Title) == "crab rave" {
 				embed.Image = &discordgo.MessageEmbedImage{
 					URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
 				}
 			}
 			if option == "best" {
-				embed.Description = sr + length + bpm + "\n" +
-					mapStats + "\n\n" +
-					scorePrint + mods + combo + "\n\n" +
-					pp + acc + hits + "\n\n"
 				embed.Footer = &discordgo.MessageEmbedFooter{
 					Text: time,
 				}
 			} else if option == "recent" {
-				embed.Description = sr + length + bpm + "\n" +
-					mapStats + "\n\n" +
-					scorePrint + mods + combo + "\n" +
-					mapCompletion + "\n" +
-					pp + acc + hits + "\n\n"
 				embed.Footer = &discordgo.MessageEmbedFooter{
 					Text: "Try #" + strconv.Itoa(try) + " | " + time,
 				}

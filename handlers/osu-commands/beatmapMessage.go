@@ -6,6 +6,7 @@ import (
 	"math"
 	"regexp"
 	"strconv"
+	"strings"
 
 	osutools "../../osu-functions"
 	structs "../../structs"
@@ -126,7 +127,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 				URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 			},
 		}
-		if beatmap.Title == "Crab Rave" {
+		if strings.ToLower(beatmap.Title) == "crab rave" {
 			embed.Image = &discordgo.MessageEmbedImage{
 				URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
 			}

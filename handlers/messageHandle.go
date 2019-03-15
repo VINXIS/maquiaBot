@@ -87,14 +87,16 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go OsuHandle(s, m, args, osuAPI, profileCache, mapCache, serverPrefix)
 		case serverPrefix + "pokemon", serverPrefix + "p":
 			go PokemonHandle(s, m, args, serverPrefix)
-		case serverPrefix + "avatar":
+		case serverPrefix + "avatar", serverPrefix + "ava", serverPrefix + "a":
 			go gencommands.Avatar(s, m)
 		case serverPrefix + "help":
 			go gencommands.Help(s, m, serverPrefix)
 		case serverPrefix + "src", serverPrefix + "source":
 			s.ChannelMessageSend(m.ChannelID, "https://github.com/VINXIS/maquiaBot")
-		case serverPrefix + "prefix":
+		case serverPrefix + "prefix", serverPrefix + "newprefix":
 			go gencommands.NewPrefix(s, m, args, serverPrefix)
+		case serverPrefix + "link", serverPrefix + "set":
+			go osucommands.Link(s, m, args, osuAPI, profileCache)
 		case serverPrefix + "r", serverPrefix + "rs", serverPrefix + "recent":
 			go osucommands.Recent(s, m, args, osuAPI, profileCache, "recent", serverPrefix, mapCache)
 		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
@@ -102,7 +104,11 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "c", serverPrefix + "compare":
 			go osucommands.Compare(s, m, args, osuAPI, profileCache, serverPrefix, mapCache)
 		case serverPrefix + "t", serverPrefix + "track":
-			go osucommands.Track()
+			go osucommands.Track(s, m, args, osuAPI, mapCache)
+		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "tracktoggle":
+			go osucommands.TrackToggle(s, m, mapCache)
+		case serverPrefix + "tinfo", serverPrefix + "tracking", serverPrefix + "trackinfo":
+			go osucommands.TrackInfo(s, m)
 		}
 		return
 	}

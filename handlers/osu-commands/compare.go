@@ -78,6 +78,9 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	}
 	if user.UserID == (osuapi.User{}).UserID {
 		// Check if user even exists
+		if userArg == "" {
+			s.ChannelMessageSend(m.ChannelID, "No user linked to your account/mentioned in message!")
+		}
 		test, err := osuAPI.GetUser(osuapi.GetUserOpts{
 			Username: userArg,
 		})
@@ -98,6 +101,11 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	})
 	tools.ErrRead(err)
 	beatmap := beatmaps[0]
+
+	if beatmap.Approved == osuapi.StatusPending || beatmap.Approved == osuapi.StatusGraveyard || beatmap.Approved == osuapi.StatusWIP {
+		s.ChannelMessageSend(m.ChannelID, "The map does not have a leaderboard!")
+		return
+	}
 
 	if len(scores) == 0 {
 		if userArg != "" {
@@ -161,6 +169,30 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
 	}
 
+	mapCompletion := ""
+	orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+		Username: user.Username,
+		Limit:    100,
+	})
+	tools.ErrRead(err)
+	for i, orderedScore := range orderedScores {
+		if score.Score.Score == orderedScore.Score.Score {
+			mapCompletion = "**#" + strconv.Itoa(i+1) + "** in top performances! \n"
+		}
+	}
+	if mapCompletion == "" {
+		mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
+			BeatmapID: beatmap.BeatmapID,
+			Limit:     100,
+		})
+		tools.ErrRead(err)
+		for i, mapScore := range mapScores {
+			if score.UserID == mapScore.UserID {
+				mapCompletion = "**#" + strconv.Itoa(i+1) + "** on leaderboard! \n"
+			}
+		}
+	}
+
 	// Get pp values
 	var pp string
 	if score.Score.FullCombo { // If play was a perfect combo
@@ -171,8 +203,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", score.Mods.String(), ppValues)
 		pp = "**" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp**/" + <-ppValues + "pp "
 	}
-	acc := "**Acc:** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "% "
-
+	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 	hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 
 	// Create embed
@@ -190,13 +221,14 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		},
 		Description: sr + length + bpm + "\n" +
 			mapStats + "\n\n" +
-			scorePrint + mods + combo + "\n\n" +
-			pp + acc + hits + "\n\n",
+			scorePrint + mods + combo + acc + "\n" +
+			mapCompletion + "\n" +
+			pp + hits + "\n\n",
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: time,
 		},
 	}
-	if beatmap.Title == "Crab Rave" {
+	if strings.ToLower(beatmap.Title) == "crab rave" {
 		embed.Image = &discordgo.MessageEmbedImage{
 			URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
 		}

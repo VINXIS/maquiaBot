@@ -59,6 +59,10 @@ func PPCalc(beatmap osuapi.Beatmap, acc float64, combo string, misses string, mo
 			res = regex.FindStringSubmatch(line)
 		}
 	}
+	if len(res) == 0 {
+		store <- "N/A"
+		return
+	}
 	ppValue, err := strconv.ParseFloat(res[1]+res[2], 64)
 	tools.ErrRead(err)
 

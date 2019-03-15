@@ -19,6 +19,12 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 			go osucommands.Recent(s, m, args, osuAPI, playerCache, "recent", serverPrefix, mapCache)
 		case "recentb", "rb", "recentbest":
 			go osucommands.Recent(s, m, args, osuAPI, playerCache, "best", serverPrefix, mapCache)
+		case "t", "track":
+			go osucommands.Track(s, m, args, osuAPI, mapCache)
+		case "tinfo", "tracking", "trackinfo":
+			go osucommands.TrackInfo(s, m)
+		case "tt", "trackt", "tracktoggle":
+			go osucommands.TrackToggle(s, m, mapCache)
 		}
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "Please specify a command! Check `"+serverPrefix+"help` for more details!")

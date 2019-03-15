@@ -279,7 +279,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 		},
 	}
-	if beatmap.Title == "Crab Rave" {
+	if strings.ToLower(beatmap.Title) == "crab rave" {
 		embed.Image = &discordgo.MessageEmbedImage{
 			URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
 		}
