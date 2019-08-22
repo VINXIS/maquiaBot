@@ -27,6 +27,9 @@ func main() {
 	discord, err := discordgo.New("Bot " + os.Getenv("DISCORD_BOT_TOKEN"))
 	tools.ErrRead(err)
 
+	// Handle farm data
+	go osutools.FarmUpdate(discord)
+
 	// Obtain map cache data
 	mapCache := []structs.MapData{}
 	f, err := ioutil.ReadFile("./data/osuData/mapCache.json")

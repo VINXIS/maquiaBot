@@ -55,7 +55,9 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 
 	// Fetch the image data
 	response, err := http.Get(url)
-	tools.ErrRead(err)
+	if err != nil {
+		return
+	}
 	imgSrc, _, err := image.Decode(response.Body)
 	if err != nil {
 		return
@@ -79,7 +81,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 				name = name + strconv.Itoa(i)
 				break
 			} else {
-				i = i + 1
+				i++
 			}
 		}
 	}
@@ -220,14 +222,22 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		mapper, err = osuAPI.GetUser(osuapi.GetUserOpts{
 			UserID: 3,
 		})
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+			return
+		}
 		mapper.Username = beatmap.Creator
+
 	}
 
 	// Obtain whole set
 	beatmaps, err = osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 		BeatmapSetID: beatmap.BeatmapSetID,
 	})
-	tools.ErrRead(err)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+		return
+	}
 
 	// Assign variables for map specs
 	totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
@@ -272,7 +282,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			status + "\n" +
 			download + "\n" +
 			diffs + "\n" + "\n" +
-			"**[" + beatmap.DiffName + "]**" + warning + "\n" +
+			"**[" + beatmap.DiffName + "]** " + warning + "\n" +
 			//aimRating + speedRating + totalRating + "\n" + TODO: Make SR calc work
 			ppSS + pp99 + pp98 + pp97 + pp95,
 		Thumbnail: &discordgo.MessageEmbedThumbnail{

@@ -11,4 +11,5 @@ type ServerData struct {
 	Time   time.Time
 	Server discordgo.Guild
 	Prefix string
+	Crab   bool
 }

@@ -19,12 +19,22 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 			go osucommands.Recent(s, m, args, osuAPI, playerCache, "recent", serverPrefix, mapCache)
 		case "recentb", "rb", "recentbest":
 			go osucommands.Recent(s, m, args, osuAPI, playerCache, "best", serverPrefix, mapCache)
-		case "t", "track":
+		case "t", "top":
+			go osucommands.Top(s, m, args, osuAPI, playerCache, serverPrefix, mapCache)
+		case "tfarm", "topfarm", "tfarmerdog", "topfarmerdog":
+			go osucommands.TopFarm(s, m, args, osuAPI, playerCache, serverPrefix)
+		case "bfarm", "bottomfarm", "bfarmerdog", "bottomfarmerdog":
+			go osucommands.BottomFarm(s, m, args, osuAPI, playerCache, serverPrefix)
+		case "farm", "farmerdog", "f":
+			go osucommands.Farmerdog(s, m, args, osuAPI, playerCache, serverPrefix)
+		case "tr", "track":
 			go osucommands.Track(s, m, args, osuAPI, mapCache)
-		case "tinfo", "tracking", "trackinfo":
+		case "ti", "tinfo", "tracking", "trackinfo":
 			go osucommands.TrackInfo(s, m)
 		case "tt", "trackt", "tracktoggle":
 			go osucommands.TrackToggle(s, m, mapCache)
+		case "c", "compare":
+			go osucommands.Compare(s, m, args, osuAPI, playerCache, serverPrefix, mapCache)
 		}
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "Please specify a command! Check `"+serverPrefix+"help` for more details!")

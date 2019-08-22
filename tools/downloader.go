@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -16,7 +17,16 @@ func DownloadFile(filepath string, url string) {
 
 	// Create the file
 	out, err := os.Create(filepath)
-	ErrRead(err)
+	for {
+		if err != nil {
+			fmt.Print("An error occured trying to create a file: ")
+			fmt.Println(err)
+			fmt.Println("Trying again...")
+			out, err = os.Create(filepath)
+		} else if err == nil {
+			break
+		}
+	}
 	defer out.Close()
 
 	// Write the body to file

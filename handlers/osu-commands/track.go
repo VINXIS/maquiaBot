@@ -45,14 +45,14 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuA
 	for _, roleID := range member.Roles {
 		role, err := s.State.Role(m.GuildID, roleID)
 		tools.ErrRead(err)
-		if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
+		if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator || role.Permissions&discordgo.PermissionManageServer == discordgo.PermissionManageServer {
 			admin = true
 			break
 		}
 	}
 
-	if !admin {
-		s.ChannelMessageSend(m.ChannelID, "You are not an admin!")
+	if !admin && m.Author.ID != server.OwnerID {
+		s.ChannelMessageSend(m.ChannelID, "You are not an admin or server manager!")
 		return
 	}
 
@@ -76,14 +76,14 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuA
 	pp := ""
 	top := ""
 	users := []string{}
-	addition := false
+	addition := true
 	removal := false
 	multiUser := false
 	for i, arg := range args {
-		if arg == "add" {
-			addition = true
-		}
-		if arg == "remove" {
+		if arg == "replace" {
+			addition = false
+		} else if arg == "remove" {
+			addition = false
 			removal = true
 		}
 		if multiUser {
@@ -114,41 +114,59 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuA
 	}
 
 	// Add/Remove as needed
-	if !addition {
+	if !addition && !removal {
 		channelData.Users = []osuapi.User{}
 	}
 	if removal {
-		if len(users) != 0 {
-			for _, user := range users {
-				tracked := false
-				for i, osuUser := range channelData.Users {
-					if osuUser.Username == user {
-						tracked = true
-						channelData.Users = append(channelData.Users[:i], channelData.Users[i+1:]...)
-					}
-				}
-				if !tracked {
-					s.ChannelMessageSend(m.ChannelID, "User "+user+" is not being tracked currently!")
-					return
-				}
-			}
-		} else {
+		if len(users) == 0 {
 			tools.DeleteFile("./data/channelData/" + m.ChannelID + ".json")
 			s.ChannelMessageSend(m.ChannelID, "Completely removed tracking for this channel!")
 			return
 		}
+		text := "Removed: "
+		tracked := false
+		for _, user := range users {
+			for i, osuUser := range channelData.Users {
+				if strings.ToLower(osuUser.Username) == strings.ToLower(user) {
+					tracked = true
+					text = text + user + " "
+					channelData.Users = append(channelData.Users[:i], channelData.Users[i+1:]...)
+				}
+			}
+		}
+		if !tracked {
+			s.ChannelMessageSend(m.ChannelID, "User is not being tracked currently!")
+			return
+		}
+		// Write data to JSON
+		jsonCache, err := json.Marshal(channelData)
+		tools.ErrRead(err)
+
+		err = ioutil.WriteFile("./data/channelData/"+m.ChannelID+".json", jsonCache, 0644)
+		tools.ErrRead(err)
+		s.ChannelMessageSend(m.ChannelID, text)
+		return
 	}
 
 	// Assign params to data
 	text := "Now tracking "
 	if len(users) != 0 {
 		for _, user := range users {
+			user = strings.ReplaceAll(user, ",", "")
 			userRes, err := osuAPI.GetUser(osuapi.GetUserOpts{
 				Username: user,
 			})
 			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "User "+user+" does not exist! Check to make sure they aren't banned/ that you typed their name properly!")
+				s.ChannelMessageSend(m.ChannelID, "User "+user+" may not exist! Check to make sure they aren't banned/ that you typed their name properly!")
 				return
+			}
+			if addition {
+				for _, osuUser := range channelData.Users {
+					if osuUser.Username == userRes.Username {
+						s.ChannelMessageSend(m.ChannelID, "User "+user+" is already being tracked!")
+						return
+					}
+				}
 			}
 			channelData.Users = append(channelData.Users, *userRes)
 			text = text + user + " "

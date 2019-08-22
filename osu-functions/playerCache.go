@@ -14,10 +14,12 @@ import (
 // PlayerCache checks to see if the latest user information is already saved, otherwise it will update as necessary
 func PlayerCache(user osuapi.User, cache []structs.PlayerData) {
 	exists := false
-	twoDay := 48 * time.Hour
 
 	for i, player := range cache {
-		if player.Osu.UserID == user.UserID && time.Now().Sub(cache[i].Time) >= twoDay {
+		if player.Osu.UserID == user.UserID {
+			if time.Since(cache[i].Time) < 48*time.Hour {
+				return
+			}
 			exists = true
 			player.Osu = user
 		}

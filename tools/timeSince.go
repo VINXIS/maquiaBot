@@ -61,7 +61,7 @@ func TimeSince(timeParse time.Time) (timeString string) {
 
 		timeString = minutes + " and " + seconds + " ago."
 	} else {
-		seconds := strconv.FormatFloat(timeSince.Seconds(), 'f', 0, 64)
+		seconds := strconv.FormatFloat(math.Abs(timeSince.Seconds()), 'f', 0, 64)
 
 		if seconds == "1" {
 			seconds = seconds + " second"

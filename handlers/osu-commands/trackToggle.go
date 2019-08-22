@@ -35,14 +35,14 @@ func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate, mapCache []st
 	for _, roleID := range member.Roles {
 		role, err := s.State.Role(m.GuildID, roleID)
 		tools.ErrRead(err)
-		if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
+		if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator || role.Permissions&discordgo.PermissionManageServer == discordgo.PermissionManageServer {
 			admin = true
 			break
 		}
 	}
 
-	if !admin {
-		s.ChannelMessageSend(m.ChannelID, "You are not an admin!")
+	if !admin && m.Author.ID != server.OwnerID {
+		s.ChannelMessageSend(m.ChannelID, "You are not an admin or server manager!")
 		return
 	}
 

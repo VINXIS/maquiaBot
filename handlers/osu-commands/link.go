@@ -3,6 +3,7 @@ package osucommands
 import (
 	"encoding/json"
 	"io/ioutil"
+	"strings"
 	"time"
 
 	structs "../../structs"
@@ -14,12 +15,56 @@ import (
 // Link links an osu! account with the discord user
 func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI *osuapi.Client, cache []structs.PlayerData) {
 	discordUser := m.Author
-	osuUsername := args[2]
+	osuUsername := ""
+	if len(args) > 2 {
+		if len(m.Mentions) >= 1 && len(args) > 3 {
+			osuUsername = args[3]
+		} else if len(m.Mentions) >= 1 {
+			osuUsername = args[2]
+		}
+	} else {
+		osuUsername = args[1]
+	}
+
+	server, err := s.Guild(m.GuildID)
+	member := &discordgo.Member{}
+	admin := false
+
+	if err == nil {
+		for _, guildMember := range server.Members {
+			if guildMember.User.ID == m.Author.ID {
+				member = guildMember
+			}
+		}
+
+		for _, roleID := range member.Roles {
+			role, err := s.State.Role(m.GuildID, roleID)
+			tools.ErrRead(err)
+			if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
+				admin = true
+				break
+			}
+		}
+		if m.Author.ID == server.OwnerID {
+			admin = true
+		}
+	}
+
+	if len(m.Mentions) >= 1 && admin {
+		discordUser = m.Mentions[0]
+	} else if len(m.Mentions) >= 1 && !admin {
+		s.ChannelMessageSend(m.ChannelID, "You are not an admin!")
+		return
+	}
 
 	for i, player := range cache {
 		if player.Discord.ID == discordUser.ID {
-			if player.Osu.Username == osuUsername {
-				s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** already assigned to this account!")
+			if strings.ToLower(player.Osu.Username) == strings.ToLower(osuUsername) {
+				if len(m.Mentions) >= 1 {
+					s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** already been linked to "+discordUser.Username+"'s account!")
+					return
+				}
+				s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** already linked to your discord account!")
 				return
 			}
 
@@ -27,7 +72,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 				Username: osuUsername,
 			})
 			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** does not exist!")
+				s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** may not exist!")
 				return
 			}
 			player.Time = time.Now()
@@ -40,10 +85,15 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 			err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
 			tools.ErrRead(err)
 
-			s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** has now been changed to this account!")
+			if len(m.Mentions) >= 1 {
+				s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to "+discordUser.Username+"'s account!")
+				return
+			}
+
+			s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to your discord account!")
 			return
 		}
-		if player.Osu.Username == osuUsername && player.Discord.ID == "" {
+		if strings.ToLower(player.Osu.Username) == strings.ToLower(osuUsername) && player.Discord.ID == "" {
 			player.Discord = *discordUser
 			cache[i] = player
 
@@ -53,7 +103,12 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 			err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
 			tools.ErrRead(err)
 
-			s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** has now been assigned to this account!")
+			if len(m.Mentions) >= 1 {
+				s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to "+discordUser.Username+"'s account!")
+				return
+			}
+
+			s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to your discord account!")
 			return
 		}
 	}
@@ -62,7 +117,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 		Username: osuUsername,
 	})
 	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** does not exist!")
+		s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** may not exist!")
 		return
 	}
 
@@ -77,6 +132,11 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
 	tools.ErrRead(err)
 
-	s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** has now been created and linked to this account!")
+	if len(m.Mentions) >= 1 {
+		s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to "+discordUser.Username+"'s account!")
+		return
+	}
+
+	s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to your discord account!")
 	return
 }

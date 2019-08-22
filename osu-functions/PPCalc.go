@@ -50,7 +50,10 @@ func PPCalc(beatmap osuapi.Beatmap, acc float64, combo string, misses string, mo
 	}
 
 	out, err := exec.Command("dotnet", args...).Output()
-	tools.ErrRead(err)
+	if err != nil {
+		store <- "N/A"
+		return
+	}
 	data = strings.Split(string(out), "\n")
 
 	var res []string

@@ -10,7 +10,6 @@ import (
 
 	osutools "../../osu-functions"
 	structs "../../structs"
-	tools "../../tools"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/thehowl/go-osuapi"
@@ -59,6 +58,10 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 			mapper, err = osuAPI.GetUser(osuapi.GetUserOpts{
 				UserID: 3,
 			})
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+				return
+			}
 			mapper.Username = beatmap.Creator
 		}
 
@@ -66,7 +69,10 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		beatmaps, err := osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapSetID: beatmap.BeatmapSetID,
 		})
-		tools.ErrRead(err)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+			return
+		}
 
 		// Assign variables for map specs
 		totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
@@ -85,9 +91,9 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		combo := "**FC:** " + strconv.Itoa(beatmap.MaxCombo) + "x"
 		mapStats := "**CS:** " + strconv.FormatFloat(beatmap.CircleSize, 'f', 1, 64) + " **AR:** " + strconv.FormatFloat(beatmap.ApproachRate, 'f', 1, 64) + " **OD:** " + strconv.FormatFloat(beatmap.OverallDifficulty, 'f', 1, 64) + " **HP:** " + strconv.FormatFloat(beatmap.HPDrain, 'f', 1, 64)
 
-		status := "**Rank Status:** " + beatmap.Approved.String()
+		status := "**Rank Status:** " + strings.Title(beatmap.Approved.String())
 
-		download := "**Download:** [osz link](https://osu.ppy.sh/d/" + strconv.Itoa(beatmap.BeatmapSetID) + ")" + " | <osu://dl/" + strconv.Itoa(beatmap.BeatmapSetID) + ">"
+		download := "**Download:** [osz link](https://osu.ppy.sh/beatmapsets/" + strconv.Itoa(beatmap.BeatmapSetID) + "/download)" + " | <osu://dl/" + strconv.Itoa(beatmap.BeatmapSetID) + ">"
 		var diffs string
 		if len(beatmaps) == 1 {
 			diffs = "**" + strconv.Itoa(len(beatmaps)) + `** difficulty <:ahFuck:550808614202245131>`
@@ -98,7 +104,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		// Get requested mods
 		mods := "NM"
 		if len(submatches[12]) > 0 {
-			mods = submatches[12]
+			mods = strings.ToUpper(submatches[12])
 			if len(mods)%2 == 0 && len(osuapi.ParseMods(mods).String()) > 0 {
 				mods = osuapi.ParseMods(mods).String()
 			}
@@ -120,7 +126,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 				status + "\n" +
 				download + "\n" +
 				diffs + "\n" + "\n" +
-				"**[" + beatmap.DiffName + "]** with mods: " + mods + "\n" +
+				"**[" + beatmap.DiffName + "]** with mods: " + strings.ToUpper(mods) + "\n" +
 				//aimRating + speedRating + totalRating + "\n" + TODO: Make SR calc work
 				ppSS + pp99 + pp98 + pp97 + pp95,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{

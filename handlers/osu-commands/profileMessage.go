@@ -15,7 +15,6 @@ import (
 // ProfileMessage gets the information for the specified profile linked
 func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileRegex *regexp.Regexp, osuAPI *osuapi.Client, cache []structs.PlayerData) {
 	modeRegex, _ := regexp.Compile(`-m (\S+)`)
-	bestRegex, _ := regexp.Compile(` -b`)
 	var mode osuapi.Mode
 	imgMode := "0"
 
@@ -73,7 +72,10 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		UserID: user.UserID,
 		Mode:   mode,
 	})
-	tools.ErrRead(err)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+		return
+	}
 
 	// Assign embed values
 	Color := osutools.ModeColour(osuapi.ModeOsu)
@@ -85,7 +87,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 	topPlayFooter := ""
 
 	var mapList []*discordgo.MessageEmbedField
-	if bestRegex.MatchString(m.Content) {
+	if strings.Contains(m.Content, " -b") {
 		imgURL = ""
 		topPlayFooter = "**Top plays:**" + "\n" + `\_\_\_\_\_\_\_\_\_\_`
 		for i := 0; i < 5; i++ {
@@ -93,6 +95,10 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			beatmaps, err := osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 				BeatmapID: score.BeatmapID,
 			})
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+				return
+			}
 			beatmap := beatmaps[0]
 
 			mapField := &discordgo.MessageEmbedField{

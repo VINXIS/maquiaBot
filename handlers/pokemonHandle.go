@@ -11,6 +11,8 @@ func PokemonHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []stri
 	if len(args) > 1 {
 		mainArg := args[1]
 		switch mainArg {
+		case "b", "berry":
+			go pokemoncommands.Berry(s, m, args)
 		default:
 			go pokemoncommands.Pokemon(s, m, args)
 		}

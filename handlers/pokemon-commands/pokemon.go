@@ -75,8 +75,14 @@ type PokemonAbility struct {
 // Pokemon searches for the pokemon and returns result
 func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 	// Check
+	if len(m.Mentions) > 0 {
+		s.ChannelMessageSend(m.ChannelID, "Please don't try mentioning people with the bot!")
+		return
+	}
+
 	if len(args) > 2 {
 		s.ChannelMessageSend(m.ChannelID, "Too many args! Please use _ for spaces in the pokemon name!")
+		return
 	}
 
 	// If deoxys change to id lol
@@ -91,7 +97,7 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 	byteArray, err := ioutil.ReadAll(res.Body)
 	tools.ErrRead(err)
 
-	if strings.ToLower(string(byteArray)) == "not found" {
+	if strings.ToLower(string(byteArray)) == "not found" || strings.HasPrefix(string(byteArray), "<") {
 		s.ChannelMessageSend(m.ChannelID, "Pokemon **"+args[1]+"** does not exist!")
 		return
 	}
@@ -170,7 +176,7 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 		}
 	}
 
-	// Create the embed and message and send
+	// Create embed
 	embed := &discordgo.MessageEmbed{
 		Title: strings.Title(pokemon.Name) + " (#" + strconv.Itoa(pokemon.ID) + ")",
 		Color: pokemontools.TypeColour(pokemon.Types[0].Type.Name),

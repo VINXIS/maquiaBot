@@ -14,6 +14,11 @@ import (
 
 // NewPrefix sets a new prefix for the bot
 func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string, serverPrefix string) {
+	if len(m.Mentions) > 0 {
+		s.ChannelMessageSend(m.ChannelID, "Please don't try mentioning people with the bot!")
+		return
+	}
+
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "This is not a guild so custom prefixes are unavailable! Please use `$` instead for commands!")
@@ -41,7 +46,7 @@ func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 		}
 	}
 
-	if !admin {
+	if !admin && m.Author.ID != server.OwnerID {
 		s.ChannelMessageSend(m.ChannelID, "You are not an admin!")
 		return
 	}
@@ -63,6 +68,7 @@ func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 	// Set new information in server data
 	serverData.Time = time.Now()
 	serverData.Prefix = args[1]
+	serverData.Crab = true
 
 	jsonCache, err := json.Marshal(serverData)
 	tools.ErrRead(err)
