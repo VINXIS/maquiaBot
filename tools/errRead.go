@@ -5,7 +5,7 @@ import (
 	"runtime"
 )
 
-// ErrRead will check to see if there is an error; it will print the error if there is any
+// ErrRead will check to see if there is an error; it will print the error and kill the bot if there is any
 func ErrRead(err error) {
 	if err != nil {
 		pc, fn, line, _ := runtime.Caller(1)

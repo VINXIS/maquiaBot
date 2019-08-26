@@ -3,6 +3,7 @@ package osucommands
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -326,7 +327,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI
 				Author: &discordgo.MessageEmbedAuthor{
 					URL:     "https://osu.ppy.sh/users/" + strconv.Itoa(user.UserID),
 					Name:    user.Username,
-					IconURL: "https://a.ppy.sh/" + strconv.Itoa(user.UserID),
+					IconURL: "https://a.ppy.sh/" + strconv.Itoa(user.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 				},
 				Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,
 				URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),

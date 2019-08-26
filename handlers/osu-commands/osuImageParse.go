@@ -274,7 +274,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
 			Name:    beatmap.Artist + " - " + beatmap.Title + " by " + mapper.Username,
-			IconURL: "https://a.ppy.sh/" + strconv.Itoa(mapper.UserID),
+			IconURL: "https://a.ppy.sh/" + strconv.Itoa(mapper.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
 		Color: Color,
 		Description: starRating + length + bpm + combo + "\n" +

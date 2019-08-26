@@ -9,7 +9,41 @@ import (
 // TimeSince gives back a parsed string of the time elpased since
 func TimeSince(timeParse time.Time) (timeString string) {
 	timeSince := time.Since(timeParse)
-	if timeSince.Hours() > 24 {
+	if timeSince.Hours() > 8760 {
+		years := strconv.FormatFloat(math.Floor(timeSince.Hours()/8760.0), 'f', 0, 64)
+		months := strconv.FormatFloat(math.Floor(math.Mod(timeSince.Hours(), 8760)/730.0), 'f', 0, 64)
+
+		if years == "1" {
+			years = years + " year"
+		} else {
+			years = years + " years"
+		}
+
+		if months == "1" {
+			months = months + " month"
+		} else {
+			months = months + " months"
+		}
+
+		timeString = years + " and " + months + " ago."
+	} else if timeSince.Hours() > 730 {
+		months := strconv.FormatFloat(math.Floor(timeSince.Hours()/730.0), 'f', 0, 64)
+		days := strconv.FormatFloat(math.Floor(math.Mod(timeSince.Hours(), 730)/24.0), 'f', 0, 64)
+
+		if months == "1" {
+			months = months + " month"
+		} else {
+			months = months + " months"
+		}
+
+		if days == "1" {
+			days = days + " day"
+		} else {
+			days = days + " days"
+		}
+
+		timeString = months + " and " + days + " ago."
+	} else if timeSince.Hours() > 24 {
 		days := strconv.FormatFloat(math.Floor(timeSince.Hours()/24.0), 'f', 0, 64)
 		hours := strconv.FormatFloat(math.Mod(timeSince.Hours(), 24), 'f', 0, 64)
 
@@ -61,7 +95,7 @@ func TimeSince(timeParse time.Time) (timeString string) {
 
 		timeString = minutes + " and " + seconds + " ago."
 	} else {
-		seconds := strconv.FormatFloat(math.Abs(timeSince.Seconds()), 'f', 0, 64)
+		seconds := strconv.FormatFloat(math.Min(0, timeSince.Seconds()), 'f', 0, 64)
 
 		if seconds == "1" {
 			seconds = seconds + " second"

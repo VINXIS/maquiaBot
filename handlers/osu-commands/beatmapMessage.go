@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
@@ -118,7 +119,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 			Author: &discordgo.MessageEmbedAuthor{
 				URL:     "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
 				Name:    beatmap.Artist + " - " + beatmap.Title + " by " + mapper.Username,
-				IconURL: "https://a.ppy.sh/" + strconv.Itoa(mapper.UserID),
+				IconURL: "https://a.ppy.sh/" + strconv.Itoa(mapper.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 			},
 			Color: Color,
 			Description: starRating + length + bpm + combo + "\n" +

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Comma adds commas to a number
+// Comma adds commas to large numbers
 func Comma(v int64) string {
 	sign := ""
 

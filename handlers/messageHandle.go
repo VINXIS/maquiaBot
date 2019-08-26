@@ -20,7 +20,7 @@ import (
 
 // MessageHandler handles any incoming messages
 func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	negateRegex, _ := regexp.Compile(`-n\W`)
+	negateRegex, _ := regexp.Compile(`-n\s`)
 
 	// Ignore all messages created by the bot itself or if the negate command was stated
 	if m.Author.ID == s.State.User.ID || negateRegex.MatchString(m.Content) {
@@ -64,7 +64,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// CRAB RAVE
 	if crab && (strings.Contains(m.Content, "crab") || strings.Contains(m.Content, "rave")) {
 		response, err := http.Get("https://cdn.discordapp.com/emojis/510169818893385729.gif")
-		tools.ErrRead(err)
+		if err != nil {
+			return
+		}
 
 		message := &discordgo.MessageSend{
 			File: &discordgo.File{

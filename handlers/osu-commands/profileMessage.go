@@ -1,6 +1,7 @@
 package osucommands
 
 import (
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
@@ -130,7 +131,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			pc + "\n" +
 			topPlayFooter,
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
-			URL: "https://a.ppy.sh/" + strconv.Itoa(user.UserID),
+			URL: "https://a.ppy.sh/" + strconv.Itoa(user.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
 		Fields: mapList,
 		Image: &discordgo.MessageEmbedImage{
