@@ -123,46 +123,15 @@ func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
 func RunReminder(s *discordgo.Session, reminderTimer structs.ReminderTimer) {
 	if time.Now().Before(reminderTimer.Reminder.Target) {
 		<-reminderTimer.Timer.C
-		if reminderTimer.Reminder.Active {
-			linkRegex, _ := regexp.Compile(`https?:\/\/\S+`)
-			dm, _ := s.UserChannelCreate(reminderTimer.Reminder.User.ID)
-			if reminderTimer.Reminder.Info != "" {
-				if linkRegex.MatchString(reminderTimer.Reminder.Info) {
-					response, err := http.Get(linkRegex.FindStringSubmatch(reminderTimer.Reminder.Info)[0])
-					if err != nil {
-						s.ChannelMessageSend(dm.ID, "Reminder about `"+reminderTimer.Reminder.Info+"`!")
-						return
-					}
-					img, _, err := image.Decode(response.Body)
-					if err != nil {
-						s.ChannelMessageSend(dm.ID, "Reminder about `"+reminderTimer.Reminder.Info+"`!")
-						return
-					}
-					imgBytes := new(bytes.Buffer)
-					err = png.Encode(imgBytes, img)
-					if err != nil {
-						s.ChannelMessageSend(dm.ID, "Reminder about `"+reminderTimer.Reminder.Info+"`!")
-					}
-					_, err = s.ChannelMessageSendComplex(dm.ID, &discordgo.MessageSend{
-						Content: "Reminder about this",
-						Files: []*discordgo.File{
-							&discordgo.File{
-								Name:   "image.png",
-								Reader: imgBytes,
-							},
-						},
-					})
-					if err != nil {
-						fmt.Println(err)
-						s.ChannelMessageSend(dm.ID, "Reminder about `"+reminderTimer.Reminder.Info+"`!")
-					}
-					response.Body.Close()
-					return
-				}
-				s.ChannelMessageSend(dm.ID, "Reminder about `"+reminderTimer.Reminder.Info+"`!")
-			} else {
-				s.ChannelMessageSend(dm.ID, "Reminder!")
+	}
+	for i, rmndr := range ReminderTimers {
+		if rmndr.Reminder.ID == reminderTimer.Reminder.ID {
+			if rmndr.Reminder.Active {
+				go ReminderMessage(s, reminderTimer)
 			}
+			ReminderTimers[i] = ReminderTimers[len(ReminderTimers)-1]
+			ReminderTimers = ReminderTimers[:len(ReminderTimers)-1]
+			break
 		}
 	}
 
@@ -190,23 +159,28 @@ func RunReminder(s *discordgo.Session, reminderTimer structs.ReminderTimer) {
 
 	err = ioutil.WriteFile("./data/reminders.json", jsonCache, 0644)
 	tools.ErrRead(err)
-
-	// Remove from reminder timers as well
-	for i, rTimer := range ReminderTimers {
-		if rTimer.Reminder.ID == reminderTimer.Reminder.ID {
-			ReminderTimers[i] = ReminderTimers[len(ReminderTimers)-1]
-			ReminderTimers = ReminderTimers[:len(ReminderTimers)-1]
-			break
-		}
-	}
 }
 
 // Reminders lists the person's reminders
 func Reminders(s *discordgo.Session, m *discordgo.MessageCreate) {
 	userTimers := []structs.Reminder{}
-	for _, reminder := range ReminderTimers {
-		if reminder.Reminder.User.ID == m.Author.ID && reminder.Reminder.Active {
-			userTimers = append(userTimers, reminder.Reminder)
+	all := false
+	if strings.Contains(m.Content, "all") {
+		if m.Author.ID != "92502458588205056" {
+			s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT VINXIS.........")
+			return
+		}
+		all = true
+		for _, reminder := range ReminderTimers {
+			if reminder.Reminder.Active {
+				userTimers = append(userTimers, reminder.Reminder)
+			}
+		}
+	} else {
+		for _, reminder := range ReminderTimers {
+			if reminder.Reminder.User.ID == m.Author.ID && reminder.Reminder.Active {
+				userTimers = append(userTimers, reminder.Reminder)
+			}
 		}
 	}
 
@@ -220,23 +194,37 @@ func Reminders(s *discordgo.Session, m *discordgo.MessageCreate) {
 			Name:    m.Author.Username + "#" + m.Author.Discriminator,
 			IconURL: m.Author.AvatarURL(""),
 		},
-		//Description: "Please use `rremove <ID>` or `remindremove <ID>` to remove a reminder",
+		Description: "Please use `rremove <ID>` or `remindremove <ID>` to remove a reminder",
 	}
-	for _, timer := range userTimers {
-		info := timer.Info
-		if info == "" {
-			info = "N/A"
+	if all {
+		for _, reminder := range userTimers {
+			info := reminder.Info
+			if info == "" {
+				info = "N/A"
+			}
+			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+				Name:   strconv.FormatInt(reminder.ID, 10),
+				Value:  "Reminder: " + info + "\nRemind time: " + reminder.Target.Format(time.RFC822) + "\nUser: " + reminder.User.Username + "#" + reminder.User.Discriminator,
+				Inline: true,
+			})
 		}
-		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-			Name:   strconv.FormatInt(timer.ID, 10),
-			Value:  "Reminder: " + info + "\n" + "Remind time: " + timer.Target.Format(time.RFC822),
-			Inline: true,
-		})
+	} else {
+		for _, reminder := range userTimers {
+			info := reminder.Info
+			if info == "" {
+				info = "N/A"
+			}
+			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+				Name:   strconv.FormatInt(reminder.ID, 10),
+				Value:  "Reminder: " + info + "\nRemind time: " + reminder.Target.Format(time.RFC822),
+				Inline: true,
+			})
+		}
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
 }
 
-// RemoveReminder removes a reminder
+// RemoveReminder removes a reminder (kind of)
 func RemoveReminder(s *discordgo.Session, m *discordgo.MessageCreate) {
 	remindRegex, _ := regexp.Compile(`r(emind)?remove\s+(\d+|all)`)
 	if !remindRegex.MatchString(m.Content) {
@@ -244,11 +232,28 @@ func RemoveReminder(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// Get reminders
+	reminders := []structs.Reminder{}
+	_, err := os.Stat("./data/reminders.json")
+	if err == nil {
+		f, err := ioutil.ReadFile("./data/reminders.json")
+		tools.ErrRead(err)
+		_ = json.Unmarshal(f, &reminders)
+	} else {
+		tools.ErrRead(err)
+	}
+
+	// Mark Active as false for the reminder in both slices
 	reminderID := remindRegex.FindStringSubmatch(m.Content)[2]
 	if reminderID == "all" {
 		for i, reminder := range ReminderTimers {
 			if reminder.Reminder.User.ID == m.Author.ID {
 				ReminderTimers[i].Reminder.Active = false
+			}
+		}
+		for i, reminder := range reminders {
+			if reminder.User.ID == m.Author.ID {
+				reminders[i].Active = false
 			}
 		}
 		s.ChannelMessageSend(m.ChannelID, "Removed reminders!")
@@ -264,6 +269,61 @@ func RemoveReminder(s *discordgo.Session, m *discordgo.MessageCreate) {
 				break
 			}
 		}
+		for i, reminder := range reminders {
+			if reminder.ID == reminderIDint {
+				reminders[i].Active = false
+				break
+			}
+		}
 		s.ChannelMessageSend(m.ChannelID, "Removed reminder!")
+	}
+
+	// Save reminders
+	jsonCache, err := json.Marshal(reminders)
+	tools.ErrRead(err)
+
+	err = ioutil.WriteFile("./data/reminders.json", jsonCache, 0644)
+	tools.ErrRead(err)
+}
+
+// ReminderMessage will send the user their reminder
+func ReminderMessage(s *discordgo.Session, reminderTimer structs.ReminderTimer) {
+	linkRegex, _ := regexp.Compile(`https?:\/\/\S+`)
+	dm, _ := s.UserChannelCreate(reminderTimer.Reminder.User.ID)
+	if reminderTimer.Reminder.Info == "" {
+		s.ChannelMessageSend(dm.ID, "Reminder!")
+	} else if linkRegex.MatchString(reminderTimer.Reminder.Info) {
+		response, err := http.Get(linkRegex.FindStringSubmatch(reminderTimer.Reminder.Info)[0])
+		if err != nil {
+			s.ChannelMessageSend(dm.ID, "Reminder about `"+reminderTimer.Reminder.Info+"`!")
+			return
+		}
+		img, _, err := image.Decode(response.Body)
+		if err != nil {
+			s.ChannelMessageSend(dm.ID, "Reminder about `"+reminderTimer.Reminder.Info+"`!")
+			return
+		}
+		imgBytes := new(bytes.Buffer)
+		err = png.Encode(imgBytes, img)
+		if err != nil {
+			s.ChannelMessageSend(dm.ID, "Reminder about `"+reminderTimer.Reminder.Info+"`!")
+		}
+		_, err = s.ChannelMessageSendComplex(dm.ID, &discordgo.MessageSend{
+			Content: "Reminder about this",
+			Files: []*discordgo.File{
+				&discordgo.File{
+					Name:   "image.png",
+					Reader: imgBytes,
+				},
+			},
+		})
+		if err != nil {
+			fmt.Println(err)
+			s.ChannelMessageSend(dm.ID, "Reminder about `"+reminderTimer.Reminder.Info+"`!")
+		}
+		response.Body.Close()
+		return
+	} else {
+		s.ChannelMessageSend(dm.ID, "Reminder about `"+reminderTimer.Reminder.Info+"`!")
 	}
 }
