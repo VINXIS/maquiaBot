@@ -16,10 +16,14 @@ func Clean(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Pla
 		return
 	}
 
+	keys := make(map[string]bool)
 	newPlayerCache := []structs.PlayerData{}
 	for _, player := range cache {
 		if player.Discord.ID != "" {
-			newPlayerCache = append(newPlayerCache, player)
+			if _, value := keys[player.Discord.ID]; !value {
+				keys[player.Discord.ID] = true
+				newPlayerCache = append(newPlayerCache, player)
+			}
 		}
 	}
 

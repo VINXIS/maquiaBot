@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
+	osuapi "../../osu-api"
 	osutools "../../osu-functions"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
-	"github.com/thehowl/go-osuapi"
 )
 
 // ProfileMessage gets the information for the specified profile linked

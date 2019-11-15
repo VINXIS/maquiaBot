@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/thehowl/go-osuapi"
+	osuapi "../osu-api"
 )
 
 // CountObjs counts the amount of objects in a beatmap
@@ -23,7 +23,7 @@ func CountObjs(beatmap osuapi.Beatmap) (objs int) {
 			fmt.Print("An error occured trying to fetch the beatmap file: ")
 			fmt.Println(err)
 			fmt.Println("Trying again...")
-			BeatmapParse(strconv.Itoa(beatmap.BeatmapID), "map", osuAPI)
+			BeatmapParse(strconv.Itoa(beatmap.BeatmapID), "map", 0, osuAPI)
 			res, err = ioutil.ReadFile("./data/osuFiles/" + strconv.Itoa(beatmap.BeatmapID) + " " + replacer.ReplaceAllString(beatmap.Artist, "") + " - " + replacer.ReplaceAllString(beatmap.Title, "") + ".osu")
 		} else if err == nil {
 			break

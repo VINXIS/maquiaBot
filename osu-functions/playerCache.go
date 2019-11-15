@@ -5,8 +5,7 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/thehowl/go-osuapi"
-
+	osuapi "../osu-api"
 	structs "../structs"
 	tools "../tools"
 )

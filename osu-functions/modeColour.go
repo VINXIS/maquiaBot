@@ -1,7 +1,7 @@
 package osutools
 
 import (
-	"github.com/thehowl/go-osuapi"
+	osuapi "../osu-api"
 )
 
 // ModeColour assigns a colour based on the beatmap's mode

@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
+	osuapi "../../osu-api"
 	osutools "../../osu-functions"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
-	"github.com/thehowl/go-osuapi"
 )
 
 // Top gets the nth top pp score
@@ -227,7 +227,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI
 			}
 
 			// Get beatmap, acc, and mods
-			beatmap := osutools.BeatmapParse(strconv.Itoa(score.BeatmapID), "map", osuAPI)
+			beatmap := osutools.BeatmapParse(strconv.Itoa(score.BeatmapID), "map", score.Mods, osuAPI)
 			accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 			mods = score.Mods.String()
 			if mods == "" {
@@ -257,6 +257,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI
 			length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 			bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 			mapStats := "**CS:** " + strconv.FormatFloat(beatmap.CircleSize, 'f', 1, 64) + " **AR:** " + strconv.FormatFloat(beatmap.ApproachRate, 'f', 1, 64) + " **OD:** " + strconv.FormatFloat(beatmap.OverallDifficulty, 'f', 1, 64) + " **HP:** " + strconv.FormatFloat(beatmap.HPDrain, 'f', 1, 64)
+			mapObjs := "**Circles:** " + strconv.Itoa(beatmap.Circles) + " **Sliders:** " + strconv.Itoa(beatmap.Sliders) + " **Spinners:** " + strconv.Itoa(beatmap.Spinners)
 			scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
 			var combo string
 			var mapCompletion string
@@ -301,13 +302,14 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI
 
 			// Get pp values
 			var pp string
+			totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
 			if score.Score.FullCombo { // If play was a perfect combo
 				pp = "**" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp**/" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp "
 			} else { // If play wasn't a perfect combo
 				ppValues := make(chan string, 1)
-				accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300+score.CountMiss)) / (300.0 * float64(score.Count50+score.Count100+score.Count300+score.CountMiss)) * 100.0
+				accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
 				go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", scoreMods, ppValues)
-				pp = "**" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp**/" + <-ppValues + "pp "
+				pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
 			}
 			acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 			hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
@@ -332,7 +334,8 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI
 				Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,
 				URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
 				Description: sr + length + bpm + "\n" +
-					mapStats + "\n\n" +
+					mapStats + "\n" +
+					mapObjs + "\n\n" +
 					scorePrint + mods + combo + acc + scoreRank + "\n" +
 					mapCompletion + mapCompletion2 + "\n" +
 					pp + hits + "\n\n",

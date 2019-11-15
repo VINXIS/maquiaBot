@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	structs "../../structs"
@@ -12,16 +13,16 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// NewPrefix sets a new prefix for the bot
-func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string, serverPrefix string) {
+// Prefix sets a new prefix for the bot
+func Prefix(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if len(m.Mentions) > 0 {
-		s.ChannelMessageSend(m.ChannelID, "Please don't try mentioning people with the bot!")
+		s.ChannelMessageSend(m.ChannelID, "Please don't try mentioning people with the bot! >:/")
 		return
 	}
 
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "This is not a guild so custom prefixes are unavailable! Please use `$` instead for commands!")
+		s.ChannelMessageSend(m.ChannelID, "This is not a server so custom prefixes are unavailable! Please use `$` instead for commands!")
 		return
 	}
 
@@ -40,19 +41,19 @@ func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 	for _, roleID := range member.Roles {
 		role, err := s.State.Role(m.GuildID, roleID)
 		tools.ErrRead(err)
-		if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
+		if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
 			admin = true
 			break
 		}
 	}
 
 	if !admin && m.Author.ID != server.OwnerID {
-		s.ChannelMessageSend(m.ChannelID, "You are not an admin!")
+		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
 		return
 	}
 
 	// Obtain server data
-	serverData := structs.ServerData{}
+	serverData := structs.NewServer()
 	_, err = os.Stat("./data/serverData/" + m.GuildID + ".json")
 	if err == nil {
 		f, err := ioutil.ReadFile("./data/serverData/" + m.GuildID + ".json")
@@ -64,11 +65,12 @@ func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 		tools.ErrRead(err)
 		return
 	}
+	oldPrefix := serverData.Prefix
 
 	// Set new information in server data
+	prefix := strings.Split(m.Content, " ")[1]
 	serverData.Time = time.Now()
-	serverData.Prefix = args[1]
-	serverData.Crab = true
+	serverData.Prefix = prefix
 
 	jsonCache, err := json.Marshal(serverData)
 	tools.ErrRead(err)
@@ -76,6 +78,6 @@ func NewPrefix(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
 	tools.ErrRead(err)
 
-	s.ChannelMessageSend(m.ChannelID, "Prefix changed from "+serverPrefix+" to "+args[1])
+	s.ChannelMessageSend(m.ChannelID, "Prefix changed from "+oldPrefix+" to "+serverData.Prefix)
 	return
 }

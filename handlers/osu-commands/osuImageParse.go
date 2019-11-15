@@ -19,11 +19,11 @@ import (
 
 	"github.com/disintegration/imaging"
 
+	osuapi "../../osu-api"
 	osutools "../../osu-functions"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
-	"github.com/thehowl/go-osuapi"
 )
 
 // OsuImageParse detects for an osu image
@@ -35,22 +35,16 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	diffRegex, _ := regexp.Compile(`\[(.*)\]`)
 	diagnosisRegex, _ := regexp.Compile(` -v`)
 
-	var (
-		name string
-		url  string
-	)
-
+	var url string
 	if len(m.Attachments) > 0 {
-		log.Println("Someone sent an image! The image URL is: " + m.Attachments[0].URL)
-
-		name = strconv.Itoa(rand.Intn(10000000))
 		url = m.Attachments[0].URL
+		log.Println("Someone sent an image! The image URL is: " + url)
+	} else if len(m.Embeds) > 0 && m.Embeds[0].Image != nil {
+		url = m.Embeds[0].Image.URL
+		log.Println("Someone sent a link! The URL is: " + url)
 	} else {
-		link := linkRegex.FindStringSubmatch(m.Content)[0]
-		log.Println("Someone sent a link! The URL is: " + link)
-
-		name = strconv.Itoa(rand.Intn(10000000))
-		url = link
+		url = linkRegex.FindStringSubmatch(m.Content)[0]
+		log.Println("Someone sent a link! The URL is: " + url)
 	}
 
 	// Fetch the image data
@@ -63,13 +57,13 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		return
 	}
 
-	// Convert image to grayscale and raise contrast
+	// Convert image to grayscale
 	newImg := imaging.AdjustSaturation(imgSrc, -100)
-	newImg = imaging.AdjustContrast(newImg, 100)
 	b := newImg.Bounds()
-	newImg = imaging.Crop(newImg, image.Rect(0, 0, b.Dx(), int(math.Max(120.0*float64(b.Dy())/969.0, 120.0))))
+	newImg = imaging.Crop(imgSrc, image.Rect(0, 0, b.Dx(), int(math.Max(120.0*float64(b.Dy())/969.0, 120.0))))
 
 	// Check if name already exists, create a new name via integer suffix instead if target name is currently in use
+	name := strconv.Itoa(rand.Intn(10000000))
 	_, err1 := os.Stat("./" + name + ".png")
 	_, err2 := os.Stat("./" + name + ".txt")
 	if !os.IsNotExist(err1) || !os.IsNotExist(err2) {
@@ -99,7 +93,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	file.Close()
 
 	// Run tesseract to parse the image
-	_, err = exec.Command("tesseract", "./"+name+".png", name).Output()
+	_, err = exec.Command("tesseract", "./"+name+".png", name, "--dpi", "96").Output()
 	tools.ErrRead(err)
 
 	// Read result and parse it
@@ -214,22 +208,6 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	// Assign embed colour for different modes
 	Color := osutools.ModeColour(beatmap.Mode)
 
-	// Temporary method to obtain mapper user id, once creator id is available, actual user avatars will be used for banned users
-	mapper, err := osuAPI.GetUser(osuapi.GetUserOpts{
-		Username: beatmap.Creator,
-	})
-	if err != nil {
-		mapper, err = osuAPI.GetUser(osuapi.GetUserOpts{
-			UserID: 3,
-		})
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-			return
-		}
-		mapper.Username = beatmap.Creator
-
-	}
-
 	// Obtain whole set
 	beatmaps, err = osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 		BeatmapSetID: beatmap.BeatmapSetID,
@@ -255,15 +233,16 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 	combo := "**FC:** " + strconv.Itoa(beatmap.MaxCombo) + "x"
 	mapStats := "**CS:** " + strconv.FormatFloat(beatmap.CircleSize, 'f', 1, 64) + " **AR:** " + strconv.FormatFloat(beatmap.ApproachRate, 'f', 1, 64) + " **OD:** " + strconv.FormatFloat(beatmap.OverallDifficulty, 'f', 1, 64) + " **HP:** " + strconv.FormatFloat(beatmap.HPDrain, 'f', 1, 64)
+	mapObjs := "**Circles:** " + strconv.Itoa(beatmap.Circles) + " **Sliders:** " + strconv.Itoa(beatmap.Sliders) + " **Spinners:** " + strconv.Itoa(beatmap.Spinners)
 
 	status := "**Rank Status:** " + beatmap.Approved.String()
 
 	download := "**Download:** [osz link](https://osu.ppy.sh/d/" + strconv.Itoa(beatmap.BeatmapSetID) + ")" + " | <osu://dl/" + strconv.Itoa(beatmap.BeatmapSetID) + ">"
 	var diffs string
 	if len(beatmaps) == 1 {
-		diffs = "**" + strconv.Itoa(len(beatmaps)) + `** difficulty <:ahFuck:550808614202245131>`
+		diffs = "**1** difficulty <:ahFuck:550808614202245131>"
 	} else {
-		diffs = "**" + strconv.Itoa(len(beatmaps)) + `** difficulties <:ahFuck:550808614202245131>`
+		diffs = "**" + strconv.Itoa(len(beatmaps)) + "** difficulties <:ahFuck:550808614202245131>"
 	}
 
 	// Calculate SR and PP
@@ -273,12 +252,13 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	embed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
-			Name:    beatmap.Artist + " - " + beatmap.Title + " by " + mapper.Username,
-			IconURL: "https://a.ppy.sh/" + strconv.Itoa(mapper.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
+			Name:    beatmap.Artist + " - " + beatmap.Title + " by " + beatmap.Creator,
+			IconURL: "https://a.ppy.sh/" + strconv.Itoa(beatmap.CreatorID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
 		Color: Color,
 		Description: starRating + length + bpm + combo + "\n" +
 			mapStats + "\n" +
+			mapObjs + "\n" +
 			status + "\n" +
 			download + "\n" +
 			diffs + "\n" + "\n" +

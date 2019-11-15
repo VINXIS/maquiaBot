@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	handlers "./handlers"
+	gencommands "./handlers/general-commands"
 	osutools "./osu-functions"
 	structs "./structs"
 	tools "./tools"
@@ -21,14 +22,11 @@ import (
 )
 
 func main() {
-	_, err := exec.Command("dotnet", "build", "./osu-tools/PerformanceCalculator").Output()
-	tools.ErrRead(err)
-
 	discord, err := discordgo.New("Bot " + os.Getenv("DISCORD_BOT_TOKEN"))
 	tools.ErrRead(err)
 
 	// Handle farm data
-	go osutools.FarmUpdate(discord)
+	go osutools.FarmUpdate()
 
 	// Obtain map cache data
 	mapCache := []structs.MapData{}
@@ -44,6 +42,28 @@ func main() {
 	tools.ErrRead(err)
 	fmt.Println("Bot is now running in " + strconv.Itoa(len(discord.State.Guilds)) + " servers.")
 
+	// Resume all reminder timers
+	reminders := []structs.Reminder{}
+	_, err = os.Stat("./data/reminders.json")
+	if err == nil {
+		f, err := ioutil.ReadFile("./data/reminders.json")
+		tools.ErrRead(err)
+		_ = json.Unmarshal(f, &reminders)
+	} else {
+		tools.ErrRead(err)
+	}
+	reminderTimers := []structs.ReminderTimer{}
+	for _, reminder := range reminders {
+		reminderTimer := structs.ReminderTimer{
+			Reminder: reminder,
+			Timer:    *time.NewTimer(reminder.Target.Sub(time.Now().UTC())),
+		}
+		reminderTimers = append(reminderTimers, reminderTimer)
+		go gencommands.RunReminder(discord, reminderTimer)
+	}
+	gencommands.ReminderTimers = reminderTimers
+
+	// Get osu! tracking data for channels
 	var channels []string
 
 	err = filepath.Walk("./data/channelData", func(path string, info os.FileInfo, err error) error {

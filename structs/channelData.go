@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
+	osuapi "../osu-api"
 	"github.com/bwmarrin/discordgo"
-	"github.com/thehowl/go-osuapi"
 )
 
 // ChannelData stores information regarding the discord channel so that tracking for osu! plays may occur in that channel

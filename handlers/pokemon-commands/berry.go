@@ -51,6 +51,9 @@ func Berry(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 	if len(args) > 3 || (len(args) == 3 && strings.ToLower(args[1]) != "berry") {
 		s.ChannelMessageSend(m.ChannelID, "Too many args! Please use _ for spaces in the berry name!")
 		return
+	} else if len(args) < 2 {
+		s.ChannelMessageSend(m.ChannelID, "No berry name given!")
+		return
 	} else if strings.ToLower(args[1]) == "berry" {
 		berryString = args[2]
 	} else {

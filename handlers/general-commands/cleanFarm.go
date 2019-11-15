@@ -21,9 +21,18 @@ func CleanFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	}
 
 	jsonCache, err := json.Marshal(cache)
-	tools.ErrRead(err)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Error with wiping data!")
+		tools.ErrRead(err)
+		return
+	}
 
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
-	tools.ErrRead(err)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Error with wiping data!")
+		tools.ErrRead(err)
+		return
+	}
 	s.ChannelMessageSend(m.ChannelID, "Cleaned farmerdog ratings!")
+	return
 }

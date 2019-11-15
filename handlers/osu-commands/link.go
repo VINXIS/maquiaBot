@@ -3,28 +3,22 @@ package osucommands
 import (
 	"encoding/json"
 	"io/ioutil"
+	"regexp"
 	"strings"
 	"time"
 
+	osuapi "../../osu-api"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
-	"github.com/thehowl/go-osuapi"
 )
 
 // Link links an osu! account with the discord user
 func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI *osuapi.Client, cache []structs.PlayerData) {
+	usernameRegex, _ := regexp.Compile(`(.+)(link|set)(\s+<@\S+)?(\s+.+)?`)
+
 	discordUser := m.Author
-	osuUsername := ""
-	if len(args) > 2 {
-		if len(m.Mentions) >= 1 && len(args) > 3 {
-			osuUsername = args[3]
-		} else if len(m.Mentions) >= 1 {
-			osuUsername = args[2]
-		}
-	} else {
-		osuUsername = args[1]
-	}
+	osuUsername := strings.TrimSpace(usernameRegex.FindStringSubmatch(m.Content)[4])
 
 	server, err := s.Guild(m.GuildID)
 	member := &discordgo.Member{}
@@ -77,6 +71,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 			}
 			player.Time = time.Now()
 			player.Osu = *user
+			player.Farm = structs.FarmerdogData{}
 			cache[i] = player
 
 			jsonCache, err := json.Marshal(cache)

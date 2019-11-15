@@ -1,15 +1,13 @@
 package osutools
 
 import (
-	"math"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 
+	osuapi "../osu-api"
 	tools "../tools"
-
-	"github.com/thehowl/go-osuapi"
 )
 
 // PPCalc calculates the pp given by the beatmap with specified acc and mods TODO: More args
@@ -22,13 +20,8 @@ func PPCalc(beatmap osuapi.Beatmap, acc float64, combo string, misses string, mo
 	var data []string
 	var args []string
 	var mode string
-	switch beatmap.Mode {
-	case osuapi.ModeOsu:
-		mode = "osu"
-	case osuapi.ModeOsuMania:
-		mode = "mania"
-	case osuapi.ModeTaiko:
-		mode = "taiko"
+	if beatmap.Mode != osuapi.ModeCatchTheBeat {
+		mode = beatmap.Mode.String()
 	}
 	args = append(args, "./osu-tools/PerformanceCalculator/bin/Debug/netcoreapp2.0/PerformanceCalculator.dll", "simulate", mode, "./data/osuFiles/"+strconv.Itoa(beatmap.BeatmapID)+" "+replacer.ReplaceAllString(beatmap.Artist, "")+" - "+replacer.ReplaceAllString(beatmap.Title, "")+".osu", "-a", strconv.FormatFloat(acc, 'f', 2, 64))
 
@@ -69,6 +62,6 @@ func PPCalc(beatmap osuapi.Beatmap, acc float64, combo string, misses string, mo
 	ppValue, err := strconv.ParseFloat(res[1]+res[2], 64)
 	tools.ErrRead(err)
 
-	value := strconv.FormatFloat(math.Round(ppValue), 'f', 0, 64)
+	value := strconv.FormatFloat(ppValue, 'f', 2, 64)
 	store <- value
 }

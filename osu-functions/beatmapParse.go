@@ -5,17 +5,17 @@ import (
 	"sort"
 	"strconv"
 
+	osuapi "../osu-api"
 	tools "../tools"
-
-	"github.com/thehowl/go-osuapi"
 )
 
 // BeatmapParse parses beatmap and obtains the .osu file
-func BeatmapParse(id, format string, osu *osuapi.Client) (beatmap osuapi.Beatmap) {
+func BeatmapParse(id, format string, mods osuapi.Mods, osu *osuapi.Client) (beatmap osuapi.Beatmap) {
 	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
 
 	mapID, err := strconv.Atoi(id)
 	tools.ErrRead(err)
+
 	if format == "map" {
 		// Fetch the beatmap
 		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
@@ -38,7 +38,7 @@ func BeatmapParse(id, format string, osu *osuapi.Client) (beatmap osuapi.Beatmap
 			"https://osu.ppy.sh/osu/"+
 				strconv.Itoa(beatmap.BeatmapID))
 	} else if format == "set" {
-		// Fetch the set
+		// Fetch the beatmap
 		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapSetID: mapID,
 		})

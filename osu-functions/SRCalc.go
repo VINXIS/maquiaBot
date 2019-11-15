@@ -1,7 +1,7 @@
 package osutools
 
 import (
-	"github.com/thehowl/go-osuapi"
+	osuapi "../osu-api"
 )
 
 // SRCalc calculates the aim, speed, and total SR for a beatmap

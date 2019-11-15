@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
+	osuapi "../osu-api"
 	structs "../structs"
 	tools "../tools"
 	"github.com/bwmarrin/discordgo"
-	"github.com/thehowl/go-osuapi"
 )
 
 // TrackPost posts scores for users tracked for that channel
@@ -55,8 +55,12 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 					scoreTime, err := time.Parse("2006-01-02 15:04:05", score.Date.String())
 					tools.ErrRead(err)
 					if score.Rank != "F" && startTime.Before(scoreTime) {
+						mods := "NM"
+						if score.Mods != 0 {
+							mods = score.Mods.String()
+						}
 
-						beatmap := BeatmapParse(strconv.Itoa(score.BeatmapID), "map", osuAPI)
+						beatmap := BeatmapParse(strconv.Itoa(score.BeatmapID), "map", score.Mods, osuAPI)
 						timeText := tools.TimeSince(scoreTime)
 
 						// Assign timing variables for map specs
@@ -72,10 +76,6 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 						}
 
 						// Assign values
-						mods := "NM"
-						if score.Mods != 0 {
-							mods = score.Mods.String()
-						}
 						accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 						Color := ModeColour(osuapi.ModeOsu)
 						sr, _, _, _, _, _ := BeatmapCache(mods, beatmap, mapCache)
@@ -83,6 +83,7 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 						bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 						scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
 						mapStats := "**CS:** " + strconv.FormatFloat(beatmap.CircleSize, 'f', 1, 64) + " **AR:** " + strconv.FormatFloat(beatmap.ApproachRate, 'f', 1, 64) + " **OD:** " + strconv.FormatFloat(beatmap.OverallDifficulty, 'f', 1, 64) + " **HP:** " + strconv.FormatFloat(beatmap.HPDrain, 'f', 1, 64)
+						mapObjs := "**Circles:** " + strconv.Itoa(beatmap.Circles) + " **Sliders:** " + strconv.Itoa(beatmap.Sliders) + " **Spinners:** " + strconv.Itoa(beatmap.Spinners)
 						var combo string
 
 						if strings.Contains(mods, "DTNC") {
@@ -131,18 +132,19 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 						// Get pp values
 						var pp string
 						var ppInt int
+						totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
 						if score.PP == 0 { // If map was not finished
 							ppValues := make(chan string, 2)
 							var ppValueArray [2]string
-							accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300+score.CountMiss)) / (300.0 * float64(score.Count50+score.Count100+score.Count300+score.CountMiss)) * 100.0
+							accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
 							go PPCalc(beatmap, accCalcNoMiss, "", "", scoreMods, ppValues)
 							go PPCalc(beatmap, accCalc, strconv.Itoa(score.MaxCombo), strconv.Itoa(score.CountMiss), scoreMods, ppValues)
 							for v := 0; v < 2; v++ {
 								ppValueArray[v] = <-ppValues
 							}
 							sort.Slice(ppValueArray[:], func(i, j int) bool {
-								pp1, _ := strconv.Atoi(ppValueArray[i])
-								pp2, _ := strconv.Atoi(ppValueArray[j])
+								pp1, _ := strconv.ParseFloat(ppValueArray[i], 64)
+								pp2, _ := strconv.ParseFloat(ppValueArray[j], 64)
 								return pp1 > pp2
 							})
 							ppInt, _ = strconv.Atoi(ppValueArray[1])
@@ -153,7 +155,7 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 						} else { // If map was finished, but play was not a perfect combo
 							ppInt = int(score.PP)
 							ppValues := make(chan string, 1)
-							accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300+score.CountMiss)) / (300.0 * float64(score.Count50+score.Count100+score.Count300+score.CountMiss)) * 100.0
+							accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
 							go PPCalc(beatmap, accCalcNoMiss, "", "", scoreMods, ppValues)
 							pp = "**" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp**/" + <-ppValues + "pp "
 						}
@@ -198,7 +200,8 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 									URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 								},
 								Description: sr + length + bpm + "\n" +
-									mapStats + "\n\n" +
+									mapStats + "\n" +
+									mapObjs + "\n\n" +
 									scorePrint + mods + combo + acc + scoreRank + "\n" +
 									mapCompletion + "\n" +
 									pp + hits + "\n\n",
@@ -223,7 +226,10 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 								}
 							}
 							_, err = s.ChannelMessageSendEmbed(ch.Channel.ID, embed)
-							tools.ErrRead(err)
+							if err != nil {
+								fmt.Println(err)
+								fmt.Println(ch)
+							}
 							ch.Users[l] = *recentUser
 						}
 					}

@@ -2,13 +2,13 @@ package osucommands
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 
-	"github.com/thehowl/go-osuapi"
-
+	osuapi "../../osu-api"
 	osutools "../../osu-functions"
 	structs "../../structs"
 	tools "../../tools"
@@ -45,7 +45,7 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuA
 	for _, roleID := range member.Roles {
 		role, err := s.State.Role(m.GuildID, roleID)
 		tools.ErrRead(err)
-		if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator || role.Permissions&discordgo.PermissionManageServer == discordgo.PermissionManageServer {
+		if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
 			admin = true
 			break
 		}
@@ -57,7 +57,9 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuA
 	}
 
 	// Obtain channel data
-	channelData := structs.ChannelData{}
+	channelData := structs.ChannelData{
+		Channel: *channel,
+	}
 	new := true
 	_, err = os.Stat("./data/channelData/" + m.ChannelID + ".json")
 	if err == nil {
@@ -68,7 +70,8 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuA
 	} else if os.IsNotExist(err) {
 		channelData.Channel = *channel
 	} else {
-		tools.ErrRead(err)
+		fmt.Println(err)
+		s.ChannelMessageSend(m.ChannelID, "An error occurred! VINXIS has obtained error info.")
 		return
 	}
 
@@ -86,9 +89,6 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuA
 			addition = false
 			removal = true
 		}
-		if multiUser {
-			users = append(users, arg)
-		}
 		if i != len(args)-1 {
 			switch strings.ToLower(arg) {
 			case "pp":
@@ -100,6 +100,9 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuA
 			case "users":
 				multiUser = true
 			}
+		}
+		if multiUser {
+			users = append(users, arg)
 		}
 	}
 

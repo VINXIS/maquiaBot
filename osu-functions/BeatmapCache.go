@@ -7,10 +7,9 @@ import (
 	"strconv"
 	"time"
 
+	osuapi "../osu-api"
 	structs "../structs"
 	tools "../tools"
-
-	"github.com/thehowl/go-osuapi"
 )
 
 // BeatmapCache checks to see if the latest beatmap information is already saved, otherwise it will calculate the SR and PP of the map
@@ -48,35 +47,33 @@ func BeatmapCache(mods string, beatmap osuapi.Beatmap, cache []structs.MapData) 
 		}
 	}
 	if latest {
-		starRating = "**SR:** " + PPData.SR + " "
-		ppSS = "**100%:** " + PPData.PPSS + "pp | "
-		pp99 = "**99%:** " + PPData.PP99 + "pp | "
-		pp98 = "**98%:** " + PPData.PP98 + "pp | "
-		pp97 = "**97%:** " + PPData.PP97 + "pp | "
-		pp95 = "**95%:** " + PPData.PP95 + "pp"
+		starRating = "**SR:** " + strconv.FormatFloat(PPData.SR, 'f', 2, 64) + " "
+		ppSS = "**100%:** " + strconv.FormatFloat(PPData.PPSS, 'f', 0, 64) + "pp | "
+		pp99 = "**99%:** " + strconv.FormatFloat(PPData.PP99, 'f', 0, 64) + "pp | "
+		pp98 = "**98%:** " + strconv.FormatFloat(PPData.PP98, 'f', 0, 64) + "pp | "
+		pp97 = "**97%:** " + strconv.FormatFloat(PPData.PP97, 'f', 0, 64) + "pp | "
+		pp95 = "**95%:** " + strconv.FormatFloat(PPData.PP95, 'f', 0, 64) + "pp"
 	} else {
 		if beatmap.Mode != osuapi.ModeCatchTheBeat {
 			ppValues := make(chan string, 5)
-			var ppValueArray [5]string
+			var ppValueArray [5]float64
 			go PPCalc(beatmap, 100.0, "", "", mods, ppValues)
 			go PPCalc(beatmap, 99.0, "", "", mods, ppValues)
 			go PPCalc(beatmap, 98.0, "", "", mods, ppValues)
 			go PPCalc(beatmap, 97.0, "", "", mods, ppValues)
 			go PPCalc(beatmap, 95.0, "", "", mods, ppValues)
 			for v := 0; v < 5; v++ {
-				ppValueArray[v] = <-ppValues
+				ppValueArray[v], _ = strconv.ParseFloat(<-ppValues, 64)
 			}
 			sort.Slice(ppValueArray[:], func(i, j int) bool {
-				pp1, _ := strconv.Atoi(ppValueArray[i])
-				pp2, _ := strconv.Atoi(ppValueArray[j])
-				return pp1 > pp2
+				return ppValueArray[i] > ppValueArray[j]
 			})
 			starRating = "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
-			ppSS = "**100%:** " + ppValueArray[0] + "pp | "
-			pp99 = "**99%:** " + ppValueArray[1] + "pp | "
-			pp98 = "**98%:** " + ppValueArray[2] + "pp | "
-			pp97 = "**97%:** " + ppValueArray[3] + "pp | "
-			pp95 = "**95%:** " + ppValueArray[4] + "pp"
+			ppSS = "**100%:** " + strconv.FormatFloat(ppValueArray[0], 'f', 0, 64) + "pp | "
+			pp99 = "**99%:** " + strconv.FormatFloat(ppValueArray[1], 'f', 0, 64) + "pp | "
+			pp98 = "**98%:** " + strconv.FormatFloat(ppValueArray[2], 'f', 0, 64) + "pp | "
+			pp97 = "**97%:** " + strconv.FormatFloat(ppValueArray[3], 'f', 0, 64) + "pp | "
+			pp95 = "**95%:** " + strconv.FormatFloat(ppValueArray[4], 'f', 0, 64) + "pp"
 			if update {
 				CacheData.Beatmap = beatmap
 				CacheData.Time = time.Now()
@@ -84,7 +81,7 @@ func BeatmapCache(mods string, beatmap osuapi.Beatmap, cache []structs.MapData) 
 				for j := range CacheData.PP {
 					if CacheData.PP[j].Mods == mods {
 						modExist = true
-						CacheData.PP[j].SR = strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64)
+						CacheData.PP[j].SR = beatmap.DifficultyRating
 						CacheData.PP[j].PPSS = ppValueArray[0]
 						CacheData.PP[j].PP99 = ppValueArray[1]
 						CacheData.PP[j].PP98 = ppValueArray[2]
@@ -95,7 +92,7 @@ func BeatmapCache(mods string, beatmap osuapi.Beatmap, cache []structs.MapData) 
 				if !modExist {
 					CacheData.PP = append(CacheData.PP, structs.PPData{
 						Mods: mods,
-						SR:   strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64),
+						SR:   beatmap.DifficultyRating,
 						PPSS: ppValueArray[0],
 						PP99: ppValueArray[1],
 						PP98: ppValueArray[2],
@@ -108,7 +105,7 @@ func BeatmapCache(mods string, beatmap osuapi.Beatmap, cache []structs.MapData) 
 				var cachePPData []structs.PPData
 				cachePPData = append(cachePPData, structs.PPData{
 					Mods: mods,
-					SR:   strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64),
+					SR:   beatmap.DifficultyRating,
 					PPSS: ppValueArray[0],
 					PP99: ppValueArray[1],
 					PP98: ppValueArray[2],
@@ -125,12 +122,6 @@ func BeatmapCache(mods string, beatmap osuapi.Beatmap, cache []structs.MapData) 
 			tools.ErrRead(err)
 			err = ioutil.WriteFile("./data/osuData/mapCache.json", jsonCache, 0644)
 			tools.ErrRead(err)
-		} else {
-			ppSS = "pp is not available for ctb yet"
-			pp99 = ""
-			pp98 = ""
-			pp97 = ""
-			pp95 = ""
 		}
 	}
 	return starRating, ppSS, pp99, pp98, pp97, pp95

@@ -3,18 +3,17 @@ package gencommands
 import (
 	"math/rand"
 
+	osuapi "../../osu-api"
 	osutools "../../osu-functions"
 	tools "../../tools"
 	helpcommands "./help"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/thehowl/go-osuapi"
 )
 
 // Help lets you know the commands available
 func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, args []string) {
-	dm, err := s.UserChannelCreate(m.Author.ID)
-	tools.ErrRead(err)
+	dm, _ := s.UserChannelCreate(m.Author.ID)
 	embed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://discordapp.com/oauth2/authorize?&client_id=551667572723023893&scope=bot&permissions=0",
@@ -112,7 +111,7 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, args 
 			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998681375965194/tumblr_phjkel3lgn1xlyyvto5_1280.png",
 		}
 	}
-	_, err = s.ChannelMessageSendEmbed(dm.ID, embed)
+	_, err := s.ChannelMessageSendEmbed(dm.ID, embed)
 	if err != nil {
 		_, err = s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+" has DMs disabled!")
 		tools.ErrRead(err)

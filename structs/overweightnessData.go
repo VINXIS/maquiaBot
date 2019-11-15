@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/thehowl/go-osuapi"
+	osuapi "../osu-api"
 )
 
 // RawData is the raw data obtained from https://raw.githubusercontent.com/grumd/osu-pps/master/data.json

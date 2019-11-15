@@ -3,8 +3,8 @@ package structs
 import (
 	"time"
 
+	osuapi "../osu-api"
 	"github.com/bwmarrin/discordgo"
-	"github.com/thehowl/go-osuapi"
 )
 
 // PlayerData stores information regarding the discord user, and the osu user
@@ -17,7 +17,14 @@ type PlayerData struct {
 
 // FarmerdogData is how much of a farmerdog the player is
 type FarmerdogData struct {
-	Time   time.Time
 	Rating float64
-	List   string
+	List   []PlayerScore
+}
+
+// PlayerScore is the score by the player, it tells you how farmy the score is as well
+type PlayerScore struct {
+	BeatmapSet int
+	PP         float64
+	FarmScore  float64
+	Name       string
 }
