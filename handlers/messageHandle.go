@@ -121,7 +121,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go gencommands.Prefix(s, m)
 		return
 	} else if strings.Contains(m.Content, "maquiacleanf") || strings.Contains(m.Content, "maquiacleanfarm") {
-		go gencommands.CleanFarm(s, m, profileCache)
+		go gencommands.CleanFarm(s, m, profileCache, osuAPI)
 		return
 	} else if strings.Contains(m.Content, "maquiaclean") {
 		go gencommands.Clean(s, m, profileCache)
@@ -229,7 +229,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "clean":
 			go gencommands.Clean(s, m, profileCache)
 		case serverPrefix + "cleanf", serverPrefix + "cleanfarm":
-			go gencommands.CleanFarm(s, m, profileCache)
+			go gencommands.CleanFarm(s, m, profileCache, osuAPI)
 		case serverPrefix + "ocr":
 			go gencommands.OCR(s, m)
 		}

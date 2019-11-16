@@ -20,6 +20,11 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 	discordUser := m.Author
 	osuUsername := strings.TrimSpace(usernameRegex.FindStringSubmatch(m.Content)[4])
 
+	farmData := structs.FarmData{}
+	f, err := ioutil.ReadFile("./data/osuData/mapFarm.json")
+	tools.ErrRead(err)
+	_ = json.Unmarshal(f, &farmData)
+
 	// Obtain server and check admin permissions for linking with mentions involved
 	server, err := s.Guild(m.GuildID)
 	if err == nil {
@@ -65,8 +70,16 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 			}
 			player.Time = time.Now()
 			player.Osu = *user
-			player.Farm = structs.FarmerdogData{}
+			player.FarmCalc(osuAPI, farmData)
 			cache[i] = player
+
+			// Remove any accounts of the same user but with no discord linked
+			for j, plyr := range cache {
+				if player.Discord.ID == "" && strings.ToLower(plyr.Osu.Username) == strings.ToLower(osuUsername) {
+					cache = append(cache[:j], cache[j+1:]...)
+					j--
+				}
+			}
 
 			jsonCache, err := json.Marshal(cache)
 			tools.ErrRead(err)
@@ -87,6 +100,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 	for i, player := range cache {
 		if strings.ToLower(player.Osu.Username) == strings.ToLower(osuUsername) && player.Discord.ID == "" {
 			player.Discord = *discordUser
+			player.FarmCalc(osuAPI, farmData)
 			cache[i] = player
 
 			jsonCache, err := json.Marshal(cache)
@@ -118,11 +132,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 		Discord: *discordUser,
 	}
 
-	// Farm stuff
-	farmData := structs.FarmData{}
-	f, err := ioutil.ReadFile("./data/osuData/mapFarm.json")
-	tools.ErrRead(err)
-	_ = json.Unmarshal(f, &farmData)
+	// Farm calc
 	player.FarmCalc(osuAPI, farmData)
 
 	// Save player

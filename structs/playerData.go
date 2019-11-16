@@ -31,22 +31,29 @@ type PlayerScore struct {
 	Name       string
 }
 
-// FarmCalc does the actual calculations for the farm values and everything
+// FarmCalc does the actual calculations of the farm values and everything for the player
 func (player PlayerData) FarmCalc(osuAPI *osuapi.Client, farmData FarmData) {
 	player.Farm = FarmerdogData{}
 
-	scoreList, _ := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+	scoreList, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 		Username: player.Osu.Username,
 		Limit:    100,
 	})
+	if err != nil {
+		return
+	}
+
 	for j, score := range scoreList {
 		var HDVer osuapi.Mods
 		var playerFarmScore = PlayerScore{}
 
+		// Remove NC
 		if strings.Contains(score.Mods.String(), "NC") {
 			stringMods := strings.Replace(score.Mods.String(), "NC", "", 1)
 			score.Mods = osuapi.ParseMods(stringMods)
 		}
+
+		// Treat HD and no HD the same
 		if strings.Contains(score.Mods.String(), "HD") {
 			HDVer = score.Mods
 			stringMods := strings.Replace(score.Mods.String(), "HD", "", 1)
@@ -55,6 +62,8 @@ func (player PlayerData) FarmCalc(osuAPI *osuapi.Client, farmData FarmData) {
 			stringMods := score.Mods.String() + "HD"
 			HDVer = osuapi.ParseMods(stringMods)
 		}
+
+		// Actual farm calc for the map
 		for _, farmMap := range farmData.Maps {
 			if score.BeatmapID == farmMap.BeatmapID && (score.Mods == farmMap.Mods || HDVer == farmMap.Mods) {
 				playerFarmScore.BeatmapSet = score.BeatmapID
@@ -63,6 +72,7 @@ func (player PlayerData) FarmCalc(osuAPI *osuapi.Client, farmData FarmData) {
 				playerFarmScore.Name = farmMap.Artist + " - " + farmMap.Title + " [" + farmMap.DiffName + "]"
 			}
 		}
+
 		if playerFarmScore.BeatmapSet != 0 {
 			player.Farm.List = append(player.Farm.List, playerFarmScore)
 			player.Farm.Rating += playerFarmScore.FarmScore
