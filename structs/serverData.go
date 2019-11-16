@@ -9,16 +9,17 @@ import (
 
 // ServerData stores information regarding the discord server, so that server specific customizations may be used.
 type ServerData struct {
-	Time       time.Time
-	Server     discordgo.Guild
-	Prefix     string
-	Crab       bool
-	OsuToggle  bool
-	Possession bool
-	Vibe       bool
-	Adjectives []string
-	Nouns      []string
-	Skills     []string
+	Time             time.Time
+	Server           discordgo.Guild
+	Prefix           string
+	Crab             bool
+	OsuToggle        bool
+	Possession       bool
+	Vibe             bool
+	Adjectives       []string
+	Nouns            []string
+	Skills           []string
+	AllowAnyoneStats bool
 }
 
 // NewServer creates a new ServerData
@@ -32,15 +33,15 @@ func NewServer(server discordgo.Guild) ServerData {
 }
 
 // Word adds the word to the specified list
-func (s ServerData) Word(word, mode, list string) error {
+func (s *ServerData) Word(word, mode, list string) error {
 	var targetList []string
 	switch list {
 	case "adjective":
-		targetList = ServerData.Adjectives
+		targetList = s.Adjectives
 	case "noun":
-		targetList = ServerData.Nouns
+		targetList = s.Nouns
 	case "skill":
-		targetList = ServerData.Skills
+		targetList = s.Skills
 	}
 	if mode == "add" {
 		for _, existingWord := range targetList {
@@ -65,11 +66,11 @@ func (s ServerData) Word(word, mode, list string) error {
 	}
 	switch list {
 	case "adjective":
-		ServerData.Adjectives = targetList
+		s.Adjectives = targetList
 	case "noun":
-		ServerData.Nouns = targetList
+		s.Nouns = targetList
 	case "skill":
-		ServerData.Skills = targetList
+		s.Skills = targetList
 	}
 	return nil
 }

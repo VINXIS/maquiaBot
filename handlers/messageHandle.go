@@ -226,6 +226,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Nouns(s, m)
 		case serverPrefix + "skills":
 			go gencommands.Skills(s, m)
+		case serverPrefix + "statst", serverPrefix + "statstoggle":
+			go gencommands.StatsToggle(s, m)
 		case serverPrefix + "clean":
 			go gencommands.Clean(s, m, profileCache)
 		case serverPrefix + "cleanf", serverPrefix + "cleanfarm":

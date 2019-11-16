@@ -120,7 +120,23 @@ func Adjectives(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain server data
 	serverData := tools.GetServer(*server)
 
-	// Obtain word and if they want to add/remove it
+	if m.Author.ID != server.OwnerID || serverData.AllowAnyoneStats {
+		member, _ := s.GuildMember(server.ID, m.Author.ID)
+		admin := false
+		for _, roleID := range member.Roles {
+			role, _ := s.State.Role(m.GuildID, roleID)
+			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
+				admin = true
+				break
+			}
+		}
+		if !admin && len(m.Mentions) >= 1 {
+			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner, or one of them must allow anyone to add words.")
+			return
+		}
+	}
+
+	// Obtain word and if they want to add/remove it or just see the current ones
 	mode := "add"
 	word := ""
 	if adjectivesRegex.MatchString(m.Content) {
@@ -128,7 +144,7 @@ func Adjectives(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if matches[2] != "" {
 			mode = matches[2]
 		}
-		word = matches[3]
+		word = strings.ReplaceAll(matches[3], "`", "")
 	} else if len(serverData.Adjectives) != 0 {
 		text := "There are " + strconv.Itoa(len(serverData.Adjectives)) + " adjectives listed for this server! The adjectives are:\n"
 		for i, adjective := range serverData.Adjectives {
@@ -183,7 +199,23 @@ func Nouns(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain server data
 	serverData := tools.GetServer(*server)
 
-	// Obtain word and if they want to add/remove it
+	if m.Author.ID != server.OwnerID || serverData.AllowAnyoneStats {
+		member, _ := s.GuildMember(server.ID, m.Author.ID)
+		admin := false
+		for _, roleID := range member.Roles {
+			role, _ := s.State.Role(m.GuildID, roleID)
+			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
+				admin = true
+				break
+			}
+		}
+		if !admin && len(m.Mentions) >= 1 {
+			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner, or one of them must allow anyone to add words.")
+			return
+		}
+	}
+
+	// Obtain word and if they want to add/remove it or just see the current ones
 	mode := "add"
 	word := ""
 	if nounsRegex.MatchString(m.Content) {
@@ -191,7 +223,7 @@ func Nouns(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if matches[2] != "" {
 			mode = matches[2]
 		}
-		word = matches[3]
+		word = strings.ReplaceAll(matches[3], "`", "")
 	} else if len(serverData.Nouns) != 0 {
 		text := "There are " + strconv.Itoa(len(serverData.Nouns)) + " nouns listed for this server! The nouns are:\n"
 		for i, noun := range serverData.Nouns {
@@ -246,7 +278,23 @@ func Skills(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain server data
 	serverData := tools.GetServer(*server)
 
-	// Obtain word and if they want to add/remove it
+	if m.Author.ID != server.OwnerID || serverData.AllowAnyoneStats {
+		member, _ := s.GuildMember(server.ID, m.Author.ID)
+		admin := false
+		for _, roleID := range member.Roles {
+			role, _ := s.State.Role(m.GuildID, roleID)
+			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
+				admin = true
+				break
+			}
+		}
+		if !admin && len(m.Mentions) >= 1 {
+			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner, or one of them must allow anyone to add words.")
+			return
+		}
+	}
+
+	// Obtain word and if they want to add/remove it or just see the current ones
 	mode := "add"
 	word := ""
 	if skillsRegex.MatchString(m.Content) {
@@ -254,7 +302,7 @@ func Skills(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if matches[2] != "" {
 			mode = matches[2]
 		}
-		word = matches[3]
+		word = strings.ReplaceAll(matches[3], "`", "")
 	} else if len(serverData.Skills) != 0 {
 		text := "There are " + strconv.Itoa(len(serverData.Skills)) + " skills listed for this server! The skills are:\n"
 		for i, skill := range serverData.Skills {
@@ -274,7 +322,7 @@ func Skills(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Commence operation
-	err = serverData.Word(word, mode, "adjective")
+	err = serverData.Word(word, mode, "skill")
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, err.Error())
 		return
@@ -292,6 +340,51 @@ func Skills(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "`"+word+"` is now added to the server's skill list!")
 	} else if mode == "remove" {
 		s.ChannelMessageSend(m.ChannelID, "`"+word+"` is now removed from the server's skill list!")
+	}
+	return
+}
+
+// StatsToggle allows users to add/remove nouns, adjectives, and skills
+func StatsToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
+	server, err := s.Guild(m.GuildID)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
+		return
+	}
+
+	if m.Author.ID != server.OwnerID {
+		member, _ := s.GuildMember(server.ID, m.Author.ID)
+		admin := false
+		for _, roleID := range member.Roles {
+			role, _ := s.State.Role(m.GuildID, roleID)
+			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
+				admin = true
+				break
+			}
+		}
+		if !admin && len(m.Mentions) >= 1 {
+			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
+			return
+		}
+	}
+
+	// Obtain server data
+	serverData := tools.GetServer(*server)
+
+	// Set new information in server data
+	serverData.Time = time.Now()
+	serverData.AllowAnyoneStats = !serverData.AllowAnyoneStats
+
+	jsonCache, err := json.Marshal(serverData)
+	tools.ErrRead(err)
+
+	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
+	tools.ErrRead(err)
+
+	if serverData.Crab {
+		s.ChannelMessageSend(m.ChannelID, "Anyone may now add nouns/adjectives/skills for stats now.")
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "Only admins, server managers, or the server owner may add nouns/adjectives/skills for stats now.")
 	}
 	return
 }
