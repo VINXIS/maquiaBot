@@ -66,8 +66,6 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		}
 	}
 
-	go osutools.PlayerCache(*user, cache)
-
 	// Get the user's best scores
 	userBest, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 		UserID: user.UserID,

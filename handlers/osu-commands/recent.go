@@ -65,7 +65,6 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 		s.ChannelMessageSend(m.ChannelID, "User **"+username+"** may not exist!")
 		return
 	}
-	go osutools.PlayerCache(*userP, cache)
 	scoreList := []osuapi.GUSScore{}
 
 	// Run api call for user best/recent

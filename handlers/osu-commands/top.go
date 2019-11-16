@@ -179,7 +179,6 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI
 					return
 				}
 				user = *userP
-				go osutools.PlayerCache(user, cache)
 			}
 			score := osuapi.GUSScore{}
 
