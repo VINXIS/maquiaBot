@@ -49,19 +49,19 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	osuAPI := osuapi.NewClient(os.Getenv("OSU_API"))
 
 	// Obtain map cache data
-	mapCache := []structs.MapData{}
+	var mapCache []structs.MapData
 	f, err := ioutil.ReadFile("./data/osuData/mapCache.json")
 	tools.ErrRead(err)
 	_ = json.Unmarshal(f, &mapCache)
 
 	// Obtain profile cache data
-	profileCache := []structs.PlayerData{}
+	var profileCache []structs.PlayerData
 	f, err = ioutil.ReadFile("./data/osuData/profileCache.json")
 	tools.ErrRead(err)
 	_ = json.Unmarshal(f, &profileCache)
 
 	// Obtain server data
-	serverData := structs.ServerData{}
+	var serverData structs.ServerData
 	_, err = os.Stat("./data/serverData/" + m.GuildID + ".json")
 	if err == nil {
 		f, err = ioutil.ReadFile("./data/serverData/" + m.GuildID + ".json")
@@ -74,8 +74,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	crab := true
 	osuToggle := true
 	vibe := false
-	emptyServerData := structs.ServerData{}
-	if serverData.Server.ID != emptyServerData.Server.ID {
+	if serverData.Server.ID != "" {
 		serverPrefix = serverData.Prefix
 		crab = serverData.Crab
 		osuToggle = serverData.OsuToggle
@@ -147,6 +146,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Avatar(s, m)
 		case serverPrefix + "u", serverPrefix + "update":
 			go gencommands.Update(s, m)
+		case serverPrefix + "parse":
+			go gencommands.ParseID(s, m)
 		case serverPrefix + "info":
 			go gencommands.Info(s, m, profileCache)
 		case serverPrefix + "sinfo", serverPrefix + "serverinfo":
