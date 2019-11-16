@@ -180,7 +180,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "decrypt":
 			go gencommands.Decrypt(s, m)
 		case serverPrefix + "osutoggle", serverPrefix + "osut":
-			go osucommands.MapToggle(s, m)
+			go osucommands.OsuToggle(s, m)
 		case serverPrefix + "link", serverPrefix + "set":
 			go osucommands.Link(s, m, args, osuAPI, profileCache)
 		case serverPrefix + "tfarm", serverPrefix + "topfarm":

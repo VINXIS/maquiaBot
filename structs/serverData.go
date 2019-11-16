@@ -21,10 +21,11 @@ type ServerData struct {
 }
 
 // NewServer creates a new ServerData
-func NewServer() ServerData {
+func NewServer(server discordgo.Guild) ServerData {
 	return ServerData{
 		Prefix:    "$",
 		OsuToggle: true,
 		Crab:      true,
+		Server:    server,
 	}
 }

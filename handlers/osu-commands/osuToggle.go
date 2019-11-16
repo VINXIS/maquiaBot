@@ -3,16 +3,14 @@ package osucommands
 import (
 	"encoding/json"
 	"io/ioutil"
-	"os"
 	"time"
 
-	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
 )
 
-// MapToggle toggles crab messages on/off
-func MapToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
+// OsuToggle toggles beatmap/user messages on/off
+func OsuToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
@@ -30,34 +28,23 @@ func MapToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	admin := false
-	for _, roleID := range member.Roles {
-		role, err := s.State.Role(m.GuildID, roleID)
-		tools.ErrRead(err)
-		if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
-			admin = true
-			break
+	if m.Author.ID != server.OwnerID {
+		admin := false
+		for _, roleID := range member.Roles {
+			role, _ := s.State.Role(m.GuildID, roleID)
+			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
+				admin = true
+				break
+			}
+		}
+		if !admin {
+			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
+			return
 		}
 	}
 
-	if !admin && m.Author.ID != server.OwnerID {
-		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
-		return
-	}
-
 	// Obtain server data
-	serverData := structs.NewServer()
-	_, err = os.Stat("./data/serverData/" + m.GuildID + ".json")
-	if err == nil {
-		f, err := ioutil.ReadFile("./data/serverData/" + m.GuildID + ".json")
-		tools.ErrRead(err)
-		_ = json.Unmarshal(f, &serverData)
-	} else if os.IsNotExist(err) {
-		serverData.Server = *server
-	} else {
-		tools.ErrRead(err)
-		return
-	}
+	serverData := tools.GetServer(*server)
 
 	// Set new information in server data
 	serverData.Time = time.Now()
