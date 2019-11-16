@@ -41,7 +41,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	emojiRegex, _ := regexp.Compile(`<(:.+:)\d+>`)
-	noEmoji := ""
+	noEmoji := m.Content
 	if emojiRegex.MatchString(m.Content) {
 		noEmoji = emojiRegex.ReplaceAllString(m.Content, emojiRegex.FindStringSubmatch(m.Content)[1])
 	}

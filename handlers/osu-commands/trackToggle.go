@@ -69,8 +69,7 @@ func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate, mapCache []st
 	if channelData.Tracking {
 		go osutools.TrackPost("data/channelData/"+m.ChannelID+".json", s, mapCache)
 		s.ChannelMessageSend(m.ChannelID, "Successfully started tracking for this channel!")
-		return
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "Successfully stopped tracking for this channel!")
 	}
-	s.ChannelMessageSend(m.ChannelID, "Successfully stopped tracking for this channel!")
-	return
 }

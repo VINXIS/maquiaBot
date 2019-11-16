@@ -2,7 +2,6 @@ package gencommands
 
 import (
 	"crypto/rand"
-	"fmt"
 	"math/big"
 	"regexp"
 	"strings"
@@ -17,7 +16,6 @@ func Choose(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "Please give options to choose from!")
 		return
 	}
-	fmt.Println(m.Content)
 
 	choices := strings.Split(regex.FindStringSubmatch(m.Content)[3], "|")
 	for i := range choices {
