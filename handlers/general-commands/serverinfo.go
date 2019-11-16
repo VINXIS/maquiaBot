@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -16,6 +17,11 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
+
+	// Stats info
+	serverData := tools.GetServer(*server)
+	statsInfo := strconv.Itoa(len(serverData.Nouns)) + " nouns\n" + strconv.Itoa(len(serverData.Adjectives)) + " adjectives\n" + strconv.Itoa(len(serverData.Skills)) + " skills\n"
+
 	// Created at date
 	createdAt, err := discordgo.SnowflakeTimestamp(server.ID)
 
@@ -138,6 +144,11 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			&discordgo.MessageEmbedField{
 				Name:   "Channels (" + strconv.Itoa(len(server.Channels)) + ")",
 				Value:  channelInfo,
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "`" + serverData.Prefix + "stats` Information:",
+				Value:  statsInfo,
 				Inline: true,
 			},
 		},

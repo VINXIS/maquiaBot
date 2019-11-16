@@ -109,7 +109,7 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // Adjectives allows users to add/change/see their custom adjectives
 func Adjectives(s *discordgo.Session, m *discordgo.MessageCreate) {
-	adjectivesRegex, _ := regexp.Compile(`(adj|adjectives)\s*(add|remove)?\s+(.+)`)
+	adjectivesRegex, _ := regexp.Compile(`(adj|adjectives?)\s*(add|remove)?\s+(.+)`)
 
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
@@ -120,7 +120,7 @@ func Adjectives(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain server data
 	serverData := tools.GetServer(*server)
 
-	if m.Author.ID != server.OwnerID || serverData.AllowAnyoneStats {
+	if m.Author.ID != server.OwnerID || !serverData.AllowAnyoneStats {
 		member, _ := s.GuildMember(server.ID, m.Author.ID)
 		admin := false
 		for _, roleID := range member.Roles {
@@ -188,7 +188,7 @@ func Adjectives(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // Nouns allows users to add/change/see their custom nouns
 func Nouns(s *discordgo.Session, m *discordgo.MessageCreate) {
-	nounsRegex, _ := regexp.Compile(`(nouns)\s*(add|remove)?\s+(.+)`)
+	nounsRegex, _ := regexp.Compile(`(nouns?)\s*(add|remove)?\s+(.+)`)
 
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
@@ -199,7 +199,7 @@ func Nouns(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain server data
 	serverData := tools.GetServer(*server)
 
-	if m.Author.ID != server.OwnerID || serverData.AllowAnyoneStats {
+	if m.Author.ID != server.OwnerID || !serverData.AllowAnyoneStats {
 		member, _ := s.GuildMember(server.ID, m.Author.ID)
 		admin := false
 		for _, roleID := range member.Roles {
@@ -267,7 +267,7 @@ func Nouns(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // Skills allows users to add/change/see their custom skills
 func Skills(s *discordgo.Session, m *discordgo.MessageCreate) {
-	skillsRegex, _ := regexp.Compile(`(skills)\s*(add|remove)?\s+(.+)`)
+	skillsRegex, _ := regexp.Compile(`(skills?)\s*(add|remove)?\s+(.+)`)
 
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
@@ -278,7 +278,7 @@ func Skills(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain server data
 	serverData := tools.GetServer(*server)
 
-	if m.Author.ID != server.OwnerID || serverData.AllowAnyoneStats {
+	if m.Author.ID != server.OwnerID || !serverData.AllowAnyoneStats {
 		member, _ := s.GuildMember(server.ID, m.Author.ID)
 		admin := false
 		for _, roleID := range member.Roles {

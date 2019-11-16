@@ -220,11 +220,11 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Choose(s, m)
 		case serverPrefix + "stats":
 			go gencommands.Stats(s, m)
-		case serverPrefix + "adj", serverPrefix + "adjectives":
+		case serverPrefix + "adj", serverPrefix + "adjective", serverPrefix + "adjectives":
 			go gencommands.Adjectives(s, m)
-		case serverPrefix + "nouns":
+		case serverPrefix + "noun", serverPrefix + "nouns":
 			go gencommands.Nouns(s, m)
-		case serverPrefix + "skills":
+		case serverPrefix + "skill", serverPrefix + "skills":
 			go gencommands.Skills(s, m)
 		case serverPrefix + "statst", serverPrefix + "statstoggle":
 			go gencommands.StatsToggle(s, m)
