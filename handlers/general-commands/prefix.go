@@ -25,19 +25,9 @@ func Prefix(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	member := &discordgo.Member{}
-	for _, guildMember := range server.Members {
-		if guildMember.User.ID == m.Author.ID {
-			member = guildMember
-			break
-		}
-	}
-
-	if member.User.ID == "" {
-		return
-	}
-
+	// Check if member has proper server privileges
 	if m.Author.ID != server.OwnerID {
+		member, _ := s.GuildMember(server.ID, m.Author.ID)
 		admin := false
 		for _, roleID := range member.Roles {
 			role, _ := s.State.Role(m.GuildID, roleID)
@@ -46,7 +36,7 @@ func Prefix(s *discordgo.Session, m *discordgo.MessageCreate) {
 				break
 			}
 		}
-		if !admin {
+		if !admin && len(m.Mentions) >= 1 {
 			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
 			return
 		}
