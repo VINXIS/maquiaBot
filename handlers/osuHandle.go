@@ -36,7 +36,7 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 		case "tt", "trackt", "tracktoggle":
 			go osucommands.TrackToggle(s, m, mapCache)
 		case "toggle":
-			go osucommands.MapToggle(s, m)
+			go osucommands.OsuToggle(s, m)
 		case "c", "compare":
 			go osucommands.Compare(s, m, args, osuAPI, playerCache, serverPrefix, mapCache)
 		}

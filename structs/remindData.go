@@ -3,7 +3,6 @@ package structs
 import (
 	"time"
 
-	tools "../tools"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -24,8 +23,10 @@ type Reminder struct {
 
 // NewReminder creates a new Reminder with a snowflake ID similar to Discord's
 func NewReminder(target time.Time, user discordgo.User, info string) Reminder {
+	ID := time.Now().Unix()*1000 - 1420070400000
+	ID <<= 22
 	return Reminder{
-		ID:     tools.GenerateSnowflake(time.Now()),
+		ID:     ID,
 		Target: target,
 		User:   user,
 		Info:   info,
