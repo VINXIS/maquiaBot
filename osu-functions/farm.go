@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	osuapi "../osu-api"
@@ -100,7 +99,7 @@ func UpdateFarmSystem() {
 
 	for i, player := range profileCache {
 		if player.Osu.Username != "" {
-			player = FarmCalc(player, osuAPI, farmData)
+			player.FarmCalc(osuAPI, farmData)
 			profileCache[i] = player
 			fmt.Println("Updated player #" + strconv.Itoa(i+1) + ": " + player.Osu.Username + " Farm Rating " + fmt.Sprint(player.Farm.Rating))
 		}
@@ -112,44 +111,4 @@ func UpdateFarmSystem() {
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
 	tools.ErrRead(err)
 	fmt.Println("Updated all players!")
-}
-
-// FarmCalc does the actual calculations for the farm values and everything
-func FarmCalc(player structs.PlayerData, osuAPI *osuapi.Client, farmData structs.FarmData) structs.PlayerData {
-	player.Farm = structs.FarmerdogData{}
-
-	scoreList, _ := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
-		Username: player.Osu.Username,
-		Limit:    100,
-	})
-	for j, score := range scoreList {
-		var HDVer osuapi.Mods
-		var playerFarmScore = structs.PlayerScore{}
-
-		if strings.Contains(score.Mods.String(), "NC") {
-			stringMods := strings.Replace(score.Mods.String(), "NC", "", 1)
-			score.Mods = osuapi.ParseMods(stringMods)
-		}
-		if strings.Contains(score.Mods.String(), "HD") {
-			HDVer = score.Mods
-			stringMods := strings.Replace(score.Mods.String(), "HD", "", 1)
-			score.Mods = osuapi.ParseMods(stringMods)
-		} else {
-			stringMods := score.Mods.String() + "HD"
-			HDVer = osuapi.ParseMods(stringMods)
-		}
-		for _, farmMap := range farmData.Maps {
-			if score.BeatmapID == farmMap.BeatmapID && (score.Mods == farmMap.Mods || HDVer == farmMap.Mods) {
-				playerFarmScore.BeatmapSet = score.BeatmapID
-				playerFarmScore.PP = score.PP
-				playerFarmScore.FarmScore = math.Max(playerFarmScore.FarmScore, math.Pow(0.95, float64(j))*farmMap.Overweightness)
-				playerFarmScore.Name = farmMap.Artist + " - " + farmMap.Title + " [" + farmMap.DiffName + "]"
-			}
-		}
-		if playerFarmScore.BeatmapSet != 0 {
-			player.Farm.List = append(player.Farm.List, playerFarmScore)
-			player.Farm.Rating += playerFarmScore.FarmScore
-		}
-	}
-	return player
 }

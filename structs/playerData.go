@@ -1,6 +1,8 @@
 package structs
 
 import (
+	"math"
+	"strings"
 	"time"
 
 	osuapi "../osu-api"
@@ -27,4 +29,43 @@ type PlayerScore struct {
 	PP         float64
 	FarmScore  float64
 	Name       string
+}
+
+// FarmCalc does the actual calculations for the farm values and everything
+func (player PlayerData) FarmCalc(osuAPI *osuapi.Client, farmData FarmData) {
+	player.Farm = FarmerdogData{}
+
+	scoreList, _ := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+		Username: player.Osu.Username,
+		Limit:    100,
+	})
+	for j, score := range scoreList {
+		var HDVer osuapi.Mods
+		var playerFarmScore = PlayerScore{}
+
+		if strings.Contains(score.Mods.String(), "NC") {
+			stringMods := strings.Replace(score.Mods.String(), "NC", "", 1)
+			score.Mods = osuapi.ParseMods(stringMods)
+		}
+		if strings.Contains(score.Mods.String(), "HD") {
+			HDVer = score.Mods
+			stringMods := strings.Replace(score.Mods.String(), "HD", "", 1)
+			score.Mods = osuapi.ParseMods(stringMods)
+		} else {
+			stringMods := score.Mods.String() + "HD"
+			HDVer = osuapi.ParseMods(stringMods)
+		}
+		for _, farmMap := range farmData.Maps {
+			if score.BeatmapID == farmMap.BeatmapID && (score.Mods == farmMap.Mods || HDVer == farmMap.Mods) {
+				playerFarmScore.BeatmapSet = score.BeatmapID
+				playerFarmScore.PP = score.PP
+				playerFarmScore.FarmScore = math.Max(playerFarmScore.FarmScore, math.Pow(0.95, float64(j))*farmMap.Overweightness)
+				playerFarmScore.Name = farmMap.Artist + " - " + farmMap.Title + " [" + farmMap.DiffName + "]"
+			}
+		}
+		if playerFarmScore.BeatmapSet != 0 {
+			player.Farm.List = append(player.Farm.List, playerFarmScore)
+			player.Farm.Rating += playerFarmScore.FarmScore
+		}
+	}
 }

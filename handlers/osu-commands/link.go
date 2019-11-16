@@ -8,7 +8,6 @@ import (
 	"time"
 
 	osuapi "../../osu-api"
-	osutools "../../osu-functions"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -124,7 +123,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 	f, err := ioutil.ReadFile("./data/osuData/mapFarm.json")
 	tools.ErrRead(err)
 	_ = json.Unmarshal(f, &farmData)
-	player = osutools.FarmCalc(player, osuAPI, farmData)
+	player.FarmCalc(osuAPI, farmData)
 
 	// Save player
 	cache = append(cache, player)

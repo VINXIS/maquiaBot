@@ -10,7 +10,6 @@ import (
 	"time"
 
 	osuapi "../../osu-api"
-	osutools "../../osu-functions"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -77,7 +76,7 @@ func Farmerdog(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.
 	_ = json.Unmarshal(f, &farmData)
 
 	// Calc stuff
-	user = osutools.FarmCalc(user, osuAPI, farmData)
+	user.FarmCalc(osuAPI, farmData)
 
 	// Add the new information to the full data
 	user.Time = time.Now()
