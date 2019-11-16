@@ -120,10 +120,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.HasPrefix(m.Content, "maquiaprefix") {
 		go gencommands.Prefix(s, m)
 		return
-	} else if strings.Contains(m.Content, "maquiacleanf") || strings.Contains(m.Content, "maquiacleanfarm") {
+	} else if strings.HasPrefix(m.Content, "maquiacleanf") || strings.Contains(m.Content, "maquiacleanfarm") {
 		go gencommands.CleanFarm(s, m, profileCache, osuAPI)
 		return
-	} else if strings.Contains(m.Content, "maquiaclean") {
+	} else if strings.HasPrefix(m.Content, "maquiaclean") {
 		go gencommands.Clean(s, m, profileCache)
 		return
 	} else if strings.HasPrefix(m.Content, serverPrefix) {
