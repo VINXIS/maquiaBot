@@ -8,6 +8,7 @@ import (
 	"time"
 
 	osuapi "../../osu-api"
+	osutools "../../osu-functions"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -20,45 +21,39 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 	discordUser := m.Author
 	osuUsername := strings.TrimSpace(usernameRegex.FindStringSubmatch(m.Content)[4])
 
+	// Obtain server and check admin permissions for linking with mentions involved
 	server, err := s.Guild(m.GuildID)
-	member := &discordgo.Member{}
-	admin := false
-
 	if err == nil {
-		for _, guildMember := range server.Members {
-			if guildMember.User.ID == m.Author.ID {
-				member = guildMember
+		if m.Author.ID != server.OwnerID {
+			member, _ := s.GuildMember(server.ID, m.Author.ID)
+			admin := false
+			for _, roleID := range member.Roles {
+				role, _ := s.State.Role(m.GuildID, roleID)
+				if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
+					admin = true
+					break
+				}
+			}
+			if !admin && len(m.Mentions) >= 1 {
+				s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
+				return
 			}
 		}
 
-		for _, roleID := range member.Roles {
-			role, err := s.State.Role(m.GuildID, roleID)
-			tools.ErrRead(err)
-			if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
-				admin = true
-				break
-			}
-		}
-		if m.Author.ID == server.OwnerID {
-			admin = true
+		if len(m.Mentions) > 0 {
+			discordUser = m.Mentions[0]
 		}
 	}
 
-	if len(m.Mentions) >= 1 && admin {
-		discordUser = m.Mentions[0]
-	} else if len(m.Mentions) >= 1 && !admin {
-		s.ChannelMessageSend(m.ChannelID, "You are not an admin!")
-		return
-	}
-
+	// Run through the player cache to find the user using discord ID.
 	for i, player := range cache {
 		if player.Discord.ID == discordUser.ID {
 			if strings.ToLower(player.Osu.Username) == strings.ToLower(osuUsername) {
 				if len(m.Mentions) >= 1 {
 					s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** already been linked to "+discordUser.Username+"'s account!")
-					return
+				} else {
+					s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** already linked to your discord account!")
 				}
-				s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** already linked to your discord account!")
 				return
 			}
 
@@ -82,12 +77,15 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 
 			if len(m.Mentions) >= 1 {
 				s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to "+discordUser.Username+"'s account!")
-				return
+			} else {
+				s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to your discord account!")
 			}
-
-			s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to your discord account!")
 			return
 		}
+	}
+
+	// Run through the player cache to find the user using the osu! username if no discord ID exists.
+	for i, player := range cache {
 		if strings.ToLower(player.Osu.Username) == strings.ToLower(osuUsername) && player.Discord.ID == "" {
 			player.Discord = *discordUser
 			cache[i] = player
@@ -100,14 +98,14 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 
 			if len(m.Mentions) >= 1 {
 				s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to "+discordUser.Username+"'s account!")
-				return
+			} else {
+				s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to your discord account!")
 			}
-
-			s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to your discord account!")
 			return
 		}
 	}
 
+	// Create player
 	user, err := osuAPI.GetUser(osuapi.GetUserOpts{
 		Username: osuUsername,
 	})
@@ -115,12 +113,21 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 		s.ChannelMessageSend(m.ChannelID, "Player: **"+osuUsername+"** may not exist!")
 		return
 	}
-
-	cache = append(cache, structs.PlayerData{
+	player := structs.PlayerData{
 		Time:    time.Now(),
 		Osu:     *user,
 		Discord: *discordUser,
-	})
+	}
+
+	// Farm stuff
+	farmData := structs.FarmData{}
+	f, err := ioutil.ReadFile("./data/osuData/mapFarm.json")
+	tools.ErrRead(err)
+	_ = json.Unmarshal(f, &farmData)
+	player = osutools.FarmCalc(player, osuAPI, farmData)
+
+	// Save player
+	cache = append(cache, player)
 	jsonCache, err := json.Marshal(cache)
 	tools.ErrRead(err)
 

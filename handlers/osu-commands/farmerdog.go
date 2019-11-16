@@ -3,7 +3,6 @@ package osucommands
 import (
 	"encoding/json"
 	"io/ioutil"
-	"math"
 	"regexp"
 	"sort"
 	"strconv"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	osuapi "../../osu-api"
+	osutools "../../osu-functions"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -34,7 +34,7 @@ func Farmerdog(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.
 		username = strings.TrimSpace(strings.Replace(username, amountRegex.FindStringSubmatch(m.Content)[0], "", -1))
 	}
 
-	// Check
+	// Check for user
 	if username == "" {
 		for i, player := range cache {
 			if m.Author.ID == player.Discord.ID {
@@ -59,17 +59,16 @@ func Farmerdog(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.
 			}
 		}
 	}
-	user.Farm = structs.FarmerdogData{}
 
-	// Get best scores
-	scoreList, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+	// Get User and see if user exists
+	osuUser, err := osuAPI.GetUser(osuapi.GetUserOpts{
 		Username: username,
-		Limit:    100,
 	})
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "User: **"+user.Osu.Username+"** may not exist!")
 		return
 	}
+	user.Osu = *osuUser
 
 	// Obtain farm data
 	farmData := structs.FarmData{}
@@ -77,60 +76,30 @@ func Farmerdog(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.
 	tools.ErrRead(err)
 	_ = json.Unmarshal(f, &farmData)
 
-	// Get the farmerdog rating
-	for j, score := range scoreList {
-		var HDVer osuapi.Mods
-		var playerFarmScore = structs.PlayerScore{}
+	// Calc stuff
+	user = osutools.FarmCalc(user, osuAPI, farmData)
 
-		if strings.Contains(score.Mods.String(), "NC") {
-			stringMods := strings.Replace(score.Mods.String(), "NC", "", 1)
-			score.Mods = osuapi.ParseMods(stringMods)
-		}
-		if strings.Contains(score.Mods.String(), "HD") {
-			HDVer = score.Mods
-			stringMods := strings.Replace(score.Mods.String(), "HD", "", 1)
-			score.Mods = osuapi.ParseMods(stringMods)
-		} else {
-			stringMods := score.Mods.String() + "HD"
-			HDVer = osuapi.ParseMods(stringMods)
-		}
-		for _, farmMap := range farmData.Maps {
-			if score.BeatmapID == farmMap.BeatmapID && (score.Mods == farmMap.Mods || HDVer == farmMap.Mods) {
-				playerFarmScore.BeatmapSet = score.BeatmapID
-				playerFarmScore.PP = score.PP
-				playerFarmScore.FarmScore = math.Max(playerFarmScore.FarmScore, math.Pow(0.95, float64(j))*farmMap.Overweightness)
-				playerFarmScore.Name = farmMap.Artist + " - " + farmMap.Title + " [" + farmMap.DiffName + "]"
-			}
-		}
-		user.Farm.List = append(user.Farm.List, playerFarmScore)
-		user.Farm.Rating += playerFarmScore.FarmScore
-	}
-
-	cacheUser, err := osuAPI.GetUser(osuapi.GetUserOpts{
-		Username: username,
-	})
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "User: **"+user.Osu.Username+"** may not exist!")
-		return
-	}
-
+	// Add the new information to the full data
 	user.Time = time.Now()
-	user.Osu = *cacheUser
-
 	if cached {
 		cache[playerIndex] = user
 	} else {
 		cache = append(cache, user)
 	}
 
+	// Save info
 	jsonCache, err := json.Marshal(cache)
 	tools.ErrRead(err)
 
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
 	tools.ErrRead(err)
 
+	// Get the list of scores
 	sort.Slice(user.Farm.List, func(i, j int) bool { return user.Farm.List[i].FarmScore > user.Farm.List[j].FarmScore })
 	list := ""
+	if amount > len(user.Farm.List) {
+		amount = len(user.Farm.List)
+	}
 	for n := 0; n < amount; n++ {
 		list += "`" + user.Farm.List[n].Name + "`: " + strconv.FormatFloat(user.Farm.List[n].FarmScore, 'f', 2, 64) + " Farmerdog rating (" + strconv.FormatFloat(user.Farm.List[n].PP, 'f', 2, 64) + ")\n"
 	}

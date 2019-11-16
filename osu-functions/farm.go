@@ -24,7 +24,7 @@ func FarmUpdate() {
 	tools.ErrRead(err)
 	_ = json.Unmarshal(f, &farmData)
 	if time.Since(farmData.Time) > 24*time.Hour {
-		updateSystem()
+		UpdateFarmSystem()
 	}
 
 	// Loop everyday
@@ -32,12 +32,13 @@ func FarmUpdate() {
 	for {
 		select {
 		case <-ticker.C:
-			updateSystem()
+			UpdateFarmSystem()
 		}
 	}
 }
 
-func updateSystem() {
+// UpdateFarmSystem updates the whole farm data
+func UpdateFarmSystem() {
 	fmt.Println("Fetching data as more than 24 hours have passed...")
 
 	// Obtain data
@@ -99,41 +100,7 @@ func updateSystem() {
 
 	for i, player := range profileCache {
 		if player.Osu.Username != "" {
-			player.Farm = structs.FarmerdogData{}
-
-			scoreList, _ := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
-				Username: player.Osu.Username,
-				Limit:    100,
-			})
-
-			for j, score := range scoreList {
-				var HDVer osuapi.Mods
-				var playerFarmScore = structs.PlayerScore{}
-
-				if strings.Contains(score.Mods.String(), "NC") {
-					stringMods := strings.Replace(score.Mods.String(), "NC", "", 1)
-					score.Mods = osuapi.ParseMods(stringMods)
-				}
-				if strings.Contains(score.Mods.String(), "HD") {
-					HDVer = score.Mods
-					stringMods := strings.Replace(score.Mods.String(), "HD", "", 1)
-					score.Mods = osuapi.ParseMods(stringMods)
-				} else {
-					stringMods := score.Mods.String() + "HD"
-					HDVer = osuapi.ParseMods(stringMods)
-				}
-				for _, farmMap := range farmData.Maps {
-					if score.BeatmapID == farmMap.BeatmapID && (score.Mods == farmMap.Mods || HDVer == farmMap.Mods) {
-						playerFarmScore.BeatmapSet = score.BeatmapID
-						playerFarmScore.PP = score.PP
-						playerFarmScore.FarmScore = math.Max(playerFarmScore.FarmScore, math.Pow(0.95, float64(j))*farmMap.Overweightness)
-						playerFarmScore.Name = farmMap.Artist + " - " + farmMap.Title + " [" + farmMap.DiffName + "]"
-					}
-				}
-				player.Farm.List = append(player.Farm.List, playerFarmScore)
-				player.Farm.Rating += playerFarmScore.FarmScore
-			}
-
+			player = FarmCalc(player, osuAPI, farmData)
 			profileCache[i] = player
 			fmt.Println("Updated player #" + strconv.Itoa(i+1) + ": " + player.Osu.Username + " Farm Rating " + fmt.Sprint(player.Farm.Rating))
 		}
@@ -145,4 +112,44 @@ func updateSystem() {
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
 	tools.ErrRead(err)
 	fmt.Println("Updated all players!")
+}
+
+// FarmCalc does the actual calculations for the farm values and everything
+func FarmCalc(player structs.PlayerData, osuAPI *osuapi.Client, farmData structs.FarmData) structs.PlayerData {
+	player.Farm = structs.FarmerdogData{}
+
+	scoreList, _ := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+		Username: player.Osu.Username,
+		Limit:    100,
+	})
+	for j, score := range scoreList {
+		var HDVer osuapi.Mods
+		var playerFarmScore = structs.PlayerScore{}
+
+		if strings.Contains(score.Mods.String(), "NC") {
+			stringMods := strings.Replace(score.Mods.String(), "NC", "", 1)
+			score.Mods = osuapi.ParseMods(stringMods)
+		}
+		if strings.Contains(score.Mods.String(), "HD") {
+			HDVer = score.Mods
+			stringMods := strings.Replace(score.Mods.String(), "HD", "", 1)
+			score.Mods = osuapi.ParseMods(stringMods)
+		} else {
+			stringMods := score.Mods.String() + "HD"
+			HDVer = osuapi.ParseMods(stringMods)
+		}
+		for _, farmMap := range farmData.Maps {
+			if score.BeatmapID == farmMap.BeatmapID && (score.Mods == farmMap.Mods || HDVer == farmMap.Mods) {
+				playerFarmScore.BeatmapSet = score.BeatmapID
+				playerFarmScore.PP = score.PP
+				playerFarmScore.FarmScore = math.Max(playerFarmScore.FarmScore, math.Pow(0.95, float64(j))*farmMap.Overweightness)
+				playerFarmScore.Name = farmMap.Artist + " - " + farmMap.Title + " [" + farmMap.DiffName + "]"
+			}
+		}
+		if playerFarmScore.BeatmapSet != 0 {
+			player.Farm.List = append(player.Farm.List, playerFarmScore)
+			player.Farm.Rating += playerFarmScore.FarmScore
+		}
+	}
+	return player
 }
