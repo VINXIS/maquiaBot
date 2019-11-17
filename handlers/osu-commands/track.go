@@ -185,6 +185,12 @@ func TrackInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	server, err := s.Guild(m.GuildID)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
+		return
+	}
+
 	// Obtain channel data
 	channelData, new := tools.GetChannel(*channel)
 	if new {
@@ -192,10 +198,18 @@ func TrackInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	serverImg := "https://cdn.discordapp.com/icons/" + server.ID + "/" + server.Icon
+	if strings.Contains(server.Icon, "a_") {
+		serverImg += ".gif"
+	} else {
+		serverImg += ".png"
+	}
+
 	// Create embed
 	embed := discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			Name: channelData.Channel.Name,
+			Name:    channelData.Channel.Name,
+			IconURL: serverImg,
 		},
 		Description: "Any admin, server moderator, or server owner can update this using `track` again! Toggle tracking on or off using `ttoggle` or `tracktoggle`",
 		Color:       osutools.ModeColour(channelData.Mode),
