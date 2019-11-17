@@ -41,6 +41,7 @@ type User struct {
 	CountSH     int       `json:"count_rank_sh,string"`
 	CountA      int       `json:"count_rank_a,string"`
 	Country     string    `json:"country"`
+	TimePlayed  int       `json:"total_seconds_played,string"`
 	CountryRank int       `json:"pp_country_rank,string"`
 	Events      []Event   `json:"events"`
 }
