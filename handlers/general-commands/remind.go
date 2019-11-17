@@ -79,10 +79,22 @@ func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if reminderTime == 0 { // Default to 5 minutes
 		reminderTime = time.Second * time.Duration(300)
 	}
+	// Check if time duration is dumb as hell
+	if reminderTime.Hours() > 8760 {
+		s.ChannelMessageSend(m.ChannelID, "Ur really funny mate")
+		return
+	}
+
 	// Obtain date
 	timeResult := time.Now().UTC().Add(reminderTime)
 	timeResultString = timeResult.Format(time.UnixDate)
 	text = strings.ReplaceAll(text, "`", "")
+
+	// People can add huge time durations where the time may go backward
+	if timeResult.Before(time.Now()) {
+		s.ChannelMessageSend(m.ChannelID, "Ur really funny mate")
+		return
+	}
 
 	// Create reminder and add to list of reminders
 	reminder := structs.NewReminder(timeResult, *m.Author, text)

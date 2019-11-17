@@ -17,6 +17,10 @@ func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	updateRegex, _ := regexp.Compile(`u(pdate)?\s+(.+)`)
+	if !updateRegex.MatchString(m.Content) {
+		s.ChannelMessageSend(m.ChannelID, "farm or osu-tools dumbass...")
+		return
+	}
 	switch updateRegex.FindStringSubmatch(m.Content)[2] {
 	case "farm":
 		go osutools.FarmUpdate()
