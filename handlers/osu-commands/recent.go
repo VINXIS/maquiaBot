@@ -129,13 +129,11 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	}
 
 	// Count number of objs
-	objCount := osutools.CountObjs(beatmap)
+	objCount := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
 	playObjCount := score.CountMiss + score.Count100 + score.Count300 + score.Count50
 
 	// Get time since play
-	timeParse, err := time.Parse("2006-01-02 15:04:05", score.Date.String())
-	tools.ErrRead(err)
-	time := tools.TimeSince(timeParse)
+	timeParse, _ := time.Parse("2006-01-02 15:04:05", score.Date.String())
 
 	// Assign timing variables for map specs
 	totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
@@ -312,11 +310,11 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	}
 	if option == "best" {
 		embed.Footer = &discordgo.MessageEmbedFooter{
-			Text: time,
+			Text: tools.TimeSince(timeParse),
 		}
 	} else if option == "recent" {
 		embed.Footer = &discordgo.MessageEmbedFooter{
-			Text: "Try #" + strconv.Itoa(try) + " | " + time,
+			Text: "Try #" + strconv.Itoa(try) + " | " + tools.TimeSince(timeParse),
 		}
 	}
 	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
