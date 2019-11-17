@@ -14,10 +14,10 @@ const (
 type Mode int
 
 var modesString = [...]string{
-	"osu",
-	"taiko",
-	"catch",
-	"mania",
+	"osu!standard",
+	"osu!taiko",
+	"osu!catch",
+	"osu!mania",
 }
 
 func (m Mode) String() string {

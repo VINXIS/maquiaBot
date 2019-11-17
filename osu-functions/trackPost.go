@@ -19,7 +19,7 @@ import (
 )
 
 // TrackPost posts scores for users tracked for that channel
-func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData) {
+func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []structs.MapData) {
 	osuAPI := osuapi.NewClient(os.Getenv("OSU_API"))
 
 	startTime := time.Now()
@@ -30,12 +30,7 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 		case <-ticker.C:
 
 			// Get channel data
-			ch := structs.ChannelData{}
-			f, err := ioutil.ReadFile("./" + channel)
-			if err != nil {
-				return
-			}
-			_ = json.Unmarshal(f, &ch)
+			ch, _ := tools.GetChannel(channel)
 
 			if !ch.Tracking || len(ch.Users) == 0 {
 				return
@@ -52,18 +47,19 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 				}
 
 				for index, score := range recentScores {
-					scoreTime, err := time.Parse("2006-01-02 15:04:05", score.Date.String())
-					tools.ErrRead(err)
+					scoreTime, _ := time.Parse("2006-01-02 15:04:05", score.Date.String())
 					if score.Rank != "F" && startTime.Before(scoreTime) {
+
+						// Get mods
 						mods := "NM"
 						if score.Mods != 0 {
 							mods = score.Mods.String()
 						}
 
+						// Save beatmap
 						beatmap := BeatmapParse(strconv.Itoa(score.BeatmapID), "map", score.Mods, osuAPI)
-						timeText := tools.TimeSince(scoreTime)
 
-						// Assign timing variables for map specs
+						// Assign timing variables for values below
 						totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
 						totalSeconds := fmt.Sprint(math.Mod(float64(beatmap.TotalLength), float64(60)))
 						if len(totalSeconds) == 1 {
@@ -84,8 +80,10 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 						scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
 						mapStats := "**CS:** " + strconv.FormatFloat(beatmap.CircleSize, 'f', 1, 64) + " **AR:** " + strconv.FormatFloat(beatmap.ApproachRate, 'f', 1, 64) + " **OD:** " + strconv.FormatFloat(beatmap.OverallDifficulty, 'f', 1, 64) + " **HP:** " + strconv.FormatFloat(beatmap.HPDrain, 'f', 1, 64)
 						mapObjs := "**Circles:** " + strconv.Itoa(beatmap.Circles) + " **Sliders:** " + strconv.Itoa(beatmap.Sliders) + " **Spinners:** " + strconv.Itoa(beatmap.Spinners)
+						timeText := tools.TimeSince(scoreTime)
 						var combo string
 
+						// Remove DT for NC scores
 						if strings.Contains(mods, "DTNC") {
 							mods = strings.Replace(mods, "DTNC", "NC", 1)
 						}
@@ -103,7 +101,8 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 						}
 
 						mapCompletion := ""
-						playNum := 101
+						topNum := 101
+						leaderboardNum := 101
 						orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 							Username: user.Username,
 							Limit:    100,
@@ -111,27 +110,24 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 						tools.ErrRead(err)
 						for i, orderedScore := range orderedScores {
 							if score.Score.Score == orderedScore.Score.Score {
-								playNum = i + 1
-								mapCompletion = "**#" + strconv.Itoa(i+1) + "** in top performances! \n"
+								topNum = i + 1
+								mapCompletion = "**#" + strconv.Itoa(topNum) + "** in top performances! \n"
 							}
 						}
-						if mapCompletion == "" {
-							mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
-								BeatmapID: beatmap.BeatmapID,
-								Limit:     100,
-							})
-							tools.ErrRead(err)
-							for i, mapScore := range mapScores {
-								if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
-									playNum = i + 1
-									mapCompletion = "**#" + strconv.Itoa(i+1) + "** on leaderboard! \n"
-								}
+						mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
+							BeatmapID: beatmap.BeatmapID,
+							Limit:     100,
+						})
+						tools.ErrRead(err)
+						for i, mapScore := range mapScores {
+							if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
+								topNum = i + 1
+								mapCompletion = "**#" + strconv.Itoa(topNum) + "** on leaderboard! \n"
 							}
 						}
 
 						// Get pp values
 						var pp string
-						var ppInt int
 						totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
 						if score.PP == 0 { // If map was not finished
 							ppValues := make(chan string, 2)
@@ -147,13 +143,11 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 								pp2, _ := strconv.ParseFloat(ppValueArray[j], 64)
 								return pp1 > pp2
 							})
-							ppInt, _ = strconv.Atoi(ppValueArray[1])
+							score.PP, _ = strconv.ParseFloat(ppValueArray[1], 64)
 							pp = "**" + ppValueArray[1] + "pp**/" + ppValueArray[0] + "pp "
 						} else if score.Score.FullCombo { // If play was a perfect combo
-							ppInt = int(score.PP)
 							pp = "**" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp**/" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp "
 						} else { // If map was finished, but play was not a perfect combo
-							ppInt = int(score.PP)
 							ppValues := make(chan string, 1)
 							accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
 							go PPCalc(beatmap, accCalcNoMiss, "", "", scoreMods, ppValues)
@@ -161,10 +155,17 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 						}
 
 						// Check params
-						check1 := (ch.PPLimit != 0 && ch.TopPlay != 100 && ppInt < ch.PPLimit && playNum > ch.TopPlay)
-						check2 := (ch.PPLimit == 0 && playNum > ch.TopPlay)
-						check3 := (ch.TopPlay == 100 && ppInt < ch.PPLimit)
-						if !check1 && !check2 && !check3 {
+						rankCheck := ch.Ranked && (beatmap.Approved == osuapi.StatusRanked || beatmap.Approved == osuapi.StatusApproved)
+						qualCheck := ch.Qualified && beatmap.Approved == osuapi.StatusQualified
+						loveCheck := ch.Loved && beatmap.Approved == osuapi.StatusLoved
+						ppCheck := score.PP >= ch.PPReq
+						leaderboardCheck := leaderboardNum <= ch.LeaderboardReq
+						topCheck := topNum <= ch.TopReq
+
+						mapCheck := rankCheck || qualCheck || loveCheck
+						scoreCheck := ppCheck || leaderboardCheck || topCheck
+						checkPass := mapCheck && scoreCheck
+						if checkPass {
 							// Count number of tries
 							try := 0
 							tryInc := true
@@ -236,8 +237,11 @@ func TrackPost(channel string, s *discordgo.Session, mapCache []structs.MapData)
 				}
 			}
 
-			jsonData, err := json.Marshal(ch)
-			err = ioutil.WriteFile("./"+channel, jsonData, 0644)
+			// Write data to JSON
+			jsonCache, err := json.Marshal(ch)
+			tools.ErrRead(err)
+
+			err = ioutil.WriteFile("./data/channelData/"+ch.Channel.ID+".json", jsonCache, 0644)
 			tools.ErrRead(err)
 
 			startTime = time.Now()

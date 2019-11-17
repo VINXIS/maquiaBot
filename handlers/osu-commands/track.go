@@ -2,9 +2,7 @@ package osucommands
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"os"
 	"strconv"
 	"strings"
 
@@ -16,196 +14,136 @@ import (
 )
 
 // Track executes the track command, used for when people want to track/untrack users/pp/etc
-func Track(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI *osuapi.Client, mapCache []structs.MapData) {
-	// Check perms
+func Track(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, mapCache []structs.MapData) {
 	channel, err := s.Channel(m.ChannelID)
 	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "This is not a server so custom prefixes are unavailable! Please use `$` instead for commands!")
+		s.ChannelMessageSend(m.ChannelID, "This is not an allowed channel!")
 		return
 	}
 
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "This is not a server so custom prefixes are unavailable! Please use `$` instead for commands!")
+		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
 
-	member := &discordgo.Member{}
-	for _, guildMember := range server.Members {
-		if guildMember.User.ID == m.Author.ID {
-			member = guildMember
+	if m.Author.ID != server.OwnerID {
+		member, _ := s.GuildMember(server.ID, m.Author.ID)
+		admin := false
+		for _, roleID := range member.Roles {
+			role, _ := s.State.Role(m.GuildID, roleID)
+			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
+				admin = true
+				break
+			}
 		}
-	}
-
-	if member.User.ID == "" {
-		return
-	}
-
-	admin := false
-	for _, roleID := range member.Roles {
-		role, err := s.State.Role(m.GuildID, roleID)
-		tools.ErrRead(err)
-		if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
-			admin = true
-			break
+		if !admin {
+			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
+			return
 		}
-	}
-
-	if !admin && m.Author.ID != server.OwnerID {
-		s.ChannelMessageSend(m.ChannelID, "You are not an admin or server manager!")
-		return
 	}
 
 	// Obtain channel data
-	channelData := structs.ChannelData{
-		Channel: *channel,
-	}
-	new := true
-	_, err = os.Stat("./data/channelData/" + m.ChannelID + ".json")
-	if err == nil {
-		f, err := ioutil.ReadFile("./data/channelData/" + m.ChannelID + ".json")
-		tools.ErrRead(err)
-		_ = json.Unmarshal(f, &channelData)
-		new = false
-	} else if os.IsNotExist(err) {
-		channelData.Channel = *channel
-	} else {
-		fmt.Println(err)
-		s.ChannelMessageSend(m.ChannelID, "An error occurred! VINXIS has obtained error info.")
-		return
-	}
+	channelData, new := tools.GetChannel(*channel)
 
 	// Get params
-	pp := ""
-	top := ""
-	users := []string{}
-	addition := true
-	removal := false
-	multiUser := false
-	for i, arg := range args {
-		if arg == "replace" {
-			addition = false
-		} else if arg == "remove" {
-			addition = false
-			removal = true
+	args := strings.Split(m.Content, " ")[1:]
+	mode := ""
+	var (
+		users, mapStatus []string
+		pp               float64
+		leaderboard, top int
+	)
+
+	for _, arg := range args {
+		arg = strings.TrimSpace(arg)
+
+		// If flag change mode
+		switch arg {
+		case "-u":
+			mode = "user"
+			continue
+		case "-pp":
+			mode = "pp"
+			continue
+		case "-l", "-leader", "-leaderboard":
+			mode = "leaderboard"
+			continue
+		case "-t", "-top":
+			mode = "top"
+			continue
+		case "-s", "-status":
+			mode = "status"
+			continue
+		case "-m", "-mode":
+			mode = "mode"
+			continue
 		}
-		if i != len(args)-1 {
-			switch strings.ToLower(arg) {
-			case "pp":
-				pp = args[i+1]
-			case "top":
-				top = args[i+1]
-			case "user":
-				users = append(users, args[i+1])
-			case "users":
-				multiUser = true
-			}
-		}
-		if multiUser {
+
+		// Obtain value if not flag
+		switch mode {
+		case "user":
 			users = append(users, arg)
-		}
-	}
-
-	// Check if any params were NOT given or if add and remove were both stated in the message
-	if pp == "" && top == "" && len(users) == 0 && !removal {
-		s.ChannelMessageSend(m.ChannelID, "Not enough params given! Need at least one of `pp` or `top` or `user(s)`")
-		return
-	}
-	if addition && removal {
-		s.ChannelMessageSend(m.ChannelID, "You cannot add and remove at the same time!")
-		return
-	}
-
-	// Add/Remove as needed
-	if !addition && !removal {
-		channelData.Users = []osuapi.User{}
-	}
-	if removal {
-		if len(users) == 0 {
-			tools.DeleteFile("./data/channelData/" + m.ChannelID + ".json")
-			s.ChannelMessageSend(m.ChannelID, "Completely removed tracking for this channel!")
-			return
-		}
-		text := "Removed: "
-		tracked := false
-		for _, user := range users {
-			for i, osuUser := range channelData.Users {
-				if strings.ToLower(osuUser.Username) == strings.ToLower(user) {
-					tracked = true
-					text = text + user + " "
-					channelData.Users = append(channelData.Users[:i], channelData.Users[i+1:]...)
-				}
+		case "pp":
+			pp, err = strconv.ParseFloat(arg, 64)
+			if err != nil || pp < 0 {
+				pp = -1
 			}
+			channelData.PPReq = pp
+			mode = ""
+		case "leaderboard":
+			leaderboard, err = strconv.Atoi(arg)
+			if err != nil || leaderboard <= 0 || leaderboard > 100 {
+				leaderboard = 101
+			}
+			channelData.LeaderboardReq = leaderboard
+			mode = ""
+		case "top":
+			top, err = strconv.Atoi(arg)
+			if err != nil || top <= 0 || top > 100 {
+				top = 101
+			}
+			channelData.TopReq = top
+			mode = ""
+		case "status":
+			mapStatus = append(mapStatus, arg)
+		case "mode":
+			switch arg {
+			case "0", "s", "std", "standard", "osu!s", "osu!std", "osu!standard":
+				channelData.Mode = osuapi.ModeOsu
+			case "1", "t", "tko", "taiko", "osu!t", "osu!tko", "osu!taiko":
+				channelData.Mode = osuapi.ModeTaiko
+			case "2", "c", "ctb", "catch", "osu!c", "catchthebeat", "osu!ctb", "osu!catch", "osu!catchthebeat":
+				channelData.Mode = osuapi.ModeCatchTheBeat
+			case "3", "m", "man", "mania", "osu!m", "osu!man", "osu!mania":
+				channelData.Mode = osuapi.ModeOsuMania
+			}
+			mode = ""
 		}
-		if !tracked {
-			s.ChannelMessageSend(m.ChannelID, "User is not being tracked currently!")
-			return
-		}
-		// Write data to JSON
-		jsonCache, err := json.Marshal(channelData)
-		tools.ErrRead(err)
-
-		err = ioutil.WriteFile("./data/channelData/"+m.ChannelID+".json", jsonCache, 0644)
-		tools.ErrRead(err)
-		s.ChannelMessageSend(m.ChannelID, text)
-		return
 	}
 
-	// Assign params to data
-	text := "Now tracking "
-	if len(users) != 0 {
+	// Obtain users and map types given
+	users = strings.Split(strings.Join(users, " "), ", ")
+	mapStatus = strings.Split(strings.Join(mapStatus, " "), ", ")
+
+	// Users
+	if args[1] == "r" || args[1] == "rem" || args[1] == "remove" {
+		channelData.RemoveUser(users)
+	} else {
 		for _, user := range users {
-			user = strings.ReplaceAll(user, ",", "")
-			userRes, err := osuAPI.GetUser(osuapi.GetUserOpts{
+			osuUser, err := osuAPI.GetUser(osuapi.GetUserOpts{
 				Username: user,
+				Mode:     channelData.Mode,
 			})
 			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "User "+user+" may not exist! Check to make sure they aren't banned/ that you typed their name properly!")
-				return
+				continue
 			}
-			if addition {
-				for _, osuUser := range channelData.Users {
-					if osuUser.Username == userRes.Username {
-						s.ChannelMessageSend(m.ChannelID, "User "+user+" is already being tracked!")
-						return
-					}
-				}
-			}
-			channelData.Users = append(channelData.Users, *userRes)
-			text = text + user + " "
+			channelData.AddUser(*osuUser)
 		}
 	}
-	if pp != "" {
-		ppint, err := strconv.Atoi(pp)
-		if ppint < 0 {
-			s.ChannelMessageSend(m.ChannelID, "Invalid paramater for `pp`")
-			return
-		}
-		if err == nil {
-			channelData.PPLimit = ppint
-		}
-		text = text + "with a pp limit of at least " + pp + "pp "
-	}
-	if top != "" {
-		topint, err := strconv.Atoi(top)
-		if topint < 0 {
-			s.ChannelMessageSend(m.ChannelID, "Invalid paramater for `top`")
-			return
-		}
-		if err == nil && topint <= 100 {
-			channelData.TopPlay = topint
-		} else {
-			topint = 100
-			channelData.TopPlay = topint
-		}
-		if pp != "" {
-			text = text + "or if the score is a top " + strconv.Itoa(topint) + " score"
-		}
-		text = text + "if their score is a top " + strconv.Itoa(topint) + " score"
-	} else {
-		channelData.TopPlay = 100
-	}
-	channelData.Tracking = true
+
+	// Map Status
+	channelData.UpdateMapStatus(mapStatus)
 
 	// Write data to JSON
 	jsonCache, err := json.Marshal(channelData)
@@ -214,10 +152,148 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuA
 	err = ioutil.WriteFile("./data/channelData/"+m.ChannelID+".json", jsonCache, 0644)
 	tools.ErrRead(err)
 
+	// Call trackpost if new, otherwise just post track information
 	if new {
-		go osutools.TrackPost("data/channelData/"+m.ChannelID+".json", s, mapCache)
+		go osutools.TrackPost(*channel, s, mapCache)
+	}
+	TrackInfo(s, m)
+}
+
+// TrackInfo gives info about what's being tracked in the channel currently
+func TrackInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
+	channel, err := s.Channel(m.ChannelID)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "This is not an allowed channel!")
+		return
 	}
 
-	s.ChannelMessageSend(m.ChannelID, text)
+	// Obtain channel data
+	channelData, new := tools.GetChannel(*channel)
+	if new {
+		s.ChannelMessageSend(m.ChannelID, "There is no tracking info for this channel currently!")
+		return
+	}
+
+	// Create embed
+	embed := discordgo.MessageEmbed{
+		Author: &discordgo.MessageEmbedAuthor{
+			Name: channelData.Channel.Name,
+		},
+		Description: "Any admin, server moderator, or server owner can update this using `track` again! Toggle tracking on or off using `ttoggle` or `tracktoggle`",
+		Color:       osutools.ModeColour(channelData.Mode),
+	}
+
+	// Warnings
+	if !channelData.Ranked && !channelData.Loved && !channelData.Qualified {
+		embed.Description += "\n**WARNING:** You do not have any map rank statuses with leaderboards enabled! Please enable at least one in order for tracking to work!"
+	}
+	if channelData.LeaderboardReq == 101 && channelData.TopReq == 101 && channelData.PPReq == -1 {
+		embed.Description += "\n**WARNING:** You do not have any leader/top/pp requirement for scores! Any score submitted by the users listed on eligible maps will be posted as a result!"
+	}
+	if !channelData.Tracking {
+		embed.Description += "\n**WARNING:** Tracking is currently turned off!"
+	}
+
+	// Add users
+	userList := ""
+	for i, user := range channelData.Users {
+		if i == len(channelData.Users)-1 {
+			userList += user.Username
+		} else {
+			userList += user.Username + ", "
+		}
+	}
+	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+		Name:  "Users Tracked:",
+		Value: userList,
+	})
+
+	// Add PP req
+	if channelData.PPReq != -1 {
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"PP Req:", strconv.FormatFloat(channelData.PPReq, 'f', 0, 64), true})
+	} else {
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"PP Req:", "N/A", true})
+	}
+
+	// Add Leaderboard req
+	if channelData.LeaderboardReq != 101 {
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Leaderboard Req:", strconv.Itoa(channelData.LeaderboardReq), true})
+	} else {
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Leaderboard Req:", "N/A", true})
+	}
+
+	// Add Top req
+	if channelData.TopReq != 101 {
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Top Perf. Req:", strconv.Itoa(channelData.TopReq), true})
+	} else {
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Top Perf. Req:", "N/A", true})
+	}
+
+	// Map types
+	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Ranked: ", strconv.FormatBool(channelData.Ranked), true})
+	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Loved: ", strconv.FormatBool(channelData.Loved), true})
+	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Qualified: ", strconv.FormatBool(channelData.Qualified), true})
+
+	// Misc.
+	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Mode: ", channelData.Mode.String(), true})
+	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Tracking: ", strconv.FormatBool(channelData.Tracking), true})
+
+	s.ChannelMessageSendEmbed(m.ChannelID, &embed)
 	return
+}
+
+// TrackToggle stops tracking for the channel
+func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate, mapCache []structs.MapData) {
+	channel, err := s.Channel(m.ChannelID)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "This is not an allowed channel!")
+		return
+	}
+
+	// Check perms
+	server, err := s.Guild(m.GuildID)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "This is not a server so custom prefixes are unavailable! Please use `$` instead for commands!")
+		return
+	}
+
+	if m.Author.ID != server.OwnerID {
+		member, _ := s.GuildMember(server.ID, m.Author.ID)
+		admin := false
+		for _, roleID := range member.Roles {
+			role, _ := s.State.Role(m.GuildID, roleID)
+			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
+				admin = true
+				break
+			}
+		}
+		if !admin {
+			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
+			return
+		}
+	}
+
+	// Obtain channel data
+	channelData, new := tools.GetChannel(*channel)
+	if new {
+		s.ChannelMessageSend(m.ChannelID, "There is no tracking info for this channel currently!")
+		return
+	}
+
+	// The Main Event
+	channelData.Tracking = !channelData.Tracking
+
+	// Write data to JSON
+	jsonCache, err := json.Marshal(channelData)
+	tools.ErrRead(err)
+
+	err = ioutil.WriteFile("./data/channelData/"+m.ChannelID+".json", jsonCache, 0644)
+	tools.ErrRead(err)
+
+	if channelData.Tracking {
+		go osutools.TrackPost(*channel, s, mapCache)
+		s.ChannelMessageSend(m.ChannelID, "Started tracking for this channel!")
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "Stopped tracking for this channel!")
+	}
 }

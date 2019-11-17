@@ -30,10 +30,10 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 		case "ppadd":
 			go osucommands.PPAdd(s, m, osuAPI, playerCache)
 		case "tr", "track":
-			go osucommands.Track(s, m, args, osuAPI, mapCache)
+			go osucommands.Track(s, m, osuAPI, mapCache)
 		case "ti", "tinfo", "tracking", "trackinfo":
 			go osucommands.TrackInfo(s, m)
-		case "tt", "trackt", "tracktoggle":
+		case "tt", "trackt", "ttoggle", "tracktoggle":
 			go osucommands.TrackToggle(s, m, mapCache)
 		case "toggle":
 			go osucommands.OsuToggle(s, m)

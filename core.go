@@ -74,7 +74,11 @@ func main() {
 	tools.ErrRead(err)
 	for _, channel := range channels {
 		if strings.HasSuffix(channel, ".json") {
-			go osutools.TrackPost(channel, discord, mapCache)
+			chID := strings.Replace(strings.Replace(channel, "data\\channelData\\", "", -1), ".json", "", -1)
+			ch, err := discord.Channel(chID)
+			if err == nil {
+				go osutools.TrackPost(*ch, discord, mapCache)
+			}
 		}
 	}
 

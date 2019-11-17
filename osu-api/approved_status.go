@@ -19,13 +19,13 @@ const (
 type ApprovedStatus int
 
 var approvedStatusesString = [...]string{
-	"graveyard",
+	"Graveyard",
 	"WIP",
-	"pending",
-	"ranked",
-	"approved",
-	"qualified",
-	"loved",
+	"Pending",
+	"Ranked",
+	"Approved",
+	"Qualified",
+	"Loved",
 }
 
 func (a ApprovedStatus) String() string {

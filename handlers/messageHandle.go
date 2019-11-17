@@ -201,8 +201,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "t", serverPrefix + "top":
 			go osucommands.Top(s, m, args, osuAPI, profileCache, serverPrefix, mapCache)
 		case serverPrefix + "tr", serverPrefix + "track":
-			go osucommands.Track(s, m, args, osuAPI, mapCache)
-		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "tracktoggle":
+			go osucommands.Track(s, m, osuAPI, mapCache)
+		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "ttoggle", serverPrefix + "tracktoggle":
 			go osucommands.TrackToggle(s, m, mapCache)
 		case serverPrefix + "ti", serverPrefix + "tinfo", serverPrefix + "tracking", serverPrefix + "trackinfo":
 			go osucommands.TrackInfo(s, m)

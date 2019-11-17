@@ -1,7 +1,6 @@
 package structs
 
 import (
-	"errors"
 	"strings"
 	"time"
 
@@ -11,36 +10,82 @@ import (
 
 // ChannelData stores information regarding the discord channel so that tracking for osu! plays may occur in that channel
 type ChannelData struct {
-	Time     time.Time
-	Channel  discordgo.Channel
-	PPLimit  int
-	TopPlay  int
-	Users    []osuapi.User
-	Tracking bool
+	Time           time.Time
+	Channel        discordgo.Channel
+	PPReq          float64
+	LeaderboardReq int
+	TopReq         int
+	Ranked         bool
+	Loved          bool
+	Qualified      bool
+	Users          []osuapi.User
+	Mode           osuapi.Mode
+	Tracking       bool
 }
 
-func (c ChannelData) trackToggle() {
+// NewChannel creates a new ChannelData
+func NewChannel(Channel discordgo.Channel) ChannelData {
+	return ChannelData{
+		Time:           time.Now(),
+		Channel:        Channel,
+		PPReq:          -1,
+		LeaderboardReq: 101,
+		TopReq:         101,
+		Mode:           osuapi.ModeOsu,
+		Tracking:       true,
+	}
+}
+
+// ClearList clears the user list and turns off tracking
+func (c *ChannelData) ClearList() {
+	c.Users = []osuapi.User{}
+	c.Tracking = false
+}
+
+// TrackToggle toggles the tracking on and off
+func (c *ChannelData) TrackToggle() {
+	if len(c.Users) == 0 {
+		c.Tracking = false
+		return
+	}
 	c.Tracking = !c.Tracking
 }
 
-func (c ChannelData) addUser(u osuapi.User) {
+// AddUser adds a user to the list of people to track
+func (c *ChannelData) AddUser(u osuapi.User) {
+	for _, user := range c.Users {
+		if user.Username == u.Username {
+			return
+		}
+	}
 	c.Users = append(c.Users, u)
 }
 
-func (c ChannelData) removeUser(users []string) error {
+// RemoveUser removes users from the list of people to track
+func (c *ChannelData) RemoveUser(users []string) {
 	if len(users) == 0 {
-		return errors.New("No users given")
+		return
 	}
 	for _, user := range users {
-		for i, osuUser := range c.Users {
-			if strings.ToLower(osuUser.Username) == strings.ToLower(user) {
+		for i := 0; i < len(c.Users); i++ {
+			if strings.ToLower(c.Users[i].Username) == strings.ToLower(user) {
 				c.Users = append(c.Users[:i], c.Users[i+1:]...)
+				i--
 			}
 		}
 	}
-	return nil
 }
 
-func (c ChannelData) clearList() {
-	c.Users = []osuapi.User{}
+// UpdateMapStatus updates the map statuses allowed
+func (c *ChannelData) UpdateMapStatus(mapTypes []string) {
+	for _, status := range mapTypes {
+		switch status {
+		case "r", "rank", "ranked":
+			c.Ranked = !c.Ranked
+		case "q", "qual", "qualified":
+			c.Qualified = !c.Qualified
+		case "l", "love", "loved":
+			c.Loved = !c.Loved
+		}
+	}
 }
