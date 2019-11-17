@@ -34,11 +34,13 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	diffRegex, _ := regexp.Compile(`\[(.*)\]`)
 	diagnosisRegex, _ := regexp.Compile(` -v`)
 
-	url := linkRegex.FindStringSubmatch(m.Content)[0]
+	url := ""
 	if len(m.Attachments) > 0 {
 		url = m.Attachments[0].URL
 	} else if len(m.Embeds) > 0 && m.Embeds[0].Image != nil {
 		url = m.Embeds[0].Image.URL
+	} else {
+		url = linkRegex.FindStringSubmatch(m.Content)[0]
 	}
 
 	// Fetch the image data
