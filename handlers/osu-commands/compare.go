@@ -19,141 +19,101 @@ import (
 
 // Compare compares finds a score from the current user on the previous map linked by the bot
 func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI *osuapi.Client, cache []structs.PlayerData, serverPrefix string, mapCache []structs.MapData) {
-	messageRegex, _ := regexp.Compile(`(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
+	mapRegex, _ := regexp.Compile(`(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	compareRegex, _ := regexp.Compile(`(c|compare)\s*(.+)?`)
+	var beatmap osuapi.Beatmap
 
-	// Obtain username, mods, and map id
-	userArg := ""
+	// Obtain username and mods
+	username := ""
 	mods := ""
-	beatmaps := []osuapi.Beatmap{}
-	beatmap := osuapi.Beatmap{}
-	var err error
-	var APIMods osuapi.Mods
 	if compareRegex.MatchString(m.Content) {
-		userArg = compareRegex.FindStringSubmatch(m.Content)[2]
-	}
-
-	if modRegex.MatchString(m.Content) {
-		modCheck := modRegex.FindStringSubmatch(m.Content)
-		modsRaw := strings.ToUpper(modCheck[1])
-		if len(modsRaw)%2 == 0 && len(osuapi.ParseMods(modsRaw).String()) > 0 {
-			APIMods = osuapi.ParseMods(modsRaw)
-			mods = APIMods.String()
+		username = compareRegex.FindStringSubmatch(m.Content)[2]
+		if modRegex.MatchString(username) {
+			mods = strings.ToUpper(modRegex.FindStringSubmatch(username)[1])
+			if strings.Contains(mods, "NC") && !strings.Contains(mods, "DT") {
+				mods += "DT"
+			}
+			username = strings.TrimSpace(strings.Replace(username, modRegex.FindStringSubmatch(username)[0], "", 1))
 		}
-		userArg = strings.TrimSpace(strings.Replace(userArg, modCheck[0], "", -1))
 	}
 
-	if messageRegex.MatchString(m.Content) {
-		submatches := messageRegex.FindStringSubmatch(m.Content)
-		mapID := 0
-		setID := 0
+	// Get the map
+	if mapRegex.MatchString(m.Content) {
+		submatches := mapRegex.FindStringSubmatch(m.Content)
 		switch submatches[3] {
 		case "s":
-			setID, _ = strconv.Atoi(submatches[4])
-		case "b", "beatmaps":
-			mapID, _ = strconv.Atoi(submatches[4])
+			beatmap = osutools.BeatmapParse(submatches[4], "set", osuapi.ParseMods(mods), osuAPI)
+		case "b":
+			beatmap = osutools.BeatmapParse(submatches[4], "map", osuapi.ParseMods(mods), osuAPI)
+		case "beatmaps":
+			beatmap = osutools.BeatmapParse(submatches[4], "map", osuapi.ParseMods(mods), osuAPI)
 		case "beatmapsets":
 			if len(submatches[7]) > 0 {
-				mapID, _ = strconv.Atoi(submatches[7])
+				beatmap = osutools.BeatmapParse(submatches[7], "map", osuapi.ParseMods(mods), osuAPI)
 			} else {
-				setID, _ = strconv.Atoi(submatches[4])
+				beatmap = osutools.BeatmapParse(submatches[4], "set", osuapi.ParseMods(mods), osuAPI)
 			}
 		}
-		if setID != 0 {
-			beatmaps, err = osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
-				BeatmapSetID: setID,
-			})
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-				return
-			}
-			if len(beatmaps) == 0 {
-				s.ChannelMessageSend(m.ChannelID, "This set does not exist!")
-				return
-			}
-			sort.Slice(beatmaps, func(i, j int) bool {
-				return beatmaps[i].DifficultyRating > beatmaps[j].DifficultyRating
-			})
-			beatmap = beatmaps[0]
-			if beatmap.Approved == osuapi.StatusPending || beatmap.Approved == osuapi.StatusGraveyard || beatmap.Approved == osuapi.StatusWIP {
-				s.ChannelMessageSend(m.ChannelID, "The map `"+beatmap.Artist+" - "+beatmap.Title+"` does not have a leaderboard!")
-				return
-			}
-		} else {
-			beatmaps, err = osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
-				BeatmapID: mapID,
-			})
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-				return
-			}
-			if len(beatmaps) == 0 {
-				s.ChannelMessageSend(m.ChannelID, "This map does not exist!")
-				return
-			}
-			beatmap = beatmaps[0]
-			if beatmap.Approved == osuapi.StatusPending || beatmap.Approved == osuapi.StatusGraveyard || beatmap.Approved == osuapi.StatusWIP {
-				s.ChannelMessageSend(m.ChannelID, "The map `"+beatmap.Artist+" - "+beatmap.Title+"` does not have a leaderboard!")
-				return
-			}
+		if beatmap.BeatmapID == 0 {
+			s.ChannelMessageSend(m.ChannelID, "Map does not exist!")
+			return
+		} else if beatmap.Approved < 1 {
+			s.ChannelMessageSend(m.ChannelID, "The map `"+beatmap.Artist+" - "+beatmap.Title+"` does not have a leaderboard!")
+			return
 		}
-		userArg = strings.TrimSpace(strings.Replace(userArg, submatches[0], "", -1))
+		username = strings.TrimSpace(strings.Replace(username, submatches[0], "", -1))
 	}
 
-	// Get prev messages
-	messages, err := s.ChannelMessages(m.ChannelID, -1, "", "", "")
-	tools.ErrRead(err)
-
-	// Sort by date
-	sort.Slice(messages, func(i, j int) bool {
-		time1, err := time.Parse(time.RFC3339, string(messages[i].Timestamp))
-		tools.ErrRead(err)
-		time2, err := time.Parse(time.RFC3339, string(messages[j].Timestamp))
-		tools.ErrRead(err)
-		return time1.After(time2)
-	})
-
-	// Check if message linked a map or not
-	beatmapRegex, _ := regexp.Compile(`https://osu.ppy.sh/beatmaps/(\d+)`)
+	// Check if message linked a map or not, if not then check previous messages instead
 	if beatmap.BeatmapID == 0 {
+		// Get prev messages
+		messages, err := s.ChannelMessages(m.ChannelID, -1, "", "", "")
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
+			return
+		}
+
+		// Sort by date
+		sort.Slice(messages, func(i, j int) bool {
+			time1, _ := messages[i].Timestamp.Parse()
+			time2, _ := messages[j].Timestamp.Parse()
+			return time1.After(time2)
+		})
+		beatmapRegex, _ := regexp.Compile(`https://osu.ppy.sh/beatmaps/(\d+)`)
 		mapID := 0
 		found := false
+
+		// Look for a valid beatmap ID
 		for _, msg := range messages {
-			msgTime, err := time.Parse(time.RFC3339, string(msg.Timestamp))
+			msgTime, _ := msg.Timestamp.Parse()
 			if msg.Author.ID == s.State.User.ID && time.Since(msgTime) < time.Hour {
 				if msg.ID != (discordgo.Message{}).ID && len(msg.Embeds) > 0 && msg.Embeds[0].Author != nil {
 					if beatmapRegex.MatchString(msg.Embeds[0].URL) {
-						mapID, err = strconv.Atoi(beatmapRegex.FindStringSubmatch(msg.Embeds[0].URL)[1])
-						tools.ErrRead(err)
+						mapID, _ = strconv.Atoi(beatmapRegex.FindStringSubmatch(msg.Embeds[0].URL)[1])
 						found = true
 						break
 					} else if beatmapRegex.MatchString(msg.Embeds[0].Author.URL) {
-						mapID, err = strconv.Atoi(beatmapRegex.FindStringSubmatch(msg.Embeds[0].Author.URL)[1])
-						tools.ErrRead(err)
+						mapID, _ = strconv.Atoi(beatmapRegex.FindStringSubmatch(msg.Embeds[0].Author.URL)[1])
 						found = true
 						break
 					}
 				}
 			}
 		}
+
+		// Check if found
 		if found == false {
 			s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
 			return
 		}
-		beatmaps, err = osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
-			BeatmapID: mapID,
-		})
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+
+		// Get the map
+		beatmap = osutools.BeatmapParse(strconv.Itoa(mapID), "map", osuapi.ParseMods(mods), osuAPI)
+		if beatmap.BeatmapID == 0 {
+			s.ChannelMessageSend(m.ChannelID, "Map does not exist!")
 			return
-		}
-		if len(beatmaps) == 0 {
-			s.ChannelMessageSend(m.ChannelID, "This map does not exist!")
-			return
-		}
-		beatmap = beatmaps[0]
-		if beatmap.Approved == osuapi.StatusPending || beatmap.Approved == osuapi.StatusGraveyard || beatmap.Approved == osuapi.StatusWIP {
+		} else if beatmap.Approved < 1 {
 			s.ChannelMessageSend(m.ChannelID, "The map `"+beatmap.Artist+" - "+beatmap.Title+"` does not have a leaderboard!")
 			return
 		}
@@ -165,28 +125,29 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	}
 
 	// Get user
-	user := osuapi.User{}
+	var user osuapi.User
 	for _, player := range cache {
-		if userArg != "" {
-			if userArg == user.Username {
+		if username != "" {
+			if username == player.Osu.Username {
 				user = player.Osu
 				break
 			}
-		} else if m.Author.ID == player.Discord.ID && player.Osu.Username != (osuapi.User{}).Username {
+		} else if m.Author.ID == player.Discord.ID && player.Osu.Username != "" {
 			user = player.Osu
 			break
 		}
 	}
-	if user.UserID == (osuapi.User{}).UserID {
-		// Check if user even exists
-		if userArg == "" {
+
+	// Check if user even exists
+	if user.UserID == 0 {
+		if username == "" {
 			s.ChannelMessageSend(m.ChannelID, "No user mentioned in message/linked to your account! Please use `set` or `link` to link an osu! account to you, or name a user to obtain their recent score of!")
 		}
 		test, err := osuAPI.GetUser(osuapi.GetUserOpts{
-			Username: userArg,
+			Username: username,
 		})
 		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "User "+userArg+" may not exist! Are you sure you replaced spaces with `_`?")
+			s.ChannelMessageSend(m.ChannelID, "User "+username+" may not exist! Are you sure you replaced spaces with `_`?")
 			return
 		}
 		user = *test
@@ -197,35 +158,33 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		BeatmapID: beatmap.BeatmapID,
 		UserID:    user.UserID,
 	}
-	if mods != "" {
-		scoreOpts.Mods = &APIMods
-	}
-
 	scores, err := osuAPI.GetScores(scoreOpts)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
 		return
 	}
-
-	if strings.Contains(mods, "DTNC") {
-		mods = strings.Replace(mods, "DTNC", "NC", 1)
-	}
-
 	if len(scores) == 0 {
-		if userArg != "" {
-			s.ChannelMessageSend(m.ChannelID, userArg+" hasn't set a score on this!")
-		} else if mods != "" {
-			if strings.Contains(mods, "DT") {
-				s.ChannelMessageSend(m.ChannelID, "You haven't set a score on this with the mods: **"+mods+"**! Are you sure you didn't play with **NC** like the dumbass weaboo u are?")
-			} else if strings.Contains(mods, "NC") {
-				s.ChannelMessageSend(m.ChannelID, "You haven't set a score on this with the mods: **"+mods+"**! Are you sure you didn't play with **DT** like a sane person?")
-			} else {
-				s.ChannelMessageSend(m.ChannelID, "You haven't set a score on this with the mods: **"+mods+"**!")
-			}
+		if username != "" {
+			s.ChannelMessageSend(m.ChannelID, username+" hasn't set a score on this!")
 		} else {
 			s.ChannelMessageSend(m.ChannelID, "You haven't set a score on this with any mod combination!")
 		}
 		return
+	}
+
+	// Mod filter
+	if mods != "" {
+		parsedMods := osuapi.ParseMods(mods)
+		for i := 0; i < len(scores); i++ {
+			if scores[i].Mods&parsedMods == 0 && (parsedMods != 0 || scores[i].Mods != 0) {
+				scores = append(scores[:i], scores[i+1:]...)
+				i--
+			}
+		}
+		if len(scores) == 0 {
+			s.ChannelMessageSend(m.ChannelID, "No scores with the mod combination **"+mods+"** exist!")
+			return
+		}
 	}
 
 	// Sort by PP
@@ -236,8 +195,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	score := scores[0]
 
 	// Get time since play
-	timeParse, err := time.Parse("2006-01-02 15:04:05", score.Date.String())
-	tools.ErrRead(err)
+	timeParse, _ := time.Parse("2006-01-02 15:04:05", score.Date.String())
 	time := tools.TimeSince(timeParse)
 
 	// Assign timing variables for map specs
@@ -253,9 +211,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	}
 
 	// Assign values
-	if score.Mods != 0 {
-		mods = score.Mods.String()
-	}
+	mods = score.Mods.String()
 	accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 	Color := osutools.ModeColour(osuapi.ModeOsu)
 	sr, _, _, _, _, _ := osutools.BeatmapCache(mods, beatmap, mapCache)
@@ -272,8 +228,6 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	if strings.Contains(mods, "DTNC") {
 		mods = strings.Replace(mods, "DTNC", "NC", 1)
 	}
-	scoreMods := mods
-	mods = " **+" + mods + "** "
 
 	var combo string
 	if score.MaxCombo == beatmap.MaxCombo {
@@ -287,7 +241,6 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	}
 
 	mapCompletion := ""
-	mapCompletion2 := ""
 	orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 		Username: user.Username,
 		Limit:    100,
@@ -298,57 +251,22 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	}
 	for i, orderedScore := range orderedScores {
 		if score.Score.Score == orderedScore.Score.Score {
-			mapCompletion = "**#" + strconv.Itoa(i+1) + "** in top performances! \n"
-			mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
-				BeatmapID: beatmap.BeatmapID,
-				Limit:     100,
-			})
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-				return
-			}
-			for j, mapScore := range mapScores {
-				if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
-					mapCompletion2 = "**#" + strconv.Itoa(j+1) + "** on leaderboard! \n"
-					break
-				}
-			}
+			mapCompletion += "**#" + strconv.Itoa(i+1) + "** in top performances! \n"
 			break
 		}
 	}
-	if mapCompletion == "" {
-		mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
-			BeatmapID: beatmap.BeatmapID,
-			Limit:     100,
-		})
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-			return
-		}
-		for i, mapScore := range mapScores {
-			if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
-				mapCompletion = "**#" + strconv.Itoa(i+1) + "** on leaderboard! \n"
-				scores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
-					Username: user.Username,
-					Limit:    100,
-				})
-				if err != nil {
-					s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-					return
-				}
-				if len(scores) == 0 {
-					s.ChannelMessageSend(m.ChannelID, user.Username+" has no top scores!")
-					return
-				}
-
-				for j, bestScore := range scores {
-					if score.UserID == bestScore.UserID && score.Score.Score == bestScore.Score.Score {
-						mapCompletion2 = "**#" + strconv.Itoa(j+1) + "** in top performances! \n"
-						break
-					}
-				}
-				break
-			}
+	mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
+		BeatmapID: beatmap.BeatmapID,
+		Limit:     100,
+	})
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+		return
+	}
+	for i, mapScore := range mapScores {
+		if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
+			mapCompletion += "**#" + strconv.Itoa(i+1) + "** on leaderboard! \n"
+			break
 		}
 	}
 
@@ -360,14 +278,14 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	} else { // If map was finished, but play was not a perfect combo
 		ppValues := make(chan string, 1)
 		accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
-		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", scoreMods, ppValues)
+		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", mods, ppValues)
 		pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
 	}
 	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 	hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
+	mods = " **+" + mods + "** "
 
-	g, err := s.Guild("556243477084635170")
-	tools.ErrRead(err)
+	g, _ := s.Guild("556243477084635170")
 	scoreRank := ""
 	for _, emoji := range g.Emojis {
 		if emoji.Name == score.Rank+"_" {
@@ -392,7 +310,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 			mapStats + "\n" +
 			mapObjs + "\n\n" +
 			scorePrint + mods + combo + acc + scoreRank + "\n" +
-			mapCompletion + mapCompletion2 + "\n" +
+			mapCompletion + "\n" +
 			pp + hits + "\n\n",
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: time,
@@ -404,5 +322,4 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		}
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
-	return
 }

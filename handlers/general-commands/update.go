@@ -16,7 +16,7 @@ func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	updateRegex, _ := regexp.Compile(`u(pdate)?\s+(.+)`)
+	updateRegex, _ := regexp.Compile(`up(date)?\s+(.+)`)
 	if !updateRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "farm or osu-tools dumbass...")
 		return

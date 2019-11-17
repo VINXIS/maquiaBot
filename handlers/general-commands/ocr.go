@@ -12,7 +12,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -43,10 +42,8 @@ func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// Sort by date
 		sort.Slice(messages, func(i, j int) bool {
-			time1, err := time.Parse(time.RFC3339, string(messages[i].Timestamp))
-			tools.ErrRead(err)
-			time2, err := time.Parse(time.RFC3339, string(messages[j].Timestamp))
-			tools.ErrRead(err)
+			time1, _ := messages[i].Timestamp.Parse()
+			time2, _ := messages[j].Timestamp.Parse()
 			return time1.After(time2)
 		})
 		for _, msg := range messages {

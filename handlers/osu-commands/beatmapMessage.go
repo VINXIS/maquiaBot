@@ -2,7 +2,6 @@ package osucommands
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"regexp"
@@ -51,12 +50,10 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	}
 
 	// Check if a beatmap was even obtained
-	if beatmap == (osuapi.Beatmap{}) {
+	if beatmap.BeatmapID == 0 {
 		s.ChannelMessageDelete(message.ChannelID, message.ID)
 		return
 	}
-
-	log.Println("Someone linked a beatmap! The beatmap is " + strconv.Itoa(beatmap.BeatmapID) + " " + beatmap.Artist + " - " + beatmap.Title + " by " + beatmap.Creator)
 
 	// Assign embed colour for different modes
 	Color := osutools.ModeColour(beatmap.Mode)

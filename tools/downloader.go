@@ -13,7 +13,6 @@ func DownloadFile(filepath string, url string) {
 	// Get the data
 	resp, err := http.Get(url)
 	ErrRead(err)
-	defer resp.Body.Close()
 
 	// Create the file
 	out, err := os.Create(filepath)
@@ -27,9 +26,10 @@ func DownloadFile(filepath string, url string) {
 			break
 		}
 	}
-	defer out.Close()
 
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
 	ErrRead(err)
+	resp.Body.Close()
+	out.Close()
 }

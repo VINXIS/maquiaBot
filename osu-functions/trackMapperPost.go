@@ -31,7 +31,6 @@ func TrackMapperPost(s *discordgo.Session) {
 			tools.ErrRead(err)
 			_ = json.Unmarshal(f, &mapperData)
 
-			fmt.Println("Start")
 			for i := 0; i < len(mapperData); i++ {
 				user, err := osuAPI.GetUser(osuapi.GetUserOpts{
 					UserID: mapperData[i].Mapper.UserID,
@@ -167,7 +166,6 @@ func TrackMapperPost(s *discordgo.Session) {
 				mapperData[i].Beatmaps = beatmaps
 			}
 
-			fmt.Println(time.Since(startTime))
 			// Save mapper data
 			jsonCache, err := json.Marshal(mapperData)
 			tools.ErrRead(err)

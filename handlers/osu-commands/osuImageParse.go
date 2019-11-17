@@ -5,7 +5,6 @@ import (
 	"image"
 	"image/png"
 	"io/ioutil"
-	"log"
 	"math"
 	"math/rand"
 	"net/http"
@@ -35,16 +34,11 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	diffRegex, _ := regexp.Compile(`\[(.*)\]`)
 	diagnosisRegex, _ := regexp.Compile(` -v`)
 
-	var url string
+	url := linkRegex.FindStringSubmatch(m.Content)[0]
 	if len(m.Attachments) > 0 {
 		url = m.Attachments[0].URL
-		log.Println("Someone sent an image! The image URL is: " + url)
 	} else if len(m.Embeds) > 0 && m.Embeds[0].Image != nil {
 		url = m.Embeds[0].Image.URL
-		log.Println("Someone sent a link! The URL is: " + url)
-	} else {
-		url = linkRegex.FindStringSubmatch(m.Content)[0]
-		log.Println("Someone sent a link! The URL is: " + url)
 	}
 
 	// Fetch the image data

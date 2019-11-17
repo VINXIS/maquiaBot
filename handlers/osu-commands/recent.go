@@ -18,27 +18,30 @@ import (
 )
 
 // Recent gets the most recent score done/nth score done
-func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData, option string, mapCache []structs.MapData) {
-	index := 1
-	username := ""
-	var err error
-	recentRegex, _ := regexp.Compile(`(.+)(r|recent|rs|rb|recentb|recentbest)\s+(.+)`)
+func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, option string, cache []structs.PlayerData, mapCache []structs.MapData) {
+	recentRegex, _ := regexp.Compile(`(r|recent|rs|rb|recentb|recentbest)\s+(.+)`)
+	modRegex, _ := regexp.Compile(`-m\s*(\S{2,})`)
 
-	// Obtain index and username
+	username := ""
+	mods := ""
+	index := 1
+
+	// Obtain index, mods, and username
 	if recentRegex.MatchString(m.Content) {
-		args := strings.Split(recentRegex.FindStringSubmatch(m.Content)[3], " ")
-		if len(args) > 1 {
-			if index, err = strconv.Atoi(args[len(args)-1]); err == nil {
-				username = strings.Join(args[:len(args)-1], " ")
-			} else {
-				index = 1
-				username = recentRegex.FindStringSubmatch(m.Content)[3]
+		username = recentRegex.FindStringSubmatch(m.Content)[2]
+		if modRegex.MatchString(username) {
+			mods = strings.ToUpper(modRegex.FindStringSubmatch(username)[1])
+			if strings.Contains(mods, "NC") && !strings.Contains(mods, "DT") {
+				mods += "DT"
 			}
-		} else {
-			index, err = strconv.Atoi(args[0])
-			if err != nil {
-				index = 1
-				username = args[0]
+			username = strings.TrimSpace(strings.Replace(username, modRegex.FindStringSubmatch(username)[0], "", 1))
+		}
+		usernameSplit := strings.Split(username, " ")
+		for _, txt := range usernameSplit {
+			if i, err := strconv.Atoi(txt); err != nil && i > 0 && i < 100 {
+				username = strings.Replace(username, txt, "", 1)
+				index = i
+				break
 			}
 		}
 	}
@@ -65,10 +68,11 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 		s.ChannelMessageSend(m.ChannelID, "User **"+username+"** may not exist!")
 		return
 	}
-	scoreList := []osuapi.GUSScore{}
 
 	// Run api call for user best/recent
-	if option == "recent" {
+	var scoreList []osuapi.GUSScore
+	switch option {
+	case "recent":
 		scoreList, err = osuAPI.GetUserRecent(osuapi.GetUserScoresOpts{
 			Username: username,
 			Limit:    50,
@@ -78,7 +82,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 			s.ChannelMessageSend(m.ChannelID, username+" has not played recently!")
 			return
 		}
-	} else if option == "best" {
+	case "best":
 		scoreList, err = osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 			Username: username,
 			Limit:    100,
@@ -88,9 +92,6 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 			s.ChannelMessageSend(m.ChannelID, username+" has no top scores!")
 			return
 		}
-	} else {
-		s.ChannelMessageSend(m.ChannelID, "Oops! Something went wrong! I was somehow not given recent or best as an option!")
-		return
 	}
 
 	// Sort scores by date and get score
@@ -103,8 +104,23 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 		return time1.Unix() > time2.Unix()
 	})
 
+	// Mod filter
+	if mods != "" {
+		parsedMods := osuapi.ParseMods(mods)
+		for i := 0; i < len(scoreList); i++ {
+			if scoreList[i].Mods&parsedMods == 0 && (parsedMods != 0 || scoreList[i].Mods != 0) {
+				scoreList = append(scoreList[:i], scoreList[i+1:]...)
+				i--
+			}
+		}
+		if len(scoreList) == 0 {
+			s.ChannelMessageSend(m.ChannelID, "No scores with the mod combination **"+mods+"** exist!")
+			return
+		}
+	}
+
 	warning := ""
-	if len(scoreList) < index {
+	if index > len(scoreList) {
 		index = len(scoreList)
 		warning = "Defaulted to max: " + strconv.Itoa(len(scoreList))
 	}
@@ -113,10 +129,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	// Get beatmap, acc, and mods
 	beatmap := osutools.BeatmapParse(strconv.Itoa(score.BeatmapID), "map", score.Mods, osuAPI)
 	accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
-	mods := "NM"
-	if score.Mods != 0 {
-		mods = score.Mods.String()
-	}
+	mods = score.Mods.String()
 
 	// Count number of tries
 	try := 0
@@ -157,13 +170,10 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
 	var combo string
 	var mapCompletion string
-	var mapCompletion2 string
 
 	if strings.Contains(mods, "DTNC") {
 		mods = strings.Replace(mods, "DTNC", "NC", 1)
 	}
-	scoreMods := mods
-	mods = " **+" + mods + "** "
 
 	if score.MaxCombo == beatmap.MaxCombo {
 		if accCalc == 100.0 {
@@ -178,65 +188,27 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	if objCount != playObjCount {
 		completed := float64(playObjCount) / float64(objCount) * 100.0
 		mapCompletion = "**" + strconv.FormatFloat(completed, 'f', 2, 64) + "%** completed \n"
-		mapCompletion2 = ""
 	} else {
-		if option == "best" {
-			sort.Slice(scoreList, func(i, j int) bool {
-				return scoreList[i].PP > scoreList[j].PP
-			})
-			for i, bestScore := range scoreList {
-				if score.BeatmapID == bestScore.BeatmapID {
-					mapCompletion = "**#" + strconv.Itoa(i+1) + "** in top performances! \n"
-					mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
-						BeatmapID: beatmap.BeatmapID,
-						Limit:     100,
-					})
-					if err != nil {
-						s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-						return
-					}
-					for j, mapScore := range mapScores {
-						if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
-							mapCompletion2 = "**#" + strconv.Itoa(j+1) + "** on leaderboard! \n"
-							break
-						}
-					}
-					break
-				}
+		orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+			Username: userP.Username,
+			Limit:    100,
+		})
+		tools.ErrRead(err)
+		for i, orderedScore := range orderedScores {
+			if score.Score.Score == orderedScore.Score.Score {
+				mapCompletion += "**#" + strconv.Itoa(i+1) + "** in top performances! \n"
+				break
 			}
-		} else if option == "recent" {
-			mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
-				BeatmapID: beatmap.BeatmapID,
-				Limit:     100,
-			})
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-				return
-			}
-			for i, mapScore := range mapScores {
-				if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
-					mapCompletion = "**#" + strconv.Itoa(i+1) + "** on leaderboard! \n"
-					scores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
-						Username: username,
-						Limit:    100,
-					})
-					if err != nil {
-						s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-						return
-					}
-					if len(scores) == 0 {
-						s.ChannelMessageSend(m.ChannelID, username+" has no top scores!")
-						return
-					}
-
-					for j, bestScore := range scores {
-						if score.BeatmapID == bestScore.BeatmapID {
-							mapCompletion2 = "**#" + strconv.Itoa(j+1) + "** in top performances! \n"
-							break
-						}
-					}
-					break
-				}
+		}
+		mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
+			BeatmapID: beatmap.BeatmapID,
+			Limit:     100,
+		})
+		tools.ErrRead(err)
+		for i, mapScore := range mapScores {
+			if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
+				mapCompletion += "**#" + strconv.Itoa(i+1) + "** on leaderboard! \n"
+				break
 			}
 		}
 	}
@@ -248,8 +220,8 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 		ppValues := make(chan string, 2)
 		var ppValueArray [2]string
 		accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
-		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", scoreMods, ppValues)
-		go osutools.PPCalc(beatmap, accCalc, strconv.Itoa(score.MaxCombo), strconv.Itoa(score.CountMiss), scoreMods, ppValues)
+		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", mods, ppValues)
+		go osutools.PPCalc(beatmap, accCalc, strconv.Itoa(score.MaxCombo), strconv.Itoa(score.CountMiss), mods, ppValues)
 		for v := 0; v < 2; v++ {
 			ppValueArray[v] = <-ppValues
 		}
@@ -268,11 +240,12 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	} else { // If map was finished, but play was not a perfect combo
 		ppValues := make(chan string, 1)
 		accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
-		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", scoreMods, ppValues)
+		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", mods, ppValues)
 		pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
 	}
 	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 	hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
+	mods = " **+" + mods + "** "
 
 	g, err := s.Guild("556243477084635170")
 	tools.ErrRead(err)
@@ -297,7 +270,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 			mapStats + "\n" +
 			mapObjs + "\n\n" +
 			scorePrint + mods + combo + acc + scoreRank + "\n" +
-			mapCompletion + mapCompletion2 + "\n" +
+			mapCompletion + "\n" +
 			pp + hits + "\n\n",
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
@@ -321,5 +294,4 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 		Content: warning,
 		Embed:   embed,
 	})
-	return
 }

@@ -111,7 +111,8 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 						for i, orderedScore := range orderedScores {
 							if score.Score.Score == orderedScore.Score.Score {
 								topNum = i + 1
-								mapCompletion = "**#" + strconv.Itoa(topNum) + "** in top performances! \n"
+								mapCompletion += "**#" + strconv.Itoa(topNum) + "** in top performances! \n"
+								break
 							}
 						}
 						mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
@@ -122,7 +123,8 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 						for i, mapScore := range mapScores {
 							if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
 								topNum = i + 1
-								mapCompletion = "**#" + strconv.Itoa(topNum) + "** on leaderboard! \n"
+								mapCompletion += "**#" + strconv.Itoa(topNum) + "** on leaderboard! \n"
+								break
 							}
 						}
 

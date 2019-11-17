@@ -103,6 +103,9 @@ func ParseMods(mods string) (m Mods) {
 }
 
 func (m Mods) String() (s string) {
+	if m == 0 {
+		s = "NM"
+	}
 	for i := 0; i < len(modsString); i++ {
 		activated := 1&m == 1
 		if activated {

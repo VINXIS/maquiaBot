@@ -16,11 +16,11 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 		case "link", "set":
 			go osucommands.Link(s, m, args, osuAPI, playerCache)
 		case "recent", "r", "rs":
-			go osucommands.Recent(s, m, osuAPI, playerCache, "recent", mapCache)
+			go osucommands.Recent(s, m, osuAPI, "recent", playerCache, mapCache)
 		case "recentb", "rb", "recentbest":
-			go osucommands.Recent(s, m, osuAPI, playerCache, "best", mapCache)
+			go osucommands.Recent(s, m, osuAPI, "best", playerCache, mapCache)
 		case "t", "top":
-			go osucommands.Top(s, m, args, osuAPI, playerCache, serverPrefix, mapCache)
+			go osucommands.Top(s, m, osuAPI, playerCache, mapCache)
 		case "tfarm", "topfarm":
 			go osucommands.TopFarm(s, m, osuAPI, playerCache, serverPrefix)
 		case "bfarm", "bottomfarm":

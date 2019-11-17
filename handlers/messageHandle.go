@@ -150,7 +150,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go PokemonHandle(s, m, args, serverPrefix)
 		case serverPrefix + "avatar", serverPrefix + "ava", serverPrefix + "a":
 			go gencommands.Avatar(s, m)
-		case serverPrefix + "u", serverPrefix + "update":
+		case serverPrefix + "ping":
+			go gencommands.Ping(s, m)
+		case serverPrefix + "up", serverPrefix + "update":
 			go gencommands.Update(s, m)
 		case serverPrefix + "parse":
 			go gencommands.ParseID(s, m)
@@ -199,13 +201,13 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "ppadd":
 			go osucommands.PPAdd(s, m, osuAPI, profileCache)
 		case serverPrefix + "r", serverPrefix + "rs", serverPrefix + "recent":
-			go osucommands.Recent(s, m, osuAPI, profileCache, "recent", mapCache)
+			go osucommands.Recent(s, m, osuAPI, "recent", profileCache, mapCache)
 		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
-			go osucommands.Recent(s, m, osuAPI, profileCache, "best", mapCache)
+			go osucommands.Recent(s, m, osuAPI, "best", profileCache, mapCache)
 		case serverPrefix + "c", serverPrefix + "compare":
 			go osucommands.Compare(s, m, args, osuAPI, profileCache, serverPrefix, mapCache)
 		case serverPrefix + "t", serverPrefix + "top":
-			go osucommands.Top(s, m, args, osuAPI, profileCache, serverPrefix, mapCache)
+			go osucommands.Top(s, m, osuAPI, profileCache, mapCache)
 		case serverPrefix + "tr", serverPrefix + "track":
 			go osucommands.Track(s, m, osuAPI, mapCache)
 		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "ttoggle", serverPrefix + "tracktoggle":
