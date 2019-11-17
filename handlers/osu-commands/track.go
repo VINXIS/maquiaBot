@@ -211,19 +211,20 @@ func TrackInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			Name:    channelData.Channel.Name,
 			IconURL: serverImg,
 		},
-		Description: "Any admin, server moderator, or server owner can update this using `track` again! Toggle tracking on or off using `ttoggle` or `tracktoggle`",
+		Description: "Any admin, server moderator, or server owner can update this using `track` again! \n**You do not need to readd everything again to update parts of the tracker.** Toggle tracking on or off using `tt`, `trackt`, `ttoggle`, or `tracktoggle`",
 		Color:       osutools.ModeColour(channelData.Mode),
 	}
 
 	// Warnings
+	warning := ""
 	if !channelData.Ranked && !channelData.Loved && !channelData.Qualified {
-		embed.Description += "\n**WARNING:** You do not have any map rank statuses with leaderboards enabled! Please enable at least one in order for tracking to work!"
+		warning += "\n**WARNING:** You do not have any map rank statuses with leaderboards enabled! Please enable at least one in order for tracking to work!"
 	}
 	if channelData.LeaderboardReq == 101 && channelData.TopReq == 101 && channelData.PPReq == -1 {
-		embed.Description += "\n**WARNING:** You do not have any leader/top/pp requirement for scores! Any score submitted by the users listed on eligible maps will be posted as a result!"
+		warning += "\n**WARNING:** You do not have any leader/top/pp requirement for scores! Any score submitted by the users listed on eligible maps will be posted as a result!"
 	}
 	if !channelData.Tracking {
-		embed.Description += "\n**WARNING:** Tracking is currently turned off!"
+		warning += "\n**WARNING:** Tracking is currently turned off!"
 	}
 
 	// Add users
@@ -297,7 +298,10 @@ func TrackInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Mode: ", channelData.Mode.String(), true})
 	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Tracking: ", strconv.FormatBool(channelData.Tracking), true})
 
-	s.ChannelMessageSendEmbed(m.ChannelID, &embed)
+	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+		Content: warning,
+		Embed:   &embed,
+	})
 	return
 }
 
