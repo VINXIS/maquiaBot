@@ -82,6 +82,9 @@ func main() {
 		}
 	}
 
+	// Get osu! mapper tracking data
+	// go osutools.TrackMapperPost(discord) Commented until a solution is found for its issues
+
 	// Create a channel to keep the bot running until a prompt is given to close
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Kill)

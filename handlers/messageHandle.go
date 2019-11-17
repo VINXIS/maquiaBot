@@ -60,6 +60,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	tools.ErrRead(err)
 	_ = json.Unmarshal(f, &profileCache)
 
+	// Obtain mapper data
+	var mapperData []structs.MapperData
+	f, err = ioutil.ReadFile("./data/osuData/mapperData.json")
+	tools.ErrRead(err)
+	_ = json.Unmarshal(f, &mapperData)
+
 	// Obtain server data
 	var serverData structs.ServerData
 	_, err = os.Stat("./data/serverData/" + m.GuildID + ".json")
@@ -206,6 +212,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go osucommands.TrackToggle(s, m, mapCache)
 		case serverPrefix + "ti", serverPrefix + "tinfo", serverPrefix + "tracking", serverPrefix + "trackinfo":
 			go osucommands.TrackInfo(s, m)
+		case serverPrefix + "mt", serverPrefix + "mtrack", serverPrefix + "maptrack", serverPrefix + "mappertrack":
+			go osucommands.TrackMapper(s, m, osuAPI, mapperData)
+		case serverPrefix + "mti", serverPrefix + "mtinfo", serverPrefix + "mtrackinfo", serverPrefix + "maptracking", serverPrefix + "mappertracking", serverPrefix + "mappertrackinfo":
+			go osucommands.TrackMapperInfo(s, m, mapperData)
 		case serverPrefix + "b", serverPrefix + "berry":
 			go pokemoncommands.Berry(s, m, args)
 		case serverPrefix + "p", serverPrefix + "percentage", serverPrefix + "per", serverPrefix + "percent":
