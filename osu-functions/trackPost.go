@@ -30,9 +30,9 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 		case <-ticker.C:
 
 			// Get channel data
-			ch, _ := tools.GetChannel(channel)
+			ch, new := tools.GetChannel(channel)
 
-			if !ch.Tracking || len(ch.Users) == 0 {
+			if !ch.Tracking || len(ch.Users) == 0 || new {
 				return
 			}
 
@@ -158,12 +158,27 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 						rankCheck := ch.Ranked && (beatmap.Approved == osuapi.StatusRanked || beatmap.Approved == osuapi.StatusApproved)
 						qualCheck := ch.Qualified && beatmap.Approved == osuapi.StatusQualified
 						loveCheck := ch.Loved && beatmap.Approved == osuapi.StatusLoved
+						mapCheck := rankCheck || qualCheck || loveCheck
+
+						// score checking is a bit more complicated than map checking since we should be ignoring parameters if they were not technically given
 						ppCheck := score.PP >= ch.PPReq
 						leaderboardCheck := leaderboardNum <= ch.LeaderboardReq
 						topCheck := topNum <= ch.TopReq
+						scoreCheck := false
+						if ch.PPReq != -1 {
+							scoreCheck = scoreCheck || ppCheck
+						}
+						if ch.LeaderboardReq != 101 {
+							scoreCheck = scoreCheck || leaderboardCheck
+						}
+						if ch.TopReq != 101 {
+							scoreCheck = scoreCheck || topCheck
+						}
+						// If no requirements were given for all 3 areas
+						if ch.PPReq == -1 && ch.LeaderboardReq == 101 && ch.TopReq == 101 {
+							scoreCheck = true
+						}
 
-						mapCheck := rankCheck || qualCheck || loveCheck
-						scoreCheck := ppCheck || leaderboardCheck || topCheck
 						checkPass := mapCheck && scoreCheck
 						if checkPass {
 							// Count number of tries

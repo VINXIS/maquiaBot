@@ -3,6 +3,7 @@ package osucommands
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 
@@ -48,6 +49,23 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clie
 
 	// Get params
 	args := strings.Split(m.Content, " ")[1:]
+
+	// Check if everything should just be removed
+	if len(args) == 1 && (args[0] == "r" || args[0] == "rem" || args[0] == "remove") {
+		_, err := os.Stat("./data/channelData/" + channel.ID + ".json")
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "No tracking exists for this channel currently!")
+			return
+		}
+		err = os.Remove("./data/channelData/" + channel.ID + ".json")
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "An error has occurred in removing your channel's tracking.")
+			return
+		}
+		s.ChannelMessageSend(m.ChannelID, "Successfully removed channel!")
+		return
+	}
+
 	mode := ""
 	var (
 		users, mapStatus []string
@@ -86,7 +104,7 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clie
 			users = append(users, arg)
 		case "pp":
 			pp, err = strconv.ParseFloat(arg, 64)
-			if err != nil || pp < 0 {
+			if err != nil || pp <= 0 {
 				pp = -1
 			}
 			channelData.PPReq = pp
@@ -127,7 +145,7 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clie
 	mapStatus = strings.Split(strings.Join(mapStatus, " "), ", ")
 
 	// Users
-	if args[1] == "r" || args[1] == "rem" || args[1] == "remove" {
+	if args[0] == "r" || args[0] == "rem" || args[0] == "remove" {
 		channelData.RemoveUser(users)
 	} else {
 		for _, user := range users {
@@ -206,6 +224,33 @@ func TrackInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 		Name:  "Users Tracked:",
 		Value: userList,
+	})
+
+	// Add command info
+
+	statuses := ""
+	if channelData.Ranked {
+		statuses += "r"
+	}
+	if channelData.Loved {
+		statuses += "l"
+	}
+	if channelData.Qualified {
+		statuses += "q"
+	}
+	statuses = strings.Join(strings.Split(statuses, ""), ", ")
+
+	command :=
+		"`-u " + userList +
+			" -pp " + strconv.FormatFloat(channelData.PPReq, 'f', 0, 64) +
+			" -l " + strconv.Itoa(channelData.LeaderboardReq) +
+			" -t " + strconv.Itoa(channelData.TopReq) +
+			" -m " + channelData.Mode.String() +
+			" -s " + statuses + "`"
+
+	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+		Name:  "Command for This Config:",
+		Value: command,
 	})
 
 	// Add PP req

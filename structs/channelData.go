@@ -77,8 +77,8 @@ func (c *ChannelData) RemoveUser(users []string) {
 }
 
 // UpdateMapStatus updates the map statuses allowed
-func (c *ChannelData) UpdateMapStatus(mapTypes []string) {
-	for _, status := range mapTypes {
+func (c *ChannelData) UpdateMapStatus(mapStatus []string) {
+	for _, status := range mapStatus {
 		switch status {
 		case "r", "rank", "ranked":
 			c.Ranked = !c.Ranked
