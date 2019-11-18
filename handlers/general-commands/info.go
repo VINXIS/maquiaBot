@@ -14,14 +14,13 @@ import (
 func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
 	userRegex, _ := regexp.Compile(`info\s+(.+)`)
 
-	users := m.Mentions
 	user := m.Author
 	nickname := "N/A"
 	roles := "N/A"
 	var joinDate discordgo.Timestamp
 	var err error
-	if len(users) == 1 {
-		user = users[0]
+	if len(m.Mentions) == 1 {
+		user = m.Mentions[0]
 	} else {
 		userTest := ""
 		if userRegex.MatchString(m.Content) {
@@ -114,11 +113,6 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 				}
 			}
 		}
-	}
-
-	if nickname == "N/A" {
-		s.ChannelMessageSend(m.ChannelID, "No user found!")
-		return
 	}
 
 	// Reformat joinDate
