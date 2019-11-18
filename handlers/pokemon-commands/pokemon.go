@@ -92,6 +92,7 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate) {
 	pokemon, err := pokemontools.APICall("pokemon", pokemonString, PokemonStruct{})
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, err.Error())
+		return
 	}
 	pokemonData := pokemon.(*PokemonStruct)
 

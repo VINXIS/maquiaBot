@@ -55,6 +55,7 @@ func Berry(s *discordgo.Session, m *discordgo.MessageCreate) {
 	berry, err := pokemontools.APICall("berry", berryString, BerryStruct{})
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, err.Error())
+		return
 	}
 	berryData := berry.(*BerryStruct)
 
