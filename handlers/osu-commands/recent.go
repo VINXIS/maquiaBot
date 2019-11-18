@@ -108,7 +108,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	if mods != "" {
 		parsedMods := osuapi.ParseMods(mods)
 		for i := 0; i < len(scoreList); i++ {
-			if scoreList[i].Mods&parsedMods == 0 && (parsedMods != 0 || scoreList[i].Mods != 0) {
+			if scoreList[i].Mods&parsedMods != parsedMods && (parsedMods != 0 || scoreList[i].Mods != 0) {
 				scoreList = append(scoreList[:i], scoreList[i+1:]...)
 				i--
 			}
