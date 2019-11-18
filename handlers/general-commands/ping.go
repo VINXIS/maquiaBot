@@ -8,8 +8,11 @@ import (
 
 // Ping checks how long it takes to reply to a message
 func Ping(s *discordgo.Session, m *discordgo.MessageCreate) {
-	messageTime, _ := m.Timestamp.Parse()
-	now := time.Now().UTC()
-	timeSince := now.Sub(messageTime).String()
-	s.ChannelMessageSend(m.ChannelID, "Message timestamp: "+messageTime.Format(time.RFC822)+"\nObtained at: "+now.Format(time.RFC822)+"\nTime elapsed: "+timeSince)
+	messageTime := time.Now().UTC()
+	msg, err := s.ChannelMessageSend(m.ChannelID, "This Message's timestamp: "+messageTime.Format(time.RFC3339Nano))
+	if err != nil {
+		return
+	}
+	editTime := time.Now().UTC()
+	s.ChannelMessageEdit(m.ChannelID, msg.ID, "This Message's timestamp: "+messageTime.Format(time.RFC3339Nano)+"\nEdit time: "+editTime.Format(time.RFC3339Nano)+"\nTime elapsed: "+editTime.Sub(messageTime).String())
 }
