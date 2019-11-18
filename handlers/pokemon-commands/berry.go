@@ -1,14 +1,11 @@
 package pokemoncommands
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
 	pokemontools "../../pokemon-functions"
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -40,46 +37,30 @@ type FlavourStruct struct {
 }
 
 // Berry gets information about berries
-func Berry(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
+func Berry(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Check
 	if len(m.Mentions) > 0 {
 		s.ChannelMessageSend(m.ChannelID, "Please don't try mentioning people with the bot!")
 		return
 	}
 
-	berryString := ""
-	if len(args) > 3 || (len(args) == 3 && strings.ToLower(args[1]) != "berry") {
-		s.ChannelMessageSend(m.ChannelID, "Too many args! Please use _ for spaces in the berry name!")
-		return
-	} else if len(args) < 2 {
-		s.ChannelMessageSend(m.ChannelID, "No berry name given!")
-		return
-	} else if strings.ToLower(args[1]) == "berry" {
-		berryString = args[2]
-	} else {
-		berryString = args[1]
+	berryRegex, _ := regexp.Compile(`b(erry)?\s+(\S+)`)
+	if !berryRegex.MatchString(m.Content) {
+		s.ChannelMessageSend(m.ChannelID, "No berry given!")
 	}
+
+	berryString := berryRegex.FindStringSubmatch(m.Content)[2]
 
 	// Obtain data
-	res, err := http.Get("https://pokeapi.co/api/v2/berry/" + strings.ToLower(berryString))
-	tools.ErrRead(err)
-
-	byteArray, err := ioutil.ReadAll(res.Body)
-	tools.ErrRead(err)
-
-	if strings.ToLower(string(byteArray)) == "not found" || strings.HasPrefix(string(byteArray), "<") {
-		s.ChannelMessageSend(m.ChannelID, "Berry **"+berryString+"** does not exist!")
-		return
+	berry, err := pokemontools.APICall("berry", berryString, BerryStruct{})
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, err.Error())
 	}
-
-	// Convert to readable data
-	berry := BerryStruct{}
-	err = json.Unmarshal(byteArray, &berry)
-	tools.ErrRead(err)
+	berryData := berry.(*BerryStruct)
 
 	// Create fields for potency
 	fields := []*discordgo.MessageEmbedField{}
-	for _, flavour := range berry.Flavours {
+	for _, flavour := range berryData.Flavours {
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   "**" + strings.Title(flavour.Flavour.Name) + "**",
 			Value:  strconv.Itoa(flavour.Potency) + " potency",
@@ -89,17 +70,17 @@ func Berry(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 
 	// Create embed
 	embed := &discordgo.MessageEmbed{
-		Title: strings.Title(berry.Name) + " (#" + strconv.Itoa(berry.ID) + ")",
-		Color: pokemontools.TypeColour(berry.NaturalGiftType.Name),
-		URL:   "https://bulbapedia.bulbagarden.net/wiki/" + strings.Title(berry.Name) + "_Berry",
-		Description: "**Growth rate:** " + strconv.Itoa(berry.GrowthTime) + " hours per stage **(" + strconv.Itoa(berry.GrowthTime*4) + " hours total)** \n" +
-			"**Max per tree:** " + strconv.Itoa(berry.MaxHarvest) + " berries \n" +
-			"**Soil Dryness Rate:** " + strconv.Itoa(berry.SoilDryness) + "\n\n" +
-			"**Size:** " + strconv.Itoa(berry.Size) + "mm | **Smoothness:** " + strconv.Itoa(berry.Smoothness) + " | **Firmness:** " + berry.Firmness.Name + "\n\n" +
-			"**Natural Gift:** " + strings.Title(berry.NaturalGiftType.Name) + " - " + strconv.Itoa(berry.NaturalGiftPower),
+		Title: strings.Title(berryData.Name) + " (#" + strconv.Itoa(berryData.ID) + ")",
+		Color: pokemontools.TypeColour(berryData.NaturalGiftType.Name),
+		URL:   "https://bulbapedia.bulbagarden.net/wiki/" + strings.Title(berryData.Name) + "_Berry",
+		Description: "**Growth rate:** " + strconv.Itoa(berryData.GrowthTime) + " hours per stage **(" + strconv.Itoa(berryData.GrowthTime*4) + " hours total)** \n" +
+			"**Max per tree:** " + strconv.Itoa(berryData.MaxHarvest) + " berries \n" +
+			"**Soil Dryness Rate:** " + strconv.Itoa(berryData.SoilDryness) + "\n\n" +
+			"**Size:** " + strconv.Itoa(berryData.Size) + "mm | **Smoothness:** " + strconv.Itoa(berryData.Smoothness) + " | **Firmness:** " + berryData.Firmness.Name + "\n\n" +
+			"**Natural Gift:** " + strings.Title(berryData.NaturalGiftType.Name) + " - " + strconv.Itoa(berryData.NaturalGiftPower),
 		Fields: fields,
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
-			URL: "https://www.serebii.net/itemdex/sprites/pgl/" + berry.Name + "berry.png",
+			URL: "https://www.serebii.net/itemdex/sprites/pgl/" + berryData.Name + "berry.png",
 		},
 	}
 

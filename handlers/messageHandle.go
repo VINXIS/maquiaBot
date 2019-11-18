@@ -219,7 +219,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "mti", serverPrefix + "mtinfo", serverPrefix + "mtrackinfo", serverPrefix + "maptracking", serverPrefix + "mappertracking", serverPrefix + "mappertrackinfo":
 			go osucommands.TrackMapperInfo(s, m, mapperData)
 		case serverPrefix + "b", serverPrefix + "berry":
-			go pokemoncommands.Berry(s, m, args)
+			go pokemoncommands.Berry(s, m)
 		case serverPrefix + "p", serverPrefix + "percentage", serverPrefix + "per", serverPrefix + "percent":
 			go gencommands.Percentage(s, m)
 		case serverPrefix + "roll":

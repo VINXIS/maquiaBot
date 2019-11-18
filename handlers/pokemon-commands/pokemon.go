@@ -1,15 +1,11 @@
 package pokemoncommands
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 
 	pokemontools "../../pokemon-functions"
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -73,55 +69,47 @@ type PokemonAbility struct {
 }
 
 // Pokemon searches for the pokemon and returns result
-func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
+func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Check
 	if len(m.Mentions) > 0 {
 		s.ChannelMessageSend(m.ChannelID, "Please don't try mentioning people with the bot!")
 		return
 	}
 
-	if len(args) > 2 {
-		s.ChannelMessageSend(m.ChannelID, "Too many args! Please use _ for spaces in the pokemon name!")
-		return
+	pokemonRegex, _ := regexp.Compile(`pokemon\s+(\S+)`)
+	if !pokemonRegex.MatchString(m.Content) {
+		s.ChannelMessageSend(m.ChannelID, "No berry given!")
 	}
 
+	pokemonString := pokemonRegex.FindStringSubmatch(m.Content)[1]
+
 	// If deoxys change to id lol
-	if strings.ToLower(args[1]) == "deoxys" {
-		args[1] = "386"
+	if strings.ToLower(pokemonString) == "deoxys" {
+		pokemonString = "386"
 	}
 
 	// Obtain data
-	res, err := http.Get("https://pokeapi.co/api/v2/pokemon/" + strings.ToLower(args[1]))
-	tools.ErrRead(err)
-
-	byteArray, err := ioutil.ReadAll(res.Body)
-	tools.ErrRead(err)
-
-	if strings.ToLower(string(byteArray)) == "not found" || strings.HasPrefix(string(byteArray), "<") {
-		s.ChannelMessageSend(m.ChannelID, "Pokemon **"+args[1]+"** does not exist!")
-		return
+	pokemon, err := pokemontools.APICall("pokemon", pokemonString, PokemonStruct{})
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, err.Error())
 	}
-
-	// Convert to readable data
-	pokemon := PokemonStruct{}
-	err = json.Unmarshal(byteArray, &pokemon)
-	tools.ErrRead(err)
+	pokemonData := pokemon.(*PokemonStruct)
 
 	// Assign values
-	weight := "**Weight:** " + strconv.Itoa(pokemon.Weight/10) + "kg | "
-	if pokemon.Weight/10 == 0 {
-		weight = "**Weight:** " + strconv.Itoa(pokemon.Weight*100) + "g | "
+	weight := "**Weight:** " + strconv.Itoa(pokemonData.Weight/10) + "kg | "
+	if pokemonData.Weight/10 == 0 {
+		weight = "**Weight:** " + strconv.Itoa(pokemonData.Weight*100) + "g | "
 	}
-	height := "**Height:** " + strconv.Itoa(pokemon.Height/10) + "m | "
-	if pokemon.Height/10 == 0 {
-		height = "**Height:** " + strconv.Itoa(pokemon.Height*100) + "cm | "
+	height := "**Height:** " + strconv.Itoa(pokemonData.Height/10) + "m | "
+	if pokemonData.Height/10 == 0 {
+		height = "**Height:** " + strconv.Itoa(pokemonData.Height*100) + "cm | "
 	}
-	exp := "**" + strconv.Itoa(pokemon.BaseExp) + " EXP** gained from defeating " + strings.Title(pokemon.Name)
+	exp := "**" + strconv.Itoa(pokemonData.BaseExp) + " EXP** gained from defeating " + strings.Title(pokemonData.Name)
 	items := "Possible item(s) held: "
-	if len(pokemon.Items) == 0 {
+	if len(pokemonData.Items) == 0 {
 		items = items + "**None**"
 	} else {
-		for i, item := range pokemon.Items {
+		for i, item := range pokemonData.Items {
 			if i == 0 {
 				items = items + "**" + strings.Title(item.Item.Name) + "**"
 			} else {
@@ -132,10 +120,10 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 
 	// Create ability string
 	abilities := "List of abilities: "
-	if len(pokemon.Items) == 0 {
+	if len(pokemonData.Items) == 0 {
 		abilities = abilities + "**None**"
 	} else {
-		for i, ability := range pokemon.Abilities {
+		for i, ability := range pokemonData.Abilities {
 			if i == 0 {
 				if ability.IsHidden {
 					abilities = abilities + "**" + strings.Title(ability.Ability.Name) + "** (hidden)"
@@ -154,7 +142,7 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 
 	// Create fields for stats + EV
 	fields := []*discordgo.MessageEmbedField{}
-	for _, pokemonStat := range pokemon.Stats {
+	for _, pokemonStat := range pokemonData.Stats {
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   "**" + strings.Title(pokemonStat.Stat.Name) + "**",
 			Value:  strconv.Itoa(pokemonStat.BaseStat) + " (" + strconv.Itoa(pokemonStat.Effort) + " EV)",
@@ -164,10 +152,10 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 
 	// Create type string
 	types := ""
-	if len(pokemon.Types) == 1 {
-		types = types + "**" + strings.Title(pokemon.Types[0].Type.Name) + "**"
+	if len(pokemonData.Types) == 1 {
+		types = types + "**" + strings.Title(pokemonData.Types[0].Type.Name) + "**"
 	} else {
-		for i, pokemonType := range pokemon.Types {
+		for i, pokemonType := range pokemonData.Types {
 			if i == 0 {
 				types = types + "**" + strings.Title(pokemonType.Type.Name) + "**"
 			} else {
@@ -178,23 +166,23 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 
 	// Create embed
 	embed := &discordgo.MessageEmbed{
-		Title: strings.Title(pokemon.Name) + " (#" + strconv.Itoa(pokemon.ID) + ")",
-		Color: pokemontools.TypeColour(pokemon.Types[0].Type.Name),
-		Description: "In around **" + strconv.Itoa(len(pokemon.Games)) + "** Pokemon games\n\n" +
+		Title: strings.Title(pokemonData.Name) + " (#" + strconv.Itoa(pokemonData.ID) + ")",
+		Color: pokemontools.TypeColour(pokemonData.Types[0].Type.Name),
+		Description: "In around **" + strconv.Itoa(len(pokemonData.Games)) + "** Pokemon games\n\n" +
 			weight + height + types + "\n\n" +
 			exp + "\n" +
 			items + "\n" +
 			abilities,
 		Fields: fields,
 		Image: &discordgo.MessageEmbedImage{
-			URL: "https://www.smogon.com/dex/media/sprites/xy/" + pokemon.Name + ".gif",
+			URL: "https://www.smogon.com/dex/media/sprites/xy/" + pokemonData.Name + ".gif",
 		},
 	}
 	formRegex, _ := regexp.Compile(`(.+)-.+`)
-	if formRegex.MatchString(pokemon.Name) {
-		embed.URL = "https://bulbapedia.bulbagarden.net/wiki/" + strings.Title(formRegex.FindStringSubmatch(pokemon.Name)[1]) + "_(Pok%C3%A9mon)"
+	if formRegex.MatchString(pokemonData.Name) {
+		embed.URL = "https://bulbapedia.bulbagarden.net/wiki/" + strings.Title(formRegex.FindStringSubmatch(pokemonData.Name)[1]) + "_(Pok%C3%A9mon)"
 	} else {
-		embed.URL = "https://bulbapedia.bulbagarden.net/wiki/" + strings.Title(pokemon.Name) + "_(Pok%C3%A9mon)"
+		embed.URL = "https://bulbapedia.bulbagarden.net/wiki/" + strings.Title(pokemonData.Name) + "_(Pok%C3%A9mon)"
 	}
 
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)

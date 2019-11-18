@@ -12,9 +12,9 @@ func PokemonHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []stri
 		mainArg := args[1]
 		switch mainArg {
 		case "b", "berry":
-			go pokemoncommands.Berry(s, m, args)
+			go pokemoncommands.Berry(s, m)
 		default:
-			go pokemoncommands.Pokemon(s, m, args)
+			go pokemoncommands.Pokemon(s, m)
 		}
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "Please specify a command! Check `"+serverPrefix+"help` for more details!")
