@@ -20,12 +20,14 @@ import (
 func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData, mapCache []structs.MapData) {
 	topRegex, _ := regexp.Compile(`t(op)?\s+(.+)`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S{2,})`)
+	strictRegex, _ := regexp.Compile(`-nostrict`)
 
 	username := ""
 	mods := ""
 	index := 1
+	strict := true
 
-	// Obtain index, mods, and username
+	// Obtain index, mods, strict, and username
 	if topRegex.MatchString(m.Content) {
 		username = topRegex.FindStringSubmatch(m.Content)[2]
 		if modRegex.MatchString(username) {
@@ -42,6 +44,10 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 				index = i
 				break
 			}
+		}
+		if strictRegex.MatchString(m.Content) {
+			strict = false
+			username = strings.TrimSpace(strings.Replace(username, strictRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 	}
 
@@ -85,7 +91,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 	if mods != "" {
 		parsedMods := osuapi.ParseMods(mods)
 		for i := 0; i < len(scoreList); i++ {
-			if (parsedMods == 0 && scoreList[i].Mods != 0) || scoreList[i].Mods&parsedMods != parsedMods {
+			if (strict && scoreList[i].Mods != parsedMods) || (!strict && ((parsedMods == 0 && scoreList[i].Mods != 0) || scoreList[i].Mods&parsedMods != parsedMods)) {
 				scoreList = append(scoreList[:i], scoreList[i+1:]...)
 				i--
 			}

@@ -21,12 +21,14 @@ import (
 func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, option string, cache []structs.PlayerData, mapCache []structs.MapData) {
 	recentRegex, _ := regexp.Compile(`(r|recent|rs|rb|recentb|recentbest)\s+(.+)`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S{2,})`)
+	strictRegex, _ := regexp.Compile(`-nostrict`)
 
 	username := ""
 	mods := ""
 	index := 1
+	strict := true
 
-	// Obtain index, mods, and username
+	// Obtain index, mods, strict, and username
 	if recentRegex.MatchString(m.Content) {
 		username = recentRegex.FindStringSubmatch(m.Content)[2]
 		if modRegex.MatchString(username) {
@@ -43,6 +45,10 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 				index = i
 				break
 			}
+		}
+		if strictRegex.MatchString(m.Content) {
+			strict = false
+			username = strings.TrimSpace(strings.Replace(username, strictRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 	}
 
@@ -108,7 +114,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	if mods != "" {
 		parsedMods := osuapi.ParseMods(mods)
 		for i := 0; i < len(scoreList); i++ {
-			if (parsedMods == 0 && scoreList[i].Mods != 0) || scoreList[i].Mods&parsedMods != parsedMods {
+			if (strict && scoreList[i].Mods != parsedMods) || (!strict && ((parsedMods == 0 && scoreList[i].Mods != 0) || scoreList[i].Mods&parsedMods != parsedMods)) {
 				scoreList = append(scoreList[:i], scoreList[i+1:]...)
 				i--
 			}

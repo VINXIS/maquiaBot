@@ -22,11 +22,13 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	mapRegex, _ := regexp.Compile(`(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	compareRegex, _ := regexp.Compile(`(c|compare)\s*(.+)?`)
+	strictRegex, _ := regexp.Compile(`-nostrict`)
 	var beatmap osuapi.Beatmap
 
 	// Obtain username and mods
 	username := ""
 	mods := ""
+	strict := true
 	if compareRegex.MatchString(m.Content) {
 		username = compareRegex.FindStringSubmatch(m.Content)[2]
 		if modRegex.MatchString(username) {
@@ -35,6 +37,10 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 				mods += "DT"
 			}
 			username = strings.TrimSpace(strings.Replace(username, modRegex.FindStringSubmatch(username)[0], "", 1))
+		}
+		if strictRegex.MatchString(m.Content) {
+			strict = false
+			username = strings.TrimSpace(strings.Replace(username, strictRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 	}
 
@@ -176,7 +182,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	if mods != "" {
 		parsedMods := osuapi.ParseMods(mods)
 		for i := 0; i < len(scores); i++ {
-			if (parsedMods == 0 && scores[i].Mods != 0) || scores[i].Mods&parsedMods != parsedMods {
+			if (strict && scores[i].Mods != parsedMods) || (!strict && ((parsedMods == 0 && scores[i].Mods != 0) || scores[i].Mods&parsedMods != parsedMods)) {
 				scores = append(scores[:i], scores[i+1:]...)
 				i--
 			}
