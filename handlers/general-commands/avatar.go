@@ -52,11 +52,7 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 		username := userRegex.FindStringSubmatch(m.Content)[2]
 		discordUser, err := s.User(username)
 		if err == nil {
-			if negateRegex.MatchString(m.Content) {
-				s.ChannelMessageSend(m.ChannelID, discordUser.Username+"'s avatar is: <"+discordUser.AvatarURL("")+">")
-				return
-			}
-			s.ChannelMessageSend(m.ChannelID, discordUser.Username+"'s avatar is: "+discordUser.AvatarURL(""))
+			postAva(s, m, []string{discordUser.Username}, []string{discordUser.AvatarURL("")}, true)
 			return
 		}
 
@@ -65,45 +61,59 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 			s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 			return
 		}
+
+		// Run through usernames, if no match is found, run through member names, if no match is found, send the message author's avatar
 		sort.Slice(server.Members, func(i, j int) bool {
 			time1, _ := server.Members[i].JoinedAt.Parse()
 			time2, _ := server.Members[j].JoinedAt.Parse()
 			return time1.Unix() < time2.Unix()
 		})
 		for _, member := range server.Members {
-			if strings.HasPrefix(strings.ToLower(member.User.Username), username) {
+			if strings.HasPrefix(strings.ToLower(member.User.Username), username) || strings.HasPrefix(strings.ToLower(member.Nick), username) {
 				discordUser, _ = s.User(member.User.ID)
-				if negateRegex.MatchString(m.Content) {
-					s.ChannelMessageSend(m.ChannelID, member.Nick+"'s avatar is: <"+discordUser.AvatarURL("")+">")
-					return
-				}
-				s.ChannelMessageSend(m.ChannelID, member.Nick+"'s avatar is: "+discordUser.AvatarURL(""))
+				postAva(s, m, []string{member.Nick}, []string{discordUser.AvatarURL("")}, true)
 				return
 			}
 		}
-		for _, member := range server.Members {
-			if strings.HasPrefix(strings.ToLower(member.Nick), username) {
-				discordUser, _ := s.User(member.User.ID)
-				if negateRegex.MatchString(m.Content) {
-					s.ChannelMessageSend(m.ChannelID, member.Nick+"'s avatar is: <"+discordUser.AvatarURL("")+">")
-					return
-				}
-				s.ChannelMessageSend(m.ChannelID, member.Nick+"'s avatar is: "+discordUser.AvatarURL(""))
-				return
-			}
-		}
-		if negateRegex.MatchString(m.Content) {
-			s.ChannelMessageSend(m.ChannelID, "No person named "+username+", Your avatar is: <"+m.Author.AvatarURL("")+">")
-			return
-		}
-		s.ChannelMessageSend(m.ChannelID, "No person named "+username+", Your avatar is: "+m.Author.AvatarURL(""))
+		postAva(s, m, []string{username}, []string{m.Author.AvatarURL("")}, false)
 		return
+	}
+	postAva(s, m, []string{}, []string{m.Author.AvatarURL("")}, true)
+}
+
+func postAva(s *discordgo.Session, m *discordgo.MessageCreate, name, avatarURL []string, found bool) {
+	negateRegex, _ := regexp.Compile(`-(np|noprev(iew)?)`)
+	if len(name) == 0 {
+		if negateRegex.MatchString(m.Content) {
+			s.ChannelMessageSend(m.ChannelID, "Your avatar is: <"+avatarURL[0]+">")
+		} else {
+			s.ChannelMessageSend(m.ChannelID, "Your avatar is: "+avatarURL[0])
+		}
+	} else if len(name) == 1 {
+		if found {
+			if negateRegex.MatchString(m.Content) {
+				s.ChannelMessageSend(m.ChannelID, name[0]+"'s avatar is: <"+avatarURL[0]+">")
+			} else {
+				s.ChannelMessageSend(m.ChannelID, name[0]+"'s avatar is: "+avatarURL[0])
+			}
+		} else {
+			if negateRegex.MatchString(m.Content) {
+				s.ChannelMessageSend(m.ChannelID, "No person named "+name[0]+", Your avatar is: <"+avatarURL[0]+">")
+			} else {
+				s.ChannelMessageSend(m.ChannelID, "No person named "+name[0]+", Your avatar is: "+avatarURL[0])
+			}
+		}
 	} else {
+		message := ""
 		if negateRegex.MatchString(m.Content) {
-			s.ChannelMessageSend(m.ChannelID, "Your avatar is: <"+m.Author.AvatarURL("")+">")
-			return
+			for i := range name {
+				message += name[i] + "'s avatar is: <" + avatarURL[i] + ">\n"
+			}
+		} else {
+			for i := range name {
+				message += name[i] + "'s avatar is: " + avatarURL[i] + "\n"
+			}
 		}
-		s.ChannelMessageSend(m.ChannelID, "Your avatar is: "+m.Author.AvatarURL(""))
-		return
+		s.ChannelMessageSend(m.ChannelID, message)
 	}
 }

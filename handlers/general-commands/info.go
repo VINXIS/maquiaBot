@@ -55,9 +55,8 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 					time2, _ := server.Members[j].JoinedAt.Parse()
 					return time1.Unix() < time2.Unix()
 				})
-				found := false
 				for _, member := range server.Members {
-					if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) {
+					if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) || strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
 						user, _ = s.User(member.User.ID)
 						nickname = member.Nick
 						joinDate = member.JoinedAt
@@ -69,27 +68,7 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 						if roles != "" {
 							roles = roles[:len(roles)-2]
 						}
-						found = true
 						break
-					}
-				}
-				if !found {
-					for _, member := range server.Members {
-						if strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
-							user, _ = s.User(member.User.ID)
-							nickname = member.Nick
-							joinDate = member.JoinedAt
-							roles = ""
-							for _, role := range member.Roles {
-								discordRole, _ := s.State.Role(server.ID, role)
-								roles = roles + discordRole.Name + ", "
-							}
-							if roles != "" {
-								roles = roles[:len(roles)-2]
-							}
-							break
-						}
-
 					}
 				}
 			}

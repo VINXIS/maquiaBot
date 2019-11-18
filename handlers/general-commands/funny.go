@@ -36,17 +36,9 @@ func Funny(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return time1.Unix() < time2.Unix()
 		})
 		for _, member := range server.Members {
-			if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) {
-				discordUser, _ := s.User(member.User.ID)
-				user = discordUser.ID
-				username = discordUser.Username + "'s"
-			}
-		}
-		for _, member := range server.Members {
-			if strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
-				discordUser, _ := s.User(member.User.ID)
-				user = discordUser.ID
-				username = discordUser.Username + "'s"
+			if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) || strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
+				user = member.User.ID
+				username = member.User.Username + "'s"
 			}
 		}
 	}
