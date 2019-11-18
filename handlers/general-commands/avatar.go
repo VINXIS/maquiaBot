@@ -12,7 +12,6 @@ import (
 
 // Avatar gets the avatar of the user/referenced user
 func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
-	negateRegex, _ := regexp.Compile(`-(np|noprev(iew)?)`)
 	userRegex, _ := regexp.Compile(`(a|ava|avatar)\s+(.+)`)
 	serverRegex, _ := regexp.Compile(`(-s\s|-s$)`)
 
@@ -36,17 +35,13 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 			},
 		})
 	} else if len(users) > 0 {
-		var avatarURLs strings.Builder
-		if negateRegex.MatchString(m.Content) {
-			for _, mention := range users {
-				avatarURLs.WriteString(mention.Username + "'s avatar is: <" + mention.AvatarURL("") + ">\n")
-			}
-		} else {
-			for _, mention := range users {
-				avatarURLs.WriteString(mention.Username + "'s avatar is: " + mention.AvatarURL("") + "\n")
-			}
+		var names []string
+		var avatars []string
+		for _, user := range users {
+			names = append(names, user.Username)
+			avatars = append(avatars, user.AvatarURL(""))
 		}
-		s.ChannelMessageSend(m.ChannelID, avatarURLs.String())
+		postAva(s, m, names, avatars, true)
 		return
 	} else if userRegex.MatchString(m.Content) {
 		username := userRegex.FindStringSubmatch(m.Content)[2]
