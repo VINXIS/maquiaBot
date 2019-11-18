@@ -37,8 +37,8 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 		}
 		usernameSplit := strings.Split(username, " ")
 		for _, txt := range usernameSplit {
-			if i, err := strconv.Atoi(txt); err != nil && i > 0 && i < 100 {
-				username = strings.Replace(username, txt, "", 1)
+			if i, err := strconv.Atoi(txt); err == nil && i > 0 && i <= 100 {
+				username = strings.TrimSpace(strings.Replace(username, txt, "", 1))
 				index = i
 				break
 			}
@@ -62,7 +62,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 		Username: username,
 	})
 	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "User "+username+" may not exist!")
+		s.ChannelMessageSend(m.ChannelID, "User **"+username+"** may not exist!")
 		return
 	}
 	score := osuapi.GUSScore{}
@@ -85,7 +85,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 	if mods != "" {
 		parsedMods := osuapi.ParseMods(mods)
 		for i := 0; i < len(scoreList); i++ {
-			if scoreList[i].Mods&parsedMods == 0 && (parsedMods != 0 || scoreList[i].Mods != 0) {
+			if (parsedMods == 0 && scoreList[i].Mods != 0) || scoreList[i].Mods&parsedMods != parsedMods {
 				scoreList = append(scoreList[:i], scoreList[i+1:]...)
 				i--
 			}

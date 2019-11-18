@@ -176,7 +176,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	if mods != "" {
 		parsedMods := osuapi.ParseMods(mods)
 		for i := 0; i < len(scores); i++ {
-			if scores[i].Mods&parsedMods != parsedMods && (parsedMods != 0 || scores[i].Mods != 0) {
+			if (parsedMods == 0 && scores[i].Mods != 0) || scores[i].Mods&parsedMods != parsedMods {
 				scores = append(scores[:i], scores[i+1:]...)
 				i--
 			}

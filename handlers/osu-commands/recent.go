@@ -38,8 +38,8 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 		}
 		usernameSplit := strings.Split(username, " ")
 		for _, txt := range usernameSplit {
-			if i, err := strconv.Atoi(txt); err != nil && i > 0 && i < 100 {
-				username = strings.Replace(username, txt, "", 1)
+			if i, err := strconv.Atoi(txt); err == nil && i > 0 && i <= 100 {
+				username = strings.TrimSpace(strings.Replace(username, txt, "", 1))
 				index = i
 				break
 			}
@@ -108,7 +108,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	if mods != "" {
 		parsedMods := osuapi.ParseMods(mods)
 		for i := 0; i < len(scoreList); i++ {
-			if scoreList[i].Mods&parsedMods != parsedMods && (parsedMods != 0 || scoreList[i].Mods != 0) {
+			if (parsedMods == 0 && scoreList[i].Mods != 0) || scoreList[i].Mods&parsedMods != parsedMods {
 				scoreList = append(scoreList[:i], scoreList[i+1:]...)
 				i--
 			}
