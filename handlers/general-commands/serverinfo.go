@@ -1,6 +1,8 @@
 package gencommands
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -20,7 +22,7 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Stats info
 	serverData := tools.GetServer(*server)
-	statsInfo := strconv.Itoa(len(serverData.Nouns)) + " nouns\n" + strconv.Itoa(len(serverData.Adjectives)) + " adjectives\n" + strconv.Itoa(len(serverData.Skills)) + " skills\n"
+	statsInfo := strconv.Itoa(len(serverData.Nouns)) + " nouns\n" + strconv.Itoa(len(serverData.Adjectives)) + " adjectives\n" + strconv.Itoa(len(serverData.Skills)) + " skills\nAllowAnyoneAdd: " + strconv.FormatBool(serverData.AllowAnyoneStats)
 
 	// Created at date
 	createdAt, err := discordgo.SnowflakeTimestamp(server.ID)
@@ -153,4 +155,12 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			},
 		},
 	})
+
+	// Save new server data
+	serverData.Time = time.Now()
+	jsonCache, err := json.Marshal(serverData)
+	tools.ErrRead(err)
+
+	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
+	tools.ErrRead(err)
 }

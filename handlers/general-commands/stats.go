@@ -120,17 +120,17 @@ func Adjectives(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain server data
 	serverData := tools.GetServer(*server)
 
-	if m.Author.ID != server.OwnerID || !serverData.AllowAnyoneStats {
+	if m.Author.ID != server.OwnerID && !serverData.AllowAnyoneStats {
 		member, _ := s.GuildMember(server.ID, m.Author.ID)
 		admin := false
 		for _, roleID := range member.Roles {
 			role, _ := s.State.Role(m.GuildID, roleID)
-			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
+			if role != nil && (role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0) {
 				admin = true
 				break
 			}
 		}
-		if !admin && len(m.Mentions) >= 1 {
+		if !admin {
 			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner, or one of them must allow anyone to add words.")
 			return
 		}
@@ -199,17 +199,17 @@ func Nouns(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain server data
 	serverData := tools.GetServer(*server)
 
-	if m.Author.ID != server.OwnerID || !serverData.AllowAnyoneStats {
+	if m.Author.ID != server.OwnerID && !serverData.AllowAnyoneStats {
 		member, _ := s.GuildMember(server.ID, m.Author.ID)
 		admin := false
 		for _, roleID := range member.Roles {
 			role, _ := s.State.Role(m.GuildID, roleID)
-			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
+			if role != nil && (role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0) {
 				admin = true
 				break
 			}
 		}
-		if !admin && len(m.Mentions) >= 1 {
+		if !admin {
 			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner, or one of them must allow anyone to add words.")
 			return
 		}
@@ -278,17 +278,17 @@ func Skills(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain server data
 	serverData := tools.GetServer(*server)
 
-	if m.Author.ID != server.OwnerID || !serverData.AllowAnyoneStats {
+	if m.Author.ID != server.OwnerID && !serverData.AllowAnyoneStats {
 		member, _ := s.GuildMember(server.ID, m.Author.ID)
 		admin := false
 		for _, roleID := range member.Roles {
 			role, _ := s.State.Role(m.GuildID, roleID)
-			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
+			if role != nil && (role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0) {
 				admin = true
 				break
 			}
 		}
-		if !admin && len(m.Mentions) >= 1 {
+		if !admin {
 			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner, or one of them must allow anyone to add words.")
 			return
 		}

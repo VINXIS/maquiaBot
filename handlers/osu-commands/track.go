@@ -49,6 +49,10 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clie
 
 	// Get params
 	args := strings.Split(m.Content, " ")[1:]
+	if len(args) == 0 {
+		s.ChannelMessageSend(m.ChannelID, "No options given!")
+		return
+	}
 
 	// Check if everything should just be removed
 	if len(args) == 1 && (args[0] == "r" || args[0] == "rem" || args[0] == "remove") {
