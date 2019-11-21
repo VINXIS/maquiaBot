@@ -45,6 +45,11 @@ func Kanye(s *discordgo.Session, m *discordgo.MessageCreate) {
 		"```\nGet down girl, go 'head, get down``` - Kanye West on Gold Digger",
 		"```\nMayonnaise colored Benz, I push Miracle Whips``` - Kanye West on Wack Niggaz",
 		"```\nYou should be honored by my lateness / That I would even show up to this fake shit``` - Kanye West on Stronger",
+		"```\nYour girl don't like me, how long has she been gay?``` - Kanye West on Bring Me Down",
+		"```\nAnd tell him that your mama had a fattie / He looked up at me / Said, 'Daddy, that's the reason why you had me?' / Yep, we was practicing / 'Til one day your ass bust through the packaging / You know what though? You my favorite accident``` - Kanye West on Celebration",
+		"```\nOld folks talking 'bout, 'Back in my day' / But homie this is my day / Class started 2 hours ago, oh am I late?``` - Kanye West on Can't Tell Me Nothing",
+		"```\nHey, you remember where we first met? / Okay, I don't remember where we first met``` - Kanye West on Bound 2",
+		"```\nI'm living in the future so the present is my past / My presence is a present, kiss my ass``` - Kanye West on Monster",
 	}
 	roll, _ := rand.Int(rand.Reader, big.NewInt(int64(len(KanyeLines))))
 	s.ChannelMessageSend(m.ChannelID, KanyeLines[roll.Int64()])
