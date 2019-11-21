@@ -62,6 +62,7 @@ func Decrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
 	resultText := string(result)
 	if linkRegex.MatchString(resultText) {
 		response, err := http.Get(linkRegex.FindStringSubmatch(resultText)[0])
+		defer response.Body.Close()
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
 			return
@@ -75,6 +76,7 @@ func Decrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
 		err = png.Encode(imgBytes, img)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
+			return
 		}
 		_, err = s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Files: []*discordgo.File{
@@ -88,7 +90,6 @@ func Decrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
 			fmt.Println(err)
 			s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
 		}
-		response.Body.Close()
 		return
 	}
 	s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
