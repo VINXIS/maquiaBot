@@ -1,12 +1,11 @@
-package gencommands
+package helpcommands
 
 import (
 	"math/rand"
 
 	osuapi "../../osu-api"
 	osutools "../../osu-functions"
-	tools "../../tools"
-	helpcommands "./help"
+	helpsubcommands "./sub-commands"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -20,8 +19,7 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, args 
 			Name:    "Click here to invite MaquiaBot!",
 			IconURL: s.State.User.AvatarURL(""),
 		},
-		Description: "All commands in PM will use the bot's default prefix `$` instead! The prefix used below was assigned by the server owner(s)!" + "\n" +
-			"Detailed version of the commands list [here](https://docs.google.com/spreadsheets/d/12VzMXGoxliSVv6Rrr6tEy_-Qe9oJ0TNF4MoPGcxIpcU/edit?usp=sharing). **Most commands have other forms as well for convenience!**" + "\n\n" +
+		Description: "Detailed version of the commands list [here](https://docs.google.com/spreadsheets/d/12VzMXGoxliSVv6Rrr6tEy_-Qe9oJ0TNF4MoPGcxIpcU/edit?usp=sharing). **Most commands have other forms as well for convenience!**" + "\n\n" +
 			"**Please do `" + prefix + "help <command>` for more information about the command!** \n" +
 			"Format: `cmd <args> [optional args]`",
 		Color: osutools.ModeColour(osuapi.ModeOsu),
@@ -33,48 +31,48 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, args 
 			if len(args) > 2 {
 				switch args[2] {
 				case "link", "set":
-					embed = helpcommands.Link(embed)
+					embed = helpsubcommands.Link(embed)
 				case "recent", "r", "rs", "recentb", "rb", "recentbest":
-					embed = helpcommands.Recent(embed)
+					embed = helpsubcommands.Recent(embed)
 				case "t", "top":
-					embed = helpcommands.Top(embed)
+					embed = helpsubcommands.Top(embed)
 				case "tr", "track":
-					embed = helpcommands.Track(embed)
+					embed = helpsubcommands.Track(embed)
 				case "ti", "tinfo", "tracking", "trackinfo":
-					embed = helpcommands.TrackInfo(embed)
+					embed = helpsubcommands.TrackInfo(embed)
 				case "tt", "trackt", "tracktoggle":
-					embed = helpcommands.TrackToggle(embed)
+					embed = helpsubcommands.TrackToggle(embed)
 				case "c", "compare":
-					embed = helpcommands.Compare(embed)
+					embed = helpsubcommands.Compare(embed)
 				}
 			} else {
-				embed = helpcommands.Osu(embed)
+				embed = helpsubcommands.Osu(embed)
 			}
 		case "p", "pokemon":
 			if len(args) > 2 {
 				switch args[2] {
 				case "b", "berry":
-					embed = helpcommands.Berry(embed)
+					embed = helpsubcommands.Berry(embed)
 				}
 			} else {
-				embed = helpcommands.Pokemon(embed)
+				embed = helpsubcommands.Pokemon(embed)
 			}
 		case "link", "set":
-			embed = helpcommands.Link(embed)
+			embed = helpsubcommands.Link(embed)
 		case "recent", "r", "rs", "recentb", "rb", "recentbest":
-			embed = helpcommands.Recent(embed)
+			embed = helpsubcommands.Recent(embed)
 		case "t", "top":
-			embed = helpcommands.Top(embed)
+			embed = helpsubcommands.Top(embed)
 		case "tr", "track":
-			embed = helpcommands.Track(embed)
+			embed = helpsubcommands.Track(embed)
 		case "ti", "tinfo", "tracking", "trackinfo":
-			embed = helpcommands.TrackInfo(embed)
+			embed = helpsubcommands.TrackInfo(embed)
 		case "tt", "trackt", "tracktoggle":
-			embed = helpcommands.TrackToggle(embed)
+			embed = helpsubcommands.TrackToggle(embed)
 		case "c", "compare":
-			embed = helpcommands.Compare(embed)
+			embed = helpsubcommands.Compare(embed)
 		case "b", "berry":
-			embed = helpcommands.Berry(embed)
+			embed = helpsubcommands.Berry(embed)
 
 		}
 	} else {
@@ -111,10 +109,11 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, args 
 			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998681375965194/tumblr_phjkel3lgn1xlyyvto5_1280.png",
 		}
 	}
-	_, err := s.ChannelMessageSendEmbed(dm.ID, embed)
+	_, err := s.ChannelMessageSendComplex(dm.ID, &discordgo.MessageSend{
+		Content: "All commands in PM will use the bot's default prefix `$` instead! The prefix used below was assigned by the server owner(s)!",
+		Embed:   embed,
+	})
 	if err != nil {
 		_, err = s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+" has DMs disabled!")
-		tools.ErrRead(err)
 	}
-	return
 }

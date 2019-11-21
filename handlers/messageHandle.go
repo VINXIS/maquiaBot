@@ -17,6 +17,7 @@ import (
 	structs "../structs"
 	tools "../tools"
 	gencommands "./general-commands"
+	helpcommands "./help-commands"
 	osucommands "./osu-commands"
 	pokemoncommands "./pokemon-commands"
 
@@ -161,7 +162,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "sinfo", serverPrefix + "serverinfo":
 			go gencommands.ServerInfo(s, m)
 		case serverPrefix + "h", serverPrefix + "help":
-			go gencommands.Help(s, m, serverPrefix, args)
+			go helpcommands.Help(s, m, serverPrefix, args)
 		case serverPrefix + "crab":
 			go gencommands.Crab(s, m)
 		case serverPrefix + "vibet", serverPrefix + "vibetoggle":

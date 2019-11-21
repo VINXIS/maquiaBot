@@ -1,4 +1,4 @@
-package helpcommands
+package helpsubcommands
 
 import (
 	"github.com/bwmarrin/discordgo"
