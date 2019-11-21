@@ -136,18 +136,18 @@ func VibeCheck(s *discordgo.Session, m *discordgo.MessageCreate, checkType strin
 		}
 		if reaction.Emoji.Name == "🚫" && reaction.Count > 1 {
 			for i := 0; i < reaction.Count-1; i++ {
-				roll, _ := rand.Int(rand.Reader, big.NewInt(int64(2)))
+				roll, _ := rand.Int(rand.Reader, big.NewInt(2))
 				if roll.Int64() == 0 {
 					green++
 				} else {
-					green = int(math.Max(float64(0), float64(green-1)))
+					green = int(math.Max(0, float64(green-1)))
 				}
 			}
 		}
 	}
 	Requirement = 100 * green / (red + green)
 
-	roll, _ := rand.Int(rand.Reader, big.NewInt(int64(100)))
+	roll, _ := rand.Int(rand.Reader, big.NewInt(100))
 	if int(roll.Int64())+1 >= Requirement {
 		response, _ := http.Get("https://cdn.discordapp.com/attachments/617108584748154880/644570138770669578/vibe-checked.png")
 		img, _, _ := image.Decode(response.Body)

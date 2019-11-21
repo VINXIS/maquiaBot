@@ -115,7 +115,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if vibe {
-		roll, _ := rand.Int(rand.Reader, big.NewInt(int64(100000)))
+		roll, _ := rand.Int(rand.Reader, big.NewInt(100000))
 		number := roll.Int64() + 1
 		if number <= 1 {
 			go gencommands.VibeCheck(s, m, "")
@@ -184,6 +184,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Funny(s, m)
 		case serverPrefix + "kanye":
 			go gencommands.Kanye(s, m)
+		case serverPrefix + "face":
+			go gencommands.Face(s, m)
 		case serverPrefix + "encrypt":
 			go gencommands.Encrypt(s, m)
 		case serverPrefix + "decrypt":
