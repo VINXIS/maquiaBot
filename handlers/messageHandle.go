@@ -116,11 +116,11 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go osucommands.TimestampMessage(s, m, timestampRegex)
 	}
 
-	// Vibe check
+	// Vibe check (1/100000 chance)
 	if vibe {
 		roll, _ := rand.Int(rand.Reader, big.NewInt(100000))
-		number := roll.Int64() + 1
-		if number <= 1 {
+		number := roll.Int64()
+		if number == 0 {
 			go gencommands.VibeCheck(s, m, "")
 		}
 	}
