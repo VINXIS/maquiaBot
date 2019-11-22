@@ -111,10 +111,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
 	timestampRegex, _ := regexp.Compile(`(\d+):(\d{2}):(\d{3})\s*(\(((\d\,?)+)\))?`)
 
+	// Timestamp conversions
 	if timestampRegex.MatchString(noEmoji) && osuToggle {
 		go osucommands.TimestampMessage(s, m, timestampRegex)
 	}
 
+	// Vibe check
 	if vibe {
 		roll, _ := rand.Int(rand.Reader, big.NewInt(100000))
 		number := roll.Int64() + 1
@@ -126,6 +128,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Command checks
 	if strings.HasPrefix(m.Content, "maquiaprefix") {
 		go gencommands.Prefix(s, m)
+		go tools.CommandLog(s, m, "maquiaprefix")
 		return
 	} else if strings.HasPrefix(m.Content, "maquiacleanf") || strings.Contains(m.Content, "maquiacleanfarm") {
 		go gencommands.CleanFarm(s, m, profileCache, osuAPI)
@@ -250,6 +253,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "ocr":
 			go gencommands.OCR(s, m)
 		}
+		go tools.CommandLog(s, m, args[0])
 		return
 	} else if beatmapRegex.MatchString(m.Content) && osuToggle { // If a beatmap was linked
 		go osucommands.BeatmapMessage(s, m, beatmapRegex, osuAPI, mapCache)
