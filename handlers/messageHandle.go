@@ -263,6 +263,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// Dont mention me mate. Ill fuck u up
 	if len(m.Mentions) > 0 {
 		for _, mention := range m.Mentions {
 			if mention.ID == s.State.User.ID {
