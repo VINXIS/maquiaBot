@@ -5,7 +5,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
-	"fmt"
 	"image"
 	"image/png"
 	"net/http"
@@ -87,7 +86,6 @@ func Decrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
 			},
 		})
 		if err != nil {
-			fmt.Println(err)
 			s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
 		}
 		return

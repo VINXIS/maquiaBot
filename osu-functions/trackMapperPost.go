@@ -155,7 +155,7 @@ func TrackMapperPost(s *discordgo.Session) {
 							Embed:   embed,
 						})
 						if err != nil {
-							fmt.Println(err)
+							fmt.Println("TrackMapperPost err: " + err.Error())
 							mapperData[j].Channels = append(mapperData[i].Channels[:j], mapperData[i].Channels[j+1:]...)
 							j--
 						}

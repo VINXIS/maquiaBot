@@ -30,7 +30,7 @@ func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageDelete(m.ChannelID, message.ID)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "An error occurred in updating osu-tools! Please try manually."+m.Author.Mention())
-			fmt.Println(err)
+			fmt.Println("Update err: " + err.Error())
 		} else {
 			s.ChannelMessageSend(m.ChannelID, "Updated! "+m.Author.Mention())
 		}

@@ -15,6 +15,7 @@ func CommandLog(s *discordgo.Session, m *discordgo.MessageCreate, command string
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
 		log.Println(logText + ".\nText: " + m.Content)
+		return
 	}
 	log.Println(logText + ", which is in the " + server.Name + " server.\nText: " + m.Content)
 }

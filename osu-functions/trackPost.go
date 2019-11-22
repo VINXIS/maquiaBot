@@ -42,7 +42,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 					Limit:  100,
 				})
 				if err != nil {
-					fmt.Println(err)
+					fmt.Println("TrackPost err 1: " + err.Error())
 					continue
 				}
 
@@ -245,7 +245,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 							}
 							_, err = s.ChannelMessageSendEmbed(ch.Channel.ID, embed)
 							if err != nil {
-								fmt.Println(err)
+								fmt.Println("TrackPost err 2: " + err.Error())
 								fmt.Println(ch)
 							}
 							ch.Users[l] = *recentUser

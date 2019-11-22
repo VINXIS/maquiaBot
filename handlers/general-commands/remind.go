@@ -3,7 +3,6 @@ package gencommands
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"image"
 	"image/png"
 	"io/ioutil"
@@ -330,7 +329,6 @@ func ReminderMessage(s *discordgo.Session, reminderTimer structs.ReminderTimer) 
 			},
 		})
 		if err != nil {
-			fmt.Println(err)
 			s.ChannelMessageSend(dm.ID, "Reminder about `"+reminderTimer.Reminder.Info+"`!")
 		}
 		response.Body.Close()
