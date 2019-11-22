@@ -5,7 +5,6 @@ import (
 
 	osuapi "../../osu-api"
 	osutools "../../osu-functions"
-	helpsubcommands "./sub-commands"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -23,60 +22,6 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, args 
 			"**Please do `" + prefix + "help <command>` for more information about the command!** \n" +
 			"Format: `cmd <args> [optional args]`",
 		Color: osutools.ModeColour(osuapi.ModeOsu),
-	}
-
-	if len(args) > 1 {
-		switch args[1] {
-		case "osu":
-			if len(args) > 2 {
-				switch args[2] {
-				case "link", "set":
-					embed = helpsubcommands.Link(embed)
-				case "recent", "r", "rs", "recentb", "rb", "recentbest":
-					embed = helpsubcommands.Recent(embed)
-				case "t", "top":
-					embed = helpsubcommands.Top(embed)
-				case "tr", "track":
-					embed = helpsubcommands.Track(embed)
-				case "ti", "tinfo", "tracking", "trackinfo":
-					embed = helpsubcommands.TrackInfo(embed)
-				case "tt", "trackt", "tracktoggle":
-					embed = helpsubcommands.TrackToggle(embed)
-				case "c", "compare":
-					embed = helpsubcommands.Compare(embed)
-				}
-			} else {
-				embed = helpsubcommands.Osu(embed)
-			}
-		case "p", "pokemon":
-			if len(args) > 2 {
-				switch args[2] {
-				case "b", "berry":
-					embed = helpsubcommands.Berry(embed)
-				}
-			} else {
-				embed = helpsubcommands.Pokemon(embed)
-			}
-		case "link", "set":
-			embed = helpsubcommands.Link(embed)
-		case "recent", "r", "rs", "recentb", "rb", "recentbest":
-			embed = helpsubcommands.Recent(embed)
-		case "t", "top":
-			embed = helpsubcommands.Top(embed)
-		case "tr", "track":
-			embed = helpsubcommands.Track(embed)
-		case "ti", "tinfo", "tracking", "trackinfo":
-			embed = helpsubcommands.TrackInfo(embed)
-		case "tt", "trackt", "tracktoggle":
-			embed = helpsubcommands.TrackToggle(embed)
-		case "c", "compare":
-			embed = helpsubcommands.Compare(embed)
-		case "b", "berry":
-			embed = helpsubcommands.Berry(embed)
-
-		}
-	} else {
-
 	}
 
 	switch rand.Intn(11) {
