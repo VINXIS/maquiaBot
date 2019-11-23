@@ -11,7 +11,7 @@ func Link(embed *discordgo.MessageEmbed, arg string) *discordgo.MessageEmbed {
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[mention]",
-			Value:  "The person to link the osu! user to (REQUIRES ADMIN PERMISSIONS)",
+			Value:  "The person to link the osu! user to **(REQUIRES ADMIN PERMS)**",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
