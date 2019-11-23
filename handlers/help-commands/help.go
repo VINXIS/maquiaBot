@@ -22,7 +22,7 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, args 
 		},
 		Description: "Detailed version of the commands list [here](https://docs.google.com/spreadsheets/d/12VzMXGoxliSVv6Rrr6tEy_-Qe9oJ0TNF4MoPGcxIpcU/edit?usp=sharing). **Most commands have other forms as well for convenience!**" + "\n\n" +
 			"**Please do `" + prefix + "help <command>` for more information about the command!** \n" +
-			"Format: `cmd <args> [optional args]`",
+			"Format: `(cmd name) <args> [optional args]`",
 		Color: osutools.ModeColour(osuapi.ModeOsu),
 	}
 
