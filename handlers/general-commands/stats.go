@@ -362,7 +362,7 @@ func StatsToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 				break
 			}
 		}
-		if !admin && len(m.Mentions) >= 1 {
+		if !admin {
 			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
 			return
 		}
@@ -381,8 +381,8 @@ func StatsToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
 	tools.ErrRead(err)
 
-	if serverData.Crab {
-		s.ChannelMessageSend(m.ChannelID, "Anyone may now add nouns/adjectives/skills for stats now.")
+	if serverData.AllowAnyoneStats {
+		s.ChannelMessageSend(m.ChannelID, "Anyone may add nouns/adjectives/skills for stats now.")
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "Only admins, server managers, or the server owner may add nouns/adjectives/skills for stats now.")
 	}

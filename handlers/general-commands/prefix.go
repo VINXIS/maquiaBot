@@ -36,7 +36,7 @@ func Prefix(s *discordgo.Session, m *discordgo.MessageCreate) {
 				break
 			}
 		}
-		if !admin && len(m.Mentions) >= 1 {
+		if !admin {
 			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
 			return
 		}
