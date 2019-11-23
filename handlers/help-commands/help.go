@@ -2,9 +2,11 @@ package helpcommands
 
 import (
 	"math/rand"
+	"regexp"
 
 	osuapi "../../osu-api"
 	osutools "../../osu-functions"
+	helpsubcommands "./sub-commands"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -22,6 +24,15 @@ func Help(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, args 
 			"**Please do `" + prefix + "help <command>` for more information about the command!** \n" +
 			"Format: `cmd <args> [optional args]`",
 		Color: osutools.ModeColour(osuapi.ModeOsu),
+	}
+
+	argRegex, _ := regexp.Compile(`help\s+(.+)`)
+	if argRegex.MatchString(m.Content) {
+		arg := argRegex.FindStringSubmatch(m.Content)[1]
+		switch arg {
+		case "link", "set":
+			embed = helpsubcommands.Link(embed, arg)
+		}
 	}
 
 	switch rand.Intn(11) {
