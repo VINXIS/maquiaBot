@@ -1,4 +1,4 @@
-package osucommands
+package admincommands
 
 import (
 	"encoding/json"
@@ -28,20 +28,9 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clie
 		return
 	}
 
-	if m.Author.ID != server.OwnerID {
-		member, _ := s.GuildMember(server.ID, m.Author.ID)
-		admin := false
-		for _, roleID := range member.Roles {
-			role, _ := s.State.Role(m.GuildID, roleID)
-			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
-				admin = true
-				break
-			}
-		}
-		if !admin {
-			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
-			return
-		}
+	if !tools.AdminCheck(s, m, *server) {
+		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
+		return
 	}
 
 	// Obtain channel data
@@ -324,20 +313,9 @@ func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate, mapCache []st
 		return
 	}
 
-	if m.Author.ID != server.OwnerID {
-		member, _ := s.GuildMember(server.ID, m.Author.ID)
-		admin := false
-		for _, roleID := range member.Roles {
-			role, _ := s.State.Role(m.GuildID, roleID)
-			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
-				admin = true
-				break
-			}
-		}
-		if !admin {
-			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
-			return
-		}
+	if !tools.AdminCheck(s, m, *server) {
+		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
+		return
 	}
 
 	// Obtain channel data

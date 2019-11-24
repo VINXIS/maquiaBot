@@ -16,6 +16,8 @@ import (
 	osuapi "../osu-api"
 	structs "../structs"
 	tools "../tools"
+	admincommands "./admin-commands"
+	botcreatorcommands "./bot-creator-commands"
 	gencommands "./general-commands"
 	helpcommands "./help-commands"
 	osucommands "./osu-commands"
@@ -121,20 +123,20 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		roll, _ := rand.Int(rand.Reader, big.NewInt(100000))
 		number := roll.Int64()
 		if number == 0 {
-			go gencommands.VibeCheck(s, m, "")
+			go gencommands.Vibe(s, m, "")
 		}
 	}
 
 	// Command checks
 	if strings.HasPrefix(m.Content, "maquiaprefix") {
-		go gencommands.Prefix(s, m)
+		go admincommands.Prefix(s, m)
 		go tools.CommandLog(s, m, "maquiaprefix")
 		return
 	} else if strings.HasPrefix(m.Content, "maquiacleanf") || strings.Contains(m.Content, "maquiacleanfarm") {
-		go gencommands.CleanFarm(s, m, profileCache, osuAPI)
+		go botcreatorcommands.CleanFarm(s, m, profileCache, osuAPI)
 		return
 	} else if strings.HasPrefix(m.Content, "maquiaclean") {
-		go gencommands.Clean(s, m, profileCache)
+		go botcreatorcommands.Clean(s, m, profileCache)
 		return
 	} else if strings.HasPrefix(m.Content, serverPrefix) {
 		args := strings.Split(m.Content, " ")
@@ -157,7 +159,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "ping":
 			go gencommands.Ping(s, m)
 		case serverPrefix + "up", serverPrefix + "update":
-			go gencommands.Update(s, m)
+			go botcreatorcommands.Update(s, m)
 		case serverPrefix + "parse":
 			go gencommands.ParseID(s, m)
 		case serverPrefix + "info":
@@ -167,13 +169,13 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "h", serverPrefix + "help":
 			go helpcommands.Help(s, m, serverPrefix, args)
 		case serverPrefix + "crab":
-			go gencommands.Crab(s, m)
+			go admincommands.Crab(s, m)
 		case serverPrefix + "vibet", serverPrefix + "vibetoggle":
-			go gencommands.Vibe(s, m)
+			go gencommands.VibeToggle(s, m)
 		case serverPrefix + "vibe", serverPrefix + "vibec", serverPrefix + "vibecheck":
-			go gencommands.VibeCheck(s, m, "notRandom")
+			go gencommands.Vibe(s, m, "notRandom")
 		case serverPrefix + "prefix", serverPrefix + "newprefix":
-			go gencommands.Prefix(s, m)
+			go admincommands.Prefix(s, m)
 		case serverPrefix + "remind":
 			go gencommands.Remind(s, m)
 		case serverPrefix + "rremove", serverPrefix + "remindremove":
@@ -195,7 +197,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "decrypt":
 			go gencommands.Decrypt(s, m)
 		case serverPrefix + "osutoggle", serverPrefix + "osut":
-			go osucommands.OsuToggle(s, m)
+			go admincommands.OsuToggle(s, m)
 		case serverPrefix + "link", serverPrefix + "set":
 			go osucommands.Link(s, m, args, osuAPI, profileCache)
 		case serverPrefix + "tfarm", serverPrefix + "topfarm":
@@ -215,11 +217,11 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "t", serverPrefix + "top":
 			go osucommands.Top(s, m, osuAPI, profileCache, mapCache)
 		case serverPrefix + "tr", serverPrefix + "track":
-			go osucommands.Track(s, m, osuAPI, mapCache)
+			go admincommands.Track(s, m, osuAPI, mapCache)
 		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "ttoggle", serverPrefix + "tracktoggle":
-			go osucommands.TrackToggle(s, m, mapCache)
+			go admincommands.TrackToggle(s, m, mapCache)
 		case serverPrefix + "ti", serverPrefix + "tinfo", serverPrefix + "tracking", serverPrefix + "trackinfo":
-			go osucommands.TrackInfo(s, m)
+			go admincommands.TrackInfo(s, m)
 		case serverPrefix + "mt", serverPrefix + "mtrack", serverPrefix + "maptrack", serverPrefix + "mappertrack":
 			go osucommands.TrackMapper(s, m, osuAPI, mapperData)
 		case serverPrefix + "mti", serverPrefix + "mtinfo", serverPrefix + "mtrackinfo", serverPrefix + "maptracking", serverPrefix + "mappertracking", serverPrefix + "mappertrackinfo":
@@ -247,9 +249,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "statst", serverPrefix + "statstoggle":
 			go gencommands.StatsToggle(s, m)
 		case serverPrefix + "clean":
-			go gencommands.Clean(s, m, profileCache)
+			go botcreatorcommands.Clean(s, m, profileCache)
 		case serverPrefix + "cleanf", serverPrefix + "cleanfarm":
-			go gencommands.CleanFarm(s, m, profileCache, osuAPI)
+			go botcreatorcommands.CleanFarm(s, m, profileCache, osuAPI)
 		case serverPrefix + "ocr":
 			go gencommands.OCR(s, m)
 		}

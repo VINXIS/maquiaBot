@@ -19,68 +19,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// Vibe toggles vibechecking messages on/off
-func Vibe(s *discordgo.Session, m *discordgo.MessageCreate) {
-	server, err := s.Guild(m.GuildID)
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
-		return
-	}
-
-	if m.Author.ID != server.OwnerID {
-		member, _ := s.GuildMember(server.ID, m.Author.ID)
-		admin := false
-		for _, roleID := range member.Roles {
-			role, _ := s.State.Role(m.GuildID, roleID)
-			if role.Permissions&discordgo.PermissionAdministrator != 0 || role.Permissions&discordgo.PermissionManageServer != 0 {
-				admin = true
-				break
-			}
-		}
-		if !admin {
-			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
-			return
-		}
-	}
-
-	// Obtain server data
-	serverData := structs.ServerData{
-		Prefix:    "$",
-		OsuToggle: true,
-		Crab:      true,
-	}
-	_, err = os.Stat("./data/serverData/" + m.GuildID + ".json")
-	if err == nil {
-		f, err := ioutil.ReadFile("./data/serverData/" + m.GuildID + ".json")
-		tools.ErrRead(err)
-		_ = json.Unmarshal(f, &serverData)
-	} else if os.IsNotExist(err) {
-		serverData.Server = *server
-	} else {
-		tools.ErrRead(err)
-		return
-	}
-
-	// Set new information in server data
-	serverData.Time = time.Now()
-	serverData.Vibe = !serverData.Vibe
-
-	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
-
-	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
-
-	if serverData.Vibe {
-		s.ChannelMessageSend(m.ChannelID, "Enabled the vibe check.")
-	} else {
-		s.ChannelMessageSend(m.ChannelID, "Disabled the vibe check.")
-	}
-	return
-}
-
-// VibeCheck checks for their vibe.
-func VibeCheck(s *discordgo.Session, m *discordgo.MessageCreate, checkType string) {
+// Vibe checks for their vibe.
+func Vibe(s *discordgo.Session, m *discordgo.MessageCreate, checkType string) {
 	target := m.Author
 	if checkType == "notRandom" {
 		if len(m.Mentions) > 0 {
@@ -156,4 +96,53 @@ func VibeCheck(s *discordgo.Session, m *discordgo.MessageCreate, checkType strin
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "You have passed the vibe check ("+strconv.Itoa(Requirement)+"% chance). Carry on "+target.Mention())
 	}
+}
+
+// VibeToggle toggles vibechecking messages on/off
+func VibeToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
+	server, err := s.Guild(m.GuildID)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
+		return
+	}
+
+	if !tools.AdminCheck(s, m, *server) {
+		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
+		return
+	}
+
+	// Obtain server data
+	serverData := structs.ServerData{
+		Prefix:    "$",
+		OsuToggle: true,
+		Crab:      true,
+	}
+	_, err = os.Stat("./data/serverData/" + m.GuildID + ".json")
+	if err == nil {
+		f, err := ioutil.ReadFile("./data/serverData/" + m.GuildID + ".json")
+		tools.ErrRead(err)
+		_ = json.Unmarshal(f, &serverData)
+	} else if os.IsNotExist(err) {
+		serverData.Server = *server
+	} else {
+		tools.ErrRead(err)
+		return
+	}
+
+	// Set new information in server data
+	serverData.Time = time.Now()
+	serverData.Vibe = !serverData.Vibe
+
+	jsonCache, err := json.Marshal(serverData)
+	tools.ErrRead(err)
+
+	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
+	tools.ErrRead(err)
+
+	if serverData.Vibe {
+		s.ChannelMessageSend(m.ChannelID, "Enabled the vibe check.")
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "Disabled the vibe check.")
+	}
+	return
 }

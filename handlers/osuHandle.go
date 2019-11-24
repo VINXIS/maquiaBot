@@ -3,6 +3,7 @@ package handlers
 import (
 	osuapi "../osu-api"
 	structs "../structs"
+	admincommands "./admin-commands"
 	osucommands "./osu-commands"
 	"github.com/bwmarrin/discordgo"
 )
@@ -30,13 +31,13 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 		case "ppadd":
 			go osucommands.PPAdd(s, m, osuAPI, playerCache)
 		case "tr", "track":
-			go osucommands.Track(s, m, osuAPI, mapCache)
+			go admincommands.Track(s, m, osuAPI, mapCache)
 		case "ti", "tinfo", "tracking", "trackinfo":
-			go osucommands.TrackInfo(s, m)
+			go admincommands.TrackInfo(s, m)
 		case "tt", "trackt", "ttoggle", "tracktoggle":
-			go osucommands.TrackToggle(s, m, mapCache)
+			go admincommands.TrackToggle(s, m, mapCache)
 		case "toggle":
-			go osucommands.OsuToggle(s, m)
+			go admincommands.OsuToggle(s, m)
 		case "c", "compare":
 			go osucommands.Compare(s, m, args, osuAPI, playerCache, serverPrefix, mapCache)
 		}

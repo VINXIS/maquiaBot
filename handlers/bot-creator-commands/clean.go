@@ -1,4 +1,4 @@
-package gencommands
+package botcreatorcommands
 
 import (
 	"encoding/json"
