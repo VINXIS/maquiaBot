@@ -1,7 +1,6 @@
 package admincommands
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -41,7 +40,7 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var usernames []string
 	if len(users) > 0 {
 		for _, user := range users {
-			usernames = append(usernames, user.Username)
+			usernames = append(usernames, strings.ToLower(user.Username))
 		}
 	}
 	if userRegex.MatchString(m.Content) {
@@ -54,10 +53,10 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 				break
 			}
 		}
-		usernames = append(usernames, strings.Split(userNum, " ")...)
+		if userNum != "" {
+			usernames = append(usernames, strings.Split(userNum, " ")...)
+		}
 	}
-	fmt.Println(usernames)
-	fmt.Println(num)
 	if len(usernames) != 0 {
 		userText = " from the following people: "
 		for _, username := range usernames {
@@ -95,7 +94,7 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Send confirmation message and then delete it after
-	msg, _ := s.ChannelMessageSend(m.ChannelID, "Removed the "+strconv.Itoa(num-1)+" latest messages"+userText)
+	msg, _ := s.ChannelMessageSend(m.ChannelID, "Removed the latest "+strconv.Itoa(num-1)+" messages"+userText)
 	timer := time.NewTimer(5 * time.Second)
 	<-timer.C
 	s.ChannelMessageDelete(msg.ChannelID, msg.ID)
