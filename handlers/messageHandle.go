@@ -141,8 +141,11 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	} else if strings.HasPrefix(m.Content, serverPrefix) {
 		args := strings.Split(m.Content, " ")
 		switch args[0] {
+		// Commands without functions
+		case serverPrefix + "dubs":
+			go s.ChannelMessageSend(m.ChannelID, "Ur retarded")
 		case serverPrefix + "k", serverPrefix + "key":
-			go s.ChannelMessageSend(m.ChannelID, "``` Default AES encryption key: Nxb]^NSc;L*qn3K(/tN{6N7%4n32fF#@```\n This key is given out publicly and I use it for all of my encryption tools, so please do not use me for sensitive data.\n I will have custom key functionality later.")
+			go s.ChannelMessageSend(m.ChannelID, "``` Default AES encryption key: Nxb]^NSc;L*qn3K(/tN{6N7%4n32fF#@```\n This key is given out publicly and I use it for all of my encryption tools, so please do not use me for sensitive data.\n To use your own key, make sure you add a `-k` flag!")
 		case serverPrefix + "noncesize", serverPrefix + "nsize":
 			key := []byte("Nxb]^NSc;L*qn3K(/tN{6N7%4n32fF#@")
 			block, _ := aes.NewCipher(key)
@@ -150,110 +153,122 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go s.ChannelMessageSend(m.ChannelID, "The nonce size using the default AES encryption key is "+strconv.Itoa(gcm.NonceSize()))
 		case serverPrefix + "src", serverPrefix + "source":
 			go s.ChannelMessageSend(m.ChannelID, "https://github.com/VINXIS/maquiaBot")
-		case serverPrefix + "osu", serverPrefix + "o":
-			go OsuHandle(s, m, args, osuAPI, profileCache, mapCache, serverPrefix)
-		case serverPrefix + "pokemon":
-			go PokemonHandle(s, m, args, serverPrefix)
-		case serverPrefix + "avatar", serverPrefix + "ava", serverPrefix + "a":
-			go gencommands.Avatar(s, m)
-		case serverPrefix + "ping":
-			go gencommands.Ping(s, m)
+
+		// Bot owner commands
+		case serverPrefix + "clean":
+			go botcreatorcommands.Clean(s, m, profileCache)
+		case serverPrefix + "cleanf", serverPrefix + "cleanfarm":
+			go botcreatorcommands.CleanFarm(s, m, profileCache, osuAPI)
 		case serverPrefix + "up", serverPrefix + "update":
 			go botcreatorcommands.Update(s, m)
-		case serverPrefix + "parse":
-			go gencommands.ParseID(s, m)
-		case serverPrefix + "info":
-			go gencommands.Info(s, m, profileCache)
-		case serverPrefix + "sinfo", serverPrefix + "serverinfo":
-			go gencommands.ServerInfo(s, m)
-		case serverPrefix + "h", serverPrefix + "help":
-			go helpcommands.Help(s, m, serverPrefix, args)
+
+		// Sub-handles for pokemon and osu!
+		case serverPrefix + "osu", serverPrefix + "o":
+			go OsuHandle(s, m, args, osuAPI, profileCache, mapCache, mapperData, serverPrefix)
+		case serverPrefix + "pokemon":
+			go PokemonHandle(s, m, args, serverPrefix)
+
+		// Admin commands
 		case serverPrefix + "crab":
 			go admincommands.Crab(s, m)
-		case serverPrefix + "vibet", serverPrefix + "vibetoggle":
-			go gencommands.VibeToggle(s, m)
-		case serverPrefix + "vibe", serverPrefix + "vibec", serverPrefix + "vibecheck":
-			go gencommands.Vibe(s, m, "notRandom")
-		case serverPrefix + "prefix", serverPrefix + "newprefix":
-			go admincommands.Prefix(s, m)
-		case serverPrefix + "remind":
-			go gencommands.Remind(s, m)
-		case serverPrefix + "rremove", serverPrefix + "remindremove":
-			go gencommands.RemoveReminder(s, m)
-		case serverPrefix + "reminders":
-			go gencommands.Reminders(s, m)
-		case serverPrefix + "l", serverPrefix + "leven", serverPrefix + "levenshtein":
-			go gencommands.Levenshtein(s, m)
-		case serverPrefix + "penis":
-			go gencommands.Penis(s, m)
-		case serverPrefix + "funny":
-			go gencommands.Funny(s, m)
-		case serverPrefix + "kanye":
-			go gencommands.Kanye(s, m)
-		case serverPrefix + "face":
-			go gencommands.Face(s, m)
-		case serverPrefix + "encrypt":
-			go gencommands.Encrypt(s, m)
-		case serverPrefix + "decrypt":
-			go gencommands.Decrypt(s, m)
 		case serverPrefix + "osutoggle", serverPrefix + "osut":
 			go admincommands.OsuToggle(s, m)
-		case serverPrefix + "link", serverPrefix + "set":
-			go osucommands.Link(s, m, args, osuAPI, profileCache)
-		case serverPrefix + "tfarm", serverPrefix + "topfarm":
-			go osucommands.TopFarm(s, m, osuAPI, profileCache, serverPrefix)
+		case serverPrefix + "prefix", serverPrefix + "newprefix":
+			go admincommands.Prefix(s, m)
+		case serverPrefix + "purge":
+			go admincommands.Purge(s, m)
+		case serverPrefix + "statst", serverPrefix + "statstoggle":
+			go admincommands.StatsToggle(s, m)
+		case serverPrefix + "tr", serverPrefix + "track":
+			go admincommands.Track(s, m, osuAPI, mapCache)
+		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "ttoggle", serverPrefix + "tracktoggle":
+			go admincommands.TrackToggle(s, m, mapCache)
+		case serverPrefix + "vibet", serverPrefix + "vibetoggle":
+			go admincommands.VibeToggle(s, m)
+
+		// General commands
+		case serverPrefix + "adj", serverPrefix + "adjective", serverPrefix + "adjectives":
+			go gencommands.Adjectives(s, m)
+		case serverPrefix + "avatar", serverPrefix + "ava", serverPrefix + "a":
+			go gencommands.Avatar(s, m)
+		case serverPrefix + "ch", serverPrefix + "choose":
+			go gencommands.Choose(s, m)
+		case serverPrefix + "decrypt":
+			go gencommands.Decrypt(s, m)
+		case serverPrefix + "encrypt":
+			go gencommands.Encrypt(s, m)
+		case serverPrefix + "face":
+			go gencommands.Face(s, m)
+		case serverPrefix + "funny":
+			go gencommands.Funny(s, m)
+		case serverPrefix + "info":
+			go gencommands.Info(s, m, profileCache)
+		case serverPrefix + "kanye":
+			go gencommands.Kanye(s, m)
+		case serverPrefix + "l", serverPrefix + "leven", serverPrefix + "levenshtein":
+			go gencommands.Levenshtein(s, m)
+		case serverPrefix + "noun", serverPrefix + "nouns":
+			go gencommands.Nouns(s, m)
+		case serverPrefix + "ocr":
+			go gencommands.OCR(s, m)
+		case serverPrefix + "p", serverPrefix + "percentage", serverPrefix + "per", serverPrefix + "percent":
+			go gencommands.Percentage(s, m)
+		case serverPrefix + "ping":
+			go gencommands.Ping(s, m)
+		case serverPrefix + "parse":
+			go gencommands.ParseID(s, m)
+		case serverPrefix + "penis":
+			go gencommands.Penis(s, m)
+		case serverPrefix + "remind":
+			go gencommands.Remind(s, m)
+		case serverPrefix + "reminders":
+			go gencommands.Reminders(s, m)
+		case serverPrefix + "remindremove", serverPrefix + "rremove":
+			go gencommands.RemoveReminder(s, m)
+		case serverPrefix + "roll":
+			go gencommands.Roll(s, m)
+		case serverPrefix + "sinfo", serverPrefix + "serverinfo":
+			go gencommands.ServerInfo(s, m)
+		case serverPrefix + "skill", serverPrefix + "skills":
+			go gencommands.Skills(s, m)
+		case serverPrefix + "stats":
+			go gencommands.Stats(s, m)
+		case serverPrefix + "vibe", serverPrefix + "vibec", serverPrefix + "vibecheck":
+			go gencommands.Vibe(s, m, "notRandom")
+
+		// osu! commands
 		case serverPrefix + "bfarm", serverPrefix + "bottomfarm":
 			go osucommands.BottomFarm(s, m, osuAPI, profileCache, serverPrefix)
+		case serverPrefix + "c", serverPrefix + "compare":
+			go osucommands.Compare(s, m, args, osuAPI, profileCache, serverPrefix, mapCache)
 		case serverPrefix + "farm":
 			go osucommands.Farmerdog(s, m, osuAPI, profileCache)
+		case serverPrefix + "link", serverPrefix + "set":
+			go osucommands.Link(s, m, args, osuAPI, profileCache)
+		case serverPrefix + "mt", serverPrefix + "mtrack", serverPrefix + "maptrack", serverPrefix + "mappertrack":
+			go osucommands.TrackMapper(s, m, osuAPI, mapperData)
+		case serverPrefix + "mti", serverPrefix + "mtinfo", serverPrefix + "mtrackinfo", serverPrefix + "maptracking", serverPrefix + "mappertracking", serverPrefix + "mappertrackinfo":
+			go osucommands.TrackMapperInfo(s, m, mapperData)
 		case serverPrefix + "ppadd":
 			go osucommands.PPAdd(s, m, osuAPI, profileCache)
 		case serverPrefix + "r", serverPrefix + "rs", serverPrefix + "recent":
 			go osucommands.Recent(s, m, osuAPI, "recent", profileCache, mapCache)
 		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
 			go osucommands.Recent(s, m, osuAPI, "best", profileCache, mapCache)
-		case serverPrefix + "c", serverPrefix + "compare":
-			go osucommands.Compare(s, m, args, osuAPI, profileCache, serverPrefix, mapCache)
 		case serverPrefix + "t", serverPrefix + "top":
 			go osucommands.Top(s, m, osuAPI, profileCache, mapCache)
-		case serverPrefix + "tr", serverPrefix + "track":
-			go admincommands.Track(s, m, osuAPI, mapCache)
-		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "ttoggle", serverPrefix + "tracktoggle":
-			go admincommands.TrackToggle(s, m, mapCache)
+		case serverPrefix + "tfarm", serverPrefix + "topfarm":
+			go osucommands.TopFarm(s, m, osuAPI, profileCache, serverPrefix)
 		case serverPrefix + "ti", serverPrefix + "tinfo", serverPrefix + "tracking", serverPrefix + "trackinfo":
-			go admincommands.TrackInfo(s, m)
-		case serverPrefix + "mt", serverPrefix + "mtrack", serverPrefix + "maptrack", serverPrefix + "mappertrack":
-			go osucommands.TrackMapper(s, m, osuAPI, mapperData)
-		case serverPrefix + "mti", serverPrefix + "mtinfo", serverPrefix + "mtrackinfo", serverPrefix + "maptracking", serverPrefix + "mappertracking", serverPrefix + "mappertrackinfo":
-			go osucommands.TrackMapperInfo(s, m, mapperData)
+			go osucommands.TrackInfo(s, m)
+
+		// Pokemon commands
 		case serverPrefix + "b", serverPrefix + "berry":
 			go pokemoncommands.Berry(s, m)
-		case serverPrefix + "p", serverPrefix + "percentage", serverPrefix + "per", serverPrefix + "percent":
-			go gencommands.Percentage(s, m)
-		case serverPrefix + "roll":
-			go gencommands.Roll(s, m)
-		case serverPrefix + "dubs":
-			go s.ChannelMessageSend(m.ChannelID, "Ur retarded")
-		case serverPrefix + "kanye":
-			go gencommands.Kanye(s, m)
-		case serverPrefix + "ch", serverPrefix + "choose":
-			go gencommands.Choose(s, m)
-		case serverPrefix + "stats":
-			go gencommands.Stats(s, m)
-		case serverPrefix + "adj", serverPrefix + "adjective", serverPrefix + "adjectives":
-			go gencommands.Adjectives(s, m)
-		case serverPrefix + "noun", serverPrefix + "nouns":
-			go gencommands.Nouns(s, m)
-		case serverPrefix + "skill", serverPrefix + "skills":
-			go gencommands.Skills(s, m)
-		case serverPrefix + "statst", serverPrefix + "statstoggle":
-			go gencommands.StatsToggle(s, m)
-		case serverPrefix + "clean":
-			go botcreatorcommands.Clean(s, m, profileCache)
-		case serverPrefix + "cleanf", serverPrefix + "cleanfarm":
-			go botcreatorcommands.CleanFarm(s, m, profileCache, osuAPI)
-		case serverPrefix + "ocr":
-			go gencommands.OCR(s, m)
+
+		// Help commands
+		case serverPrefix + "h", serverPrefix + "help":
+			go helpcommands.Help(s, m, serverPrefix, args)
 		}
 		go tools.CommandLog(s, m, args[0])
 		return

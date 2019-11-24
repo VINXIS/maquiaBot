@@ -3,18 +3,14 @@ package gencommands
 import (
 	"bytes"
 	"crypto/rand"
-	"encoding/json"
 	"image"
 	"image/png"
-	"io/ioutil"
 	"math"
 	"math/big"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
-	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
 )
@@ -96,53 +92,4 @@ func Vibe(s *discordgo.Session, m *discordgo.MessageCreate, checkType string) {
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "You have passed the vibe check ("+strconv.Itoa(Requirement)+"% chance). Carry on "+target.Mention())
 	}
-}
-
-// VibeToggle toggles vibechecking messages on/off
-func VibeToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
-	server, err := s.Guild(m.GuildID)
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
-		return
-	}
-
-	if !tools.AdminCheck(s, m, *server) {
-		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
-		return
-	}
-
-	// Obtain server data
-	serverData := structs.ServerData{
-		Prefix:    "$",
-		OsuToggle: true,
-		Crab:      true,
-	}
-	_, err = os.Stat("./data/serverData/" + m.GuildID + ".json")
-	if err == nil {
-		f, err := ioutil.ReadFile("./data/serverData/" + m.GuildID + ".json")
-		tools.ErrRead(err)
-		_ = json.Unmarshal(f, &serverData)
-	} else if os.IsNotExist(err) {
-		serverData.Server = *server
-	} else {
-		tools.ErrRead(err)
-		return
-	}
-
-	// Set new information in server data
-	serverData.Time = time.Now()
-	serverData.Vibe = !serverData.Vibe
-
-	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
-
-	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
-
-	if serverData.Vibe {
-		s.ChannelMessageSend(m.ChannelID, "Enabled the vibe check.")
-	} else {
-		s.ChannelMessageSend(m.ChannelID, "Disabled the vibe check.")
-	}
-	return
 }
