@@ -19,7 +19,6 @@ import (
 	admincommands "./admin-commands"
 	botcreatorcommands "./bot-creator-commands"
 	gencommands "./general-commands"
-	helpcommands "./help-commands"
 	osucommands "./osu-commands"
 	pokemoncommands "./pokemon-commands"
 
@@ -70,28 +69,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	_ = json.Unmarshal(f, &mapperData)
 
 	// Obtain server data
-	var serverData structs.ServerData
-	_, err = os.Stat("./data/serverData/" + m.GuildID + ".json")
-	if err == nil {
-		f, err = ioutil.ReadFile("./data/serverData/" + m.GuildID + ".json")
-		tools.ErrRead(err)
-		_ = json.Unmarshal(f, &serverData)
+	server, err := s.Guild(m.GuildID)
+	if err != nil {
+		server = &discordgo.Guild{}
 	}
-
-	// Check for custom prefix
-	serverPrefix := `$`
-	crab := true
-	osuToggle := true
-	vibe := false
-	if serverData.Server.ID != "" {
-		serverPrefix = serverData.Prefix
-		crab = serverData.Crab
-		osuToggle = serverData.OsuToggle
-		vibe = serverData.Vibe
-	}
+	serverData := tools.GetServer(*server)
+	serverPrefix := serverData.Prefix
 
 	// CRAB RAVE
-	if crab && (strings.Contains(m.Content, "crab") || strings.Contains(m.Content, "rave")) && m.Content != serverPrefix+"crab" {
+	if serverData.Crab && (strings.Contains(m.Content, "crab") || strings.Contains(m.Content, "rave")) && m.Content != serverPrefix+"crab" {
 		response, err := http.Get("https://cdn.discordapp.com/emojis/510169818893385729.gif")
 		if err != nil {
 			return
@@ -114,12 +100,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	timestampRegex, _ := regexp.Compile(`(\d+):(\d{2}):(\d{3})\s*(\(((\d\,?)+)\))?`)
 
 	// Timestamp conversions
-	if timestampRegex.MatchString(noEmoji) && osuToggle {
+	if timestampRegex.MatchString(noEmoji) && serverData.OsuToggle {
 		go osucommands.TimestampMessage(s, m, timestampRegex)
 	}
 
-	// Vibe check (1/100000 chance)
-	if vibe {
+	// Vibe check (1/100000 chance if vibe is on in the server)
+	if serverData.Vibe {
 		roll, _ := rand.Int(rand.Reader, big.NewInt(100000))
 		number := roll.Int64()
 		if number == 0 {
@@ -163,7 +149,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go botcreatorcommands.Update(s, m)
 
 		// Sub-handles for pokemon and osu!
-		case serverPrefix + "osu", serverPrefix + "o":
+		case serverPrefix + "h", serverPrefix + "help":
+			go HelpHandle(s, m, serverPrefix)
+		case serverPrefix + "o", serverPrefix + "osu":
 			go OsuHandle(s, m, args, osuAPI, profileCache, mapCache, mapperData, serverPrefix)
 		case serverPrefix + "pokemon":
 			go PokemonHandle(s, m, args, serverPrefix)
@@ -265,17 +253,13 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Pokemon commands
 		case serverPrefix + "b", serverPrefix + "berry":
 			go pokemoncommands.Berry(s, m)
-
-		// Help commands
-		case serverPrefix + "h", serverPrefix + "help":
-			go helpcommands.Help(s, m, serverPrefix, args)
 		}
 		go tools.CommandLog(s, m, args[0])
 		return
-	} else if beatmapRegex.MatchString(m.Content) && osuToggle { // If a beatmap was linked
+	} else if beatmapRegex.MatchString(m.Content) && serverData.OsuToggle { // If a beatmap was linked
 		go osucommands.BeatmapMessage(s, m, beatmapRegex, osuAPI, mapCache)
 		return
-	} else if profileRegex.MatchString(m.Content) && osuToggle { // if a profile was linked
+	} else if profileRegex.MatchString(m.Content) && serverData.OsuToggle { // if a profile was linked
 		go osucommands.ProfileMessage(s, m, profileRegex, osuAPI, profileCache)
 		return
 	}

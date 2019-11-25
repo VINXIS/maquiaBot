@@ -1,12 +1,12 @@
-package helpsubcommands
+package helpcommands
 
 import (
 	"github.com/bwmarrin/discordgo"
 )
 
 // Link explains the link functionality
-func Link(embed *discordgo.MessageEmbed, arg string) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: " + arg
+func Link(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
+	embed.Author.Name = "Command: link / set"
 	embed.Description = "`(link|set) [mention] <osu! username>` lets you link an osu! account with the username given to your discord account."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
