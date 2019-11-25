@@ -37,5 +37,5 @@ func Levenshtein(messageOne, messageTwo string) float64 {
 			matrix[i][j] = math.Min(matrix[i-1][j]+1.0, math.Min(matrix[i][j-1]+1.0, matrix[i-1][j-1]+substitutionCost))
 		}
 	}
-	return math.Max(0, matrix[messageOneLength][messageTwoLength]-math.Abs(float64(messageOneLength-messageTwoLength)))
+	return math.Max(0, matrix[messageOneLength][messageTwoLength])
 }

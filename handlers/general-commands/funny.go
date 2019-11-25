@@ -88,7 +88,7 @@ func Funny(s *discordgo.Session, m *discordgo.MessageCreate) {
 				if emojiRegex.MatchString(msg2.Content) {
 					msg2.Content = emojiRegex.ReplaceAllString(msg2.Content, emojiRegex.FindStringSubmatch(msg2.Content)[1])
 				}
-				messageLevenVal += tools.Levenshtein(msg.Content, msg2.Content)
+				messageLevenVal += tools.Levenshtein(msg.Content, msg2.Content) - math.Abs(float64(len(msg.Content)-len(msg2.Content)))
 				messageLevenSize++
 			}
 		}
