@@ -314,7 +314,6 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			&discordgo.MessageEmbedField{
 				Name:   "`" + serverData.Prefix + "stats` Information:",
 				Value:  statsInfo,
-				Inline: true,
 			},
 		},
 	})

@@ -11,7 +11,7 @@ func Choose(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:  "<option1> | <option2> | [option3]...",
-			Value: "List out the options separated by ` | ` ",
+			Value: "List out the options separated by ` | `.",
 		},
 	}
 	return embed

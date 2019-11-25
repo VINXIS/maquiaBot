@@ -11,7 +11,7 @@ func Encrypt(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<text>",
-			Value:  "The text you want to encrypt",
+			Value:  "The text you want to encrypt.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
@@ -34,7 +34,7 @@ func Decrypt(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<text>",
-			Value:  "The text you want to decrypt",
+			Value:  "The text you want to decrypt.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{

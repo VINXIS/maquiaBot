@@ -30,7 +30,7 @@ func Stats(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // Adjectives explains the adjective functionality
 func Adjectives(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: adj / adjective / adjectives"
-	embed.Description = "`(adj|adjective|adjectives) [add|remove] [adj]` lets you add/remove adjectives from the stats feature, or see the list of current adjectives if no word is given"
+	embed.Description = "`(adj|adjective|adjectives) [add|remove] [adj]` lets you add/remove adjectives from the stats feature, or see the list of current adjectives if no word is given."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[add|remove]",
@@ -53,7 +53,7 @@ func Adjectives(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // Nouns explains the noun functionality
 func Nouns(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: noun / nouns"
-	embed.Description = "`(noun|nouns) [add|remove] [noun]` lets you add/remove nouns from the stats feature, or see the list of current nouns if no word is given"
+	embed.Description = "`(noun|nouns) [add|remove] [noun]` lets you add/remove nouns from the stats feature, or see the list of current nouns if no word is given."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[add|remove]",

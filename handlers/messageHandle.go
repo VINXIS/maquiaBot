@@ -199,15 +199,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Nouns(s, m)
 		case serverPrefix + "ocr":
 			go gencommands.OCR(s, m)
-		case serverPrefix + "p", serverPrefix + "percentage", serverPrefix + "per", serverPrefix + "percent":
+		case serverPrefix + "p", serverPrefix + "per", serverPrefix + "percent", serverPrefix + "percentage":
 			go gencommands.Percentage(s, m)
-		case serverPrefix + "ping":
-			go gencommands.Ping(s, m)
 		case serverPrefix + "parse":
 			go gencommands.ParseID(s, m)
 		case serverPrefix + "penis":
 			go gencommands.Penis(s, m)
-		case serverPrefix + "remind":
+		case serverPrefix + "ping":
+			go gencommands.Ping(s, m)
+		case serverPrefix + "remind", serverPrefix + "reminder":
 			go gencommands.Remind(s, m)
 		case serverPrefix + "reminders":
 			go gencommands.Reminders(s, m)

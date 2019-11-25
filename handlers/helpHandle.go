@@ -22,20 +22,62 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		},
 		Description: "Detailed version of the commands list [here](https://docs.google.com/spreadsheets/d/12VzMXGoxliSVv6Rrr6tEy_-Qe9oJ0TNF4MoPGcxIpcU/edit?usp=sharing). **Most commands have other forms as well for convenience!**" + "\n\n" +
 			"**Please do `" + prefix + "help <command>` for more information about the command!** \n" +
-			"Help information format: `(cmd name) <args> [optional args]`",
+			"Help information format: `(cmd|names) <args> [optional args]`",
+		Fields: []*discordgo.MessageEmbedField{
+			&discordgo.MessageEmbedField{
+				Name:  "Admin commands:",
+				Value: "`(prefix|maquiaprefix|newprefix)`, " +
+				"`(statst|statstoggle)`, " + 
+				"`(vibet|vibetoggle)`",
+			},
+			&discordgo.MessageEmbedField{
+				Name:  "General commands:",
+				Value: "`(adj|adjective|adjectives)`, " +
+				"`(a|ava|avatar)`, " +
+				"`(ch|choose)`, " +
+				"`decrypt`, " +
+				"`encrypt`, " +
+				"`face`, " +
+				"`funny`, " +
+				"`info`, " +
+				"`kanye`, " +
+				"`(l|leven|levenshtein)`, " +
+				"`(noun|nouns)`, " +
+				"`ocr`, " +
+				"`(p|per|percent|percentage)`, " +
+				"`parse`, " +
+				"`penis`, " +
+				"`ping`, " +
+				"`(remind|reminder)`, " +
+				"`reminders`, " +
+				"`(remindremove|rremove)`, " +
+				"`roll`, " +
+				"`(sinfo|serverinfo)`, " +
+				"`(skill|skills)`, " +
+				"`stats`, " +
+				"`(vibe|vibec|vibecheck)`",
+			},
+		},
 		Color: osutools.ModeColour(osuapi.ModeOsu),
 	}
 
 	argRegex, _ := regexp.Compile(`help\s+(.+)`)
 	if argRegex.MatchString(m.Content) {
 		arg := argRegex.FindStringSubmatch(m.Content)[1]
-		if arg == "pokemon" || arg == "osu" {
-			arg = strings.Split(argRegex.FindStringSubmatch(m.Content)[1], " ")[1]
+		if strings.Split(arg, " ")[0] == "pokemon" || strings.Split(arg, " ")[0] == "osu" {
+			args := strings.Split(argRegex.FindStringSubmatch(m.Content)[1], " ")
+			if len(args) > 1 {
+				arg = args[1]
+			}
 		}
 		switch arg {
 		// Admin commands
+		case "prefix", "maquiaprefix", "newprefix":
+			embed = helpcommands.Prefix(embed)
 		case "statst", "statstoggle":
 			embed = helpcommands.StatsToggle(embed)
+		case "vibet", "vibetoggle":
+			embed = helpcommands.VibeToggle(embed)
 
 		// General commands
 		case "adj", "adjective", "adjectives":
@@ -48,14 +90,44 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Decrypt(embed)
 		case "encrypt":
 			embed = helpcommands.Encrypt(embed)
-		case "maquiaprefix", "prefix", "newprefix":
-			embed = helpcommands.Prefix(embed)
+		case "face":
+			embed = helpcommands.Face(embed)
+		case "funny":
+			embed = helpcommands.Funny(embed)
+		case "info":
+			embed = helpcommands.Info(embed)
+		case "kanye":
+			embed = helpcommands.Kanye(embed)
+		case "l", "leven", "levenshtein":
+			embed = helpcommands.Levenshtein(embed)
 		case "noun", "nouns":
 			embed = helpcommands.Nouns(embed)
+		case "ocr":
+			embed = helpcommands.OCR(embed)
+		case "p", "per", "percent", "percentage":
+			embed = helpcommands.Percentage(embed)
+		case "parse":
+			embed = helpcommands.Parse(embed)
+		case "penis":
+			embed = helpcommands.Penis(embed)
+		case "ping":
+			embed = helpcommands.Ping(embed)
+		case "remind", "reminder":
+			embed = helpcommands.Remind(embed)
+		case "reminders":
+			embed = helpcommands.Reminders(embed)
+		case "remindremove", "rremove":
+			embed = helpcommands.RemindRemove(embed)
+		case "roll":
+			embed = helpcommands.Roll(embed)
+		case "sinfo", "serverinfo":
+			embed = helpcommands.ServerInfo(embed)
 		case "skill", "skills":
 			embed = helpcommands.Skills(embed)
 		case "stats":
 			embed = helpcommands.Stats(embed)
+		case "vibe", "vibec", "vibecheck":
+			embed = helpcommands.Vibe(embed)
 
 		// osu! commands
 		case "link", "set":

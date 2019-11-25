@@ -23,14 +23,14 @@ var ReminderTimers []structs.ReminderTimer
 
 // Remind reminds the person after an x amount of specified time
 func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
-	remindRegex, _ := regexp.Compile(`remind\s+(.+)`)
+	remindRegex, _ := regexp.Compile(`remind(er)?\s+(.+)`)
 	timeRegex, _ := regexp.Compile(`\s(\d+) (month|week|day|hour|minute|second)s?`)
 	reminderTime := time.Duration(0)
 	text := ""
 	timeResultString := ""
 	// Parse info
 	if remindRegex.MatchString(m.Content) {
-		text = remindRegex.FindStringSubmatch(m.Content)[1]
+		text = remindRegex.FindStringSubmatch(m.Content)[2]
 		if timeRegex.MatchString(m.Content) {
 			times := timeRegex.FindAllStringSubmatch(m.Content, -1)
 			months := 0
