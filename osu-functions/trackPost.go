@@ -234,7 +234,12 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 							tools.ErrRead(err)
 
 							if recentUser.PP != user.PP {
-								embed.Author.Name = user.Username + " " + strconv.FormatFloat(user.PP, 'f', 2, 64) + " -> " + strconv.FormatFloat(recentUser.PP, 'f', 2, 64) + " (+" + strconv.FormatFloat(recentUser.PP-user.PP, 'f', 2, 64) + "pp)"
+								embed.Author.Name = user.Username + " " + strconv.FormatFloat(user.PP, 'f', 2, 64) + " -> " + strconv.FormatFloat(recentUser.PP, 'f', 2, 64)
+								if recentUser.PP-user.PP > 0{
+									embed.Author.Name += " (+" + strconv.FormatFloat(recentUser.PP-user.PP, 'f', 2, 64) + "pp)"
+								} else {
+									embed.Author.Name += " (" + strconv.FormatFloat(recentUser.PP-user.PP, 'f', 2, 64) + "pp)"
+								}
 							} else {
 								embed.Author.Name = user.Username
 							}
