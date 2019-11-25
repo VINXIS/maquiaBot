@@ -11,8 +11,7 @@ func Prefix(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<prefix>",
-			Value:  "The prefix to change to **(REQUIRES ADMIN PERMS)**",
-			Inline: true,
+			Value:  "The prefix to change to.",
 		},
 	}
 	return embed

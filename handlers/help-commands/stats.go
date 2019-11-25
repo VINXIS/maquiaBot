@@ -7,7 +7,7 @@ import (
 // Stats explains the stats functionality
 func Stats(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: stats"
-	embed.Description = "`stats [text] [num]` lets admins change the prefix for the bot in the server."
+	embed.Description = "`stats [text] [num]` gives stats for a specific amount of skills, alongside a class randomly chosen from adjectives and nouns combined."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[text]",
@@ -16,11 +16,11 @@ func Stats(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:   "[num]",
-			Value:  "The number of skills to print (Default is 4)",
+			Value:  "The number of skills to print (Default is 4).",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:  "Related Commands",
+			Name:  "Related Commands:",
 			Value: "`adjective`, `nouns`, `skills`, `statstoggle`",
 		},
 	}
@@ -30,20 +30,20 @@ func Stats(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // Adjectives explains the adjective functionality
 func Adjectives(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: adj / adjective / adjectives"
-	embed.Description = "`(adj|adjective|adjectives) [remove] <adj>` lets you add/remove adjectives from the stats feature."
+	embed.Description = "`(adj|adjective|adjectives) [add|remove] [adj]` lets you add/remove adjectives from the stats feature, or see the list of current adjectives if no word is given"
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
-			Name:   "[remove]",
-			Value:  "State remove to remove the adj.",
+			Name:   "[add|remove]",
+			Value:  "State add / remove to add / remove the adjective (Default: add).",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:   "<adj>",
-			Value:  "The word to add/remove",
+			Name:   "[adj]",
+			Value:  "The word to add/remove. No word lets you see the full list.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:  "Related Commands",
+			Name:  "Related Commands:",
 			Value: "`stats`, `nouns`, `skills`, `statstoggle`",
 		},
 	}
@@ -53,20 +53,20 @@ func Adjectives(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // Nouns explains the noun functionality
 func Nouns(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: noun / nouns"
-	embed.Description = "`(noun|nouns) [remove] <noun>` lets you add/remove nouns from the stats feature."
+	embed.Description = "`(noun|nouns) [add|remove] [noun]` lets you add/remove nouns from the stats feature, or see the list of current nouns if no word is given"
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
-			Name:   "[remove]",
-			Value:  "State remove to remove the noun.",
+			Name:   "[add|remove]",
+			Value:  "State add / remove to add / remove the noun (Default: add).",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:   "<noun>",
-			Value:  "The word to add/remove",
+			Name:   "[noun]",
+			Value:  "The word to add/remove. No word lets you see the full list.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:  "Related Commands",
+			Name:  "Related Commands:",
 			Value: "`stats`, `adjective`, `skills`, `statstoggle`",
 		},
 	}
@@ -76,20 +76,20 @@ func Nouns(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // Skills explains the skills functionality
 func Skills(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: skill / skills"
-	embed.Description = "`(skill|skills) [remove] <skill>` lets you add/remove skills from the stats feature."
+	embed.Description = "`(skill|skills) [add|remove] [skill]` lets you add/remove skills from the stats feature, or see the list of current skills if no word is given."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
-			Name:   "[remove]",
-			Value:  "State remove to remove the skill.",
+			Name:   "[add|remove]",
+			Value:  "State add / remove to add / remove the skill (Default: add).",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:   "<skill>",
-			Value:  "The word to add/remove",
+			Name:   "[skill]",
+			Value:  "The word to add/remove. No word lets you see the full list.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:  "Related Commands",
+			Name:  "Related Commands:",
 			Value: "`stats`, `adjective`, `nouns`, `statstoggle`",
 		},
 	}
@@ -102,7 +102,7 @@ func StatsToggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Description = "`(statst|statstoggle)` lets admins toggle if anyone can add adj/nouns/skills, or if only admins are allowed."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
-			Name:  "Related Commands",
+			Name:  "Related Commands:",
 			Value: "`stats`, `adjective`, `nouns`, `skills`",
 		},
 	}

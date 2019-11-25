@@ -3,6 +3,7 @@ package handlers
 import (
 	"math/rand"
 	"regexp"
+	"strings"
 
 	osuapi "../osu-api"
 	osutools "../osu-functions"
@@ -29,21 +30,36 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 	if argRegex.MatchString(m.Content) {
 		arg := argRegex.FindStringSubmatch(m.Content)[1]
 		if arg == "pokemon" || arg == "osu" {
-			arg = argRegex.FindStringSubmatch(m.Content)[1]
+			arg = strings.Split(argRegex.FindStringSubmatch(m.Content)[1], " ")[1]
 		}
 		switch arg {
+		// Admin commands
+		case "statst", "statstoggle":
+			embed = helpcommands.StatsToggle(embed)
+
+		// General commands
 		case "adj", "adjective", "adjectives":
 			embed = helpcommands.Adjectives(embed)
-		case "link", "set":
-			embed = helpcommands.Link(embed)
+		case "avatar", "ava", "a":
+			embed = helpcommands.Avatar(embed)
+		case "ch", "choose":
+			embed = helpcommands.Choose(embed)
+		case "decrypt":
+			embed = helpcommands.Decrypt(embed)
+		case "encrypt":
+			embed = helpcommands.Encrypt(embed)
 		case "maquiaprefix", "prefix", "newprefix":
 			embed = helpcommands.Prefix(embed)
 		case "noun", "nouns":
 			embed = helpcommands.Nouns(embed)
 		case "skill", "skills":
-			embed = helpcommands.Nouns(embed)
+			embed = helpcommands.Skills(embed)
 		case "stats":
 			embed = helpcommands.Stats(embed)
+
+		// osu! commands
+		case "link", "set":
+			embed = helpcommands.Link(embed)
 		}
 	}
 
@@ -78,7 +94,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		}
 	}
 	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-		Content: "All commands in PM will use the bot's default prefix `$` instead! The prefix used below is assigned by the server owner(s)!",
+		Content: "All commands in PM will use the bot's default prefix `$` instead!",
 		Embed:   embed,
 	})
 }
