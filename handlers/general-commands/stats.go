@@ -30,12 +30,14 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Parse emssage to see if a skill count was given/object of reference
 	text := "You have"
+	textLength := 0
 	skillCount := 4
 	if statsRegex.MatchString(m.Content) {
 		var err error
 		skillCount, err = strconv.Atoi(statsRegex.FindStringSubmatch(m.Content)[2])
 		if err != nil {
 			text = strings.ReplaceAll(statsRegex.FindStringSubmatch(m.Content)[2]+" has", "`", "")
+			textLength = len(strings.ReplaceAll(statsRegex.FindStringSubmatch(m.Content)[2], "`", ""))
 			list := strings.Split(statsRegex.FindStringSubmatch(m.Content)[2], " ")
 			skillCount = 4
 			if len(list) > 1 {
@@ -44,6 +46,7 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 					skillCount = 4
 				} else {
 					text = strings.ReplaceAll(strings.Join(list[:len(list)-1], " "), "`", "") + " has"
+					textLength = len(strings.ReplaceAll(strings.Join(list[:len(list)-1], " "), "`", ""))
 				}
 			}
 		}
@@ -67,7 +70,7 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain 4 skills
 	var skills []string
 	authorid, _ := strconv.Atoi(m.Author.ID)
-	skillRang := rand.New(rand.NewSource(int64(authorid) + time.Now().UnixNano()))
+	skillRang := rand.New(rand.NewSource(int64(authorid + textLength) + time.Now().UnixNano()))
 	maxLength := float64(0)
 	for len(skills) < skillCount {
 		randNum := skillRang.Intn(len(serverData.Skills))
