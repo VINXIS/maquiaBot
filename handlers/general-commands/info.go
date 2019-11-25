@@ -2,7 +2,6 @@ package gencommands
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"regexp"
 	"sort"
