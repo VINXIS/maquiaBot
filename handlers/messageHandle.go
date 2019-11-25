@@ -128,7 +128,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		args := strings.Split(m.Content, " ")
 		switch args[0] {
 		// Commands without functions
-		case serverPrefix + "dubs":
+		case serverPrefix + "complain":
+			go s.ChannelMessageSend(m.ChannelID, "Shut up hoe")
+		case serverPrefix + "dubs", serverPrefix + "doubles", serverPrefix + "trips", serverPrefix + "triples", serverPrefix + "quads", serverPrefix + "quadruples", serverPrefix + "quints", serverPrefix + "quintuples":
 			go s.ChannelMessageSend(m.ChannelID, "Ur retarded")
 		case serverPrefix + "k", serverPrefix + "key":
 			go s.ChannelMessageSend(m.ChannelID, "``` Default AES encryption key: Nxb]^NSc;L*qn3K(/tN{6N7%4n32fF#@```\n This key is given out publicly and I use it for all of my encryption tools, so please do not use me for sensitive data.\n To use your own key, make sure you add a `-k` flag!")
