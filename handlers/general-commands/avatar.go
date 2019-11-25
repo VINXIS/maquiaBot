@@ -39,7 +39,7 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 		var avatars []string
 		for _, user := range users {
 			names = append(names, user.Username)
-			avatars = append(avatars, user.AvatarURL(""))
+			avatars = append(avatars, user.AvatarURL("2048"))
 		}
 		postAva(s, m, names, avatars, true)
 		return
@@ -47,7 +47,7 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 		username := userRegex.FindStringSubmatch(m.Content)[2]
 		discordUser, err := s.User(username)
 		if err == nil {
-			postAva(s, m, []string{discordUser.Username}, []string{discordUser.AvatarURL("")}, true)
+			postAva(s, m, []string{discordUser.Username}, []string{discordUser.AvatarURL("2048")}, true)
 			return
 		}
 
@@ -66,14 +66,14 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 		for _, member := range server.Members {
 			if strings.HasPrefix(strings.ToLower(member.User.Username), username) || strings.HasPrefix(strings.ToLower(member.Nick), username) {
 				discordUser, _ = s.User(member.User.ID)
-				postAva(s, m, []string{member.Nick}, []string{discordUser.AvatarURL("")}, true)
+				postAva(s, m, []string{member.Nick}, []string{discordUser.AvatarURL("2048")}, true)
 				return
 			}
 		}
-		postAva(s, m, []string{username}, []string{m.Author.AvatarURL("")}, false)
+		postAva(s, m, []string{username}, []string{m.Author.AvatarURL("2048")}, false)
 		return
 	}
-	postAva(s, m, []string{}, []string{m.Author.AvatarURL("")}, true)
+	postAva(s, m, []string{}, []string{m.Author.AvatarURL("2048")}, true)
 }
 
 func postAva(s *discordgo.Session, m *discordgo.MessageCreate, name, avatarURL []string, found bool) {

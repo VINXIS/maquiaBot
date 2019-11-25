@@ -18,44 +18,44 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://discordapp.com/oauth2/authorize?&client_id=551667572723023893&scope=bot&permissions=0",
 			Name:    "Click here to invite MaquiaBot!",
-			IconURL: s.State.User.AvatarURL(""),
+			IconURL: s.State.User.AvatarURL("2048"),
 		},
 		Description: "Detailed version of the commands list [here](https://docs.google.com/spreadsheets/d/12VzMXGoxliSVv6Rrr6tEy_-Qe9oJ0TNF4MoPGcxIpcU/edit?usp=sharing). **Most commands have other forms as well for convenience!**" + "\n\n" +
 			"**Please do `" + prefix + "help <command>` for more information about the command!** \n" +
 			"Help information format: `(cmd|names) <args> [optional args]`",
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
-				Name:  "Admin commands:",
+				Name: "Admin commands:",
 				Value: "`(prefix|maquiaprefix|newprefix)`, " +
-				"`(statst|statstoggle)`, " + 
-				"`(vibet|vibetoggle)`",
+					"`(statst|statstoggle)`, " +
+					"`(vibet|vibetoggle)`",
 			},
 			&discordgo.MessageEmbedField{
-				Name:  "General commands:",
+				Name: "General commands:",
 				Value: "`(adj|adjective|adjectives)`, " +
-				"`(a|ava|avatar)`, " +
-				"`(ch|choose)`, " +
-				"`decrypt`, " +
-				"`encrypt`, " +
-				"`face`, " +
-				"`funny`, " +
-				"`info`, " +
-				"`kanye`, " +
-				"`(l|leven|levenshtein)`, " +
-				"`(noun|nouns)`, " +
-				"`ocr`, " +
-				"`(p|per|percent|percentage)`, " +
-				"`parse`, " +
-				"`penis`, " +
-				"`ping`, " +
-				"`(remind|reminder)`, " +
-				"`reminders`, " +
-				"`(remindremove|rremove)`, " +
-				"`roll`, " +
-				"`(sinfo|serverinfo)`, " +
-				"`(skill|skills)`, " +
-				"`stats`, " +
-				"`(vibe|vibec|vibecheck)`",
+					"`(a|ava|avatar)`, " +
+					"`(ch|choose)`, " +
+					"`decrypt`, " +
+					"`encrypt`, " +
+					"`face`, " +
+					"`funny`, " +
+					"`info`, " +
+					"`kanye`, " +
+					"`(l|leven|levenshtein)`, " +
+					"`(noun|nouns)`, " +
+					"`ocr`, " +
+					"`(p|per|percent|percentage)`, " +
+					"`parse`, " +
+					"`penis`, " +
+					"`ping`, " +
+					"`(remind|reminder)`, " +
+					"`reminders`, " +
+					"`(remindremove|rremove)`, " +
+					"`roll`, " +
+					"`(sinfo|serverinfo)`, " +
+					"`(skill|skills)`, " +
+					"`stats`, " +
+					"`(vibe|vibec|vibecheck)`",
 			},
 		},
 		Color: osutools.ModeColour(osuapi.ModeOsu),

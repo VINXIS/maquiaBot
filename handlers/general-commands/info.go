@@ -2,6 +2,7 @@ package gencommands
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"regexp"
 	"sort"
@@ -31,12 +32,13 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 			userTest = userRegex.FindStringSubmatch(m.Content)[1]
 		}
 		user, err = s.User(userTest)
-		if err != nil {
-			server, err := s.Guild(m.GuildID)
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "This is not a server! Use their ID directly instead.")
-				return
-			}
+		if err == nil {
+			userTest = user.Username
+		} else {
+			user = m.Author
+		}
+		server, err := s.Guild(m.GuildID)
+		if err == nil {
 			if userTest == "" {
 				for _, member := range server.Members {
 					if member.User.ID == m.Author.ID {
@@ -76,25 +78,6 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 					}
 				}
 			}
-		} else {
-			server, err := s.Guild(m.GuildID)
-			if err == nil {
-				for _, member := range server.Members {
-					if member.User.ID == user.ID {
-						nickname = member.Nick
-						joinDate = member.JoinedAt
-						roles = ""
-						for _, role := range member.Roles {
-							discordRole, _ := s.State.Role(server.ID, role)
-							roles = roles + discordRole.Name + ", "
-						}
-						if roles != "" {
-							roles = roles[:len(roles)-2]
-						}
-						break
-					}
-				}
-			}
 		}
 	}
 
@@ -102,7 +85,7 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 	joinDateDate, _ := joinDate.Parse()
 
 	// Created at date
-	createdAt, err := discordgo.SnowflakeTimestamp(user.ID)
+	createdAt, _ := discordgo.SnowflakeTimestamp(user.ID)
 
 	// Status
 	presence, err := s.State.Presence(m.GuildID, user.ID)
@@ -129,11 +112,11 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 
 	s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			Name:    user.Username + "#" + user.Discriminator,
-			IconURL: user.AvatarURL(""),
+			Name:    user.String(),
+			IconURL: user.AvatarURL("2048"),
 		},
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
-			URL: user.AvatarURL(""),
+			URL: user.AvatarURL("2048"),
 		},
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
@@ -278,7 +261,7 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			},
 			&discordgo.MessageEmbedField{
 				Name:   "Server Owner",
-				Value:  owner.Username + "#" + owner.Discriminator,
+				Value:  owner.String(),
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
@@ -312,8 +295,8 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
-				Name:   "`" + serverData.Prefix + "stats` Information:",
-				Value:  statsInfo,
+				Name:  "`" + serverData.Prefix + "stats` Information:",
+				Value: statsInfo,
 			},
 		},
 	})

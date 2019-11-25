@@ -202,8 +202,8 @@ func Reminders(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	embed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			Name:    m.Author.Username + "#" + m.Author.Discriminator,
-			IconURL: m.Author.AvatarURL(""),
+			Name:    m.Author.String(),
+			IconURL: m.Author.AvatarURL("2048"),
 		},
 		Description: "Please use `rremove <ID>` or `remindremove <ID>` to remove a reminder",
 	}
@@ -215,7 +215,7 @@ func Reminders(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 				Name:   strconv.FormatInt(reminder.ID, 10),
-				Value:  "Reminder: " + info + "\nRemind time: " + reminder.Target.Format(time.RFC822) + "\nUser: " + reminder.User.Username + "#" + reminder.User.Discriminator,
+				Value:  "Reminder: " + info + "\nRemind time: " + reminder.Target.Format(time.RFC822) + "\nUser: " + reminder.User.String(),
 				Inline: true,
 			})
 		}
