@@ -1,10 +1,10 @@
 package gencommands
 
 import (
-	"crypto/rand"
-	"math/big"
+	"math/rand"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -24,6 +24,7 @@ func Roll(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 	}
-	roll, _ := rand.Int(rand.Reader, big.NewInt(int64(number)))
-	s.ChannelMessageSend(m.ChannelID, strconv.Itoa(int(roll.Int64())+1))
+	authorid, _ := strconv.Atoi(m.Author.ID)
+	random := rand.New(rand.NewSource(int64(authorid) + time.Now().UnixNano()))
+	s.ChannelMessageSend(m.ChannelID, strconv.Itoa(random.Intn(number)+1))
 }

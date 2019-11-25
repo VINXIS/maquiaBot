@@ -20,7 +20,8 @@ func Percentage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if percentRegex.MatchString(m.Content) {
 		text = "Percentage for `" + strings.ReplaceAll(percentRegex.FindStringSubmatch(m.Content)[2], "`", "") + "`:\n"
 	}
-	skillRang := rand.New(rand.NewSource(time.Now().UnixNano()))
+	authorid, _ := strconv.Atoi(m.Author.ID)
+	skillRang := rand.New(rand.NewSource(int64(authorid) + time.Now().UnixNano()))
 	percent := math.Max(0, math.Min(100, skillRang.NormFloat64()*12.5+50))
 	bar := tools.BarCreation(percent / 100)
 

@@ -1,12 +1,10 @@
 package gencommands
 
 import (
-	cryptoRand "crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math"
-	"math/big"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -68,10 +66,12 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Obtain 4 skills
 	var skills []string
+	authorid, _ := strconv.Atoi(m.Author.ID)
+	skillRang := rand.New(rand.NewSource(int64(authorid) + time.Now().UnixNano()))
 	maxLength := float64(0)
 	for len(skills) < skillCount {
-		randNum, _ := cryptoRand.Int(cryptoRand.Reader, big.NewInt(int64(len(serverData.Skills))))
-		newSkill := serverData.Skills[randNum.Int64()]
+		randNum := skillRang.Intn(len(serverData.Skills))
+		newSkill := serverData.Skills[randNum]
 		contained := false
 		for _, skill := range skills {
 			if skill == newSkill {
@@ -87,17 +87,16 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Obtain the percentages of the skills, alongside an adjective and noun
 	fullText := "```"
-	skillRang := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for _, skill := range skills {
 		percent := math.Max(0, math.Min(100, skillRang.NormFloat64()*12.5+50))
 		bar := tools.BarCreation(percent / 100)
 		fullText = fullText + fmt.Sprintf("%-"+strconv.FormatFloat(maxLength, 'f', 0, 64)+"s: %3d%% %s", skill, int(percent), bar) + "\n"
 	}
-	randNum, _ := cryptoRand.Int(cryptoRand.Reader, big.NewInt(int64(len(serverData.Adjectives))))
-	adjective := serverData.Adjectives[randNum.Int64()]
+	randNum := skillRang.Intn(len(serverData.Adjectives))
+	adjective := serverData.Adjectives[randNum]
 
-	randNum, _ = cryptoRand.Int(cryptoRand.Reader, big.NewInt(int64(len(serverData.Nouns))))
-	noun := serverData.Nouns[randNum.Int64()]
+	randNum = skillRang.Intn(len(serverData.Nouns))
+	noun := serverData.Nouns[randNum]
 
 	fullText = fullText + "\n" + text + " chosen the \"" + adjective + " " + noun + "\" class.```"
 	_, err = s.ChannelMessageSend(m.ChannelID, fullText)
