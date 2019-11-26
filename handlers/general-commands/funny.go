@@ -25,17 +25,17 @@ func Funny(s *discordgo.Session, m *discordgo.MessageCreate) {
 		username = users[0].Username + "'s"
 	} else if userRegex.MatchString(m.Content) {
 		userTest := userRegex.FindStringSubmatch(m.Content)[1]
-		server, err := s.Guild(m.GuildID)
+		members, err := s.GuildMembers(m.GuildID, "", 1000)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "This is not a server! Use their ID directly instead.")
 			return
 		}
-		sort.Slice(server.Members, func(i, j int) bool {
-			time1, _ := server.Members[i].JoinedAt.Parse()
-			time2, _ := server.Members[j].JoinedAt.Parse()
+		sort.Slice(members, func(i, j int) bool {
+			time1, _ := members[i].JoinedAt.Parse()
+			time2, _ := members[j].JoinedAt.Parse()
 			return time1.Unix() < time2.Unix()
 		})
-		for _, member := range server.Members {
+		for _, member := range members {
 			if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) || strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
 				user = member.User.ID
 				username = member.User.Username + "'s"

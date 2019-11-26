@@ -36,17 +36,20 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 		} else {
 			user = m.Author
 		}
-		server, err := s.Guild(m.GuildID)
+		members, err := s.GuildMembers(m.GuildID, "", 1000)
 		if err == nil {
 			if userTest == "" {
-				for _, member := range server.Members {
+				for _, member := range members {
 					if member.User.ID == m.Author.ID {
 						user, _ = s.User(member.User.ID)
 						nickname = member.Nick
 						joinDate = member.JoinedAt
 						roles = ""
 						for _, role := range member.Roles {
-							discordRole, _ := s.State.Role(server.ID, role)
+							discordRole, err := s.State.Role(m.GuildID, role)
+							if err != nil {
+								continue
+							}
 							roles = roles + discordRole.Name + ", "
 						}
 						if roles != "" {
@@ -55,19 +58,22 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 					}
 				}
 			} else {
-				sort.Slice(server.Members, func(i, j int) bool {
-					time1, _ := server.Members[i].JoinedAt.Parse()
-					time2, _ := server.Members[j].JoinedAt.Parse()
+				sort.Slice(members, func(i, j int) bool {
+					time1, _ := members[i].JoinedAt.Parse()
+					time2, _ := members[j].JoinedAt.Parse()
 					return time1.Unix() < time2.Unix()
 				})
-				for _, member := range server.Members {
+				for _, member := range members {
 					if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) || strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
 						user, _ = s.User(member.User.ID)
 						nickname = member.Nick
 						joinDate = member.JoinedAt
 						roles = ""
 						for _, role := range member.Roles {
-							discordRole, _ := s.State.Role(server.ID, role)
+							discordRole, err := s.State.Role(m.GuildID, role)
+							if err != nil {
+								continue
+							}
 							roles = roles + discordRole.Name + ", "
 						}
 						if roles != "" {
@@ -82,6 +88,11 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 
 	// Reformat joinDate
 	joinDateDate, _ := joinDate.Parse()
+	serverCreateDate, _ := discordgo.SnowflakeTimestamp(m.GuildID)
+	joinDateString := "N/A"
+	if joinDateDate.After(serverCreateDate) {
+		joinDateString = joinDateDate.Format(time.RFC822Z)
+	}
 
 	// Created at date
 	createdAt, _ := discordgo.SnowflakeTimestamp(user.ID)
@@ -135,7 +146,7 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 			},
 			&discordgo.MessageEmbedField{
 				Name:   "Date Joined",
-				Value:  joinDateDate.Format(time.RFC822Z),
+				Value:  joinDateString,
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{

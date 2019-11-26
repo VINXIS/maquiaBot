@@ -12,7 +12,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-//Penis gives u a penis size for the day based off of a normal distribution from data obtained at http://penissizes.org/average-penis-size-ethnicity-race-and-country
+// Penis gives u a penis size for the day based off of a normal distribution from data obtained at http://penissizes.org/average-penis-size-ethnicity-race-and-country
 func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
 	userRegex, _ := regexp.Compile(`penis\s+(.+)`)
 
@@ -29,17 +29,17 @@ func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
 			user = discordUser.ID
 			username = discordUser.Username
 		} else {
-			server, err := s.Guild(m.GuildID)
+			members, err := s.GuildMembers(m.GuildID, "", 1000)
 			if err != nil {
 				s.ChannelMessageSend(m.ChannelID, "This is not a server! Use their ID directly instead.")
 				return
 			}
-			sort.Slice(server.Members, func(i, j int) bool {
-				time1, _ := server.Members[i].JoinedAt.Parse()
-				time2, _ := server.Members[j].JoinedAt.Parse()
+			sort.Slice(members, func(i, j int) bool {
+				time1, _ := members[i].JoinedAt.Parse()
+				time2, _ := members[j].JoinedAt.Parse()
 				return time1.Unix() < time2.Unix()
 			})
-			for _, member := range server.Members {
+			for _, member := range members {
 				if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) || strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
 					user = member.User.ID
 					username = member.User.Username

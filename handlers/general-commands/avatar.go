@@ -51,19 +51,19 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		server, err := s.Guild(m.GuildID)
+		members, err := s.GuildMembers(m.GuildID, "", 1000)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 			return
 		}
 
 		// Run through usernames, if no match is found, run through member names, if no match is found, send the message author's avatar
-		sort.Slice(server.Members, func(i, j int) bool {
-			time1, _ := server.Members[i].JoinedAt.Parse()
-			time2, _ := server.Members[j].JoinedAt.Parse()
+		sort.Slice(members, func(i, j int) bool {
+			time1, _ := members[i].JoinedAt.Parse()
+			time2, _ := members[j].JoinedAt.Parse()
 			return time1.Unix() < time2.Unix()
 		})
-		for _, member := range server.Members {
+		for _, member := range members {
 			if strings.HasPrefix(strings.ToLower(member.User.Username), username) || strings.HasPrefix(strings.ToLower(member.Nick), username) {
 				discordUser, _ = s.User(member.User.ID)
 				postAva(s, m, []string{member.Nick}, []string{discordUser.AvatarURL("2048")}, true)
