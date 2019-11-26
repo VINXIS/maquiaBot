@@ -28,7 +28,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 	// Obtain server and check admin permissions for linking with mentions involved
 	server, err := s.Guild(m.GuildID)
 	if err == nil {
-		if !tools.AdminCheck(s, m, *server) {
+		if !tools.AdminCheck(s, m, *server) && len(m.Mentions) > 0 {
 			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
 			return
 		}

@@ -15,7 +15,7 @@ func Levenshtein(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "What is the levenshtein distance?",
-			Value: "It is a way to calculate how different two words.\nhttps://en.wikipedia.org/wiki/Levenshtein_distance",
+			Value: "It is a way to calculate how different two words / phrases are from each other.\nhttps://en.wikipedia.org/wiki/Levenshtein_distance",
 		},
 	}
 	return embed
