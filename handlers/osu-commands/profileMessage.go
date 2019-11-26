@@ -15,7 +15,8 @@ import (
 
 // ProfileMessage gets the information for the specified profile linked
 func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileRegex *regexp.Regexp, osuAPI *osuapi.Client, cache []structs.PlayerData) {
-	modeRegex, _ := regexp.Compile(`-m (\S+)`)
+	profileCmdRegex, _ := regexp.Compile(`(osu\s+)?profile\s+(.+)`)
+	modeRegex, _ := regexp.Compile(`-m\s+(.+)`)
 	mode := osuapi.ModeOsu
 
 	if modeRegex.MatchString(m.Content) {
@@ -31,7 +32,26 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 	}
 
 	// Obtain username/user ID and assign variables
-	value := profileRegex.FindStringSubmatch(m.Content)[3]
+	value := ""
+	cmdMode := "link"
+	if profileRegex.MatchString(m.Content) {
+		value = profileRegex.FindStringSubmatch(m.Content)[3]
+	} else if profileCmdRegex.MatchString(m.Content) {
+		value = profileCmdRegex.FindStringSubmatch(m.Content)[2]
+		cmdMode = "command"
+	} else {
+		for _, player := range cache {
+			if m.Author.ID == player.Discord.ID && player.Osu.Username != "" {
+				value = player.Osu.Username
+				cmdMode = "command"
+				break
+			}
+		}
+		if value == "" {
+			s.ChannelMessageSend(m.ChannelID, "Could not find any osu! account linked for "+m.Author.Mention()+" ! Please use `set` or `link` to link an osu! account to you!")
+			return
+		}
+	}
 	id, err := strconv.Atoi(value)
 	user := &osuapi.User{}
 
@@ -42,6 +62,9 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			Mode:     mode,
 		})
 		if err != nil {
+			if cmdMode == "command" {
+				s.ChannelMessageSend(m.ChannelID, "User not found!")
+			}
 			return
 		}
 	} else {
@@ -50,7 +73,16 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			Mode:   mode,
 		})
 		if err != nil {
-			return
+			user, err = osuAPI.GetUser(osuapi.GetUserOpts{
+				Username: value,
+				Mode:     mode,
+			})
+			if err != nil {
+				if cmdMode == "command" {
+					s.ChannelMessageSend(m.ChannelID, "User not found!")
+				}
+				return
+			}
 		}
 	}
 

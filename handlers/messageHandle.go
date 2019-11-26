@@ -241,6 +241,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go osucommands.TrackMapperInfo(s, m, mapperData)
 		case serverPrefix + "ppadd":
 			go osucommands.PPAdd(s, m, osuAPI, profileCache)
+		case serverPrefix + "profile":
+			go osucommands.ProfileMessage(s, m, profileRegex, osuAPI, profileCache)
 		case serverPrefix + "r", serverPrefix + "rs", serverPrefix + "recent":
 			go osucommands.Recent(s, m, osuAPI, "recent", profileCache, mapCache)
 		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
@@ -261,7 +263,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	} else if beatmapRegex.MatchString(m.Content) && serverData.OsuToggle { // If a beatmap was linked
 		go osucommands.BeatmapMessage(s, m, beatmapRegex, osuAPI, mapCache)
 		return
-	} else if profileRegex.MatchString(m.Content) && serverData.OsuToggle { // if a profile was linked
+	} else if profileRegex.MatchString(m.Content) && serverData.OsuToggle { // If a profile was linked
 		go osucommands.ProfileMessage(s, m, profileRegex, osuAPI, profileCache)
 		return
 	}
