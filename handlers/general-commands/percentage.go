@@ -17,11 +17,13 @@ func Percentage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	percentRegex, _ := regexp.Compile(`(p|percentage|per|percent)\s+(.+)?`)
 
 	var text string
+	textLength := 0
 	if percentRegex.MatchString(m.Content) {
 		text = "Percentage for `" + strings.ReplaceAll(percentRegex.FindStringSubmatch(m.Content)[2], "`", "") + "`:\n"
+		textLength = len(strings.ReplaceAll(percentRegex.FindStringSubmatch(m.Content)[2], "`", ""))
 	}
 	authorid, _ := strconv.Atoi(m.Author.ID)
-	skillRang := rand.New(rand.NewSource(int64(authorid+len(strings.ReplaceAll(percentRegex.FindStringSubmatch(m.Content)[2], "`", ""))) + time.Now().UnixNano()))
+	skillRang := rand.New(rand.NewSource(int64(authorid+textLength) + time.Now().UnixNano()))
 	percent := math.Max(0, math.Min(100, skillRang.NormFloat64()*12.5+50))
 	bar := tools.BarCreation(percent / 100)
 
