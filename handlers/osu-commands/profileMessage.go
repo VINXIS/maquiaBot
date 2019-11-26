@@ -15,7 +15,8 @@ import (
 
 // ProfileMessage gets the information for the specified profile linked
 func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileRegex *regexp.Regexp, osuAPI *osuapi.Client, cache []structs.PlayerData) {
-	profileCmdRegex, _ := regexp.Compile(`(osu\s+)?profile\s+(.+)`)
+	profileCmd1Regex, _ := regexp.Compile(`osu\s+(.+)`)
+	profileCmd2Regex, _ := regexp.Compile(`profile\s+(.+)`)
 	modeRegex, _ := regexp.Compile(`-m\s+(.+)`)
 	mode := osuapi.ModeOsu
 
@@ -36,8 +37,11 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 	cmdMode := "link"
 	if profileRegex.MatchString(m.Content) {
 		value = profileRegex.FindStringSubmatch(m.Content)[3]
-	} else if profileCmdRegex.MatchString(m.Content) {
-		value = profileCmdRegex.FindStringSubmatch(m.Content)[2]
+	} else if profileCmd2Regex.MatchString(m.Content) {
+		value = profileCmd2Regex.FindStringSubmatch(m.Content)[1]
+		cmdMode = "command"
+	} else if profileCmd1Regex.MatchString(m.Content) {
+		value = profileCmd1Regex.FindStringSubmatch(m.Content)[1]
 		cmdMode = "command"
 	} else {
 		for _, player := range cache {

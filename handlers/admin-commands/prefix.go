@@ -35,6 +35,11 @@ func Prefix(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Set new information in server data
 	oldPrefix := serverData.Prefix
+	args := strings.Split(m.Content, " ")
+	if len(args) < 2 {
+		s.ChannelMessageSend(m.ChannelID, "No prefix given to change to!")
+		return
+	}
 	prefix := strings.Split(m.Content, " ")[1]
 	serverData.Time = time.Now()
 	serverData.Prefix = prefix
