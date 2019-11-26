@@ -73,3 +73,24 @@ func CleanFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 
 	s.ChannelMessageSend(m.ChannelID, "Updated farmerdog ratings!")
 }
+
+// CleanEmpty removes any users with no discord or osu! account
+func CleanEmpty(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
+	if m.Author.ID != "92502458588205056" {
+		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT VINXIS.........")
+		return
+	}
+	for i := 0; i < len(cache); i++ {
+		if cache[i].Discord.ID == "" && cache[i].Osu.Username == "" {
+			cache = append(cache[:i], cache[i+1:]...)
+			i--
+		}
+	}
+
+	jsonCache, err := json.Marshal(cache)
+	tools.ErrRead(err)
+
+	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
+	tools.ErrRead(err)
+	s.ChannelMessageSend(m.ChannelID, "Removed empty users!")
+}

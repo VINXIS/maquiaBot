@@ -16,8 +16,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// Farmerdog gives a player's farmerdog rating
-func Farmerdog(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData) {
+// Farm gives a player's farmerdog rating
+func Farm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData) {
 	username := ""
 	user := structs.PlayerData{}
 	cached := false
@@ -200,6 +200,16 @@ func BottomFarm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi
 					trueCache = append(trueCache, player)
 					break
 				}
+			}
+		}
+
+		cache = trueCache
+	} else {
+		trueCache := []structs.PlayerData{}
+
+		for _, player := range cache {
+			if player.Farm.Rating != 0.00 {
+				trueCache = append(trueCache, player)
 			}
 		}
 

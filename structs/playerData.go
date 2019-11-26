@@ -32,7 +32,7 @@ type PlayerScore struct {
 }
 
 // FarmCalc does the actual calculations of the farm values and everything for the player
-func (player PlayerData) FarmCalc(osuAPI *osuapi.Client, farmData FarmData) {
+func (player *PlayerData) FarmCalc(osuAPI *osuapi.Client, farmData FarmData) {
 	player.Farm = FarmerdogData{}
 
 	scoreList, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{

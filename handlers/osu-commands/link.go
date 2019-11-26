@@ -62,9 +62,9 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 			player.FarmCalc(osuAPI, farmData)
 			cache[i] = player
 
-			// Remove any accounts of the same user but with no discord linked
+			// Remove any accounts of the same user or empty osu! user and with no discord linked
 			for j := 0; j < len(cache); j++ {
-				if player.Discord.ID == "" && strings.ToLower(cache[j].Osu.Username) == strings.ToLower(osuUsername) {
+				if player.Discord.ID == "" && (cache[j].Osu.Username == "" || strings.ToLower(cache[j].Osu.Username) == strings.ToLower(osuUsername)) {
 					cache = append(cache[:j], cache[j+1:]...)
 					j--
 				}

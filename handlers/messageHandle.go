@@ -145,6 +145,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Bot owner commands
 		case serverPrefix + "clean":
 			go botcreatorcommands.Clean(s, m, profileCache)
+		case serverPrefix + "cleane", serverPrefix + "cleanempty":
+			go botcreatorcommands.CleanEmpty(s, m, profileCache)
 		case serverPrefix + "cleanf", serverPrefix + "cleanfarm":
 			go botcreatorcommands.CleanFarm(s, m, profileCache, osuAPI)
 		case serverPrefix + "up", serverPrefix + "update":
@@ -232,7 +234,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "c", serverPrefix + "compare":
 			go osucommands.Compare(s, m, args, osuAPI, profileCache, serverPrefix, mapCache)
 		case serverPrefix + "farm":
-			go osucommands.Farmerdog(s, m, osuAPI, profileCache)
+			go osucommands.Farm(s, m, osuAPI, profileCache)
 		case serverPrefix + "link", serverPrefix + "set":
 			go osucommands.Link(s, m, args, osuAPI, profileCache)
 		case serverPrefix + "mt", serverPrefix + "mtrack", serverPrefix + "maptrack", serverPrefix + "mappertrack":
