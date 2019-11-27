@@ -151,6 +151,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go botcreatorcommands.CleanFarm(s, m, profileCache, osuAPI)
 		case serverPrefix + "up", serverPrefix + "update":
 			go botcreatorcommands.Update(s, m)
+		case serverPrefix + "updatestatus":
+			go botcreatorcommands.UpdateStatus(s, m)
 
 		// Sub-handles for pokemon and osu!
 		case serverPrefix + "h", serverPrefix + "help":
@@ -206,7 +208,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "p", serverPrefix + "per", serverPrefix + "percent", serverPrefix + "percentage":
 			go gencommands.Percentage(s, m)
 		case serverPrefix + "parse":
-			go gencommands.ParseID(s, m)
+			go gencommands.Parse(s, m)
 		case serverPrefix + "penis":
 			go gencommands.Penis(s, m)
 		case serverPrefix + "ping":

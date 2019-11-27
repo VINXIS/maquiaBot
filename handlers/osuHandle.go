@@ -33,7 +33,7 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 		case "c", "compare":
 			go osucommands.Compare(s, m, args, osuAPI, playerCache, serverPrefix, mapCache)
 		case "farm":
-			go osucommands.Farmerdog(s, m, osuAPI, playerCache)
+			go osucommands.Farm(s, m, osuAPI, playerCache)
 		case "link", "set":
 			go osucommands.Link(s, m, args, osuAPI, playerCache)
 		case "mt", "mtrack", "maptrack", "mappertrack":

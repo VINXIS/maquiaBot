@@ -8,8 +8,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// ParseID parses the discord snowflake ID given
-func ParseID(s *discordgo.Session, m *discordgo.MessageCreate) {
+// Parse parses the discord snowflake ID given
+func Parse(s *discordgo.Session, m *discordgo.MessageCreate) {
 	parseRegex, _ := regexp.Compile(`parse\s+(\d+)`)
 
 	// Get snowflake value to test
@@ -28,5 +28,10 @@ func ParseID(s *discordgo.Session, m *discordgo.MessageCreate) {
 	intWorkerID := (snowflakeInt & 0x3E0000) >> 17
 	intProcessID := (snowflakeInt & 0x1F000) >> 12
 	Increment := snowflakeInt & 0xFFF
-	s.ChannelMessageSend(m.ChannelID, "Timestamp: "+timeStamp.UTC().Format(time.RFC822Z)+"\nInternal worker ID: "+strconv.FormatInt(intWorkerID, 10)+"\nInternal process ID: "+strconv.FormatInt(intProcessID, 10)+"\nInternal process ID: "+strconv.FormatInt(Increment, 10))
+
+	// Parse twitter snowflake
+	timestamp := (snowflakeInt >> 22) + 1288834974657
+	timeStamp2 := time.Unix(timestamp/1000, 0)
+
+	s.ChannelMessageSend(m.ChannelID, "Discord Timestamp: "+timeStamp.UTC().Format(time.RFC822Z)+"\nTwitter Timestamp: "+timeStamp2.UTC().Format(time.RFC822Z)+"\nInternal worker ID: "+strconv.FormatInt(intWorkerID, 10)+"\nInternal process ID: "+strconv.FormatInt(intProcessID, 10)+"\nInternal process ID: "+strconv.FormatInt(Increment, 10))
 }

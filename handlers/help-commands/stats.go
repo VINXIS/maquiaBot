@@ -7,7 +7,7 @@ import (
 // Stats explains the stats functionality
 func Stats(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: stats"
-	embed.Description = "`stats [text] [num]` gives stats for a specific amount of skills, alongside a class randomly chosen from adjectives and nouns combined."
+	embed.Description = "`stats [text] [num]` gives stats for a specific amount of skills, alongside a class randomly chosen from the adjectives and nouns added by server members combined."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[text]",

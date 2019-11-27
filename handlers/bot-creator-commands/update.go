@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"regexp"
+	"strconv"
 
 	osutools "../../osu-functions"
 	"github.com/bwmarrin/discordgo"
@@ -35,4 +36,20 @@ func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
 			s.ChannelMessageSend(m.ChannelID, "Updated! "+m.Author.Mention())
 		}
 	}
+}
+
+// UpdateStatus updates the bot discord status
+func UpdateStatus(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.Author.ID != "92502458588205056" {
+		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT VINXIS.........")
+		return
+	}
+	updateRegex, _ := regexp.Compile(`updatestatus\s+(.+)`)
+	if !updateRegex.MatchString(m.Content) {
+		s.UpdateStatus(0, strconv.Itoa(len(s.State.Guilds))+" servers")
+		return
+	}
+
+	text := updateRegex.FindStringSubmatch(m.Content)[1]
+	s.UpdateStatus(0, text)
 }

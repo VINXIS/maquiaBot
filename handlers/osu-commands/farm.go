@@ -60,6 +60,11 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clien
 		}
 	}
 
+	if username == "" {
+		s.ChannelMessageSend(m.ChannelID, "No user given!")
+		return
+	}
+
 	// Get User and see if user exists
 	osuUser, err := osuAPI.GetUser(osuapi.GetUserOpts{
 		Username: username,
