@@ -167,10 +167,6 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 				IconURL: "https://a.ppy.sh/" + strconv.Itoa(replay.Player.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 			},
 			Title: "Unknown / Unsubmitted map",
-			URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(replay.Beatmap.BeatmapID),
-			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(replay.Beatmap.BeatmapSetID) + "l.jpg",
-			},
 			Description: scorePrint + mods + combo + acc + scoreRank + "\n" +
 				mapCompletion + "\n" +
 				hits + "\n\n",
@@ -208,9 +204,16 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		}
 	}
 	if replay.Player.UserID == 0 {
-		embed.Author = &discordgo.MessageEmbedAuthor{
-			Name:    "Unknown player",
-			IconURL: "https://osu.ppy.sh/images/layout/avatar-guest.png",
+		if replay.Score.Mods&osuapi.ModAutoplay != 0 {
+			embed.Author = &discordgo.MessageEmbedAuthor{
+				Name:    "osu!",
+				IconURL: "https://osu.ppy.sh/images/layout/avatar-guest.png",
+			}
+		} else {
+			embed.Author = &discordgo.MessageEmbedAuthor{
+				Name:    "Unknown player",
+				IconURL: "https://osu.ppy.sh/images/layout/avatar-guest.png",
+			}
 		}
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
