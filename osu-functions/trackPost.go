@@ -42,7 +42,6 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 					Limit:  100,
 				})
 				if err != nil {
-					fmt.Println("TrackPost err 1: " + err.Error())
 					continue
 				}
 
@@ -235,7 +234,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 
 							if recentUser.PP != user.PP {
 								embed.Author.Name = user.Username + " " + strconv.FormatFloat(user.PP, 'f', 2, 64) + " -> " + strconv.FormatFloat(recentUser.PP, 'f', 2, 64)
-								if recentUser.PP-user.PP > 0{
+								if recentUser.PP-user.PP > 0 {
 									embed.Author.Name += " (+" + strconv.FormatFloat(recentUser.PP-user.PP, 'f', 2, 64) + "pp)"
 								} else {
 									embed.Author.Name += " (" + strconv.FormatFloat(recentUser.PP-user.PP, 'f', 2, 64) + "pp)"
@@ -250,7 +249,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 							}
 							_, err = s.ChannelMessageSendEmbed(ch.Channel.ID, embed)
 							if err != nil {
-								fmt.Println("TrackPost err 2: " + err.Error())
+								fmt.Println("TrackPost err: " + err.Error())
 								fmt.Println(ch)
 							}
 							ch.Users[l] = *recentUser

@@ -226,6 +226,8 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
 	mapStats := "**CS:** " + strconv.FormatFloat(beatmap.CircleSize, 'f', 1, 64) + " **AR:** " + strconv.FormatFloat(beatmap.ApproachRate, 'f', 1, 64) + " **OD:** " + strconv.FormatFloat(beatmap.OverallDifficulty, 'f', 1, 64) + " **HP:** " + strconv.FormatFloat(beatmap.HPDrain, 'f', 1, 64)
 	mapObjs := "**Circles:** " + strconv.Itoa(beatmap.Circles) + " **Sliders:** " + strconv.Itoa(beatmap.Sliders) + " **Spinners:** " + strconv.Itoa(beatmap.Spinners)
+	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
+	hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 
 	if mods == "" {
 		mods = "NM"
@@ -287,8 +289,6 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", mods, ppValues)
 		pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
 	}
-	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
-	hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 	mods = " **+" + mods + "** "
 
 	g, _ := s.Guild("556243477084635170")
