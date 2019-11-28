@@ -82,6 +82,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	mapObjs := "**Circles:** " + strconv.Itoa(replay.Beatmap.Circles) + " **Sliders:** " + strconv.Itoa(replay.Beatmap.Sliders) + " **Spinners:** " + strconv.Itoa(replay.Beatmap.Spinners)
 	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 	hits := "**Hits:** [" + strconv.Itoa(replay.Score.Count300) + "/" + strconv.Itoa(replay.Score.Count100) + "/" + strconv.Itoa(replay.Score.Count50) + "/" + strconv.Itoa(replay.Score.CountMiss) + "]"
+	status := "**Rank Status:** " + strings.Title(replay.Beatmap.Approved.String())
 	if mods == "" {
 		mods = "NM"
 	}
@@ -189,7 +190,8 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			},
 			Description: sr + length + bpm + "\n" +
 				mapStats + "\n" +
-				mapObjs + "\n\n" +
+				mapObjs + "\n" + 
+				status + "\n\n" +
 				scorePrint + mods + combo + acc + scoreRank + "\n" +
 				mapCompletion + "\n" +
 				pp + hits + "\n\n",
