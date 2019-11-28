@@ -17,7 +17,7 @@ import (
 
 // Stats creates and outputs randomized stats for the user in question
 func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
-	statsRegex, _ := regexp.Compile(`(stats|class)\s+(.+)?`)
+	statsRegex, _ := regexp.Compile(`(stats|class)(\s+(.+))?`)
 	prefixRegex, _ := regexp.Compile(`(.+)(stats|class)`)
 
 	server, err := s.Guild(m.GuildID)
@@ -33,20 +33,24 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	textLength := 0
 	skillCount := 4
 	if statsRegex.MatchString(m.Content) {
-		var err error
-		skillCount, err = strconv.Atoi(statsRegex.FindStringSubmatch(m.Content)[2])
-		if err != nil {
-			text = strings.ReplaceAll(statsRegex.FindStringSubmatch(m.Content)[2]+" has", "`", "")
-			textLength = len(strings.ReplaceAll(statsRegex.FindStringSubmatch(m.Content)[2], "`", ""))
-			list := strings.Split(statsRegex.FindStringSubmatch(m.Content)[2], " ")
-			skillCount = 4
-			if len(list) > 1 {
-				skillCount, err = strconv.Atoi(list[len(list)-1])
-				if err != nil {
-					skillCount = 4
-				} else {
-					text = strings.ReplaceAll(strings.Join(list[:len(list)-1], " "), "`", "") + " has"
-					textLength = len(strings.ReplaceAll(strings.Join(list[:len(list)-1], " "), "`", ""))
+		if statsRegex.FindStringSubmatch(m.Content)[1] == "class" {
+			skillCount = 0
+		} else {
+			var err error
+			skillCount, err = strconv.Atoi(statsRegex.FindStringSubmatch(m.Content)[3])
+			if err != nil {
+				text = strings.ReplaceAll(statsRegex.FindStringSubmatch(m.Content)[3]+" has", "`", "")
+				textLength = len(strings.ReplaceAll(statsRegex.FindStringSubmatch(m.Content)[3], "`", ""))
+				list := strings.Split(statsRegex.FindStringSubmatch(m.Content)[3], " ")
+				skillCount = 4
+				if len(list) > 1 {
+					skillCount, err = strconv.Atoi(list[len(list)-1])
+					if err != nil {
+						skillCount = 4
+					} else {
+						text = strings.ReplaceAll(strings.Join(list[:len(list)-1], " "), "`", "") + " has"
+						textLength = len(strings.ReplaceAll(strings.Join(list[:len(list)-1], " "), "`", ""))
+					}
 				}
 			}
 		}

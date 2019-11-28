@@ -16,7 +16,7 @@ func Stats(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:   "[num]",
-			Value:  "The number of skills to print (Default is 4).",
+			Value:  "The number of skills to print (Default is 4 for stats, 0 for class).",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
