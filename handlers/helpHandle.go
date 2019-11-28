@@ -55,7 +55,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`roll`, " +
 					"`(sinfo|serverinfo)`, " +
 					"`(skill|skills)`, " +
-					"`stats`, " +
+					"`(stats|class)`, " +
 					"`(vibe|vibec|vibecheck)`",
 			},
 		},
@@ -127,7 +127,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.ServerInfo(embed)
 		case "skill", "skills":
 			embed = helpcommands.Skills(embed)
-		case "stats":
+		case "stats", "class":
 			embed = helpcommands.Stats(embed)
 		case "vibe", "vibec", "vibecheck":
 			embed = helpcommands.Vibe(embed)

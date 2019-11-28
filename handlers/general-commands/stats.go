@@ -17,8 +17,8 @@ import (
 
 // Stats creates and outputs randomized stats for the user in question
 func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
-	statsRegex, _ := regexp.Compile(`(stats)\s+(.+)?`)
-	prefixRegex, _ := regexp.Compile(`(.+)(stats.*)`)
+	statsRegex, _ := regexp.Compile(`(stats|class)\s+(.+)?`)
+	prefixRegex, _ := regexp.Compile(`(.+)(stats|class)`)
 
 	server, err := s.Guild(m.GuildID)
 	if err != nil {

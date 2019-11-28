@@ -225,7 +225,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.ServerInfo(s, m)
 		case serverPrefix + "skill", serverPrefix + "skills":
 			go gencommands.Skills(s, m)
-		case serverPrefix + "stats":
+		case serverPrefix + "stats", serverPrefix + "class":
 			go gencommands.Stats(s, m)
 		case serverPrefix + "vibe", serverPrefix + "vibec", serverPrefix + "vibecheck":
 			go gencommands.Vibe(s, m, "notRandom")
