@@ -149,6 +149,9 @@ func (r *ReplayData) getLife() []HealthData {
 	healthData := []HealthData{}
 	for _, interval := range lifeData {
 		parts := strings.Split(interval, "|")
+		if len(parts) < 2 {
+			continue
+		}
 		timeStamp, _ := strconv.ParseInt(parts[0], 10, 64)
 		health, _ := strconv.ParseFloat(parts[1], 64)
 		healthData = append(healthData, HealthData{

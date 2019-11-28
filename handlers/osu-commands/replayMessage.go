@@ -51,7 +51,9 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		Data: replayInfo,
 	}
 	replay.ParseReplay(osuAPI)
-	fmt.Println(replay)
+	if replay.Beatmap.BeatmapID != 0 {
+		osutools.BeatmapParse(strconv.Itoa(replay.Beatmap.BeatmapID), "map", replay.Score.Mods, osuAPI)
+	}
 
 	// Get time since play
 	time := tools.TimeSince(replay.Time)
@@ -80,6 +82,13 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	mapObjs := "**Circles:** " + strconv.Itoa(replay.Beatmap.Circles) + " **Sliders:** " + strconv.Itoa(replay.Beatmap.Sliders) + " **Spinners:** " + strconv.Itoa(replay.Beatmap.Spinners)
 	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 	hits := "**Hits:** [" + strconv.Itoa(replay.Score.Count300) + "/" + strconv.Itoa(replay.Score.Count100) + "/" + strconv.Itoa(replay.Score.Count50) + "/" + strconv.Itoa(replay.Score.CountMiss) + "]"
+	if mods == "" {
+		mods = "NM"
+	}
+
+	if strings.Contains(mods, "DTNC") {
+		mods = strings.Replace(mods, "DTNC", "NC", 1)
+	}
 
 	var combo string
 	if replay.Score.MaxCombo == replay.Beatmap.MaxCombo {
@@ -148,31 +157,60 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	mods = " **+" + mods + "** "
 
 	// Create embed
-	embed := &discordgo.MessageEmbed{
-		Color: Color,
-		Author: &discordgo.MessageEmbedAuthor{
-			URL:     "https://osu.ppy.sh/users/" + strconv.Itoa(replay.Player.UserID),
-			Name:    replay.Player.Username,
-			IconURL: "https://a.ppy.sh/" + strconv.Itoa(replay.Player.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
-		},
-		Title: replay.Beatmap.Artist + " - " + replay.Beatmap.Title + " [" + replay.Beatmap.DiffName + "] by " + replay.Beatmap.Creator,
-		URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(replay.Beatmap.BeatmapID),
-		Thumbnail: &discordgo.MessageEmbedThumbnail{
-			URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(replay.Beatmap.BeatmapSetID) + "l.jpg",
-		},
-		Description: sr + length + bpm + "\n" +
-			mapStats + "\n" +
-			mapObjs + "\n\n" +
-			scorePrint + mods + combo + acc + scoreRank + "\n" +
-			mapCompletion + "\n" +
-			pp + hits + "\n\n",
-		Footer: &discordgo.MessageEmbedFooter{
-			Text: time,
-		},
+	var embed = &discordgo.MessageEmbed{}
+	if replay.Beatmap.BeatmapID == 0 {
+		embed = &discordgo.MessageEmbed{
+			Color: Color,
+			Author: &discordgo.MessageEmbedAuthor{
+				URL:     "https://osu.ppy.sh/users/" + strconv.Itoa(replay.Player.UserID),
+				Name:    replay.Player.Username,
+				IconURL: "https://a.ppy.sh/" + strconv.Itoa(replay.Player.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
+			},
+			Title: "Unknown / Unsubmitted map",
+			URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(replay.Beatmap.BeatmapID),
+			Thumbnail: &discordgo.MessageEmbedThumbnail{
+				URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(replay.Beatmap.BeatmapSetID) + "l.jpg",
+			},
+			Description: scorePrint + mods + combo + acc + scoreRank + "\n" +
+				mapCompletion + "\n" +
+				hits + "\n\n",
+			Footer: &discordgo.MessageEmbedFooter{
+				Text: time,
+			},
+		}
+	} else {
+		embed = &discordgo.MessageEmbed{
+			Color: Color,
+			Author: &discordgo.MessageEmbedAuthor{
+				URL:     "https://osu.ppy.sh/users/" + strconv.Itoa(replay.Player.UserID),
+				Name:    replay.Player.Username,
+				IconURL: "https://a.ppy.sh/" + strconv.Itoa(replay.Player.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
+			},
+			Title: replay.Beatmap.Artist + " - " + replay.Beatmap.Title + " [" + replay.Beatmap.DiffName + "] by " + replay.Beatmap.Creator,
+			URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(replay.Beatmap.BeatmapID),
+			Thumbnail: &discordgo.MessageEmbedThumbnail{
+				URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(replay.Beatmap.BeatmapSetID) + "l.jpg",
+			},
+			Description: sr + length + bpm + "\n" +
+				mapStats + "\n" +
+				mapObjs + "\n\n" +
+				scorePrint + mods + combo + acc + scoreRank + "\n" +
+				mapCompletion + "\n" +
+				pp + hits + "\n\n",
+			Footer: &discordgo.MessageEmbedFooter{
+				Text: time,
+			},
+		}
+		if strings.ToLower(replay.Beatmap.Title) == "crab rave" {
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
+			}
+		}
 	}
-	if strings.ToLower(replay.Beatmap.Title) == "crab rave" {
-		embed.Image = &discordgo.MessageEmbedImage{
-			URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
+	if replay.Player.UserID == 0 {
+		embed.Author = &discordgo.MessageEmbedAuthor{
+			Name:    "Unknown player",
+			IconURL: "https://osu.ppy.sh/images/layout/avatar-guest.png",
 		}
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
