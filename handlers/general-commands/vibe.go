@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"image"
+	"image/gif"
 	"image/png"
 	"math"
 	"math/big"
@@ -79,7 +80,7 @@ func Vibe(s *discordgo.Session, m *discordgo.MessageCreate, checkType string) {
 		img, _, _ := image.Decode(response.Body)
 		tools.AddLabel(img, 50, 96, target.Username)
 		imgBytes := new(bytes.Buffer)
-		err = png.Encode(imgBytes, img)
+		_ = png.Encode(imgBytes, img)
 		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Content: target.Mention() + " you had a " + strconv.Itoa(Requirement) + "% chance in passing the vibe check.... tough luck.",
 			Files: []*discordgo.File{
@@ -90,6 +91,22 @@ func Vibe(s *discordgo.Session, m *discordgo.MessageCreate, checkType string) {
 			},
 		})
 	} else {
-		s.ChannelMessageSend(m.ChannelID, "You have passed the vibe check ("+strconv.Itoa(Requirement)+"% chance). Carry on "+target.Mention())
+		gifRoll, _ := rand.Int(rand.Reader, big.NewInt(2))
+		response, _ := http.Get("https://cdn.discordapp.com/attachments/305538303179096065/649757904936894464/emote.gif")
+		if int(gifRoll.Int64()) == 1 {
+			response, _ = http.Get("https://cdn.discordapp.com/attachments/305538303179096065/649758516692779008/emote.gif")
+		}
+		img, _ := gif.DecodeAll(response.Body)
+		imgBytes := new(bytes.Buffer)
+		_ = gif.EncodeAll(imgBytes, img)
+		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+			Content: "You have passed the vibe check (" + strconv.Itoa(Requirement) + "% chance). Carry on " + target.Mention(),
+			Files: []*discordgo.File{
+				&discordgo.File{
+					Name:   "image.gif",
+					Reader: imgBytes,
+				},
+			},
+		})
 	}
 }
