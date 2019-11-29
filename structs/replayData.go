@@ -134,6 +134,28 @@ func (r *ReplayData) getScore(osuAPI *osuapi.Client) osuapi.Score {
 	score.FullCombo = r.Data[18] == 1
 	score.Mods = osuapi.Mods(uint32(r.Data[22])<<24 | uint32(r.Data[21])<<16 | uint32(r.Data[20])<<8 | uint32(r.Data[19]))
 	r.Data = r.Data[23:]
+
+	// Score Rank
+	percent300 := float64(score.Count300) / float64(score.CountMiss+score.Count50+score.Count100+score.Count300)
+	percent50 := float64(score.Count50) / float64(score.CountMiss+score.Count50+score.Count100+score.Count300)
+	switch {
+	case percent300 == 1:
+		score.Rank = "SS"
+	case percent300 > 0.9 && percent50 < 0.01 && score.CountMiss == 0:
+		score.Rank = "S"
+	case percent300 > 0.8 && score.CountMiss == 0, percent300 > 0.9:
+		score.Rank = "A"
+	case percent300 > 0.7 && score.CountMiss == 0, percent300 > 0.8:
+		score.Rank = "B"
+	case percent300 > 0.6:
+		score.Rank = "C"
+	default:
+		score.Rank = "D"
+	}
+	if (score.Mods&osuapi.ModFlashlight != 0 || score.Mods&osuapi.ModHidden != 0) && (score.Rank == "S" || score.Rank == "SS") {
+		score.Rank += "H"
+	}
+
 	return score
 }
 

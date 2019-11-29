@@ -73,7 +73,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	// Assign values
 	mods := replay.Score.Mods.String()
 	accCalc := (50.0*float64(replay.Score.Count50) + 100.0*float64(replay.Score.Count100) + 300.0*float64(replay.Score.Count300)) / (300.0 * float64(replay.Score.CountMiss+replay.Score.Count50+replay.Score.Count100+replay.Score.Count300)) * 100.0
-	Color := osutools.ModeColour(osuapi.ModeOsu)
+	Color := osutools.ModeColour(replay.Beatmap.Mode)
 	sr, _, _, _, _, _ := osutools.BeatmapCache(mods, replay.Beatmap, mapCache)
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(replay.Beatmap.BPM) + " "
@@ -103,7 +103,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	}
 
 	mapCompletion := ""
-	scoreRank := ""
+	scoreRank := replay.Score.Rank
 	if replay.Beatmap.Approved > 0 {
 		orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 			Username: replay.Player.Username,
@@ -131,14 +131,15 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 				}
 			}
 		}
-		g, err := s.Guild("556243477084635170")
+	}
+
+	g, err := s.Guild("556243477084635170")
 		tools.ErrRead(err)
 		for _, emoji := range g.Emojis {
 			if emoji.Name == replay.Score.Rank+"_" {
 				scoreRank = emoji.MessageFormat()
 			}
 		}
-	}
 
 	ppValues := make(chan string, 2)
 	var ppValueArray [2]string
