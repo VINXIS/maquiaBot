@@ -135,7 +135,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 	}
 
 	// Assign misc variables
-	Color := osutools.ModeColour(osuapi.ModeOsu)
+	Color := osutools.ModeColour(beatmap.Mode)
 	sr, _, _, _, _, _ := osutools.BeatmapCache(mods, beatmap, mapCache)
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "

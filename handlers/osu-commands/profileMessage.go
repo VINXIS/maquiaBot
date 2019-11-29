@@ -105,7 +105,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 	}
 
 	// Assign embed values
-	Color := osutools.ModeColour(osuapi.ModeOsu)
+	Color := osutools.ModeColour(mode)
 	PP := "**PP:** " + strconv.FormatFloat(user.PP, 'f', 2, 64) + " "
 	rank := "**Rank:** #" + strconv.Itoa(user.Rank) + " (" + user.Country + "#" + strconv.Itoa(user.CountryRank) + ")"
 	accuracy := "**Acc:** " + strconv.FormatFloat(user.Accuracy, 'f', 2, 64) + "% "
