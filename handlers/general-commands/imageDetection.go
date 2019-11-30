@@ -13,7 +13,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -46,12 +45,6 @@ func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		// Sort by date
-		sort.Slice(messages, func(i, j int) bool {
-			time1, _ := messages[i].Timestamp.Parse()
-			time2, _ := messages[j].Timestamp.Parse()
-			return time1.After(time2)
-		})
 		for _, msg := range messages {
 			if len(msg.Attachments) > 0 {
 				url = msg.Attachments[0].URL
@@ -193,12 +186,6 @@ func Face(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		// Sort by date
-		sort.Slice(messages, func(i, j int) bool {
-			time1, _ := messages[i].Timestamp.Parse()
-			time2, _ := messages[j].Timestamp.Parse()
-			return time1.After(time2)
-		})
 		for _, msg := range messages {
 			if len(msg.Attachments) > 0 {
 				url = msg.Attachments[0].URL

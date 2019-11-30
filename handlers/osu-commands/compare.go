@@ -80,12 +80,6 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 			return
 		}
 
-		// Sort by date
-		sort.Slice(messages, func(i, j int) bool {
-			time1, _ := messages[i].Timestamp.Parse()
-			time2, _ := messages[j].Timestamp.Parse()
-			return time1.After(time2)
-		})
 		beatmapRegex, _ := regexp.Compile(`https://osu.ppy.sh/beatmaps/(\d+)`)
 		mapID := 0
 		found := false
