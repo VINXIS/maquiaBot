@@ -51,6 +51,9 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 						text = strings.ReplaceAll(strings.Join(list[:len(list)-1], " "), "`", "") + " has"
 						textLength = len(strings.ReplaceAll(strings.Join(list[:len(list)-1], " "), "`", ""))
 					}
+				} else if statsRegex.FindStringSubmatch(m.Content)[3] == "" {
+					text = "You have"
+					textLength = 0
 				}
 			}
 		}
