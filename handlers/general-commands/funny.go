@@ -106,5 +106,5 @@ func Funny(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	percentile := 100 * 0.5 * math.Erfc((average-float64(totalFunny))/(math.Sqrt(2.0)*stddev))
 
-	s.ChannelMessageSend(m.ChannelID, username+" funny value is "+strconv.FormatFloat(totalFunny, 'f', 2, 64)+" which is funnier than "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of people on discord.")
+	s.ChannelMessageSend(m.ChannelID, username+" funny value is "+strconv.FormatFloat(totalFunny, 'f', 2, 64)+" which is approximately funnier than "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of people on discord.")
 }

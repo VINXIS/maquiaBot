@@ -18,16 +18,16 @@ func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	users := m.Mentions
 	user := m.Author.ID
-	username := ""
+	username := "Your"
 	if len(users) == 1 {
 		user = users[0].ID
-		username = users[0].Username
+		username = users[0].Username + "'s"
 	} else if userRegex.MatchString(m.Content) {
 		userTest := userRegex.FindStringSubmatch(m.Content)[1]
 		discordUser, err := s.User(userTest)
 		if err == nil {
 			user = discordUser.ID
-			username = discordUser.Username
+			username = discordUser.Username + "'s"
 		} else {
 			members, err := s.GuildMembers(m.GuildID, "", 1000)
 			if err != nil {
@@ -42,7 +42,7 @@ func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
 			for _, member := range members {
 				if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) || strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
 					user = member.User.ID
-					username = member.User.Username
+					username = member.User.Username + "'s"
 				}
 			}
 		}
@@ -59,9 +59,5 @@ func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	percentile := 100 * 0.5 * math.Erfc((average-penisSize)/(math.Sqrt(2.0)*stddev))
 
-	if user == m.Author.ID {
-		s.ChannelMessageSend(m.ChannelID, "Your erect size for the day is "+strconv.FormatFloat(penisSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisSize/2.54, 'f', 2, 64)+"in) which is larger than "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of penises.")
-	} else {
-		s.ChannelMessageSend(m.ChannelID, username+"'s erect size for the day is "+strconv.FormatFloat(penisSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisSize/2.54, 'f', 2, 64)+"in) which is larger than "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of penises.")
-	}
+	s.ChannelMessageSend(m.ChannelID, username+" erect size for the day is "+strconv.FormatFloat(penisSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisSize/2.54, 'f', 2, 64)+"in) which is larger than approximately "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of penises.")
 }

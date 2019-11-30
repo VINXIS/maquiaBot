@@ -163,7 +163,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go PokemonHandle(s, m, args, serverPrefix)
 
 		// Admin commands
-		case serverPrefix + "crab":
+		case serverPrefix + "ct", serverPrefix + "crabt", serverPrefix + "ctoggle", serverPrefix + "crabtoggle":
 			go admincommands.Crab(s, m)
 		case serverPrefix + "osutoggle", serverPrefix + "osut":
 			go admincommands.OsuToggle(s, m)
@@ -171,13 +171,13 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go admincommands.Prefix(s, m)
 		case serverPrefix + "purge":
 			go admincommands.Purge(s, m)
-		case serverPrefix + "statst", serverPrefix + "statstoggle":
+		case serverPrefix + "st", serverPrefix + "statst", serverPrefix + "stoggle", serverPrefix + "statstoggle":
 			go admincommands.StatsToggle(s, m)
 		case serverPrefix + "tr", serverPrefix + "track":
 			go admincommands.Track(s, m, osuAPI, mapCache)
 		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "ttoggle", serverPrefix + "tracktoggle":
 			go admincommands.TrackToggle(s, m, mapCache)
-		case serverPrefix + "vibet", serverPrefix + "vibetoggle":
+		case serverPrefix + "vt", serverPrefix + "vibet", serverPrefix + "vtoggle", serverPrefix + "vibetoggle":
 			go admincommands.VibeToggle(s, m)
 
 		// General commands
