@@ -73,6 +73,19 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 				break
 			}
 		}
+		if link == "" { // Go again if no link for either bitrate is found
+			for _, media := range tweet.ExtendedEntities.Media {
+				if media.Type == "video" || media.Type == "animated_gif" {
+					for _, variant := range media.VideoInfo.Variants {
+						if variant.ContentType == "video/mp4" {
+							link = variant.Url
+							break
+						}
+					}
+					break
+				}
+			}
+		}
 		response, err := http.Get(link)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Error obtaining video / gif!")
