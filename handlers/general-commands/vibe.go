@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/rand"
 	"image"
-	"image/gif"
 	"image/png"
 	"math"
 	"math/big"
@@ -29,7 +28,7 @@ func Vibe(s *discordgo.Session, m *discordgo.MessageCreate, checkType string) {
 				return
 			}
 			for _, msg := range msgs {
-				if msg.Author.ID != m.Author.ID {
+				if msg.Author.ID != m.Author.ID && msg.Author.ID != s.State.User.ID {
 					target = msg.Author
 					break
 				}
@@ -96,15 +95,12 @@ func Vibe(s *discordgo.Session, m *discordgo.MessageCreate, checkType string) {
 		if int(gifRoll.Int64()) == 1 {
 			response, _ = http.Get("https://cdn.discordapp.com/attachments/305538303179096065/649758516692779008/emote.gif")
 		}
-		img, _ := gif.DecodeAll(response.Body)
-		imgBytes := new(bytes.Buffer)
-		_ = gif.EncodeAll(imgBytes, img)
 		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Content: "You have passed the vibe check (" + strconv.Itoa(Requirement) + "% chance). Carry on " + target.Mention(),
 			Files: []*discordgo.File{
 				&discordgo.File{
 					Name:   "image.gif",
-					Reader: imgBytes,
+					Reader: response.Body,
 				},
 			},
 		})

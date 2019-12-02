@@ -1,12 +1,9 @@
 package gencommands
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
-	"image"
-	"image/png"
 	"net/http"
 	"regexp"
 	"strings"
@@ -102,29 +99,18 @@ func Decrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
 			response.Body.Close()
 			return
 		}
-		defer response.Body.Close()
-		img, _, err := image.Decode(response.Body)
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
-			return
-		}
-		imgBytes := new(bytes.Buffer)
-		err = png.Encode(imgBytes, img)
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
-			return
-		}
 		_, err = s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Files: []*discordgo.File{
 				&discordgo.File{
 					Name:   "image.png",
-					Reader: imgBytes,
+					Reader: response.Body,
 				},
 			},
 		})
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
 		}
+		response.Body.Close()
 		return
 	}
 	s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")

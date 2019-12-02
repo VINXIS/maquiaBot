@@ -154,6 +154,11 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clie
 		}
 	}
 
+	if len(channelData.Users) == 0 && new {
+		s.ChannelMessageSend(m.ChannelID, "No users given! Please use the `-u` flag to add users, and separate users with commas!")
+		return
+	}
+
 	// Map Status
 	channelData.UpdateMapStatus(mapStatus)
 

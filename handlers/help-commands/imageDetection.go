@@ -7,11 +7,16 @@ import (
 // OCR explains the OCR functionality
 func OCR(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: ocr"
-	embed.Description = "`ocr [link]` detects for text in an image."
+	embed.Description = "`ocr [link] [-l lang]` detects for text in an image."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:  "[link]",
 			Value: "Gets the image from this link, otherwise gets the latest posted image if a link isn't given.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:  "[-l lang]",
+			Value: "Give the language to detect using the `-l` flag. Language codes are 3 letters, and most can be found here: https://en.wikipedia.org/wiki/ISO_639-2",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{

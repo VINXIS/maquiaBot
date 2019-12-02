@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"math/big"
-	"net/http"
 	"os"
 	"regexp"
 	"strconv"
@@ -21,7 +20,6 @@ import (
 	gencommands "./general-commands"
 	osucommands "./osu-commands"
 	pokemoncommands "./pokemon-commands"
-
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -77,20 +75,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverPrefix := serverData.Prefix
 
 	// CRAB RAVE
-	if serverData.Crab && (strings.Contains(m.Content, "crab") || strings.Contains(m.Content, "rave")) && m.Content != serverPrefix+"crab" {
-		response, err := http.Get("https://cdn.discordapp.com/emojis/510169818893385729.gif")
-		if err != nil {
-			return
-		}
-
-		message := &discordgo.MessageSend{
-			File: &discordgo.File{
-				Name:   "crab.gif",
-				Reader: response.Body,
-			},
-		}
-		s.ChannelMessageSendComplex(m.ChannelID, message)
-		response.Body.Close()
+	if serverData.Crab && (strings.Contains(m.Content, "crab") || strings.Contains(m.Content, "rave")) && !strings.HasPrefix(m.Content, serverPrefix+"crab") {
+		go gencommands.Crab(s, m)
 	}
 
 	// Generate regexes for message parsing
@@ -165,7 +151,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Admin commands
 		case serverPrefix + "ct", serverPrefix + "crabt", serverPrefix + "ctoggle", serverPrefix + "crabtoggle":
 			go admincommands.Crab(s, m)
-		case serverPrefix + "osutoggle", serverPrefix + "osut":
+		case serverPrefix + "ot", serverPrefix + "osut", serverPrefix + "otoggle", serverPrefix + "osutoggle":
 			go admincommands.OsuToggle(s, m)
 		case serverPrefix + "prefix", serverPrefix + "newprefix":
 			go admincommands.Prefix(s, m)
@@ -185,10 +171,18 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Adjectives(s, m)
 		case serverPrefix + "avatar", serverPrefix + "ava", serverPrefix + "a":
 			go gencommands.Avatar(s, m)
+		case serverPrefix + "cc", serverPrefix + "cp", serverPrefix + "comparec", serverPrefix + "comparep", serverPrefix + "comparecock", serverPrefix + "comparepenis":
+			go gencommands.PenisCompare(s, m)
 		case serverPrefix + "ch", serverPrefix + "choose":
 			go gencommands.Choose(s, m)
+		case serverPrefix + "crab":
+			if !serverData.Crab {
+				go gencommands.Crab(s, m)
+			}
 		case serverPrefix + "decrypt":
 			go gencommands.Decrypt(s, m)
+		case serverPrefix + "e", serverPrefix + "emoji", serverPrefix + "emote":
+			go gencommands.Emoji(s, m)
 		case serverPrefix + "encrypt":
 			go gencommands.Encrypt(s, m)
 		case serverPrefix + "face":
@@ -209,7 +203,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Percentage(s, m)
 		case serverPrefix + "parse":
 			go gencommands.Parse(s, m)
-		case serverPrefix + "penis":
+		case serverPrefix + "penis", serverPrefix + "cock":
 			go gencommands.Penis(s, m)
 		case serverPrefix + "ping":
 			go gencommands.Ping(s, m)
@@ -227,6 +221,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Skills(s, m)
 		case serverPrefix + "stats", serverPrefix + "class":
 			go gencommands.Stats(s, m)
+		case serverPrefix + "twitter", serverPrefix + "twitterdl":
+			go gencommands.Twitter(s, m)
 		case serverPrefix + "vibe", serverPrefix + "vibec", serverPrefix + "vibecheck":
 			go gencommands.Vibe(s, m, "notRandom")
 

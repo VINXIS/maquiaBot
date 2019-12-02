@@ -33,5 +33,5 @@ func Parse(s *discordgo.Session, m *discordgo.MessageCreate) {
 	timestamp := (snowflakeInt >> 22) + 1288834974657
 	timeStamp2 := time.Unix(timestamp/1000, 0)
 
-	s.ChannelMessageSend(m.ChannelID, "Discord Timestamp: "+timeStamp.UTC().Format(time.RFC822Z)+"\nTwitter Timestamp: "+timeStamp2.UTC().Format(time.RFC822Z)+"\nInternal worker ID: "+strconv.FormatInt(intWorkerID, 10)+"\nInternal process ID: "+strconv.FormatInt(intProcessID, 10)+"\nInternal process ID: "+strconv.FormatInt(Increment, 10))
+	s.ChannelMessageSend(m.ChannelID, "Discord Timestamp: "+timeStamp.UTC().Format(time.RFC822Z)+"\nTwitter Timestamp: "+timeStamp2.UTC().Format(time.RFC822Z)+"\nInternal worker ID: "+strconv.FormatInt(intWorkerID, 10)+"\nInternal process ID: "+strconv.FormatInt(intProcessID, 10)+"\nIncrement #: "+strconv.FormatInt(Increment, 10))
 }

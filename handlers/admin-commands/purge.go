@@ -24,30 +24,17 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// Get messages
-	messages, err := s.ChannelMessages(m.ChannelID, -1, "", "", "")
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "Error obtaining messages!")
-		return
-	}
-
 	// Get username(s) and number of messages
 	userRegex, _ := regexp.Compile(`purge\s+(.+)`)
 
-	users := m.Mentions
-	userText := "!"
+	userText := ""
 	num := 4
 	var usernames []string
-	if len(users) > 0 {
-		for _, user := range users {
-			usernames = append(usernames, strings.ToLower(user.Username))
-		}
-	}
 	if userRegex.MatchString(m.Content) {
-		userNum := userRegex.FindStringSubmatch(m.ContentWithMentionsReplaced())[1]
+		userNum := userRegex.FindStringSubmatch(strings.Replace(m.ContentWithMentionsReplaced(), "@", "", -1))[1]
 		args := strings.Split(userNum, " ")
 		for _, arg := range args {
-			if i, err := strconv.Atoi(arg); err == nil && i > 0 && i <= 100 {
+			if i, err := strconv.Atoi(arg); err == nil && i > 0 {
 				userNum = strings.TrimSpace(strings.Replace(userNum, arg, "", 1))
 				num = i + 1
 				break
@@ -58,43 +45,84 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 	if len(usernames) != 0 {
-		userText = " from the following people: "
 		for _, username := range usernames {
 			userText += "**" + username + "** "
 		}
 	}
 
+	// Get messages
+	messages, err := s.ChannelMessages(m.ChannelID, -1, "", "", "")
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Error obtaining messages!")
+		return
+	}
+
 	// Get messages and delete them
 	var messageIDs []string
-	for _, msg := range messages {
-		if len(usernames) == 0 {
-			messageIDs = append(messageIDs, msg.ID)
-		} else {
-			for _, username := range usernames {
-				if strings.HasPrefix(strings.ToLower(msg.Author.Username), username) || strings.HasPrefix(strings.ToLower(msg.Author.Username), strings.Replace(username, "@", "", -1)) {
-					messageIDs = append(messageIDs, msg.ID)
-					break
+	lastID := ""
+	prevLength := 0
+	recurring := 0
+	for {
+		messages, err = s.ChannelMessages(m.ChannelID, -1, lastID, "", "")
+		if err != nil {
+			break
+		}
+		for _, msg := range messages {
+			if len(usernames) == 0 {
+				messageIDs = append(messageIDs, msg.ID)
+			} else {
+				for _, username := range usernames {
+					if strings.HasPrefix(strings.ToLower(msg.Author.Username), strings.ToLower(username)) || (msg.Member != nil && strings.HasPrefix(strings.ToLower(msg.Member.Nick), strings.ToLower(username))) {
+						messageIDs = append(messageIDs, msg.ID)
+						break
+					}
 				}
 			}
+			if len(messageIDs) == num {
+				break
+			}
+			lastID = msg.ID
 		}
 		if len(messageIDs) == num {
+			break
+		}
+		if prevLength == len(messageIDs) {
+			recurring++
+		} else {
+			prevLength = len(messageIDs)
+			recurring = 1
+		}
+		if recurring == 5 {
+			num = len(messageIDs)
 			break
 		}
 	}
 
 	if len(messageIDs) == 0 {
-		s.ChannelMessageSend(m.ChannelID, "No messages found with the given usernames!")
+		s.ChannelMessageSend(m.ChannelID, "No messages found with the given usernames: "+userText)
 		return
 	}
 
-	err = s.ChannelMessagesBulkDelete(m.ChannelID, messageIDs)
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "Could not delete messages! Please make sure I have the proper permissions!")
-		return
+	if len(messageIDs) > 100 {
+		i := 100
+		for {
+			if i >= len(messageIDs) {
+				i = len(messageIDs) - 1
+			}
+			err = s.ChannelMessagesBulkDelete(m.ChannelID, messageIDs[i-100:i])
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "Could not delete messages! Please make sure I have the proper permissions!")
+				return
+			}
+			if i == len(messageIDs)-1 {
+				break
+			}
+			i += 100
+		}
 	}
 
 	// Send confirmation message and then delete it after
-	msg, _ := s.ChannelMessageSend(m.ChannelID, "Removed the latest "+strconv.Itoa(num-1)+" messages"+userText)
+	msg, _ := s.ChannelMessageSend(m.ChannelID, "Removed the latest "+strconv.Itoa(num-1)+" messages from the following people: "+userText)
 	timer := time.NewTimer(5 * time.Second)
 	<-timer.C
 	s.ChannelMessageDelete(msg.ChannelID, msg.ID)
