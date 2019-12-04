@@ -77,6 +77,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// CRAB RAVE
 	if serverData.Crab && (strings.Contains(m.Content, "crab") || strings.Contains(m.Content, "rave")) && !strings.HasPrefix(m.Content, serverPrefix+"crab") {
 		go gencommands.Crab(s, m)
+		go tools.CommandLog(s, m, "crab rave")
 	}
 
 	// Generate regexes for message parsing
@@ -89,6 +90,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// NICE IDEA
 	if serverData.NiceIdea && ideaRegex.MatchString(m.Content) {
 		go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
+		go tools.CommandLog(s, m, "nice idea")
 	}
 
 	// Timestamp conversions
