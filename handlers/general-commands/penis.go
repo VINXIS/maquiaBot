@@ -58,8 +58,13 @@ func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
 	penisSize := random.NormFloat64()*stddev + average
 
 	percentile := 100 * 0.5 * math.Erfc((average-penisSize)/(math.Sqrt(2.0)*stddev))
-
-	s.ChannelMessageSend(m.ChannelID, username+" erect size for the day is "+strconv.FormatFloat(penisSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisSize/2.54, 'f', 2, 64)+"in) which is larger than approximately "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of penises.")
+	emote := ""
+	if percentile < 25 {
+		emote = ":pinching_hand:"
+	} else if percentile > 75 {
+		emote = ":eggplant:"
+	}
+	s.ChannelMessageSend(m.ChannelID, username+" erect size for the day is "+strconv.FormatFloat(penisSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisSize/2.54, 'f', 2, 64)+"in) which is larger than approximately "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of penises. "+emote)
 }
 
 // PenisCompare compares ur penis size to someone else's

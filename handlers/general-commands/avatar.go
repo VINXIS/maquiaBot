@@ -34,6 +34,7 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 				},
 			},
 		})
+		return
 	} else if len(users) > 0 {
 		var names []string
 		var avatars []string
@@ -72,8 +73,9 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		postAva(s, m, []string{username}, []string{m.Author.AvatarURL("2048")}, false)
 		return
+	} else {
+		postAva(s, m, []string{}, []string{m.Author.AvatarURL("2048")}, true)
 	}
-	postAva(s, m, []string{}, []string{m.Author.AvatarURL("2048")}, true)
 }
 
 func postAva(s *discordgo.Session, m *discordgo.MessageCreate, name, avatarURL []string, found bool) {

@@ -1,7 +1,6 @@
 package gencommands
 
 import (
-	"math"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -24,8 +23,8 @@ func Percentage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	authorid, _ := strconv.Atoi(m.Author.ID)
 	skillRang := rand.New(rand.NewSource(int64(authorid+textLength) + time.Now().UnixNano()))
-	percent := math.Max(0, math.Min(100, skillRang.NormFloat64()*12.5+50))
-	bar := tools.BarCreation(percent / 100)
+	percent := skillRang.Int63n(100) + 1
+	bar := tools.BarCreation(float64(percent) / 100)
 
-	s.ChannelMessageSend(m.ChannelID, text+"```\n"+bar+" "+strconv.FormatFloat(percent, 'f', 0, 64)+"%```")
+	s.ChannelMessageSend(m.ChannelID, text+"```\n"+bar+" "+strconv.FormatInt(percent, 10)+"%```")
 }
