@@ -9,8 +9,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// CrabToggle toggles crab messages on/off
-func CrabToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
+// NiceIdeaToggle toggles nice idea messages on/off
+func NiceIdeaToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
@@ -27,7 +27,7 @@ func CrabToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Set new information in server data
 	serverData.Time = time.Now()
-	serverData.Crab = !serverData.Crab
+	serverData.NiceIdea = !serverData.NiceIdea
 
 	jsonCache, err := json.Marshal(serverData)
 	tools.ErrRead(err)
@@ -35,10 +35,10 @@ func CrabToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
 	tools.ErrRead(err)
 
-	if serverData.Crab {
-		s.ChannelMessageSend(m.ChannelID, "Enabled crab rave O_o")
+	if serverData.NiceIdea {
+		s.ChannelMessageSend(m.ChannelID, "Brovada just came up with a nice idea.")
 	} else {
-		s.ChannelMessageSend(m.ChannelID, "Disabled crab rave O_o")
+		s.ChannelMessageSend(m.ChannelID, "Brovada didn't come up with any nice ideas.")
 	}
 	return
 }

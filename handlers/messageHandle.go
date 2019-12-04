@@ -84,6 +84,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	beatmapRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
 	timestampRegex, _ := regexp.Compile(`(\d+):(\d{2}):(\d{3})\s*(\(((\d\,?)+)\))?`)
+	ideaRegex, _ := regexp.Compile(`(n+i+c+e*|g+o+o+d+|g+u+d+)\s*i+d+e+a+`)
+
+	// NICE IDEA
+	if serverData.NiceIdea && ideaRegex.MatchString(m.Content) {
+		go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
+	}
 
 	// Timestamp conversions
 	if timestampRegex.MatchString(noEmoji) && serverData.OsuToggle {
@@ -150,7 +156,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// Admin commands
 		case serverPrefix + "ct", serverPrefix + "crabt", serverPrefix + "ctoggle", serverPrefix + "crabtoggle":
-			go admincommands.Crab(s, m)
+			go admincommands.CrabToggle(s, m)
+		case serverPrefix + "it", serverPrefix + "ideat", serverPrefix + "itoggle", serverPrefix + "ideatoggle":
+			go admincommands.NiceIdeaToggle(s, m)
 		case serverPrefix + "ot", serverPrefix + "osut", serverPrefix + "otoggle", serverPrefix + "osutoggle":
 			go admincommands.OsuToggle(s, m)
 		case serverPrefix + "prefix", serverPrefix + "newprefix":
@@ -189,6 +197,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Face(s, m)
 		case serverPrefix + "funny":
 			go gencommands.Funny(s, m)
+		case serverPrefix + "idea", serverPrefix + "niceidea":
+			if !serverData.NiceIdea {
+				go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
+			}
 		case serverPrefix + "info":
 			go gencommands.Info(s, m, profileCache)
 		case serverPrefix + "kanye":

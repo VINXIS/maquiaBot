@@ -26,6 +26,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			&discordgo.MessageEmbedField{
 				Name: "Admin commands:",
 				Value: "`(ct|crabt|ctoggle|crabtoggle)`, " +
+					"`(it|ideat|itoggle|ideatoggle)`, " +
 					"`(ot|osut|otoggle|osutoggle)`, " +
 					"`(prefix|maquiaprefix|newprefix)`, " +
 					"`purge`, " +
@@ -46,6 +47,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`encrypt`, " +
 					"`face`, " +
 					"`funny`, " +
+					"`(idea|niceidea)`, " + 
 					"`info`, " +
 					"`kanye`, " +
 					"`(l|leven|levenshtein)`, " +
@@ -91,6 +93,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		// Admin commands
 		case "ct", "crabt", "ctoggle", "crabtoggle":
 			embed = helpcommands.CrabToggle(embed)
+		case "it", "ideat", "itoggle", "ideatoggle":
+			embed = helpcommands.NiceIdeaToggle(embed)
 		case "ot", "osut", "otoggle", "osutoggle":
 			embed = helpcommands.OsuToggle(embed)
 		case "prefix", "maquiaprefix", "newprefix":
@@ -127,6 +131,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Face(embed)
 		case "funny":
 			embed = helpcommands.Funny(embed)
+		case "idea", "niceidea":
+			embed = helpcommands.NiceIdea(embed)
 		case "info":
 			embed = helpcommands.Info(embed)
 		case "kanye":

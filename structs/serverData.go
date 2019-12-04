@@ -13,6 +13,7 @@ type ServerData struct {
 	Server           discordgo.Guild
 	Prefix           string
 	Crab             bool
+	NiceIdea         bool
 	OsuToggle        bool
 	Possession       bool
 	Vibe             bool
