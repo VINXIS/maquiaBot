@@ -85,7 +85,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	beatmapRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
 	timestampRegex, _ := regexp.Compile(`(\d+):(\d{2}):(\d{3})\s*(\(((\d\,?)+)\))?`)
-	ideaRegex, _ := regexp.Compile(`(n+i+c+e*|g+o+o+d+|g+u+d+)\s*i+d+e+a+`)
+	ideaRegex, _ := regexp.Compile(`(n+i+c+e*|g+o+d+|g+u+d+|c+o+l+)\s*i+d+e+a+`)
 
 	// NICE IDEA
 	if serverData.NiceIdea && ideaRegex.MatchString(m.Content) {
@@ -242,7 +242,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// osu! commands
 		case serverPrefix + "bfarm", serverPrefix + "bottomfarm":
-			go osucommands.BottomFarm(s, m, osuAPI, profileCache, serverPrefix)
+			go osucommands.BottomFarm(s, m, osuAPI, profileCache)
+		case serverPrefix + "bpm":
+			go osucommands.BPM(s, m, osuAPI, profileCache)
 		case serverPrefix + "c", serverPrefix + "compare":
 			go osucommands.Compare(s, m, args, osuAPI, profileCache, serverPrefix, mapCache)
 		case serverPrefix + "farm":
@@ -264,7 +266,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "t", serverPrefix + "top":
 			go osucommands.Top(s, m, osuAPI, profileCache, mapCache)
 		case serverPrefix + "tfarm", serverPrefix + "topfarm":
-			go osucommands.TopFarm(s, m, osuAPI, profileCache, serverPrefix)
+			go osucommands.TopFarm(s, m, osuAPI, profileCache)
 		case serverPrefix + "ti", serverPrefix + "tinfo", serverPrefix + "tracking", serverPrefix + "trackinfo":
 			go osucommands.TrackInfo(s, m)
 

@@ -29,7 +29,9 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 
 		// non-Admin specific
 		case "bfarm", "bottomfarm":
-			go osucommands.BottomFarm(s, m, osuAPI, playerCache, serverPrefix)
+			go osucommands.BottomFarm(s, m, osuAPI, playerCache)
+		case "bpm":
+			go osucommands.BPM(s, m, osuAPI, playerCache)
 		case "c", "compare":
 			go osucommands.Compare(s, m, args, osuAPI, playerCache, serverPrefix, mapCache)
 		case "farm":
@@ -49,7 +51,7 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 		case "t", "top":
 			go osucommands.Top(s, m, osuAPI, playerCache, mapCache)
 		case "tfarm", "topfarm":
-			go osucommands.TopFarm(s, m, osuAPI, playerCache, serverPrefix)
+			go osucommands.TopFarm(s, m, osuAPI, playerCache)
 		case "ti", "tinfo", "tracking", "trackinfo":
 			go osucommands.TrackInfo(s, m)
 		default:

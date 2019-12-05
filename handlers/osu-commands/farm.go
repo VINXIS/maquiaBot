@@ -111,7 +111,7 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clien
 }
 
 // TopFarm gives the top farmerdogs in the game based on who's been run
-func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData, serverPrefix string) {
+func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData) {
 	farmCountRegex, _ := regexp.Compile(`.+(tfarm|topfarm)\s*(-s)?\s*(\d+)?`)
 
 	farmAmount := 1
@@ -189,7 +189,7 @@ func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cl
 }
 
 // BottomFarm gives the top farmerdogs in the game based on who's been run
-func BottomFarm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData, serverPrefix string) {
+func BottomFarm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData) {
 	farmCountRegex, _ := regexp.Compile(`.+(bfarm|bottomfarm)\s*(-s)?\s*(\d+)?`)
 
 	farmAmount := 1

@@ -70,6 +70,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			&discordgo.MessageEmbedField{
 				Name: "osu! commands:",
 				Value: "`(bfarm|bottomfarm)`, " +
+					"`bpm`, " +
 					"`farm`, " +
 					"`(link|set)`, " +
 					"`(tfarm|topfarm)`, " +
@@ -173,6 +174,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		// osu! commands
 		case "bfarm", "bottomfarm":
 			embed = helpcommands.BottomFarm(embed)
+		case "bpm":
+			embed = helpcommands.BPM(embed)
 		case "farm":
 			embed = helpcommands.Farm(embed)
 		case "link", "set":
