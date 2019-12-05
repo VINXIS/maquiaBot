@@ -29,6 +29,7 @@ func NewServer(server discordgo.Guild) ServerData {
 		Prefix:    "$",
 		OsuToggle: true,
 		Crab:      true,
+		NiceIdea:  true,
 		Server:    server,
 	}
 }
