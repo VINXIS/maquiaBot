@@ -221,6 +221,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Penis(s, m)
 		case serverPrefix + "ping":
 			go gencommands.Ping(s, m)
+		case serverPrefix + "rc", serverPrefix + "rp", serverPrefix + "rankc", serverPrefix + "rankp", serverPrefix + "rankcock", serverPrefix + "rankpenis":
+			go gencommands.PenisRank(s, m)
 		case serverPrefix + "remind", serverPrefix + "reminder":
 			go gencommands.Remind(s, m)
 		case serverPrefix + "reminders":

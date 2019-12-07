@@ -12,6 +12,12 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+type penis struct {
+	member     *discordgo.Member
+	size       float64
+	percentile float64
+}
+
 // Penis gives u a penis size for the day based off of a normal distribution from data obtained at http://penissizes.org/average-penis-size-ethnicity-race-and-country
 func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
 	userRegex, _ := regexp.Compile(`(penis|cock)\s+(.+)`)
@@ -144,4 +150,93 @@ func PenisCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	s.ChannelMessageSend(m.ChannelID, mainText)
+}
+
+// PenisRank displays the largest / smallest penises in the server
+func PenisRank(s *discordgo.Session, m *discordgo.MessageCreate) {
+	rankRegex, _ := regexp.Compile(`(rc|rp|rankc|rankp|rankcock|rankpenis)\s+(\d+)`)
+	smallRegex, _ := regexp.Compile(`-s`)
+	// Get members
+	members, err := s.GuildMembers(m.GuildID, "", 1000)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
+		return
+	}
+
+	// Get number of people to show
+	num := 1
+	if rankRegex.MatchString(m.Content) {
+		num, err = strconv.Atoi(rankRegex.FindStringSubmatch(m.Content)[2])
+		if err != nil {
+			num = 1
+		}
+		if num > len(members) {
+			num = len(members)
+		}
+	}
+
+	penisSizes := []penis{}
+	average := 13.91
+	stddev := 2.20
+	year, month, day := time.Now().Date()
+
+	// Get average server size, member sizes, and percentiles
+	var avgSize float64
+	for _, member := range members {
+		authorid, _ := strconv.Atoi(member.User.ID)
+		random := rand.New(rand.NewSource(int64(authorid + day + int(month) + year)))
+
+		penisSize := random.NormFloat64()*stddev + average
+		percentile := 100 * 0.5 * math.Erfc((average-penisSize)/(math.Sqrt(2.0)*stddev))
+
+		penisSizes = append(penisSizes, penis{
+			member:     member,
+			size:       penisSize,
+			percentile: percentile,
+		})
+		avgSize += penisSize
+	}
+	avgSize /= float64(len(members))
+
+	// Sort and obtain wanted amount
+	var text string
+	if smallRegex.MatchString(m.Content) {
+		sort.Slice(penisSizes, func(i, j int) bool { return penisSizes[i].size < penisSizes[j].size })
+		if num <= 1 {
+			emote := ""
+			if penisSizes[0].percentile < 25 {
+				emote = ":pinching_hand:"
+			} else if penisSizes[0].percentile > 75 {
+				emote = ":eggplant: WTF"
+			}
+			s.ChannelMessageSend(m.ChannelID, "**"+penisSizes[0].member.User.Username+"'s** erect size for the day is "+strconv.FormatFloat(penisSizes[0].size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisSizes[0].size/2.54, 'f', 2, 64)+"in) which is larger than approximately "+strconv.FormatFloat(penisSizes[0].percentile, 'f', 2, 64)+"% of penises. Their size is the smallest in this server today! "+emote+"\n**Average size in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
+			return
+		}
+
+		text = "Smallest **" + strconv.Itoa(num) + "** sizes in this server: \n"
+	} else {
+		sort.Slice(penisSizes, func(i, j int) bool { return penisSizes[i].size > penisSizes[j].size })
+		if num <= 1 {
+			emote := ""
+			if penisSizes[0].percentile < 25 {
+				emote = ":pinching_hand: LOLL"
+			} else if penisSizes[0].percentile > 75 {
+				emote = ":eggplant:"
+			}
+			s.ChannelMessageSend(m.ChannelID, "**"+penisSizes[0].member.User.Username+"'s** erect size for the day is "+strconv.FormatFloat(penisSizes[0].size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisSizes[0].size/2.54, 'f', 2, 64)+"in) which is larger than approximately "+strconv.FormatFloat(penisSizes[0].percentile, 'f', 2, 64)+"% of penises. Their size is the largest in this server today! "+emote+"\n**Average size in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
+			return
+		}
+
+		text = "Largest **" + strconv.Itoa(num) + "** sizes in this server: \n"
+	}
+	for i := 0; i < num; i++ {
+		emote := ""
+		if penisSizes[i].percentile < 25 {
+			emote = ":pinching_hand:"
+		} else if penisSizes[i].percentile > 75 {
+			emote = ":eggplant:"
+		}
+		text += "**" + penisSizes[i].member.User.Username + ":** " + strconv.FormatFloat(penisSizes[i].size, 'f', 2, 64) + "cm (" + strconv.FormatFloat(penisSizes[i].size/2.54, 'f', 2, 64) + "in) " + emote + "\n"
+	}
+	s.ChannelMessageSend(m.ChannelID, text+"**Average size in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
 }

@@ -57,6 +57,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`parse`, " +
 					"`(penis|cock)`, " +
 					"`ping`, " +
+					"`(rc|rp|rankc|rankp|rankcock|rankpenis)`, " +
 					"`(remind|reminder)`, " +
 					"`reminders`, " +
 					"`(remindremove|rremove)`, " +
@@ -152,6 +153,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Penis(embed)
 		case "ping":
 			embed = helpcommands.Ping(embed)
+		case "rc", "rp", "rankc", "rankp", "rankcock", "rankpenis":
+			embed = helpcommands.PenisRank(embed)
 		case "remind", "reminder":
 			embed = helpcommands.Remind(embed)
 		case "reminders":

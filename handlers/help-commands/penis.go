@@ -15,7 +15,7 @@ func Penis(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`comparepenis`",
+			Value: "`comparepenis`, `rankpenis`",
 		},
 	}
 	return embed
@@ -32,7 +32,30 @@ func PenisCompare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`penis`",
+			Value: "`penis`, `rankpenis`",
+		},
+	}
+	return embed
+}
+
+// PenisRank explains the penis rank functionality
+func PenisRank(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
+	embed.Author.Name = "Command: rc / rp / rankc / rankp / rankcock / rankpenis"
+	embed.Description = "`(rc|rp|rankc|rankp|rankcock|rankpenis) [number] [-s]` ranks the largest / smallest penis sizes in the server."
+	embed.Fields = []*discordgo.MessageEmbedField{
+		&discordgo.MessageEmbedField{
+			Name:  "[number]",
+			Value: "Display a certain number of largest / smallest penises (Default: 1).",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:  "[-s]",
+			Value: "Add this to show the smallest sizes. If this is not added, it will show the largest sizes instead.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:  "Related Commands:",
+			Value: "`penis`, `comparepenis`",
 		},
 	}
 	return embed
