@@ -70,6 +70,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 	roll, _ := rand.Int(rand.Reader, big.NewInt(int64(len(userQuotes))))
 	quote := userQuotes[roll.Int64()]
 	timestamp, _ := quote.Timestamp.Parse()
+	timestampString := strings.Replace(timestamp.Format(time.RFC822Z), "+0000", "UTC", -1)
 	if user.ID == "" {
 		user = quote.Author
 	}
@@ -81,7 +82,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		},
 		Description: quote.Content,
 		Footer: &discordgo.MessageEmbedFooter{
-			Text: timestamp.Format(time.RFC822Z),
+			Text: timestampString,
 		},
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
@@ -92,7 +93,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 	quoteAddRegex, _ := regexp.Compile(`q(uote)?a(dd)?\s+(.+)`)
 	randomRegex, _ := regexp.Compile(`-r`)
-	channelRegex, _ := regexp.Compile(`https://discordapp.com/channels\/\d+\/(\d+)\/(\d+)`)
+	channelRegex, _ := regexp.Compile(`https://discordapp.com/channels\/(\d+)\/(\d+)\/(\d+)`)
 
 	// Get server
 	server, err := s.Guild(m.GuildID)
@@ -111,7 +112,11 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	if channelRegex.MatchString(m.Content) {
-		message, _ = s.ChannelMessage(channelRegex.FindStringSubmatch(m.Content)[1], channelRegex.FindStringSubmatch(m.Content)[2])
+		if channelRegex.FindStringSubmatch(m.Content)[1] != server.ID {
+			s.ChannelMessageSend(m.ChannelID, "Please do not quote from other servers!")
+			return
+		}
+		message, _ = s.ChannelMessage(channelRegex.FindStringSubmatch(m.Content)[2], channelRegex.FindStringSubmatch(m.Content)[3])
 	} else if quoteAddRegex.MatchString(m.Content) {
 		username = quoteAddRegex.FindStringSubmatch(m.Content)[3]
 		message, err = s.ChannelMessage(m.ChannelID, username)
