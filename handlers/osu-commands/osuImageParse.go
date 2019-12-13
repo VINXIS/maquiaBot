@@ -129,7 +129,10 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		return
 	}
 
-	message, _ := s.ChannelMessageSend(m.ChannelID, "Processing image...")
+	message, err := s.ChannelMessageSend(m.ChannelID, "Processing image...")
+	if err != nil {
+		return
+	}
 	var beatmap osuapi.Beatmap
 	beatmaps, err := osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 		Username: mapperName,
