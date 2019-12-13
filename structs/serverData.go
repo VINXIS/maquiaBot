@@ -21,6 +21,7 @@ type ServerData struct {
 	Nouns            []string
 	Skills           []string
 	AllowAnyoneStats bool
+	Quotes           []discordgo.Message
 }
 
 // NewServer creates a new ServerData
@@ -75,4 +76,27 @@ func (s *ServerData) Word(word, mode, list string) error {
 		s.Skills = targetList
 	}
 	return nil
+}
+
+// AddQuote adds a quote to the server data
+func (s *ServerData) AddQuote(message *discordgo.Message) error {
+	for _, quote := range s.Quotes {
+		if quote.ID == message.ID {
+			return errors.New("message already a quote")
+		}
+	}
+	s.Quotes = append(s.Quotes, *message)
+	return nil
+}
+
+// RemoveQuote removes a quote from the server data
+func (s *ServerData) RemoveQuote(ID string) error {
+	for i, quote := range s.Quotes {
+		if quote.ID == ID {
+			s.Quotes[i] = s.Quotes[len(s.Quotes)-1]
+			s.Quotes = s.Quotes[:len(s.Quotes)-1]
+			return nil
+		}
+	}
+	return errors.New("message is not a quote")
 }

@@ -221,6 +221,14 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Penis(s, m)
 		case serverPrefix + "ping":
 			go gencommands.Ping(s, m)
+		case serverPrefix + "q", serverPrefix + "quote":
+			go gencommands.Quote(s, m)
+		case serverPrefix + "qa", serverPrefix + "qadd", serverPrefix + "quotea", serverPrefix + "quoteadd":
+			go gencommands.QuoteAdd(s, m)
+		case serverPrefix + "qd", serverPrefix + "qr", serverPrefix + "quoted", serverPrefix + "quoter", serverPrefix + "qdelete", serverPrefix + "qremove", serverPrefix + "quotedelete", serverPrefix + "quoteremove":
+			go gencommands.QuoteRemove(s, m)
+		case serverPrefix + "qs", serverPrefix + "quotes":
+			go gencommands.Quotes(s, m)
 		case serverPrefix + "rc", serverPrefix + "rp", serverPrefix + "rankc", serverPrefix + "rankp", serverPrefix + "rankcock", serverPrefix + "rankpenis":
 			go gencommands.PenisRank(s, m)
 		case serverPrefix + "remind", serverPrefix + "reminder":

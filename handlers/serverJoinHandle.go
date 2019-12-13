@@ -10,7 +10,7 @@ import (
 
 // ServerJoin is to send a message when the bot joins a server
 func ServerJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
-	s.UpdateStatus(0, "Chillin in "+strconv.Itoa(len(s.State.Guilds))+" servers")
+	s.UpdateStatus(0, strconv.Itoa(len(s.State.Guilds))+" servers")
 
 	// Check if bot was already in server or if server is unavailable
 	joinTime, _ := g.Guild.JoinedAt.Parse()

@@ -19,6 +19,7 @@ import (
 	tools "./tools"
 
 	"github.com/bwmarrin/discordgo"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -34,13 +35,21 @@ func main() {
 	tools.ErrRead(err)
 	_ = json.Unmarshal(f, &mapCache)
 
-	// Register the messageCreate func as a callback for MessageCreate events
+	// Add handlers
 	discord.AddHandler(handlers.MessageHandler)
+	discord.AddHandler(handlers.ReactAdd)
+	discord.AddHandler(handlers.ServerJoin)
+	discord.AddHandler(handlers.ServerLeave)
 
 	// Open a websocket connection to Discord and begin listening
-	err = discord.Open()
-	tools.ErrRead(err)
+	for {
+		err = discord.Open()
+		if err == nil {
+			break
+		}
+	}
 	fmt.Println("Bot is now running in " + strconv.Itoa(len(discord.State.Guilds)) + " servers.")
+	discord.UpdateStatus(0, strconv.Itoa(len(discord.State.Guilds))+" servers")
 
 	// Resume all reminder timers
 	reminders := []structs.Reminder{}
@@ -84,6 +93,13 @@ func main() {
 
 	// Get osu! mapper tracking data
 	// go osutools.TrackMapperPost(discord) Commented until a solution is found for its issues
+
+	// // Open DB
+	// db, err := sql.Open("mysql", "root:mOatHhdArgb9@/maquiabot")
+	// tools.ErrRead(err)
+	// rows, err := db.Prepare("CREATE TABLE IF NOT EXISTS servers (")
+	// tools.ErrRead(err)
+	// fmt.Println(rows)
 
 	// Create a channel to keep the bot running until a prompt is given to close
 	sc := make(chan os.Signal, 1)

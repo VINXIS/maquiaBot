@@ -57,6 +57,10 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`parse`, " +
 					"`(penis|cock)`, " +
 					"`ping`, " +
+					"`(q|quote)`, " +
+					"`(qa|qadd|quotea|quoteadd)`, " +
+					"`(qd|qr|qremove|qdelete|quoter|quoted|quoteremove|quotedelete)`, " +
+					"`(qs|quotes)`, " +
 					"`(rc|rp|rankc|rankp|rankcock|rankpenis)`, " +
 					"`(remind|reminder)`, " +
 					"`reminders`, " +
@@ -153,6 +157,14 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Penis(embed)
 		case "ping":
 			embed = helpcommands.Ping(embed)
+		case "q", "quote":
+			embed = helpcommands.Quote(embed)
+		case "qa", "qadd", "quotea", "quoteadd":
+			embed = helpcommands.QuoteAdd(embed)
+		case "qd", "qr", "qremove", "qdelete", "quoter", "quoted", "quoteremove", "quotedelete":
+			embed = helpcommands.QuoteRemove(embed)
+		case "qs", "quotes":
+			embed = helpcommands.Quotes(embed)
 		case "rc", "rp", "rankc", "rankp", "rankcock", "rankpenis":
 			embed = helpcommands.PenisRank(embed)
 		case "remind", "reminder":
