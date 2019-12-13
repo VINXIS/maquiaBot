@@ -30,6 +30,7 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Parse emssage to see if a skill count was given/object of reference
 	text := "You have"
+	text2 := ""
 	textLength := 0
 	skillCount := 4
 	if statsRegex.MatchString(m.Content) {
@@ -56,6 +57,9 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 					textLength = 0
 				}
 			}
+			if skillCount == 0 {
+				text2 = "Dude just use `class` lol\n"
+			}
 		}
 	}
 
@@ -77,7 +81,7 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain 4 skills
 	var skills []string
 	authorid, _ := strconv.Atoi(m.Author.ID)
-	skillRang := rand.New(rand.NewSource(int64(authorid + textLength) + time.Now().UnixNano()))
+	skillRang := rand.New(rand.NewSource(int64(authorid+textLength) + time.Now().UnixNano()))
 	maxLength := float64(0)
 	for len(skills) < skillCount {
 		randNum := skillRang.Intn(len(serverData.Skills))
@@ -109,7 +113,7 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	noun := serverData.Nouns[randNum]
 
 	fullText = fullText + "\n" + text + " chosen the \"" + adjective + " " + noun + "\" class.```"
-	_, err = s.ChannelMessageSend(m.ChannelID, fullText)
+	_, err = s.ChannelMessageSend(m.ChannelID, text2+fullText)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Message probably went over the 2000 character limit!")
 	}
