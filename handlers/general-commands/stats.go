@@ -36,6 +36,9 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if statsRegex.MatchString(m.Content) {
 		if statsRegex.FindStringSubmatch(m.Content)[1] == "class" {
 			skillCount = 0
+			if statsRegex.FindStringSubmatch(m.Content)[3] != "" {
+				text = strings.ReplaceAll(statsRegex.FindStringSubmatch(m.Content)[3]+" has", "`", "")
+			}
 		} else {
 			var err error
 			skillCount, err = strconv.Atoi(statsRegex.FindStringSubmatch(m.Content)[3])
