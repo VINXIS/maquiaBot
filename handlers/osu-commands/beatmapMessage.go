@@ -21,6 +21,9 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	submatches := regex.FindStringSubmatch(m.Content)
 
 	message, err := s.ChannelMessageSend(m.ChannelID, "Processing beatmap...")
+	if err != nil {
+		return
+	}
 	var beatmap osuapi.Beatmap
 
 	// Get requested mods

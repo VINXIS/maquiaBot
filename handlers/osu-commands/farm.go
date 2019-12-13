@@ -107,7 +107,7 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clien
 		list += "`" + user.Farm.List[n].Name + "`: " + strconv.FormatFloat(user.Farm.List[n].FarmScore, 'f', 2, 64) + " Farmerdog rating (" + strconv.FormatFloat(user.Farm.List[n].PP, 'f', 2, 64) + ")\n"
 	}
 
-	_, err = s.ChannelMessageSend(m.ChannelID, "Farmerdog rating for **"+user.Osu.Username+":** "+strconv.FormatFloat(user.Farm.Rating, 'f', 2, 64)+"\n**Your top "+strconv.Itoa(amount)+" farmerdog scores:** \n"+list)
+	s.ChannelMessageSend(m.ChannelID, "Farmerdog rating for **"+user.Osu.Username+":** "+strconv.FormatFloat(user.Farm.Rating, 'f', 2, 64)+"\n**Your top "+strconv.Itoa(amount)+" farmerdog scores:** \n"+list)
 }
 
 // TopFarm gives the top farmerdogs in the game based on who's been run

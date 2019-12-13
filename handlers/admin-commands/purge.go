@@ -122,7 +122,10 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Send confirmation message and then delete it after
-	msg, _ := s.ChannelMessageSend(m.ChannelID, "Removed the latest "+strconv.Itoa(num-1)+" messages from the following people: "+userText)
+	msg, err := s.ChannelMessageSend(m.ChannelID, "Removed the latest "+strconv.Itoa(num-1)+" messages from the following people: "+userText)
+	if err != nil {
+		return
+	}
 	timer := time.NewTimer(5 * time.Second)
 	<-timer.C
 	s.ChannelMessageDelete(msg.ChannelID, msg.ID)
