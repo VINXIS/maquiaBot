@@ -26,8 +26,11 @@ func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
 	case "farm":
 		go osutools.FarmUpdate()
 	case "osu":
-		message, _ := s.ChannelMessageSend(m.ChannelID, "Updating osu-tools...")
-		_, err := exec.Command("dotnet", "build", "./osu-tools/PerformanceCalculator").Output()
+		message, err := s.ChannelMessageSend(m.ChannelID, "Updating osu-tools...")
+		if err != nil {
+			return
+		}
+		_, err = exec.Command("dotnet", "build", "./osu-tools/PerformanceCalculator").Output()
 		s.ChannelMessageDelete(m.ChannelID, message.ID)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "An error occurred in updating osu-tools! Please try manually."+m.Author.Mention())
