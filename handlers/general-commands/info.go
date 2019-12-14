@@ -167,6 +167,111 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 	})
 }
 
+// RoleInfo gives information about a role
+func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
+	roleRegex, _ := regexp.Compile(`r(ole)?info\s+(.+)`)
+
+	// Get server
+	server, err := s.Guild(m.GuildID)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
+		return
+	}
+	serverImg := "https://cdn.discordapp.com/icons/" + server.ID + "/" + server.Icon
+	if strings.Contains(server.Icon, "a_") {
+		serverImg += ".gif"
+	} else {
+		serverImg += ".png"
+	}
+
+	// Get role
+	if !roleRegex.MatchString(m.Content) {
+		s.ChannelMessageSend(m.ChannelID, "No role name given!")
+		return
+	}
+
+	roles, _ := s.GuildRoles(m.GuildID)
+	roleName := roleRegex.FindStringSubmatch(m.Content)[2]
+	role := &discordgo.Role{}
+	for _, servrole := range roles {
+		if strings.HasPrefix(strings.ToLower(servrole.Name), roleName) {
+			role = servrole
+		}
+	}
+	if role.ID == "" {
+		s.ChannelMessageSend(m.ChannelID, "Could not find a role called **"+roleName+"**!")
+		return
+	}
+
+	// Get list of people who have the role
+	members, err := s.GuildMembers(m.GuildID, "", 1000)
+	memberList := ""
+	memberCount := 0
+	for _, member := range members {
+		for _, memberRole := range member.Roles {
+			if memberRole == role.ID {
+				memberCount++
+				memberList += member.User.Username + ", "
+				break
+			}
+		}
+	}
+	memberList = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(memberList), ","))
+	if memberList == "" {
+		memberList = "N/A"
+	}
+
+	// Created at date
+	createdAt, _ := discordgo.SnowflakeTimestamp(role.ID)
+
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+		Color: role.Color,
+		Author: &discordgo.MessageEmbedAuthor{
+			Name:    role.Name,
+			IconURL: serverImg,
+		},
+		Thumbnail: &discordgo.MessageEmbedThumbnail{
+			URL: serverImg,
+		},
+		Fields: []*discordgo.MessageEmbedField{
+			&discordgo.MessageEmbedField{
+				Name:   "ID",
+				Value:  role.ID,
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "Role Created",
+				Value:  createdAt.UTC().Format(time.RFC822Z),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "Position",
+				Value:  strconv.Itoa(role.Position),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "Managed Externally",
+				Value:  strconv.FormatBool(role.Managed),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "Mentionable",
+				Value:  strconv.FormatBool(role.Mentionable),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "Shown Separately",
+				Value:  strconv.FormatBool(role.Hoist),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:  "Members (" + strconv.Itoa(memberCount) + ")",
+				Value: memberList,
+			},
+		},
+	})
+}
+
 // ServerInfo gives information about the server
 func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 

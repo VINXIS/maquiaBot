@@ -15,7 +15,24 @@ func Info(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`serverinfo`",
+			Value: "`roleinfo`, `serverinfo`",
+		},
+	}
+	return embed
+}
+
+// RoleInfo explains the role info functionality
+func RoleInfo(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
+	embed.Author.Name = "Command: rinfo / roleinfo"
+	embed.Description = "`(rinfo|roleinfo) <rolename>` gets the information for a role."
+	embed.Fields = []*discordgo.MessageEmbedField{
+		&discordgo.MessageEmbedField{
+			Name:  "<rolename>",
+			Value: "The role to get the information for.",
+		},
+		&discordgo.MessageEmbedField{
+			Name:  "Related Commands:",
+			Value: "`info`, `serverinfo`",
 		},
 	}
 	return embed
@@ -28,7 +45,7 @@ func ServerInfo(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`info`",
+			Value: "`info`, `roleinfo`",
 		},
 	}
 	return embed

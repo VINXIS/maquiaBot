@@ -237,6 +237,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Reminders(s, m)
 		case serverPrefix + "remindremove", serverPrefix + "rremove":
 			go gencommands.RemoveReminder(s, m)
+		case serverPrefix + "rinfo", serverPrefix + "roleinfo":
+			go gencommands.RoleInfo(s, m)
 		case serverPrefix + "roll":
 			go gencommands.Roll(s, m)
 		case serverPrefix + "sinfo", serverPrefix + "serverinfo":

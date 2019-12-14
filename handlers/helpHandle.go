@@ -65,6 +65,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(remind|reminder)`, " +
 					"`reminders`, " +
 					"`(remindremove|rremove)`, " +
+					"`(rinfo|roleinfo)`, " +
 					"`roll`, " +
 					"`(sinfo|serverinfo)`, " +
 					"`(skill|skills)`, " +
@@ -173,6 +174,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Reminders(embed)
 		case "remindremove", "rremove":
 			embed = helpcommands.RemindRemove(embed)
+		case "rinfo", "roleinfo":
+			embed = helpcommands.RoleInfo(embed)
 		case "roll":
 			embed = helpcommands.Roll(embed)
 		case "sinfo", "serverinfo":
