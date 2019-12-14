@@ -33,7 +33,7 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 			for _, channel := range guild.Channels {
 				if channel.ID == guild.ID {
 					sent = true
-					s.ChannelMessageSend(channel.ID, "Admins of the server can always toggle announcements from the bot creator on/off by using `announcetoggle`. **Announcement below:**\n\n"+announcement)
+					s.ChannelMessageSend(channel.ID, "Admins of the server can always toggle announcements from the bot creator on/off by using `announcetoggle`. \n**Announcement below:**\n\n"+announcement)
 					break
 				}
 			}
@@ -43,7 +43,7 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 
 			for _, channel := range guild.Channels {
-				_, err := s.ChannelMessageSend(channel.ID, "Admins of the server can always toggle announcements from the bot creator on/off by using `announcetoggle`. **Announcement below:**\n\n"+announcement)
+				_, err := s.ChannelMessageSend(channel.ID, "Admins of the server can always toggle announcements from the bot creator on/off by using `announcetoggle`. \n**Announcement below:**\n\n"+announcement)
 				if err == nil {
 					break
 				}
