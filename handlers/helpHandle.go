@@ -25,7 +25,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
 				Name: "Admin commands:",
-				Value: "`(ct|crabt|ctoggle|crabtoggle)`, " +
+				Value: "`(at|announcet|atoggle|announcetoggle)`, " +
+					"`(ct|crabt|ctoggle|crabtoggle)`, " +
 					"`(it|ideat|itoggle|ideatoggle)`, " +
 					"`(ot|osut|otoggle|osutoggle)`, " +
 					"`(prefix|maquiaprefix|newprefix)`, " +
@@ -98,6 +99,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		}
 		switch arg {
 		// Admin commands
+		case "at", "announcet", "atoggle", "announcetoggle":
+			embed = helpcommands.AnnounceToggle(embed)
 		case "ct", "crabt", "ctoggle", "crabtoggle":
 			embed = helpcommands.CrabToggle(embed)
 		case "it", "ideat", "itoggle", "ideatoggle":

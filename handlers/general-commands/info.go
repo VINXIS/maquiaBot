@@ -285,6 +285,13 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverData := tools.GetServer(*server)
 	statsInfo := strconv.Itoa(len(serverData.Nouns)) + " nouns\n" + strconv.Itoa(len(serverData.Adjectives)) + " adjectives\n" + strconv.Itoa(len(serverData.Skills)) + " skills\nAllowAnyoneAdd: " + strconv.FormatBool(serverData.AllowAnyoneStats)
 
+	// Toggle Information
+	toggleInfo := "Crab: " + strconv.FormatBool(serverData.Crab) + "\n" +
+		"Nice Idea: " + strconv.FormatBool(serverData.NiceIdea) + "\n" +
+		"osu!: " + strconv.FormatBool(serverData.OsuToggle) + "\n" +
+		"Vibe Check: " + strconv.FormatBool(serverData.Vibe) + "\n" +
+		"Announcements: " + strconv.FormatBool(serverData.Announce) + "\n"
+
 	// Created at date
 	createdAt, err := discordgo.SnowflakeTimestamp(server.ID)
 
@@ -407,6 +414,11 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			&discordgo.MessageEmbedField{
 				Name:   "Channels (" + strconv.Itoa(len(server.Channels)) + ")",
 				Value:  channelInfo,
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "Server Options",
+				Value:  toggleInfo,
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{

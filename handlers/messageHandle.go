@@ -137,6 +137,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go s.ChannelMessageSend(m.ChannelID, "https://github.com/VINXIS/maquiaBot")
 
 		// Bot owner commands
+		case serverPrefix + "announce":
+			go botcreatorcommands.Announce(s, m)
 		case serverPrefix + "clean":
 			go botcreatorcommands.Clean(s, m, profileCache)
 		case serverPrefix + "cleane", serverPrefix + "cleanempty":
@@ -156,7 +158,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "pokemon":
 			go PokemonHandle(s, m, args, serverPrefix)
 
-		// Admin commands
+		// Admin commands'
+		case serverPrefix + "at", serverPrefix + "announcet", serverPrefix + "atoggle", serverPrefix + "announcetoggle":
+			go admincommands.AnnounceToggle(s, m)
 		case serverPrefix + "ct", serverPrefix + "crabt", serverPrefix + "ctoggle", serverPrefix + "crabtoggle":
 			go admincommands.CrabToggle(s, m)
 		case serverPrefix + "it", serverPrefix + "ideat", serverPrefix + "itoggle", serverPrefix + "ideatoggle":
