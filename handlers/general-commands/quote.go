@@ -17,6 +17,7 @@ import (
 // Quote lets you get a quote from someone
 func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 	quoteRegex, _ := regexp.Compile(`q(uote)?\s+(.+)`)
+	linkRegex, _ := regexp.Compile(`https?:\/\/\S+`)
 
 	// Get server
 	server, err := s.Guild(m.GuildID)
@@ -74,6 +75,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if user.ID == "" {
 		user = quote.Author
 	}
+
 	embed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://discordapp.com/channels/" + server.ID + "/" + quote.ChannelID + "/" + quote.ID,
@@ -84,6 +86,41 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: timestampString,
 		},
+	}
+	if len(quote.Attachments) != 0 {
+		if strings.HasSuffix(quote.Attachments[0].URL, "png") || strings.HasSuffix(quote.Attachments[0].URL, "jpg") || strings.HasSuffix(quote.Attachments[0].URL, "gif") {
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: quote.Attachments[0].URL,
+			}
+		} else if strings.HasSuffix(quote.Attachments[0].URL, "mp4") || strings.HasSuffix(quote.Attachments[0].URL, "flv") || strings.HasSuffix(quote.Attachments[0].URL, "avi") {
+			embed.Video = &discordgo.MessageEmbedVideo{
+				URL: quote.Attachments[0].URL,
+			}
+		} else {
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: quote.Attachments[0].URL,
+			}
+			embed.Video = &discordgo.MessageEmbedVideo{
+				URL: quote.Attachments[0].URL,
+			}
+		}
+	} else if linkRegex.MatchString(quote.Content) {
+		if strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "png") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "jpg") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "gif") {
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: linkRegex.FindStringSubmatch(quote.Content)[0],
+			}
+		} else if strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "mp4") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "flv") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "avi") {
+			embed.Video = &discordgo.MessageEmbedVideo{
+				URL: linkRegex.FindStringSubmatch(quote.Content)[0],
+			}
+		} else {
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: linkRegex.FindStringSubmatch(quote.Content)[0],
+			}
+			embed.Video = &discordgo.MessageEmbedVideo{
+				URL: linkRegex.FindStringSubmatch(quote.Content)[0],
+			}
+		}
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	return
@@ -161,7 +198,7 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
-	if message == nil || message.ID == "" || message.Content == "" {
+	if message == nil || message.ID == "" || (message.Content == "" && len(message.Attachments) == 0) {
 		s.ChannelMessageSend(m.ChannelID, "No message found!")
 		return
 	}
@@ -180,7 +217,11 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
 	tools.ErrRead(err)
 
-	s.ChannelMessageSend(m.ChannelID, "Quote: `"+message.Content+"` added for **"+message.Author.Username+"**!")
+	if message.Content != "" {
+		s.ChannelMessageSend(m.ChannelID, "Quote: `"+message.Content+"` added for **"+message.Author.Username+"**!")
+	} else if len(message.Attachments) != 0 {
+		s.ChannelMessageSend(m.ChannelID, "Image / video quote added for **"+message.Author.Username+"**!")
+	}
 	return
 }
 
@@ -297,7 +338,7 @@ func Quotes(s *discordgo.Session, m *discordgo.MessageCreate) {
 			Inline: true,
 		})
 		if len(embed.Fields) == 25 {
-			if len(userQuotes) > 25  {
+			if len(userQuotes) > 25 {
 				embed.Footer = &discordgo.MessageEmbedFooter{
 					Text: "Page 1",
 				}
