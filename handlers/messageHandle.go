@@ -213,6 +213,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Kanye(s, m)
 		case serverPrefix + "l", serverPrefix + "leven", serverPrefix + "levenshtein":
 			go gencommands.Levenshtein(s, m)
+		case serverPrefix + "meme":
+			go gencommands.Meme(s, m)
 		case serverPrefix + "noun", serverPrefix + "nouns":
 			go gencommands.Nouns(s, m)
 		case serverPrefix + "ocr":
@@ -306,6 +308,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if len(m.Mentions) > 0 {
 		for _, mention := range m.Mentions {
 			if mention.ID == s.State.User.ID {
+				roll, _ := rand.Int(rand.Reader, big.NewInt(100))
+				number := roll.Int64()
+				if number % 11 == 0 {
+					s.ChannelMessageSend(m.ChannelID, "lol dude i bet u havent even watched the Maquia movie stop pinging me .")
+					break
+				}
 				s.ChannelMessageSend(m.ChannelID, "what do u want dude lol")
 				break
 			}

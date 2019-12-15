@@ -52,6 +52,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`info`, " +
 					"`kanye`, " +
 					"`(l|leven|levenshtein)`, " +
+					"`meme`, " +
 					"`(noun|nouns)`, " +
 					"`ocr`, " +
 					"`(p|per|percent|percentage)`, " +
@@ -149,6 +150,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Kanye(embed)
 		case "l", "leven", "levenshtein":
 			embed = helpcommands.Levenshtein(embed)
+		case "meme":
+			embed = helpcommands.Meme(embed)
 		case "noun", "nouns":
 			embed = helpcommands.Nouns(embed)
 		case "ocr":

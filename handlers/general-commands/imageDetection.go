@@ -167,9 +167,6 @@ func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
 // Face lets you detect faces
 func Face(s *discordgo.Session, m *discordgo.MessageCreate) {
 	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
-	// saturationRegex, _ := regexp.Compile(`-s\s+(-?\d+)`)
-	// contrastRegex, _ := regexp.Compile(`-c\s+(-?\d+)`)
-	// langRegex, _ := regexp.Compile(`-l\s+(\S+)`)
 
 	var url string
 	if len(m.Attachments) > 0 {

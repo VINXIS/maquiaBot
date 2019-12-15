@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"image"
+	"image/color"
 	"image/png"
 	"math"
 	"math/big"
@@ -77,7 +78,7 @@ func Vibe(s *discordgo.Session, m *discordgo.MessageCreate, checkType string) {
 	if int(roll.Int64())+1 >= Requirement {
 		response, _ := http.Get("https://cdn.discordapp.com/attachments/617108584748154880/644570138770669578/vibe-checked.png")
 		img, _, _ := image.Decode(response.Body)
-		tools.AddLabel(img, 50, 96, target.Username)
+		tools.AddLabel(img, 50, 96, target.Username, "Roboto-Regular", 14, color.Black)
 		imgBytes := new(bytes.Buffer)
 		_ = png.Encode(imgBytes, img)
 		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
