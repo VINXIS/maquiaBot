@@ -88,11 +88,19 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 			if len(quote.Content) > 1024 {
 				quote.Content = quote.Content[:1024]
 			}
-			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-				Name:   quote.ID + " - " + quote.Author.Username,
-				Value:  quote.Content,
-				Inline: true,
-			})
+			if quote.Content != "" {
+				embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+					Name:   quote.ID + " - " + quote.Author.Username,
+					Value:  quote.Content,
+					Inline: true,
+				})
+			} else {
+				embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+					Name:   quote.ID + " - " + quote.Author.Username,
+					Value:  "**IMAGE/VIDEO QUOTE**",
+					Inline: true,
+				})
+			}
 			if len(embed.Fields) == 25 {
 				break
 			}
