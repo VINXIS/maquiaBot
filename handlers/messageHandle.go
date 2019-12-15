@@ -271,6 +271,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go osucommands.TrackMapper(s, m, osuAPI, mapperData)
 		case serverPrefix + "mti", serverPrefix + "mtinfo", serverPrefix + "mtrackinfo", serverPrefix + "maptracking", serverPrefix + "mappertracking", serverPrefix + "mappertrackinfo":
 			go osucommands.TrackMapperInfo(s, m, mapperData)
+		case serverPrefix + "osutop", serverPrefix + "osudetail":
+			go osucommands.ProfileMessage(s, m, profileRegex, osuAPI, profileCache)
 		case serverPrefix + "ppadd":
 			go osucommands.PPAdd(s, m, osuAPI, profileCache)
 		case serverPrefix + "profile":
