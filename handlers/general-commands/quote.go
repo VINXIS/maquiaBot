@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"math/big"
+	"net/http"
 	"regexp"
 	"sort"
 	"strings"
@@ -18,6 +19,7 @@ import (
 func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 	quoteRegex, _ := regexp.Compile(`q(uote)?\s+(.+)`)
 	linkRegex, _ := regexp.Compile(`https?:\/\/\S+`)
+	extensionRegex, _ := regexp.Compile(`\.(\S{3,4})`)
 
 	// Get server
 	server, err := s.Guild(m.GuildID)
@@ -87,39 +89,37 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 			Text: timestampString,
 		},
 	}
+	link := ""
+	name := ""
 	if len(quote.Attachments) != 0 {
-		if strings.HasSuffix(quote.Attachments[0].URL, "png") || strings.HasSuffix(quote.Attachments[0].URL, "jpg") || strings.HasSuffix(quote.Attachments[0].URL, "gif") {
-			embed.Image = &discordgo.MessageEmbedImage{
-				URL: quote.Attachments[0].URL,
-			}
-		} else if strings.HasSuffix(quote.Attachments[0].URL, "mp4") || strings.HasSuffix(quote.Attachments[0].URL, "flv") || strings.HasSuffix(quote.Attachments[0].URL, "avi") {
-			embed.Video = &discordgo.MessageEmbedVideo{
-				URL: quote.Attachments[0].URL,
-			}
-		} else {
-			embed.Image = &discordgo.MessageEmbedImage{
-				URL: quote.Attachments[0].URL,
-			}
-			embed.Video = &discordgo.MessageEmbedVideo{
-				URL: quote.Attachments[0].URL,
-			}
+		if !(strings.HasSuffix(quote.Attachments[0].URL, "png") || strings.HasSuffix(quote.Attachments[0].URL, "jpg") || strings.HasSuffix(quote.Attachments[0].URL, "gif")) {
+			link = quote.Attachments[0].URL
+			name = quote.Attachments[0].Filename
+		}
+		embed.Image = &discordgo.MessageEmbedImage{
+			URL: quote.Attachments[0].URL,
 		}
 	} else if linkRegex.MatchString(quote.Content) {
-		if strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "png") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "jpg") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "gif") {
-			embed.Image = &discordgo.MessageEmbedImage{
-				URL: linkRegex.FindStringSubmatch(quote.Content)[0],
-			}
-		} else if strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "mp4") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "flv") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "avi") {
-			embed.Video = &discordgo.MessageEmbedVideo{
-				URL: linkRegex.FindStringSubmatch(quote.Content)[0],
-			}
-		} else {
-			embed.Image = &discordgo.MessageEmbedImage{
-				URL: linkRegex.FindStringSubmatch(quote.Content)[0],
-			}
-			embed.Video = &discordgo.MessageEmbedVideo{
-				URL: linkRegex.FindStringSubmatch(quote.Content)[0],
-			}
+		if !(strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "png") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "jpg") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "gif")) {
+			link = linkRegex.FindStringSubmatch(quote.Content)[0]
+			res := extensionRegex.FindAllStringSubmatch(quote.Content, -1)
+			name = "video." + res[len(res)-1][0]
+		}
+		embed.Image = &discordgo.MessageEmbedImage{
+			URL: linkRegex.FindStringSubmatch(quote.Content)[0],
+		}
+	}
+	if link != "" {
+		response, err := http.Get(link)
+		if err == nil {
+			s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+				Embed: embed,
+				File: &discordgo.File{
+					Name:   name,
+					Reader: response.Body,
+				},
+			})
+			return
 		}
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
