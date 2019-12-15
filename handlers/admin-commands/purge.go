@@ -119,10 +119,21 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			i += 100
 		}
+	} else {
+		err = s.ChannelMessagesBulkDelete(m.ChannelID, messageIDs)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "Could not delete messages! Please make sure I have the proper permissions!")
+			return
+		}
 	}
 
 	// Send confirmation message and then delete it after
-	msg, err := s.ChannelMessageSend(m.ChannelID, "Removed the latest "+strconv.Itoa(num-1)+" messages from the following people: "+userText)
+	msg := &discordgo.Message{}
+	if len(usernames) != 0 {
+		msg, err = s.ChannelMessageSend(m.ChannelID, "Removed the latest "+strconv.Itoa(num-1)+" messages from the following people: "+userText)
+	} else {
+		msg, err = s.ChannelMessageSend(m.ChannelID, "Removed the latest "+strconv.Itoa(num-1)+" messages.")
+	}
 	if err != nil {
 		return
 	}
