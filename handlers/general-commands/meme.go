@@ -76,7 +76,12 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Fetch the image data
+	msg, err := s.ChannelMessageSend(m.ChannelID, "Generating meme...")
+	if err != nil {
+		return
+	}
 	response, err := http.Get("http://memegen.link/custom/" + topText + "/" + bottomText + ".jpg?alt=" + url + "&watermark=none")
+	s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Could not reach URL.")
 		return

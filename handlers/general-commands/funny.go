@@ -43,10 +43,16 @@ func Funny(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
+	msg, err := s.ChannelMessageSend(m.ChannelID, "Obtaining funny value...")
+	if err != nil {
+		return
+	}
+
 	guild, err := s.Guild(m.GuildID)
 	if err != nil {
 		messages, err := s.ChannelMessages(m.ChannelID, 100, "", "", "")
 		if err != nil {
+			s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 			s.ChannelMessageSend(m.ChannelID, "Error fetching messages.")
 			return
 		}
@@ -106,5 +112,6 @@ func Funny(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	percentile := 100 * 0.5 * math.Erfc((average-float64(totalFunny))/(math.Sqrt(2.0)*stddev))
 
-	s.ChannelMessageSend(m.ChannelID, username+" funny value is "+strconv.FormatFloat(totalFunny, 'f', 2, 64)+" which is approximately funnier than "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of people on discord.")
+	s.ChannelMessageDelete(msg.ChannelID, msg.ID)
+	s.ChannelMessageSend(m.ChannelID, username+" funny value is "+strconv.FormatFloat(totalFunny, 'f', 2, 64)+" which is approximately funnier than "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of people on discord. "+m.Author.Mention())
 }

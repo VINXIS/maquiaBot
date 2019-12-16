@@ -60,6 +60,10 @@ func BPM(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 	}
 
 	// Obtain average and stddev
+	msg, err := s.ChannelMessageSend(m.ChannelID, "Obtaining funny value...")
+	if err != nil {
+		return
+	}
 	var averageBPM float64
 	var mapBPMs []float64
 	for _, score := range orderedScores {
@@ -91,5 +95,6 @@ func BPM(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 
 	todayBPM := math.Min(math.Max(50, random.NormFloat64()*stddevBPM+averageBPM), 400)
 
+	s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 	s.ChannelMessageSend(m.ChannelID, "BPM of the day for **"+username+":** "+strconv.FormatFloat(todayBPM, 'f', 0, 64)+"\nAverage BPM from tops: "+strconv.FormatFloat(averageBPM, 'f', 0, 64)+"\nStdDev BPM from tops: "+strconv.FormatFloat(stddevBPM, 'f', 0, 64))
 }

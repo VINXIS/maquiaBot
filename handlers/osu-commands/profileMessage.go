@@ -111,7 +111,8 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		Color: osutools.ModeColour(mode),
 	}
 
-	// Get tops if asked
+	// Get tops / details if asked
+	totalHits := user.Count50 + user.Count100 + user.Count300
 	g, _ := s.Guild("556243477084635170")
 	if profileCmd3Regex.MatchString(m.Content) {
 		// Get the user's best scores
@@ -163,13 +164,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		}
 		embed.Description += "**Top plays:**" + "\n" + `\_\_\_\_\_\_\_\_\_\_`
 		embed.Fields = mapList
-	} else if profileCmd4Regex.MatchString(m.Content) {
-		totalHits := user.Count50 + user.Count100 + user.Count300
-		if totalHits == 0 {
-			s.ChannelMessageSendEmbed(m.ChannelID, embed)
-			return
-		}
-
+	} else if profileCmd4Regex.MatchString(m.Content) && totalHits != 0 {
 		// Get the user's recent scores
 		userRecent, err := osuAPI.GetUserRecent(osuapi.GetUserScoresOpts{
 			UserID: user.UserID,
