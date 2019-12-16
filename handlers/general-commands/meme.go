@@ -1,16 +1,11 @@
 package gencommands
 
 import (
-	"bytes"
-	"image"
-	"image/png"
-	"math"
 	"net/http"
 	"regexp"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/fogleman/gg"
 )
 
 // Meme lets you create a meme
@@ -29,14 +24,33 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if topText == "" && bottomText == "" {
 		s.ChannelMessageSend(m.ChannelID, "Please give text to add onto the image!")
 		return
+	} else if topText != "" && bottomText == "" {
+		words := strings.Split(topText, " ")
+		if len(words) > 1 {
+			topText = strings.Join(words[:len(words)/2], " ")
+			bottomText = strings.Join(words[len(words)/2:], " ")
+		}
+	}
+	if topText == "" {
+		topText = "%20"
 	}
 
-	if len(m.Attachments) > 0 {
+	if linkRegex.MatchString(m.Content) {
+		url = linkRegex.FindStringSubmatch(m.Content)[0]
+		topText = strings.Replace(topText, url, "", -1)
+		bottomText = strings.Replace(bottomText, url, "", -1)
+	} else if len(m.Attachments) > 0 {
 		url = m.Attachments[0].URL
 	} else if len(m.Embeds) > 0 && m.Embeds[0].Image != nil {
 		url = m.Embeds[0].Image.URL
-	} else if url == "" {
-		// Get prev messages
+	} else if len(m.Mentions) > 0 {
+		url = m.Mentions[0].AvatarURL("")
+		topText = strings.Replace(topText, m.Mentions[0].Mention(), "", -1)
+		bottomText = strings.Replace(bottomText, m.Mentions[0].Mention(), "", -1)
+	}
+
+	// Look at prev messages if no url is given
+	if url == "" {
 		messages, err := s.ChannelMessages(m.ChannelID, 100, "", "", "")
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Error fetching messages.")
@@ -62,64 +76,19 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Fetch the image data
-	response, err := http.Get(url)
+	response, err := http.Get("http://memegen.link/custom/" + topText + "/" + bottomText + ".jpg?alt=" + url + "&watermark=none")
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Could not reach URL.")
 		return
 	}
-	img, _, err := image.Decode(response.Body)
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "Could not parse any image from data given.")
-		return
-	}
-	r := img.Bounds()
-	w := float64(r.Dx())
-	h := float64(r.Dy())
-	size := math.Min(40, float64(h)/10)
-
-	cxt := gg.NewContext(r.Dx(), r.Dy())
-	cxt.DrawImage(img, 0, 0)
-	cxt.LoadFontFace("./data/fonts/impact.ttf", size)
-
-	// Apply black stroke
-	cxt.SetHexColor("#000")
-	strokeSize := math.Min(3, float64(h)*3/200)
-	for dy := -strokeSize; dy <= strokeSize; dy++ {
-		for dx := -strokeSize; dx <= strokeSize; dx++ {
-			// give it rounded corners
-			if dx*dx+dy*dy >= strokeSize*strokeSize {
-				continue
-			}
-			x := float64(w/2 + dx)
-			y := size + float64(dy)
-			cxt.DrawStringAnchored(strings.ToUpper(topText), x, y, 0.5, 0.5)
-		}
-	}
-	for dy := -strokeSize; dy <= strokeSize; dy++ {
-		for dx := -strokeSize; dx <= strokeSize; dx++ {
-			// give it rounded corners
-			if dx*dx+dy*dy >= strokeSize*strokeSize {
-				continue
-			}
-			x := w/2 + dx
-			y := float64(h) - size + dy
-			cxt.DrawStringAnchored(strings.ToUpper(bottomText), x, y, 0.5, 0.5)
-		}
-	}
-
-	// Apply white fill
-	cxt.SetHexColor("#FFF")
-	cxt.DrawStringAnchored(strings.ToUpper(topText), float64(w)/2, size, 0.5, 0.5)
-	cxt.DrawStringAnchored(strings.ToUpper(bottomText), float64(w)/2, float64(h)-size, 0.5, 0.5)
-
-	imgBytes := new(bytes.Buffer)
-	_ = png.Encode(imgBytes, cxt.Image())
 	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 		Files: []*discordgo.File{
 			&discordgo.File{
 				Name:   "image.png",
-				Reader: imgBytes,
+				Reader: response.Body,
 			},
 		},
 	})
+	response.Body.Close()
+	return
 }
