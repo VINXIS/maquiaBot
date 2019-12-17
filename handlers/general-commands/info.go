@@ -287,6 +287,8 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Toggle Information
 	toggleInfo := "Crab: " + strconv.FormatBool(serverData.Crab) + "\n" +
+		"Cheers: " + strconv.FormatBool(serverData.Cheers) + "\n" +
+		"Late: " + strconv.FormatBool(serverData.Late) + "\n" +
 		"Nice Idea: " + strconv.FormatBool(serverData.NiceIdea) + "\n" +
 		"osu!: " + strconv.FormatBool(serverData.OsuToggle) + "\n" +
 		"Vibe Check: " + strconv.FormatBool(serverData.Vibe) + "\n" +
