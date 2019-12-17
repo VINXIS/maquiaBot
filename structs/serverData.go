@@ -13,6 +13,7 @@ type ServerData struct {
 	Server           discordgo.Guild
 	Prefix           string
 	Crab             bool
+	Cheers           bool
 	Late             bool
 	NiceIdea         bool
 	OsuToggle        bool
@@ -31,6 +32,7 @@ func NewServer(server discordgo.Guild) ServerData {
 		Prefix:    "$",
 		OsuToggle: true,
 		Crab:      true,
+		Cheers:    true,
 		Late:      true,
 		NiceIdea:  true,
 		Announce:  true,

@@ -15,7 +15,7 @@ import (
 func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string) {
 	embed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			URL:     "https://discordapp.com/oauth2/authorize?&client_id=551667572723023893&scope=bot&permissions=0",
+			URL:     "https://discordapp.com/oauth2/authorize?&client_id=" + s.State.User.ID + "&scope=bot&permissions=0",
 			Name:    "Click here to invite MaquiaBot!",
 			IconURL: s.State.User.AvatarURL("2048"),
 		},
@@ -27,6 +27,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 				Name: "Admin commands:",
 				Value: "`(at|announcet|atoggle|announcetoggle)`, " +
 					"`(ct|crabt|ctoggle|crabtoggle)`, " +
+					"`(cht|cheerst|chtoggle|cheerstoggle)`, " +
 					"`(it|ideat|itoggle|ideatoggle)`, " +
 					"`(ot|osut|otoggle|osutoggle)`, " +
 					"`(prefix|maquiaprefix|newprefix)`, " +
@@ -42,13 +43,14 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(a|ava|avatar)`, " +
 					"`(cc|cp|comparec|comparep|comparecock|comparepenis)`, " +
 					"`(ch|choose)`, " +
+					"`cheers`, " +
 					"`crab`, " +
 					"`decrypt`, " +
 					"`(e|emoji|emote)`, " +
 					"`encrypt`, " +
 					"`face`, " +
 					"`funny`, " +
-					"`(idea|niceidea)`, " + 
+					"`(idea|niceidea)`, " +
 					"`info`, " +
 					"`kanye`, " +
 					"`(l|leven|levenshtein)`, " +
@@ -105,6 +107,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.AnnounceToggle(embed)
 		case "ct", "crabt", "ctoggle", "crabtoggle":
 			embed = helpcommands.CrabToggle(embed)
+		case "cht", "cheerst", "chtoggle", "cheerstoggle":
+			embed = helpcommands.CheersToggle(embed)
 		case "it", "ideat", "itoggle", "ideatoggle":
 			embed = helpcommands.NiceIdeaToggle(embed)
 		case "lt", "latet", "ltoggle", "latetoggle":
@@ -133,6 +137,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.PenisCompare(embed)
 		case "ch", "choose":
 			embed = helpcommands.Choose(embed)
+		case "cheers":
+			embed = helpcommands.Cheers(embed)
 		case "crab":
 			embed = helpcommands.Crab(embed)
 		case "decrypt":

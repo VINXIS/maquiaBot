@@ -17,6 +17,7 @@ type Config struct {
 	DiscordToken string
 	OsuToken     string
 	Crab         string
+	Cheers       string
 	Late         string
 }
 

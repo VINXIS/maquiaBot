@@ -77,9 +77,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// LATE
-	if serverData.Crab && (strings.Contains(m.Content, "late") || strings.Contains(m.Content, "old") || strings.Contains(m.Content, "ancient")) && !strings.HasPrefix(m.Content, serverPrefix+"late") {
+	if serverData.Late && (strings.Contains(m.Content, "late") || strings.Contains(m.Content, "old") || strings.Contains(m.Content, "ancient")) && !strings.HasPrefix(m.Content, serverPrefix+"late") {
 		go gencommands.Late(s, m)
 		go tools.CommandLog(s, m, "late")
+	}
+
+	// CHEERS
+	if serverData.Cheers && (strings.Contains(m.Content, "🍻") || strings.Contains(m.Content, "🍺") || strings.Contains(m.Content, "🦐") || strings.Contains(m.Content, "cheer")) && !strings.HasPrefix(m.Content, serverPrefix+"cheers") {
+		go gencommands.Cheers(s, m)
+		go tools.CommandLog(s, m, "cheers")
 	}
 
 	// Generate regexes for message parsing
@@ -165,6 +171,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go admincommands.AnnounceToggle(s, m)
 		case serverPrefix + "ct", serverPrefix + "crabt", serverPrefix + "ctoggle", serverPrefix + "crabtoggle":
 			go admincommands.CrabToggle(s, m)
+		case serverPrefix + "cht", serverPrefix + "cheerst", serverPrefix + "chtoggle", serverPrefix + "cheerstoggle":
+			go admincommands.CheersToggle(s, m)
 		case serverPrefix + "it", serverPrefix + "ideat", serverPrefix + "itoggle", serverPrefix + "ideatoggle":
 			go admincommands.NiceIdeaToggle(s, m)
 		case serverPrefix + "lt", serverPrefix + "latet", serverPrefix + "ltoggle", serverPrefix + "latetoggle":
@@ -193,6 +201,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.PenisCompare(s, m)
 		case serverPrefix + "ch", serverPrefix + "choose":
 			go gencommands.Choose(s, m)
+		case serverPrefix + "cheers":
+			go gencommands.Cheers(s, m)
 		case serverPrefix + "crab":
 			go gencommands.Crab(s, m)
 		case serverPrefix + "decrypt":
