@@ -16,7 +16,7 @@ import (
 )
 
 // Track executes the track command, used for when people want to track/untrack users/pp/etc
-func Track(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, mapCache []structs.MapData) {
+func Track(s *discordgo.Session, m *discordgo.MessageCreate, mapCache []structs.MapData) {
 	channel, err := s.Channel(m.ChannelID)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "This is not an allowed channel!")
@@ -143,7 +143,7 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clie
 		channelData.RemoveUser(users)
 	} else {
 		for _, user := range users {
-			osuUser, err := osuAPI.GetUser(osuapi.GetUserOpts{
+			osuUser, err := osucommands.OsuAPI.GetUser(osuapi.GetUserOpts{
 				Username: user,
 				Mode:     channelData.Mode,
 			})

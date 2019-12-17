@@ -6,14 +6,15 @@ import (
 	"regexp"
 	"strconv"
 
+	config "../../config"
 	osutools "../../osu-functions"
 	"github.com/bwmarrin/discordgo"
 )
 
 // Update updates osu-tools
 func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID != "92502458588205056" {
-		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT VINXIS.........")
+	if m.Author.ID != config.Conf.BotHoster.UserID {
+		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
 		return
 	}
 
@@ -43,8 +44,8 @@ func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // UpdateStatus updates the bot discord status
 func UpdateStatus(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID != "92502458588205056" {
-		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT VINXIS.........")
+	if m.Author.ID != config.Conf.BotHoster.UserID {
+		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
 		return
 	}
 	updateRegex, _ := regexp.Compile(`updatestatus\s+(.+)`)

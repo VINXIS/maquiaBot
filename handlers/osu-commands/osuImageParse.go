@@ -26,7 +26,7 @@ import (
 )
 
 // OsuImageParse detects for an osu image
-func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp, osuAPI *osuapi.Client, cache []structs.MapData) {
+func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp, cache []structs.MapData) {
 
 	// Create regexps for checks
 	mapperRegex, _ := regexp.Compile(`(?i)b?e?a?t?mapp?e?d? by (\S*)`)
@@ -134,7 +134,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		return
 	}
 	var beatmap osuapi.Beatmap
-	beatmaps, err := osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
+	beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 		Username: mapperName,
 	})
 	if err != nil {
@@ -170,7 +170,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	}
 
 	// Run it again in case no map with the diff name was found due to possible image parsing errors
-	if beatmap == (osuapi.Beatmap{}) {
+	if beatmap.BeatmapID == 0 {
 		warning = "**WARNING** Diff name could not be found. Showing information for top diff."
 		for _, b := range beatmaps {
 			if b.Title == title {
@@ -178,18 +178,18 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 				break
 			}
 		}
-	}
-
-	// Check if anything was actually found
-	if beatmap == (osuapi.Beatmap{}) || len(beatmaps) == 0 {
-		if diagnosisRegex.MatchString(m.Message.Content) {
-			s.ChannelMessageEdit(message.ChannelID, message.ID, "No luck... the mapper line I parsed was ** "+mapperName+" ** and the title line I parsed was ** "+title+" **")
-		} else {
-			s.ChannelMessageDelete(message.ChannelID, message.ID)
+		
+		// Check if anything was actually found
+		if beatmap.BeatmapID == 0 || len(beatmaps) == 0 {
+			if diagnosisRegex.MatchString(m.Message.Content) {
+				s.ChannelMessageEdit(message.ChannelID, message.ID, "No luck... the mapper line I parsed was ** "+mapperName+" ** and the title line I parsed was ** "+title+" **")
+			} else {
+				s.ChannelMessageDelete(message.ChannelID, message.ID)
+			}
+			tools.DeleteFile("./" + name + ".png")
+			tools.DeleteFile("./" + name + ".txt")
+			return
 		}
-		tools.DeleteFile("./" + name + ".png")
-		tools.DeleteFile("./" + name + ".txt")
-		return
 	}
 
 	// Download the .osu file for the map
@@ -208,7 +208,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	Color := osutools.ModeColour(beatmap.Mode)
 
 	// Obtain whole set
-	beatmaps, err = osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
+	beatmaps, err = OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 		BeatmapSetID: beatmap.BeatmapSetID,
 	})
 	if err != nil {

@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 	"math"
 	"math/rand"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
+	config "../config"
 	osuapi "../osu-api"
 	structs "../structs"
 	tools "../tools"
@@ -20,7 +20,6 @@ import (
 
 // TrackPost posts scores for users tracked for that channel
 func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []structs.MapData) {
-	osuAPI := osuapi.NewClient(os.Getenv("OSU_API"))
 
 	startTime := time.Now()
 
@@ -37,7 +36,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 			}
 
 			for l, user := range ch.Users {
-				recentScores, err := osuAPI.GetUserRecent(osuapi.GetUserScoresOpts{
+				recentScores, err := OsuAPI.GetUserRecent(osuapi.GetUserScoresOpts{
 					UserID: user.UserID,
 					Limit:  100,
 				})
@@ -56,7 +55,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 						}
 
 						// Save beatmap
-						beatmap := BeatmapParse(strconv.Itoa(score.BeatmapID), "map", score.Mods, osuAPI)
+						beatmap := BeatmapParse(strconv.Itoa(score.BeatmapID), "map", score.Mods)
 
 						// Assign timing variables for values below
 						totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
@@ -102,7 +101,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 						mapCompletion := ""
 						topNum := 101
 						leaderboardNum := 101
-						orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+						orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 							Username: user.Username,
 							Limit:    100,
 						})
@@ -114,7 +113,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 								break
 							}
 						}
-						mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
+						mapScores, err := OsuAPI.GetScores(osuapi.GetScoresOpts{
 							BeatmapID: beatmap.BeatmapID,
 							Limit:     100,
 						})
@@ -195,7 +194,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 							acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 							hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 
-							g, err := s.Guild("556243477084635170")
+							g, _ := s.Guild(config.Conf.Server)
 							tools.ErrRead(err)
 							scoreRank := ""
 							for _, emoji := range g.Emojis {
@@ -227,7 +226,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 								},
 							}
 
-							recentUser, err := osuAPI.GetUser(osuapi.GetUserOpts{
+							recentUser, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 								UserID: user.UserID,
 							})
 							tools.ErrRead(err)

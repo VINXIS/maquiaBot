@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	config "../../config"
 	osuapi "../../osu-api"
 	osutools "../../osu-functions"
 	structs "../../structs"
@@ -19,7 +20,7 @@ import (
 )
 
 // ReplayMessage posts replay information fopr a given replay
-func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp, osuAPI *osuapi.Client, mapCache []structs.MapData) {
+func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp, mapCache []structs.MapData) {
 	// Get URL
 	url := ""
 	if len(m.Attachments) > 0 {
@@ -50,9 +51,9 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	replay := structs.ReplayData{
 		Data: replayInfo,
 	}
-	replay.ParseReplay(osuAPI)
+	replay.ParseReplay(OsuAPI)
 	if replay.Beatmap.BeatmapID != 0 {
-		osutools.BeatmapParse(strconv.Itoa(replay.Beatmap.BeatmapID), "map", replay.Score.Mods, osuAPI)
+		osutools.BeatmapParse(strconv.Itoa(replay.Beatmap.BeatmapID), "map", replay.Score.Mods)
 	}
 
 	// Get time since play
@@ -105,7 +106,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	mapCompletion := ""
 	scoreRank := replay.Score.Rank
 	if replay.Beatmap.Approved > 0 {
-		orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+		orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 			Username: replay.Player.Username,
 			Limit:    100,
 		})
@@ -118,7 +119,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 				}
 			}
 		}
-		mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
+		mapScores, err := OsuAPI.GetScores(osuapi.GetScoresOpts{
 			BeatmapID: replay.Beatmap.BeatmapID,
 			Limit:     100,
 		})
@@ -133,7 +134,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		}
 	}
 
-	g, err := s.Guild("556243477084635170")
+	g, _ := s.Guild(config.Conf.Server)
 		tools.ErrRead(err)
 		for _, emoji := range g.Emojis {
 			if emoji.Name == replay.Score.Rank+"_" {

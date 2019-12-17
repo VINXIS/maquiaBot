@@ -1,0 +1,14 @@
+{
+    "BotHoster": {
+        "Username": "",
+        "UserID": ""
+    },
+    "Database": {
+        "Username": "",
+        "Password": "",
+        "Name": ""
+    },
+    "Server": "",
+    "DiscordToken": "",
+    "OsuToken": ""
+}

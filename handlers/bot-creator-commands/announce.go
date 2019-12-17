@@ -3,14 +3,15 @@ package botcreatorcommands
 import (
 	"regexp"
 
+	config "../../config"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
 )
 
 // Announce announces new stuff
 func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID != "92502458588205056" {
-		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT VINXIS.........")
+	if m.Author.ID != config.Conf.BotHoster.UserID {
+		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
 		return
 	}
 

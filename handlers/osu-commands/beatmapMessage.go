@@ -16,7 +16,7 @@ import (
 )
 
 // BeatmapMessage is a handler executed when a message contains a beatmap link
-func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp, osuAPI *osuapi.Client, cache []structs.MapData) {
+func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp, cache []structs.MapData) {
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	submatches := regex.FindStringSubmatch(m.Content)
 
@@ -39,16 +39,16 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	// Check if the format uses a /b/, /s/, /beatmaps/, or /beatmapsets/ link
 	switch submatches[2] {
 	case "s":
-		beatmap = osutools.BeatmapParse(submatches[3], "set", osuapi.ParseMods(mods), osuAPI)
+		beatmap = osutools.BeatmapParse(submatches[3], "set", osuapi.ParseMods(mods))
 	case "b":
-		beatmap = osutools.BeatmapParse(submatches[3], "map", osuapi.ParseMods(mods), osuAPI)
+		beatmap = osutools.BeatmapParse(submatches[3], "map", osuapi.ParseMods(mods))
 	case "beatmaps":
-		beatmap = osutools.BeatmapParse(submatches[3], "map", osuapi.ParseMods(mods), osuAPI)
+		beatmap = osutools.BeatmapParse(submatches[3], "map", osuapi.ParseMods(mods))
 	case "beatmapsets":
 		if len(submatches[6]) > 0 {
-			beatmap = osutools.BeatmapParse(submatches[6], "map", osuapi.ParseMods(mods), osuAPI)
+			beatmap = osutools.BeatmapParse(submatches[6], "map", osuapi.ParseMods(mods))
 		} else {
-			beatmap = osutools.BeatmapParse(submatches[3], "set", osuapi.ParseMods(mods), osuAPI)
+			beatmap = osutools.BeatmapParse(submatches[3], "set", osuapi.ParseMods(mods))
 		}
 	}
 
@@ -62,7 +62,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	Color := osutools.ModeColour(beatmap.Mode)
 
 	// Obtain whole set
-	beatmaps, err := osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
+	beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 		BeatmapSetID: beatmap.BeatmapSetID,
 	})
 	if err != nil {

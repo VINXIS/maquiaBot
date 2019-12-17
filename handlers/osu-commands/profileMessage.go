@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	config "../../config"
 	osuapi "../../osu-api"
 	osutools "../../osu-functions"
 	structs "../../structs"
@@ -15,7 +16,7 @@ import (
 )
 
 // ProfileMessage gets the information for the specified profile linked
-func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileRegex *regexp.Regexp, osuAPI *osuapi.Client, cache []structs.PlayerData) {
+func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileRegex *regexp.Regexp, cache []structs.PlayerData) {
 	profileCmd1Regex, _ := regexp.Compile(`osu(top|detail)?\s+(.+)`)
 	profileCmd2Regex, _ := regexp.Compile(`profile\s+(.+)`)
 	profileCmd3Regex, _ := regexp.Compile(`osutop`)
@@ -65,7 +66,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 
 	// Get user
 	if err != nil {
-		user, err = osuAPI.GetUser(osuapi.GetUserOpts{
+		user, err = OsuAPI.GetUser(osuapi.GetUserOpts{
 			Username: value,
 			Mode:     mode,
 		})
@@ -76,12 +77,12 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			return
 		}
 	} else {
-		user, err = osuAPI.GetUser(osuapi.GetUserOpts{
+		user, err = OsuAPI.GetUser(osuapi.GetUserOpts{
 			UserID: id,
 			Mode:   mode,
 		})
 		if err != nil {
-			user, err = osuAPI.GetUser(osuapi.GetUserOpts{
+			user, err = OsuAPI.GetUser(osuapi.GetUserOpts{
 				Username: value,
 				Mode:     mode,
 			})
@@ -113,10 +114,10 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 
 	// Get tops / details if asked
 	totalHits := user.Count50 + user.Count100 + user.Count300
-	g, _ := s.Guild("556243477084635170")
+	g, _ := s.Guild(config.Conf.Server)
 	if profileCmd3Regex.MatchString(m.Content) {
 		// Get the user's best scores
-		userBest, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+		userBest, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 			UserID: user.UserID,
 			Mode:   mode,
 		})
@@ -129,7 +130,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		for i := 0; i < 5; i++ {
 			score := userBest[i]
 
-			beatmaps, err := osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
+			beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 				BeatmapID: score.BeatmapID,
 			})
 			if err != nil {
@@ -166,7 +167,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		embed.Fields = mapList
 	} else if profileCmd4Regex.MatchString(m.Content) && totalHits != 0 {
 		// Get the user's recent scores
-		userRecent, err := osuAPI.GetUserRecent(osuapi.GetUserScoresOpts{
+		userRecent, err := OsuAPI.GetUserRecent(osuapi.GetUserScoresOpts{
 			UserID: user.UserID,
 			Mode:   mode,
 		})

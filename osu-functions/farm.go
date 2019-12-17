@@ -6,11 +6,9 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
-	osuapi "../osu-api"
 	structs "../structs"
 	tools "../tools"
 )
@@ -87,8 +85,6 @@ func UpdateFarmSystem() {
 	err = ioutil.WriteFile("./data/osuData/mapFarm.json", jsonCache, 0644)
 	tools.ErrRead(err)
 
-	osuAPI := osuapi.NewClient(os.Getenv("OSU_API"))
-
 	// Obtain profile cache data
 	profileCache := []structs.PlayerData{}
 	f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
@@ -99,7 +95,7 @@ func UpdateFarmSystem() {
 
 	for i, player := range profileCache {
 		if player.Osu.Username != "" {
-			player.FarmCalc(osuAPI, farmData)
+			player.FarmCalc(OsuAPI, farmData)
 			profileCache[i] = player
 			fmt.Println("Updated player #" + strconv.Itoa(i+1) + ": " + player.Osu.Username + " Farm Rating " + fmt.Sprint(player.Farm.Rating))
 		}

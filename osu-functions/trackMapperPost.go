@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"math"
 	"math/rand"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +18,6 @@ import (
 
 // TrackMapperPost tracks mappers and posts their new maps into the channels
 func TrackMapperPost(s *discordgo.Session) {
-	osuAPI := osuapi.NewClient(os.Getenv("OSU_API"))
 	startTime := time.Now()
 	ticker := time.NewTicker(10 * time.Second)
 	for {
@@ -32,7 +30,7 @@ func TrackMapperPost(s *discordgo.Session) {
 			_ = json.Unmarshal(f, &mapperData)
 
 			for i := 0; i < len(mapperData); i++ {
-				user, err := osuAPI.GetUser(osuapi.GetUserOpts{
+				user, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 					UserID: mapperData[i].Mapper.UserID,
 				})
 				if err != nil {
@@ -40,7 +38,7 @@ func TrackMapperPost(s *discordgo.Session) {
 					i--
 					continue
 				}
-				beatmaps, err := osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
+				beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 					UserID: user.UserID,
 				})
 
@@ -54,7 +52,7 @@ func TrackMapperPost(s *discordgo.Session) {
 					setsChecked[beatmap.BeatmapSetID] = true
 
 					// see if set satisfies approvalstatus change/submission requirements
-					osuMap := BeatmapParse(strconv.Itoa(beatmap.BeatmapSetID), "set", osuapi.ParseMods("NM"), osuAPI)
+					osuMap := BeatmapParse(strconv.Itoa(beatmap.BeatmapSetID), "set", osuapi.ParseMods("NM"))
 					var targetMap osuapi.Beatmap
 					var approvals []osuapi.ApprovedStatus // Store all approvedstatuses because sometimes the osu!api gives sets with multiple approved status
 					for _, dataMap := range mapperData[i].Beatmaps {
@@ -78,7 +76,7 @@ func TrackMapperPost(s *discordgo.Session) {
 					Color := ModeColour(osuMap.Mode)
 
 					// Obtain whole set
-					set, _ := osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
+					set, _ := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 						BeatmapSetID: osuMap.BeatmapSetID,
 					})
 

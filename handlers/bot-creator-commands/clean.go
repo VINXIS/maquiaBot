@@ -4,16 +4,18 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
+	config "../../config"
 	osuapi "../../osu-api"
 	structs "../../structs"
 	tools "../../tools"
+	osucommands "../osu-commands"
 	"github.com/bwmarrin/discordgo"
 )
 
 // Clean cleans the caches
 func Clean(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
-	if m.Author.ID != "92502458588205056" {
-		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT VINXIS.........")
+	if m.Author.ID != config.Conf.BotHoster.UserID {
+		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
 		return
 	}
 
@@ -37,9 +39,9 @@ func Clean(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Pla
 }
 
 // CleanFarm cleans the all farmerdog ratings
-func CleanFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData, osuAPI *osuapi.Client) {
-	if m.Author.ID != "92502458588205056" {
-		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT VINXIS.........")
+func CleanFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
+	if m.Author.ID != config.Conf.BotHoster.UserID {
+		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
 		return
 	}
 
@@ -54,7 +56,7 @@ func CleanFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		if cache[i].Osu.Username != "" && cache[i].Farm.Rating == 0.00 {
 			cache[i].Osu = osuapi.User{}
 		}
-		cache[i].FarmCalc(osuAPI, farmData)
+		cache[i].FarmCalc(osucommands.OsuAPI, farmData)
 	}
 
 	// Save
@@ -76,10 +78,11 @@ func CleanFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 
 // CleanEmpty removes any users with no discord or osu! account
 func CleanEmpty(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
-	if m.Author.ID != "92502458588205056" {
-		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT VINXIS.........")
+	if m.Author.ID != config.Conf.BotHoster.UserID {
+		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
 		return
 	}
+
 	for i := 0; i < len(cache); i++ {
 		if cache[i].Discord.ID == "" && cache[i].Osu.Username == "" {
 			cache = append(cache[:i], cache[i+1:]...)

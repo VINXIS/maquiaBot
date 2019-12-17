@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	config "../../config"
 	osuapi "../../osu-api"
 	osutools "../../osu-functions"
 	structs "../../structs"
@@ -17,7 +18,7 @@ import (
 )
 
 // Top gets the nth top pp score
-func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData, mapCache []structs.MapData) {
+func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData, mapCache []structs.MapData) {
 	topRegex, _ := regexp.Compile(`t(op)?\s+(.+)`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S{2,})`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)
@@ -64,7 +65,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 			return
 		}
 	}
-	user, err := osuAPI.GetUser(osuapi.GetUserOpts{
+	user, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 		Username: username,
 	})
 	if err != nil {
@@ -74,7 +75,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 	score := osuapi.GUSScore{}
 
 	// Get best scores
-	scoreList, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+	scoreList, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 		Username: username,
 		Limit:    100,
 	})
@@ -110,7 +111,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 	score = scoreList[index-1]
 
 	// Get beatmap, acc, and mods
-	beatmap := osutools.BeatmapParse(strconv.Itoa(score.BeatmapID), "map", score.Mods, osuAPI)
+	beatmap := osutools.BeatmapParse(strconv.Itoa(score.BeatmapID), "map", score.Mods)
 	accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 	mods = score.Mods.String()
 	if mods == "" {
@@ -161,7 +162,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 	}
 
 	mapCompletion := ""
-	orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+	orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 		Username: user.Username,
 		Limit:    100,
 	})
@@ -172,7 +173,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 			break
 		}
 	}
-	mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
+	mapScores, err := OsuAPI.GetScores(osuapi.GetScoresOpts{
 		BeatmapID: beatmap.BeatmapID,
 		Limit:     100,
 	})
@@ -198,7 +199,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 	hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 
-	g, err := s.Guild("556243477084635170")
+	g, _ := s.Guild(config.Conf.Server)
 	tools.ErrRead(err)
 	scoreRank := ""
 	for _, emoji := range g.Emojis {

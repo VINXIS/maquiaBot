@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	config "../../config"
 	osuapi "../../osu-api"
 	osutools "../../osu-functions"
 	structs "../../structs"
@@ -18,7 +19,7 @@ import (
 )
 
 // Recent gets the most recent score done/nth score done
-func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, option string, cache []structs.PlayerData, mapCache []structs.MapData) {
+func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cache []structs.PlayerData, mapCache []structs.MapData) {
 	recentRegex, _ := regexp.Compile(`(r|recent|rs|rb|recentb|recentbest)\s+(.+)`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S{2,})`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)
@@ -67,7 +68,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	}
 
 	// Get user
-	userP, err := osuAPI.GetUser(osuapi.GetUserOpts{
+	userP, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 		Username: username,
 	})
 	if err != nil {
@@ -79,7 +80,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	var scoreList []osuapi.GUSScore
 	switch option {
 	case "recent":
-		scoreList, err = osuAPI.GetUserRecent(osuapi.GetUserScoresOpts{
+		scoreList, err = OsuAPI.GetUserRecent(osuapi.GetUserScoresOpts{
 			Username: username,
 			Limit:    50,
 		})
@@ -89,7 +90,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 			return
 		}
 	case "best":
-		scoreList, err = osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+		scoreList, err = OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 			Username: username,
 			Limit:    100,
 		})
@@ -133,7 +134,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	score := scoreList[index-1]
 
 	// Get beatmap, acc, and mods
-	beatmap := osutools.BeatmapParse(strconv.Itoa(score.BeatmapID), "map", score.Mods, osuAPI)
+	beatmap := osutools.BeatmapParse(strconv.Itoa(score.BeatmapID), "map", score.Mods)
 	accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 	mods = score.Mods.String()
 
@@ -195,7 +196,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 		completed := float64(playObjCount) / float64(objCount) * 100.0
 		mapCompletion = "**" + strconv.FormatFloat(completed, 'f', 2, 64) + "%** completed \n"
 	} else {
-		orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+		orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 			Username: userP.Username,
 			Limit:    100,
 		})
@@ -206,7 +207,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 				break
 			}
 		}
-		mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
+		mapScores, err := OsuAPI.GetScores(osuapi.GetScoresOpts{
 			BeatmapID: beatmap.BeatmapID,
 			Limit:     100,
 		})
@@ -253,7 +254,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cli
 	hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 	mods = " **+" + mods + "** "
 
-	g, err := s.Guild("556243477084635170")
+	g, _ := s.Guild(config.Conf.Server)
 	tools.ErrRead(err)
 	scoreRank := ""
 	for _, emoji := range g.Emojis {

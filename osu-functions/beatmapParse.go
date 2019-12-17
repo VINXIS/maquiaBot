@@ -10,7 +10,7 @@ import (
 )
 
 // BeatmapParse parses beatmap and obtains the .osu file
-func BeatmapParse(id, format string, mods osuapi.Mods, osu *osuapi.Client) (beatmap osuapi.Beatmap) {
+func BeatmapParse(id, format string, mods osuapi.Mods) (beatmap osuapi.Beatmap) {
 	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
 
 	mapID, err := strconv.Atoi(id)
@@ -18,7 +18,7 @@ func BeatmapParse(id, format string, mods osuapi.Mods, osu *osuapi.Client) (beat
 
 	if format == "map" {
 		// Fetch the beatmap
-		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
+		beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapID: mapID,
 		})
 		tools.ErrRead(err)
@@ -39,7 +39,7 @@ func BeatmapParse(id, format string, mods osuapi.Mods, osu *osuapi.Client) (beat
 				strconv.Itoa(beatmap.BeatmapID))
 	} else if format == "set" {
 		// Fetch the beatmap
-		beatmaps, err := osu.GetBeatmaps(osuapi.GetBeatmapsOpts{
+		beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapSetID: mapID,
 		})
 		tools.ErrRead(err)

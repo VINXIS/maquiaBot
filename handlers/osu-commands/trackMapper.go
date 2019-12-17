@@ -13,7 +13,7 @@ import (
 )
 
 // TrackMapper lets people track mappers
-func TrackMapper(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, mapperData []structs.MapperData) {
+func TrackMapper(s *discordgo.Session, m *discordgo.MessageCreate, mapperData []structs.MapperData) {
 	// Get mapper(s), channel and perms
 	if !strings.Contains(m.Content, " ") {
 		s.ChannelMessageSend(m.ChannelID, "No mappers given to add!!")
@@ -88,13 +88,13 @@ func TrackMapper(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuap
 				if remove {
 					continue
 				} else {
-					user, err := osuAPI.GetUser(osuapi.GetUserOpts{
+					user, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 						Username: arg,
 					})
 					if err != nil {
 						continue
 					}
-					beatmaps, err := osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
+					beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 						UserID: user.UserID,
 					})
 					newMapper := structs.MapperData{

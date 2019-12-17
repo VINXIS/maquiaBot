@@ -7,12 +7,10 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"math/big"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
-	osuapi "../osu-api"
 	structs "../structs"
 	tools "../tools"
 	admincommands "./admin-commands"
@@ -45,8 +43,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if emojiRegex.MatchString(m.Content) {
 		noEmoji = emojiRegex.ReplaceAllString(m.Content, emojiRegex.FindStringSubmatch(m.Content)[1])
 	}
-
-	osuAPI := osuapi.NewClient(os.Getenv("OSU_API"))
 
 	// Obtain map cache data
 	var mapCache []structs.MapData
@@ -113,7 +109,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go tools.CommandLog(s, m, "maquiaprefix")
 		return
 	} else if strings.HasPrefix(m.Content, "maquiacleanf") || strings.Contains(m.Content, "maquiacleanfarm") {
-		go botcreatorcommands.CleanFarm(s, m, profileCache, osuAPI)
+		go botcreatorcommands.CleanFarm(s, m, profileCache)
 		return
 	} else if strings.HasPrefix(m.Content, "maquiaclean") {
 		go botcreatorcommands.Clean(s, m, profileCache)
@@ -144,7 +140,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "cleane", serverPrefix + "cleanempty":
 			go botcreatorcommands.CleanEmpty(s, m, profileCache)
 		case serverPrefix + "cleanf", serverPrefix + "cleanfarm":
-			go botcreatorcommands.CleanFarm(s, m, profileCache, osuAPI)
+			go botcreatorcommands.CleanFarm(s, m, profileCache)
 		case serverPrefix + "up", serverPrefix + "update":
 			go botcreatorcommands.Update(s, m)
 		case serverPrefix + "updatestatus":
@@ -154,7 +150,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "h", serverPrefix + "help":
 			go HelpHandle(s, m, serverPrefix)
 		case serverPrefix + "o", serverPrefix + "osu":
-			go OsuHandle(s, m, args, osuAPI, profileCache, mapCache, mapperData, serverPrefix)
+			go OsuHandle(s, m, args, profileCache, mapCache, mapperData, serverPrefix)
 		case serverPrefix + "pokemon":
 			go PokemonHandle(s, m, args, serverPrefix)
 
@@ -174,7 +170,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "st", serverPrefix + "statst", serverPrefix + "stoggle", serverPrefix + "statstoggle":
 			go admincommands.StatsToggle(s, m)
 		case serverPrefix + "tr", serverPrefix + "track":
-			go admincommands.Track(s, m, osuAPI, mapCache)
+			go admincommands.Track(s, m, mapCache)
 		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "ttoggle", serverPrefix + "tracktoggle":
 			go admincommands.TrackToggle(s, m, mapCache)
 		case serverPrefix + "vt", serverPrefix + "vibet", serverPrefix + "vtoggle", serverPrefix + "vibetoggle":
@@ -260,33 +256,33 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// osu! commands
 		case serverPrefix + "bfarm", serverPrefix + "bottomfarm":
-			go osucommands.BottomFarm(s, m, osuAPI, profileCache)
+			go osucommands.BottomFarm(s, m, profileCache)
 		case serverPrefix + "bpm":
-			go osucommands.BPM(s, m, osuAPI, profileCache)
+			go osucommands.BPM(s, m, profileCache)
 		case serverPrefix + "c", serverPrefix + "compare":
-			go osucommands.Compare(s, m, args, osuAPI, profileCache, serverPrefix, mapCache)
+			go osucommands.Compare(s, m, args, profileCache, serverPrefix, mapCache)
 		case serverPrefix + "farm":
-			go osucommands.Farm(s, m, osuAPI, profileCache)
+			go osucommands.Farm(s, m, profileCache)
 		case serverPrefix + "link", serverPrefix + "set":
-			go osucommands.Link(s, m, args, osuAPI, profileCache)
+			go osucommands.Link(s, m, args, profileCache)
 		case serverPrefix + "mt", serverPrefix + "mtrack", serverPrefix + "maptrack", serverPrefix + "mappertrack":
-			go osucommands.TrackMapper(s, m, osuAPI, mapperData)
+			go osucommands.TrackMapper(s, m, mapperData)
 		case serverPrefix + "mti", serverPrefix + "mtinfo", serverPrefix + "mtrackinfo", serverPrefix + "maptracking", serverPrefix + "mappertracking", serverPrefix + "mappertrackinfo":
 			go osucommands.TrackMapperInfo(s, m, mapperData)
 		case serverPrefix + "osutop", serverPrefix + "osudetail":
-			go osucommands.ProfileMessage(s, m, profileRegex, osuAPI, profileCache)
+			go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
 		case serverPrefix + "ppadd":
-			go osucommands.PPAdd(s, m, osuAPI, profileCache)
+			go osucommands.PPAdd(s, m, profileCache)
 		case serverPrefix + "profile":
-			go osucommands.ProfileMessage(s, m, profileRegex, osuAPI, profileCache)
+			go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
 		case serverPrefix + "r", serverPrefix + "rs", serverPrefix + "recent":
-			go osucommands.Recent(s, m, osuAPI, "recent", profileCache, mapCache)
+			go osucommands.Recent(s, m, "recent", profileCache, mapCache)
 		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
-			go osucommands.Recent(s, m, osuAPI, "best", profileCache, mapCache)
+			go osucommands.Recent(s, m, "best", profileCache, mapCache)
 		case serverPrefix + "t", serverPrefix + "top":
-			go osucommands.Top(s, m, osuAPI, profileCache, mapCache)
+			go osucommands.Top(s, m, profileCache, mapCache)
 		case serverPrefix + "tfarm", serverPrefix + "topfarm":
-			go osucommands.TopFarm(s, m, osuAPI, profileCache)
+			go osucommands.TopFarm(s, m, profileCache)
 		case serverPrefix + "ti", serverPrefix + "tinfo", serverPrefix + "tracking", serverPrefix + "trackinfo":
 			go osucommands.TrackInfo(s, m)
 
@@ -297,10 +293,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go tools.CommandLog(s, m, args[0])
 		return
 	} else if beatmapRegex.MatchString(m.Content) && serverData.OsuToggle { // If a beatmap was linked
-		go osucommands.BeatmapMessage(s, m, beatmapRegex, osuAPI, mapCache)
+		go osucommands.BeatmapMessage(s, m, beatmapRegex, mapCache)
 		return
 	} else if profileRegex.MatchString(m.Content) && serverData.OsuToggle { // If a profile was linked
-		go osucommands.ProfileMessage(s, m, profileRegex, osuAPI, profileCache)
+		go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
 		return
 	}
 
@@ -310,7 +306,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if mention.ID == s.State.User.ID {
 				roll, _ := rand.Int(rand.Reader, big.NewInt(100))
 				number := roll.Int64()
-				if number % 11 == 0 {
+				if number%11 == 0 {
 					s.ChannelMessageSend(m.ChannelID, "lol dude i bet u havent even watched the Maquia movie stop pinging me .")
 					break
 				}
@@ -322,7 +318,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Check if an image was linked
 	if len(m.Attachments) > 0 || linkRegex.MatchString(m.Content) || (len(m.Embeds) > 0 && m.Embeds[0].Image != nil) {
-		go osucommands.OsuImageParse(s, m, linkRegex, osuAPI, mapCache)
-		go osucommands.ReplayMessage(s, m, linkRegex, osuAPI, mapCache)
+		go osucommands.OsuImageParse(s, m, linkRegex, mapCache)
+		go osucommands.ReplayMessage(s, m, linkRegex, mapCache)
 	}
 }

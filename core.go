@@ -12,8 +12,11 @@ import (
 	"syscall"
 	"time"
 
+	config "./config"
 	handlers "./handlers"
 	gencommands "./handlers/general-commands"
+	osucommands "./handlers/osu-commands"
+	osuapi "./osu-api"
 	osutools "./osu-functions"
 	structs "./structs"
 	tools "./tools"
@@ -23,7 +26,12 @@ import (
 )
 
 func main() {
-	discord, err := discordgo.New("Bot " + os.Getenv("DISCORD_BOT_TOKEN"))
+	// Obtain config
+	config.NewConfig()
+	osuAPI := osuapi.NewClient(config.Conf.OsuToken)
+	osucommands.OsuAPI = osuAPI
+	osutools.OsuAPI = osuAPI
+	discord, err := discordgo.New("Bot " + config.Conf.DiscordToken)
 	tools.ErrRead(err)
 
 	// Handle farm data
@@ -95,7 +103,7 @@ func main() {
 	// go osutools.TrackMapperPost(discord) Commented until a solution is found for its issues
 
 	// // Open DB
-	// db, err := sql.Open("mysql", "root:mOatHhdArgb9@/maquiabot")
+	// db, err := sql.Open("mysql", config.Conf.Database.Username + ":" + config.Conf.Database.Password + "@/" + config.Conf.Database.Name)
 	// tools.ErrRead(err)
 	// rows, err := db.Prepare("CREATE TABLE IF NOT EXISTS servers (")
 	// tools.ErrRead(err)

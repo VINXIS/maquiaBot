@@ -13,7 +13,7 @@ import (
 )
 
 // BPM gives a player's BPM of the day
-func BPM(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData) {
+func BPM(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
 	bpmregex, _ := regexp.Compile(`bpm\s+(.+)`)
 	username := ""
 	if bpmregex.MatchString(m.Content) {
@@ -39,7 +39,7 @@ func BPM(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 	}
 
 	// Get top scores
-	player, err := osuAPI.GetUser(osuapi.GetUserOpts{
+	player, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 		Username: username,
 	})
 	if err != nil {
@@ -47,7 +47,7 @@ func BPM(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 		return
 	}
 
-	orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+	orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 		Username: username,
 		Limit:    100,
 	})
@@ -67,7 +67,7 @@ func BPM(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client
 	var averageBPM float64
 	var mapBPMs []float64
 	for _, score := range orderedScores {
-		beatmap, err := osuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
+		beatmap, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapID: score.BeatmapID,
 		})
 		if err != nil {

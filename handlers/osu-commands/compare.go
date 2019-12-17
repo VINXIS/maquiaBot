@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	config "../../config"
 	osuapi "../../osu-api"
 	osutools "../../osu-functions"
 	structs "../../structs"
@@ -18,7 +19,7 @@ import (
 )
 
 // Compare compares finds a score from the current user on the previous map linked by the bot
-func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI *osuapi.Client, cache []structs.PlayerData, serverPrefix string, mapCache []structs.MapData) {
+func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache []structs.PlayerData, serverPrefix string, mapCache []structs.MapData) {
 	mapRegex, _ := regexp.Compile(`(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	compareRegex, _ := regexp.Compile(`(c|compare)\s*(.+)?`)
@@ -49,16 +50,16 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		submatches := mapRegex.FindStringSubmatch(m.Content)
 		switch submatches[3] {
 		case "s":
-			beatmap = osutools.BeatmapParse(submatches[4], "set", osuapi.ParseMods(mods), osuAPI)
+			beatmap = osutools.BeatmapParse(submatches[4], "set", osuapi.ParseMods(mods))
 		case "b":
-			beatmap = osutools.BeatmapParse(submatches[4], "map", osuapi.ParseMods(mods), osuAPI)
+			beatmap = osutools.BeatmapParse(submatches[4], "map", osuapi.ParseMods(mods))
 		case "beatmaps":
-			beatmap = osutools.BeatmapParse(submatches[4], "map", osuapi.ParseMods(mods), osuAPI)
+			beatmap = osutools.BeatmapParse(submatches[4], "map", osuapi.ParseMods(mods))
 		case "beatmapsets":
 			if len(submatches[7]) > 0 {
-				beatmap = osutools.BeatmapParse(submatches[7], "map", osuapi.ParseMods(mods), osuAPI)
+				beatmap = osutools.BeatmapParse(submatches[7], "map", osuapi.ParseMods(mods))
 			} else {
-				beatmap = osutools.BeatmapParse(submatches[4], "set", osuapi.ParseMods(mods), osuAPI)
+				beatmap = osutools.BeatmapParse(submatches[4], "set", osuapi.ParseMods(mods))
 			}
 		}
 		if beatmap.BeatmapID == 0 {
@@ -109,7 +110,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		}
 
 		// Get the map
-		beatmap = osutools.BeatmapParse(strconv.Itoa(mapID), "map", osuapi.ParseMods(mods), osuAPI)
+		beatmap = osutools.BeatmapParse(strconv.Itoa(mapID), "map", osuapi.ParseMods(mods))
 		if beatmap.BeatmapID == 0 {
 			s.ChannelMessageSend(m.ChannelID, "Map does not exist!")
 			return
@@ -143,7 +144,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		if username == "" {
 			s.ChannelMessageSend(m.ChannelID, "No user mentioned in message/linked to your account! Please use `set` or `link` to link an osu! account to you, or name a user to obtain their recent score of!")
 		}
-		test, err := osuAPI.GetUser(osuapi.GetUserOpts{
+		test, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 			Username: username,
 		})
 		if err != nil {
@@ -158,7 +159,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 		BeatmapID: beatmap.BeatmapID,
 		UserID:    user.UserID,
 	}
-	scores, err := osuAPI.GetScores(scoreOpts)
+	scores, err := OsuAPI.GetScores(scoreOpts)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
 		return
@@ -243,7 +244,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	}
 
 	mapCompletion := ""
-	orderedScores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+	orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 		Username: user.Username,
 		Limit:    100,
 	})
@@ -257,7 +258,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 			break
 		}
 	}
-	mapScores, err := osuAPI.GetScores(osuapi.GetScoresOpts{
+	mapScores, err := OsuAPI.GetScores(osuapi.GetScoresOpts{
 		BeatmapID: beatmap.BeatmapID,
 		Limit:     100,
 	})
@@ -285,7 +286,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, os
 	}
 	mods = " **+" + mods + "** "
 
-	g, _ := s.Guild("556243477084635170")
+	g, _ := s.Guild(config.Conf.Server)
 	scoreRank := ""
 	for _, emoji := range g.Emojis {
 		if emoji.Name == score.Rank+"_" {

@@ -17,7 +17,7 @@ import (
 )
 
 // Farm gives a player's farmerdog rating
-func Farm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData) {
+func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
 	username := ""
 	user := structs.PlayerData{}
 	cached := false
@@ -66,7 +66,7 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clien
 	}
 
 	// Get User and see if user exists
-	osuUser, err := osuAPI.GetUser(osuapi.GetUserOpts{
+	osuUser, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 		Username: username,
 	})
 	if err != nil {
@@ -82,7 +82,7 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clien
 	_ = json.Unmarshal(f, &farmData)
 
 	// Add the new information to the full data
-	user.FarmCalc(osuAPI, farmData)
+	user.FarmCalc(OsuAPI, farmData)
 	user.Time = time.Now()
 	if cached {
 		cache[playerIndex] = user
@@ -111,7 +111,7 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clien
 }
 
 // TopFarm gives the top farmerdogs in the game based on who's been run
-func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData) {
+func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
 	farmCountRegex, _ := regexp.Compile(`.+(tfarm|topfarm)\s*(-s)?\s*(\d+)?`)
 
 	farmAmount := 1
@@ -189,7 +189,7 @@ func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Cl
 }
 
 // BottomFarm gives the top farmerdogs in the game based on who's been run
-func BottomFarm(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData) {
+func BottomFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
 	farmCountRegex, _ := regexp.Compile(`.+(bfarm|bottomfarm)\s*(-s)?\s*(\d+)?`)
 
 	farmAmount := 1

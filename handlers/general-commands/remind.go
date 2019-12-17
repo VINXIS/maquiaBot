@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	config "../../config"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -177,8 +178,8 @@ func Reminders(s *discordgo.Session, m *discordgo.MessageCreate) {
 	userTimers := []structs.Reminder{}
 	all := false
 	if strings.Contains(m.Content, "all") {
-		if m.Author.ID != "92502458588205056" {
-			s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT VINXIS.........")
+		if m.Author.ID != config.Conf.BotHoster.UserID {
+			s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
 			return
 		}
 		all = true

@@ -13,7 +13,7 @@ import (
 )
 
 // PPAdd calculates final pp after obtaining given pp score
-func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Client, cache []structs.PlayerData) {
+func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
 	ppRegex, _ := regexp.Compile(`ppadd\s+(.+)`)
 
 	if !ppRegex.MatchString(m.Content) {
@@ -54,14 +54,14 @@ func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, osuAPI *osuapi.Clie
 	}
 
 	// Get user and their best scores
-	user, err := osuAPI.GetUser(osuapi.GetUserOpts{
+	user, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 		Username: username,
 	})
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Either the API just owned me, or the osu! user **"+username+"** may not exist! Check if the osu! user exists or try again later.")
 		return
 	}
-	scores, err := osuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+	scores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 		Username: user.Username,
 		Limit:    100,
 	})

@@ -14,7 +14,7 @@ import (
 )
 
 // Link links an osu! account with the discord user
-func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAPI *osuapi.Client, cache []structs.PlayerData) {
+func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache []structs.PlayerData) {
 	usernameRegex, _ := regexp.Compile(`(.+)(link|set)(\s+<@\S+)?(\s+.+)?`)
 
 	discordUser := m.Author
@@ -50,7 +50,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 				return
 			}
 
-			user, err := osuAPI.GetUser(osuapi.GetUserOpts{
+			user, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 				Username: osuUsername,
 			})
 			if err != nil {
@@ -59,7 +59,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 			}
 			player.Time = time.Now()
 			player.Osu = *user
-			player.FarmCalc(osuAPI, farmData)
+			player.FarmCalc(OsuAPI, farmData)
 			cache[i] = player
 
 			// Remove any accounts of the same user or empty osu! user and with no discord linked
@@ -89,7 +89,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 	for i, player := range cache {
 		if strings.ToLower(player.Osu.Username) == strings.ToLower(osuUsername) && player.Discord.ID == "" {
 			player.Discord = *discordUser
-			player.FarmCalc(osuAPI, farmData)
+			player.FarmCalc(OsuAPI, farmData)
 			cache[i] = player
 
 			jsonCache, err := json.Marshal(cache)
@@ -108,7 +108,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 	}
 
 	// Create player
-	user, err := osuAPI.GetUser(osuapi.GetUserOpts{
+	user, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 		Username: osuUsername,
 	})
 	if err != nil {
@@ -122,7 +122,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, osuAP
 	}
 
 	// Farm calc
-	player.FarmCalc(osuAPI, farmData)
+	player.FarmCalc(OsuAPI, farmData)
 
 	// Save player
 	cache = append(cache, player)
