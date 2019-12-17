@@ -18,7 +18,10 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 		ID       int64
 	)
 	twitterRegex, _ := regexp.Compile(`twitter.com\/(\S+)\/status\/(\d+)`)
-	if linkType == "" {
+	if twitterRegex.MatchString(m.Content) {
+		linkType = "mp4"
+		ID, _ = strconv.ParseInt(twitterRegex.FindStringSubmatch(m.Content)[2], 10, 64)
+	} else {
 		messages, _ := s.ChannelMessages(m.ChannelID, -1, "", "", "")
 		for _, msg := range messages {
 			if twitterRegex.MatchString(msg.Content) && len(msg.Embeds) > 0 {
