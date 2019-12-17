@@ -60,7 +60,7 @@ func BPM(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 	}
 
 	// Obtain average and stddev
-	msg, err := s.ChannelMessageSend(m.ChannelID, "Obtaining funny value...")
+	msg, err := s.ChannelMessageSend(m.ChannelID, "Obtaining BPM value...")
 	if err != nil {
 		return
 	}
