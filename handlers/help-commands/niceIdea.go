@@ -7,7 +7,7 @@ import (
 // NiceIdea explains the nice idea functionality
 func NiceIdea(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: idea / niceidea"
-	embed.Description = "`(idea|niceidea)` lets you send a nice idea if an admin disabled automatic nice idea posting."
+	embed.Description = "`(idea|niceidea)` lets you send a nice idea."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",

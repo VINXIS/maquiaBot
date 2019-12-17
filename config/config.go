@@ -16,6 +16,8 @@ type Config struct {
 	Server       string
 	DiscordToken string
 	OsuToken     string
+	Crab         string
+	Late         string
 }
 
 // BotHoster holds info about who is hosting the bot (also known as Bot Creator)

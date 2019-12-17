@@ -102,12 +102,12 @@ func main() {
 	// Get osu! mapper tracking data
 	// go osutools.TrackMapperPost(discord) Commented until a solution is found for its issues
 
-	// // Open DB
-	// db, err := sql.Open("mysql", config.Conf.Database.Username + ":" + config.Conf.Database.Password + "@/" + config.Conf.Database.Name)
-	// tools.ErrRead(err)
-	// rows, err := db.Prepare("CREATE TABLE IF NOT EXISTS servers (")
-	// tools.ErrRead(err)
-	// fmt.Println(rows)
+	// // OpenDB
+	// db, err := sql.Open("mysql", config.Conf.Database.Username+":"+config.Conf.Database.Password+"@/"+config.Conf.Database.Nae)
+	// tools.ErrRead(er)
+	// rows, err := db.Prepare("CREATE TABLE IF NOT EXISTS servers ")
+	// tools.ErrRead(er)
+	// fmt.Println(ros)
 
 	// Create a channel to keep the bot running until a prompt is given to close
 	sc := make(chan os.Signal, 1)

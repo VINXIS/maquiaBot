@@ -7,16 +7,16 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// Crab sends a crab rave image
-func Crab(s *discordgo.Session, m *discordgo.MessageCreate) {
-	response, err := http.Get(config.Conf.Crab)
+// Late sends a video related to someone saying late.
+func Late(s *discordgo.Session, m *discordgo.MessageCreate) {
+	response, err := http.Get(config.Conf.Late)
 	if err != nil {
 		return
 	}
 
 	message := &discordgo.MessageSend{
 		File: &discordgo.File{
-			Name:   "crab.gif",
+			Name:   "late.mp4",
 			Reader: response.Body,
 		},
 	}

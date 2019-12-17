@@ -52,6 +52,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`info`, " +
 					"`kanye`, " +
 					"`(l|leven|levenshtein)`, " +
+					"`(late|old|ancient)`, " +
 					"`meme`, " +
 					"`(noun|nouns)`, " +
 					"`ocr`, " +
@@ -106,6 +107,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.CrabToggle(embed)
 		case "it", "ideat", "itoggle", "ideatoggle":
 			embed = helpcommands.NiceIdeaToggle(embed)
+		case "lt", "latet", "ltoggle", "latetoggle":
+			embed = helpcommands.LateToggle(embed)
 		case "ot", "osut", "otoggle", "osutoggle":
 			embed = helpcommands.OsuToggle(embed)
 		case "prefix", "maquiaprefix", "newprefix":
@@ -150,6 +153,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Kanye(embed)
 		case "l", "leven", "levenshtein":
 			embed = helpcommands.Levenshtein(embed)
+		case "late", "old", "ancient":
+			embed = helpcommands.Late(embed)
 		case "meme":
 			embed = helpcommands.Meme(embed)
 		case "noun", "nouns":

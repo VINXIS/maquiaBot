@@ -76,6 +76,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go tools.CommandLog(s, m, "crab rave")
 	}
 
+	// LATE
+	if serverData.Crab && (strings.Contains(m.Content, "late") || strings.Contains(m.Content, "old") || strings.Contains(m.Content, "ancient")) && !strings.HasPrefix(m.Content, serverPrefix+"late") {
+		go gencommands.Late(s, m)
+		go tools.CommandLog(s, m, "late")
+	}
+
 	// Generate regexes for message parsing
 	profileRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(u|users)\/(\S+)`)
 	beatmapRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
@@ -161,6 +167,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go admincommands.CrabToggle(s, m)
 		case serverPrefix + "it", serverPrefix + "ideat", serverPrefix + "itoggle", serverPrefix + "ideatoggle":
 			go admincommands.NiceIdeaToggle(s, m)
+		case serverPrefix + "lt", serverPrefix + "latet", serverPrefix + "ltoggle", serverPrefix + "latetoggle":
+			go admincommands.LateToggle(s, m)
 		case serverPrefix + "ot", serverPrefix + "osut", serverPrefix + "otoggle", serverPrefix + "osutoggle":
 			go admincommands.OsuToggle(s, m)
 		case serverPrefix + "prefix", serverPrefix + "newprefix":
@@ -186,9 +194,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "ch", serverPrefix + "choose":
 			go gencommands.Choose(s, m)
 		case serverPrefix + "crab":
-			if !serverData.Crab {
-				go gencommands.Crab(s, m)
-			}
+			go gencommands.Crab(s, m)
 		case serverPrefix + "decrypt":
 			go gencommands.Decrypt(s, m)
 		case serverPrefix + "e", serverPrefix + "emoji", serverPrefix + "emote":
@@ -200,15 +206,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "funny":
 			go gencommands.Funny(s, m)
 		case serverPrefix + "idea", serverPrefix + "niceidea":
-			if !serverData.NiceIdea {
-				go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
-			}
+			go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
 		case serverPrefix + "info":
 			go gencommands.Info(s, m, profileCache)
 		case serverPrefix + "kanye":
 			go gencommands.Kanye(s, m)
 		case serverPrefix + "l", serverPrefix + "leven", serverPrefix + "levenshtein":
 			go gencommands.Levenshtein(s, m)
+		case serverPrefix + "late", serverPrefix + "old", serverPrefix + "ancient":
+			go gencommands.Late(s, m)
 		case serverPrefix + "meme":
 			go gencommands.Meme(s, m)
 		case serverPrefix + "noun", serverPrefix + "nouns":
