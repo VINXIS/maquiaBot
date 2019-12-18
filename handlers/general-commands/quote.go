@@ -41,7 +41,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 	number := 0
 	if quoteRegex.MatchString(m.Content) {
 		username = quoteRegex.FindStringSubmatch(m.Content)[2]
-		if number, err = strconv.Atoi(strings.Split(username, " ")[1]); err == nil {
+		if number, err = strconv.Atoi(strings.Split(username, " ")[1]); err == nil && len(strings.Split(username, " ")) > 1 {
 			username = strings.Split(username, " ")[0]
 		} else {
 			number = 0
