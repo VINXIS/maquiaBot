@@ -7,7 +7,7 @@ import (
 // Toggle explains the toggle functionality
 func Toggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: toggle"
-	embed.Description = "`toggle <[-a] [-ch] [-c] [-d] [-i] [-l] [-o] [-s] [-v]>` lets admins toggle specific server options."
+	embed.Description = "`toggle <[-a] [-ch] [-cr] [-d] [-i] [-l] [-o] [-s] [-v]>` lets admins toggle specific server options."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[-a]",
@@ -20,7 +20,7 @@ func Toggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:   "[-c]",
+			Name:   "[-cr]",
 			Value:  "Toggle whether any message containing crab or rave should trigger a crab rave message.",
 			Inline: true,
 		},

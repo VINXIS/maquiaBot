@@ -38,7 +38,7 @@ func Toggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 		serverData.Cheers = !serverData.Cheers
 		flagged = true
 	}
-	if strings.Contains(m.Content, "-c") || strings.Contains(m.Content, "-crab") {
+	if strings.Contains(m.Content, "-cr") || strings.Contains(m.Content, "-crab") {
 		serverData.Crab = !serverData.Crab
 		flagged = true
 	}
