@@ -21,7 +21,7 @@ func Stats(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`adjective`, `nouns`, `skills`, `statstoggle`",
+			Value: "`adjective`, `nouns`, `skills`, `toggle`",
 		},
 	}
 	return embed
@@ -44,7 +44,7 @@ func Adjectives(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`stats`, `nouns`, `skills`, `statstoggle`",
+			Value: "`stats`, `nouns`, `skills`, `toggle`",
 		},
 	}
 	return embed
@@ -67,7 +67,7 @@ func Nouns(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`stats`, `adjective`, `skills`, `statstoggle`",
+			Value: "`stats`, `adjective`, `skills`, `toggle`",
 		},
 	}
 	return embed
@@ -90,20 +90,7 @@ func Skills(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`stats`, `adjective`, `nouns`, `statstoggle`",
-		},
-	}
-	return embed
-}
-
-// StatsToggle explains the statstoggle functionality
-func StatsToggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: statst / statstoggle"
-	embed.Description = "`(statst|statstoggle)` lets admins toggle if anyone can add adj/nouns/skills, or if only admins are allowed."
-	embed.Fields = []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
-			Name:  "Related Commands:",
-			Value: "`stats`, `adjective`, `nouns`, `skills`",
+			Value: "`stats`, `adjective`, `nouns`, `toggle`",
 		},
 	}
 	return embed

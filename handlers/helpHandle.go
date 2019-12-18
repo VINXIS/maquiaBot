@@ -25,17 +25,11 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
 				Name: "Admin commands:",
-				Value: "`(at|announcet|atoggle|announcetoggle)`, " +
-					"`(ct|crabt|ctoggle|crabtoggle)`, " +
-					"`(cht|cheerst|chtoggle|cheerstoggle)`, " +
-					"`(it|ideat|itoggle|ideatoggle)`, " +
-					"`(ot|osut|otoggle|osutoggle)`, " +
-					"`(prefix|maquiaprefix|newprefix)`, " +
+				Value: "`(prefix|maquiaprefix|newprefix)`, " +
 					"`purge`, " +
-					"`(st|statst|stoggle|statstoggle)`, " +
+					"`toggle`, " + 
 					"`(tr|track)`, " +
-					"`(tt|trackt|ttoggle|tracktoggle)`, " +
-					"`(vt|vibet|vtoggle|vibetoggle)`",
+					"`(tt|trackt|ttoggle|tracktoggle)`, ",
 			},
 			&discordgo.MessageEmbedField{
 				Name: "General commands:",
@@ -49,7 +43,6 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(e|emoji|emote)`, " +
 					"`encrypt`, " +
 					"`face`, " +
-					"`funny`, " +
 					"`(idea|niceidea)`, " +
 					"`info`, " +
 					"`kanye`, " +
@@ -103,30 +96,16 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		}
 		switch arg {
 		// Admin commands
-		case "at", "announcet", "atoggle", "announcetoggle":
-			embed = helpcommands.AnnounceToggle(embed)
-		case "ct", "crabt", "ctoggle", "crabtoggle":
-			embed = helpcommands.CrabToggle(embed)
-		case "cht", "cheerst", "chtoggle", "cheerstoggle":
-			embed = helpcommands.CheersToggle(embed)
-		case "it", "ideat", "itoggle", "ideatoggle":
-			embed = helpcommands.NiceIdeaToggle(embed)
-		case "lt", "latet", "ltoggle", "latetoggle":
-			embed = helpcommands.LateToggle(embed)
-		case "ot", "osut", "otoggle", "osutoggle":
-			embed = helpcommands.OsuToggle(embed)
 		case "prefix", "maquiaprefix", "newprefix":
 			embed = helpcommands.Prefix(embed)
 		case "purge":
 			embed = helpcommands.Purge(embed)
-		case "st", "statst", "stoggle", "statstoggle":
-			embed = helpcommands.StatsToggle(embed)
+		case "toggle":
+			embed = helpcommands.Toggle(embed)
 		case "tr", "track":
 			embed = helpcommands.Track(embed)
 		case "tt", "trackt", "ttoggle", "tracktoggle":
 			embed = helpcommands.TrackToggle(embed)
-		case "vt", "vibet", "vtoggle", "vibetoggle":
-			embed = helpcommands.VibeToggle(embed)
 
 		// General commands
 		case "adj", "adjective", "adjectives":
@@ -149,8 +128,6 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Encrypt(embed)
 		case "face":
 			embed = helpcommands.Face(embed)
-		case "funny":
-			embed = helpcommands.Funny(embed)
 		case "idea", "niceidea":
 			embed = helpcommands.NiceIdea(embed)
 		case "info":

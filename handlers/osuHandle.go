@@ -23,8 +23,6 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 			go admincommands.Track(s, m, mapCache)
 		case "tt", "trackt", "ttoggle", "tracktoggle":
 			go admincommands.TrackToggle(s, m, mapCache)
-		case "toggle":
-			go admincommands.OsuToggle(s, m)
 
 		// non-Admin specific
 		case "bfarm", "bottomfarm":

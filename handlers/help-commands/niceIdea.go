@@ -11,20 +11,7 @@ func NiceIdea(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`ideatoggle`",
-		},
-	}
-	return embed
-}
-
-// NiceIdeaToggle explains the nice idea toggle functionality
-func NiceIdeaToggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: it / ideat / itoggle / ideatoggle"
-	embed.Description = "`(it|ideat|itoggle|ideatoggle)` lets admins toggle whether any text containing nice idea, good idea, or gud idea will send a nice idea."
-	embed.Fields = []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
-			Name:  "Related Commands:",
-			Value: "`idea`",
+			Value: "`toggle`",
 		},
 	}
 	return embed

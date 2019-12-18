@@ -77,7 +77,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// LATE
-	if serverData.Late && (strings.Contains(m.Content, "late") || strings.Contains(m.Content, "old") || strings.Contains(m.Content, "ancient")) && !strings.HasPrefix(m.Content, serverPrefix+"late") {
+	if serverData.Late && (strings.Contains(m.Content, "late") || strings.Contains(m.Content, "ancient")) && !strings.HasPrefix(m.Content, serverPrefix+"late") {
 		go gencommands.Late(s, m)
 		go tools.CommandLog(s, m, "late")
 	}
@@ -167,30 +167,16 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go PokemonHandle(s, m, args, serverPrefix)
 
 		// Admin commands'
-		case serverPrefix + "at", serverPrefix + "announcet", serverPrefix + "atoggle", serverPrefix + "announcetoggle":
-			go admincommands.AnnounceToggle(s, m)
-		case serverPrefix + "ct", serverPrefix + "crabt", serverPrefix + "ctoggle", serverPrefix + "crabtoggle":
-			go admincommands.CrabToggle(s, m)
-		case serverPrefix + "cht", serverPrefix + "cheerst", serverPrefix + "chtoggle", serverPrefix + "cheerstoggle":
-			go admincommands.CheersToggle(s, m)
-		case serverPrefix + "it", serverPrefix + "ideat", serverPrefix + "itoggle", serverPrefix + "ideatoggle":
-			go admincommands.NiceIdeaToggle(s, m)
-		case serverPrefix + "lt", serverPrefix + "latet", serverPrefix + "ltoggle", serverPrefix + "latetoggle":
-			go admincommands.LateToggle(s, m)
-		case serverPrefix + "ot", serverPrefix + "osut", serverPrefix + "otoggle", serverPrefix + "osutoggle":
-			go admincommands.OsuToggle(s, m)
 		case serverPrefix + "prefix", serverPrefix + "newprefix":
 			go admincommands.Prefix(s, m)
 		case serverPrefix + "purge":
 			go admincommands.Purge(s, m)
-		case serverPrefix + "st", serverPrefix + "statst", serverPrefix + "stoggle", serverPrefix + "statstoggle":
-			go admincommands.StatsToggle(s, m)
+		case serverPrefix + "toggle":
+			go admincommands.Toggle(s, m)
 		case serverPrefix + "tr", serverPrefix + "track":
 			go admincommands.Track(s, m, mapCache)
 		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "ttoggle", serverPrefix + "tracktoggle":
 			go admincommands.TrackToggle(s, m, mapCache)
-		case serverPrefix + "vt", serverPrefix + "vibet", serverPrefix + "vtoggle", serverPrefix + "vibetoggle":
-			go admincommands.VibeToggle(s, m)
 
 		// General commands
 		case serverPrefix + "adj", serverPrefix + "adjective", serverPrefix + "adjectives":
@@ -213,8 +199,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Encrypt(s, m)
 		case serverPrefix + "face":
 			go gencommands.Face(s, m)
-		case serverPrefix + "funny":
-			go gencommands.Funny(s, m)
 		case serverPrefix + "idea", serverPrefix + "niceidea":
 			go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
 		case serverPrefix + "info":
@@ -236,7 +220,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "parse":
 			go gencommands.Parse(s, m)
 		case serverPrefix + "penis", serverPrefix + "cock":
-			go gencommands.Penis(s, m)
+			if serverData.Daily {
+				go gencommands.Penis(s, m)
+			}
 		case serverPrefix + "ping":
 			go gencommands.Ping(s, m)
 		case serverPrefix + "q", serverPrefix + "quote":
@@ -274,7 +260,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "bfarm", serverPrefix + "bottomfarm":
 			go osucommands.BottomFarm(s, m, profileCache)
 		case serverPrefix + "bpm":
-			go osucommands.BPM(s, m, profileCache)
+			if serverData.Daily {
+				go osucommands.BPM(s, m, profileCache)
+			}
 		case serverPrefix + "c", serverPrefix + "compare":
 			go osucommands.Compare(s, m, args, profileCache, serverPrefix, mapCache)
 		case serverPrefix + "farm":

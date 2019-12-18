@@ -286,8 +286,9 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	statsInfo := strconv.Itoa(len(serverData.Nouns)) + " nouns\n" + strconv.Itoa(len(serverData.Adjectives)) + " adjectives\n" + strconv.Itoa(len(serverData.Skills)) + " skills\nAllowAnyoneAdd: " + strconv.FormatBool(serverData.AllowAnyoneStats)
 
 	// Toggle Information
-	toggleInfo := "Crab: " + strconv.FormatBool(serverData.Crab) + "\n" +
-		"Cheers: " + strconv.FormatBool(serverData.Cheers) + "\n" +
+	toggleInfo := "Cheers: " + strconv.FormatBool(serverData.Cheers) + "\n" +
+		"Crab: " + strconv.FormatBool(serverData.Crab) + "\n" +
+		"Daily: " + strconv.FormatBool(serverData.Daily) + "\n" +
 		"Late: " + strconv.FormatBool(serverData.Late) + "\n" +
 		"Nice Idea: " + strconv.FormatBool(serverData.NiceIdea) + "\n" +
 		"osu!: " + strconv.FormatBool(serverData.OsuToggle) + "\n" +

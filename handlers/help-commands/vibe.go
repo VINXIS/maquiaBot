@@ -15,20 +15,7 @@ func Vibe(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`vibetoggle`",
-		},
-	}
-	return embed
-}
-
-// VibeToggle explains the vibe toggle functionality
-func VibeToggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: vibet / vibetoggle"
-	embed.Description = "`(vibet|vibetoggle)` lets admins toggle as to whether a vibe check should randomly run or not (1/100000 chance)."
-	embed.Fields = []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
-			Name:  "Related Commands:",
-			Value: "`vibe`",
+			Value: "`toggle`",
 		},
 	}
 	return embed

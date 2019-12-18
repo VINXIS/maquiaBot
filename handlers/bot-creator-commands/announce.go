@@ -2,6 +2,7 @@ package botcreatorcommands
 
 import (
 	"regexp"
+	"strings"
 
 	config "../../config"
 	tools "../../tools"
@@ -21,7 +22,7 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	announcement := announceRegex.FindStringSubmatch(m.Content)[1]
+	announcement := strings.Replace(m.Content, "announce", "", 1)
 
 	for _, guild := range s.State.Guilds {
 		if guild.ID == m.GuildID {
@@ -34,7 +35,7 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 			for _, channel := range guild.Channels {
 				if channel.ID == guild.ID {
 					sent = true
-					s.ChannelMessageSend(channel.ID, "Admins of the server can always toggle announcements from the bot creator on/off by using `announcetoggle`.\n\n**Announcement below:**\n"+announcement)
+					s.ChannelMessageSend(channel.ID, "Admins of the server can always toggle announcements from the bot creator on/off by using `toggle -a`.\n\n**Announcement below:**\n"+announcement)
 					break
 				}
 			}
@@ -44,7 +45,7 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 
 			for _, channel := range guild.Channels {
-				_, err := s.ChannelMessageSend(channel.ID, "Admins of the server can always toggle announcements from the bot creator on/off by using `announcetoggle`.\n\n**Announcement below:**\n"+announcement)
+				_, err := s.ChannelMessageSend(channel.ID, "Admins of the server can always toggle announcements from the bot creator on/off by using `toggle -a`.\n\n**Announcement below:**\n"+announcement)
 				if err == nil {
 					break
 				}
