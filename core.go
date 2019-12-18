@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -102,18 +103,18 @@ func main() {
 	// Get osu! mapper tracking data
 	// go osutools.TrackMapperPost(discord) Commented until a solution is found for its issues
 
-	// // OpenDB
-	// db, err := sql.Open("mysql", config.Conf.Database.Username+":"+config.Conf.Database.Password+"@/"+config.Conf.Database.Nae)
-	// tools.ErrRead(er)
-	// rows, err := db.Prepare("CREATE TABLE IF NOT EXISTS servers ")
-	// tools.ErrRead(er)
-	// fmt.Println(ros)
+	// OpenDB
+	tools.DB, err = sql.Open("mysql", config.Conf.Database.Username+":"+config.Conf.Database.Password+"@/"+config.Conf.Database.Name)
+	tools.ErrRead(err)
+	err = tools.DB.Ping()
+	tools.ErrRead(err)
 
 	// Create a channel to keep the bot running until a prompt is given to close
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Kill)
 	<-sc
 
-	// Close the Discord Session
+	// Close sessions
 	discord.Close()
+	tools.DB.Close()
 }
