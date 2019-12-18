@@ -236,6 +236,9 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 				Value: ssh + " " + ss + "\n" + sh + " " + s + "\n" + a,
 			},
 		}
+		embed.Image = &discordgo.MessageEmbedImage{
+			URL: "https://osu.ppy.sh/pages/include/profile-graphactivity.php?_jpg&u=" + strconv.Itoa(user.UserID),
+		}
 	} else {
 		pp := "**PP:** " + strconv.FormatFloat(user.PP, 'f', 2, 64)
 		rank := "**Rank:** #" + strconv.Itoa(user.Rank) + " (" + user.Country + "#" + strconv.Itoa(user.CountryRank) + ")"
