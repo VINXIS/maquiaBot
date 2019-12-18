@@ -25,9 +25,9 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 		messages, _ := s.ChannelMessages(m.ChannelID, -1, "", "", "")
 		for _, msg := range messages {
 			if twitterRegex.MatchString(msg.Content) && len(msg.Embeds) > 0 {
+				ID, _ = strconv.ParseInt(twitterRegex.FindStringSubmatch(msg.Content)[2], 10, 64)
 				if msg.Embeds[0].Video != nil {
 					linkType = "mp4"
-					ID, _ = strconv.ParseInt(twitterRegex.FindStringSubmatch(msg.Content)[2], 10, 64)
 					break
 				} else if msg.Embeds[0].Image != nil {
 					link = msg.Embeds[0].Image.URL
@@ -48,7 +48,7 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		message := &discordgo.MessageSend{
 			File: &discordgo.File{
-				Name:   "twitter." + linkType,
+				Name:   strconv.FormatInt(ID, 10) + "." + linkType,
 				Reader: response.Body,
 			},
 		}
@@ -96,7 +96,7 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		message := &discordgo.MessageSend{
 			File: &discordgo.File{
-				Name:   "twitter." + linkType,
+				Name:   strconv.FormatInt(ID, 10) + "." + linkType,
 				Reader: response.Body,
 			},
 		}
