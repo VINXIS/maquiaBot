@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -37,9 +38,14 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 	user := &discordgo.User{}
 	username := ""
 	userQuotes := serverData.Quotes
+	number := 0
 	if quoteRegex.MatchString(m.Content) {
 		username = quoteRegex.FindStringSubmatch(m.Content)[2]
-
+		if number, err = strconv.Atoi(strings.Split(username, " ")[1]); err == nil {
+			username = strings.Split(username, " ")[0]
+		} else {
+			number = 0
+		}
 		// Get user
 		members, _ := s.GuildMembers(m.GuildID, "", 1000)
 		sort.Slice(members, func(i, j int) bool {
@@ -56,6 +62,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		if user.ID == "" {
 			s.ChannelMessageSend(m.ChannelID, "No user with the name **"+username+"** found!")
+			return
 		}
 
 		userQuotes = []discordgo.Message{}
@@ -72,6 +79,12 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	roll, _ := rand.Int(rand.Reader, big.NewInt(int64(len(userQuotes))))
 	quote := userQuotes[roll.Int64()]
+	if number != 0 {
+		if number > len(userQuotes) {
+			number = len(userQuotes)
+		}
+		quote = userQuotes[number-1]
+	}
 	timestamp, _ := quote.Timestamp.Parse()
 	timestampString := strings.Replace(timestamp.Format(time.RFC822Z), "+0000", "UTC", -1)
 	if user.ID == "" {

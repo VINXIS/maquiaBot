@@ -22,7 +22,7 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	announcement := strings.Replace(m.Content, "announce", "", 1)
+	announcement := announceRegex.FindStringSubmatch(m.Content)[1] + strings.Join(strings.Split(m.Content, "\n")[1:], "\n")
 
 	for _, guild := range s.State.Guilds {
 		if guild.ID == m.GuildID {

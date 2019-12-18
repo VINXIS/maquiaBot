@@ -7,11 +7,17 @@ import (
 // Quote explains the quote functionality
 func Quote(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: q / quote"
-	embed.Description = "`(q|quote) [username]` gives a quote."
+	embed.Description = "`(q|quote) [<username> [num]]` gives a quote."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
-			Name:  "[username]",
-			Value: "The user to get a quote for. No username will have the bot randomly choose from the users.",
+			Name:   "[username]",
+			Value:  "The user to get a quote for. No username will have the bot randomly choose from the users.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:   "[num]",
+			Value:  "The user's nth quote to give. No number will result in a random quote to be chosen.",
+			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
@@ -27,13 +33,13 @@ func QuoteAdd(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Description = "`(qa|qadd|quotea|quoteadd) [username] [-r]` adds a quote to the user."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
-			Name:  "[username]",
-			Value: "The user / message ID / message link to add a quote for. If you do not give anything, it will add the quote to the latest person who sent a message aside for you.",
+			Name:   "[username]",
+			Value:  "The user / message ID / message link to add a quote for. If you do not give anything, it will add the quote to the latest person who sent a message aside for you.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:  "[-r]",
-			Value: "Randomly choose one of the messages instead of the latest.",
+			Name:   "[-r]",
+			Value:  "Randomly choose one of the messages instead of the latest.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{

@@ -103,7 +103,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 	embed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://osu.ppy.sh/users/" + strconv.Itoa(user.UserID),
-			Name:    user.Username + " - " + strconv.Itoa(user.UserID),
+			Name:    user.Username + " (" + strconv.Itoa(user.UserID) + ")",
 			IconURL: "https://osu.ppy.sh/images/flags/" + user.Country + ".png",
 		},
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
@@ -152,13 +152,12 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 
 			mapField := &discordgo.MessageEmbedField{
-				Name: beatmap.Artist + " - " + beatmap.Title + " **+" + mods + "**",
+				Name: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] **+" + mods + "**",
 				Value: "[**Link**](https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID) + ") | <osu://dl/" + strconv.Itoa(beatmap.BeatmapSetID) + ">\n" +
-					"**Score:** " + strconv.FormatInt(score.Score.Score, 10) + " " + scoreRank + "\n" +
+					"**PP:** " + strconv.FormatFloat(score.PP, 'f', 2, 64) + " " + scoreRank + "\n" +
 					"**Acc:** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%\n" +
-					"**Combo:** " + strconv.Itoa(score.MaxCombo) + "/" + strconv.Itoa(beatmap.MaxCombo) + "x\n" +
-					"**PP:** " + strconv.FormatFloat(score.PP, 'f', 2, 64) + "\n",
-				Inline: true,
+					"**Score:** " + strconv.FormatInt(score.Score.Score, 10) + "\n" +
+					"**Combo:** " + strconv.Itoa(score.MaxCombo) + "/" + strconv.Itoa(beatmap.MaxCombo) + "x\n",
 			}
 
 			mapList = append(mapList, mapField)
