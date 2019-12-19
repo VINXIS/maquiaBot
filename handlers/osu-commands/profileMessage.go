@@ -1,6 +1,7 @@
 package osucommands
 
 import (
+	"bytes"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	"github.com/wcharczuk/go-chart"
 )
 
 // ProfileMessage gets the information for the specified profile linked
@@ -115,11 +117,13 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 	// Get tops / details if asked
 	totalHits := user.Count50 + user.Count100 + user.Count300
 	g, _ := s.Guild(config.Conf.Server)
+	buffer := bytes.NewBuffer([]byte{})
 	if profileCmd3Regex.MatchString(m.Content) {
 		// Get the user's best scores
 		userBest, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 			UserID: user.UserID,
 			Mode:   mode,
+			Limit:  100,
 		})
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
@@ -164,6 +168,26 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		}
 		embed.Description += "**Top plays:**" + "\n" + `\_\_\_\_\_\_\_\_\_\_`
 		embed.Fields = mapList
+
+		var x, y []float64
+		for i, play := range userBest {
+			x = append(x, float64(i+1))
+			y = append(y, play.PP)
+		}
+		graph := chart.Chart{
+			Series: []chart.Series{
+				chart.ContinuousSeries{
+					XValueFormatter: chart.IntValueFormatter,
+					Style: chart.Style{
+						StrokeColor: chart.GetDefaultColor(0).WithAlpha(64),
+						FillColor:   chart.GetDefaultColor(0).WithAlpha(64),
+					},
+					XValues: x,
+					YValues: y,
+				},
+			},
+		}
+		err = graph.Render(chart.PNG, buffer)
 	} else if profileCmd4Regex.MatchString(m.Content) && totalHits != 0 {
 		// Get the user's recent scores
 		userRecent, err := OsuAPI.GetUserRecent(osuapi.GetUserScoresOpts{
@@ -252,7 +276,16 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			pc + "\n" +
 			timePlayed
 	}
-
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	if buffer.Len() != 0 {
+		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+			Files: []*discordgo.File{
+				&discordgo.File{
+					Name:   "tops.png",
+					Reader: buffer,
+				},
+			},
+		})
+	}
 	return
 }
