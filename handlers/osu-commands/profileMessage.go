@@ -193,6 +193,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		userRecent, err := OsuAPI.GetUserRecent(osuapi.GetUserScoresOpts{
 			UserID: user.UserID,
 			Mode:   mode,
+			Limit:  100,
 		})
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")

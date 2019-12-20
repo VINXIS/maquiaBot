@@ -107,7 +107,7 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	for _, skill := range skills {
 		percent := math.Max(0, math.Min(100, skillRang.NormFloat64()*12.5+50))
 		bar := tools.BarCreation(percent / 100)
-		fullText = fullText + fmt.Sprintf("%-"+strconv.FormatFloat(maxLength, 'f', 0, 64)+"s: %3d%% %s", skill, int(percent), bar) + "\n"
+		fullText += fmt.Sprintf("%-"+strconv.FormatFloat(maxLength, 'f', 0, 64)+"s: %3d%% %s", skill, int(percent), bar) + "\n"
 	}
 	randNum := skillRang.Intn(len(serverData.Adjectives))
 	adjective := serverData.Adjectives[randNum]
@@ -115,7 +115,7 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	randNum = skillRang.Intn(len(serverData.Nouns))
 	noun := serverData.Nouns[randNum]
 
-	fullText = fullText + "\n" + text + " chosen the \"" + adjective + " " + noun + "\" class.```"
+	fullText += "\n" + text + " chosen the \"" + adjective + " " + noun + "\" class.```"
 	_, err = s.ChannelMessageSend(m.ChannelID, text2+fullText)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Message probably went over the 2000 character limit!")
