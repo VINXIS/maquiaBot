@@ -2,6 +2,7 @@ package gencommands
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"regexp"
 	"sort"
@@ -337,6 +338,48 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 		channelInfo += strconv.Itoa(other) + " other\n"
 	}
 
+	// Quote info
+	quoteCount := strconv.Itoa(len(serverData.Quotes))
+	quoteInfo := "N/A"
+	quoteData := []struct {
+		Name  string
+		ID    string
+		Count int
+	}{}
+	for _, quote := range serverData.Quotes {
+		included := false
+		for i, user := range quoteData {
+			if quote.Author.ID == user.ID {
+				included = true
+				quoteData[i].Count++
+				break
+			}
+		}
+		if !included {
+			user, _ := s.User(quote.Author.ID)
+			quoteData = append(quoteData, struct {
+				Name  string
+				ID    string
+				Count int
+			}{
+				Name:  user.Username,
+				ID:    quote.Author.ID,
+				Count: 1,
+			})
+		}
+	}
+	sort.Slice(quoteData, func(i, j int) bool { return quoteData[i].Count > quoteData[j].Count })
+
+	for i, user := range quoteData {
+		if (i+1)%4 == 0 {
+			quoteInfo += fmt.Sprintf("**%s:** %d,\n", user.Name, user.Count)
+		} else {
+			quoteInfo += fmt.Sprintf("**%s:** %d, ", user.Name, user.Count)
+		}
+	}
+	quoteInfo = strings.TrimSuffix(quoteInfo, ", ")
+	quoteInfo = strings.TrimSuffix(quoteInfo, ",\n")
+
 	// AFK Timeout
 	timeout := server.AfkTimeout
 	timeoutString := "N/A"
@@ -420,13 +463,19 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
+				Name:   "`" + serverData.Prefix + "stats` Information:",
+				Value:  statsInfo,
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
 				Name:   "Server Options",
 				Value:  toggleInfo,
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
-				Name:  "`" + serverData.Prefix + "stats` Information:",
-				Value: statsInfo,
+				Name:   "Quotes (" + quoteCount + ")",
+				Value:  quoteInfo,
+				Inline: true,
 			},
 		},
 	})
