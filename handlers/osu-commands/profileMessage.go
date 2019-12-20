@@ -26,8 +26,9 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 	modeRegex, _ := regexp.Compile(`-m\s+(.+)`)
 	mode := osuapi.ModeOsu
 
+	mValue := ""
 	if modeRegex.MatchString(m.Content) {
-		mValue := strings.ToLower(modeRegex.FindStringSubmatch(m.Content)[1])
+		mValue = strings.ToLower(modeRegex.FindStringSubmatch(m.Content)[1])
 		switch mValue {
 		case "taiko", "tko", "1", "t":
 			mode = osuapi.ModeTaiko
@@ -36,6 +37,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		case "mania", "man", "3", "m":
 			mode = osuapi.ModeOsuMania
 		}
+		mValue = strings.ToLower(modeRegex.FindStringSubmatch(m.Content)[0])
 	}
 
 	// Obtain username/user ID and assign variables
@@ -49,6 +51,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 	} else if profileCmd1Regex.MatchString(m.Content) {
 		value = profileCmd1Regex.FindStringSubmatch(m.Content)[2]
 	}
+	value = strings.TrimSpace(strings.Replace(value, mValue, "", -1))
 
 	if value == "" {
 		for _, player := range cache {
@@ -127,6 +130,9 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		})
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+			return
+		} else if len(userBest) == 0 {
+			s.ChannelMessageSend(m.ChannelID, "This user has no top scores!")
 			return
 		}
 
