@@ -1,6 +1,6 @@
 package tools
 
-import "database/sql"
+import "github.com/jinzhu/gorm"
 
 // DB is the database
-var DB *sql.DB
+var DB *gorm.DB

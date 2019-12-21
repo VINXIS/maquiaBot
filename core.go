@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -23,7 +22,8 @@ import (
 	tools "./tools"
 
 	"github.com/bwmarrin/discordgo"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 func main() {
@@ -104,9 +104,7 @@ func main() {
 	// go osutools.TrackMapperPost(discord) Commented until a solution is found for its issues
 
 	// OpenDB
-	tools.DB, err = sql.Open("mysql", config.Conf.Database.Username+":"+config.Conf.Database.Password+"@/"+config.Conf.Database.Name)
-	tools.ErrRead(err)
-	err = tools.DB.Ping()
+	tools.DB, err = gorm.Open("mysql", config.Conf.Database.Username+":"+config.Conf.Database.Password+"@/"+config.Conf.Database.Name)
 	tools.ErrRead(err)
 
 	// Create a channel to keep the bot running until a prompt is given to close

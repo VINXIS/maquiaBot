@@ -370,6 +370,9 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	sort.Slice(quoteData, func(i, j int) bool { return quoteData[i].Count > quoteData[j].Count })
 
+	if len(quoteData) != 0 {
+		quoteInfo = ""
+	}
 	for i, user := range quoteData {
 		if (i+1)%4 == 0 {
 			quoteInfo += fmt.Sprintf("**%s:** %d,\n", user.Name, user.Count)

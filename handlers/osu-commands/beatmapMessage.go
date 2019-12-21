@@ -128,7 +128,12 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 			URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
 		}
 	}
-	s.ChannelMessageEdit(message.ChannelID, message.ID, "")
-	s.ChannelMessageEditEmbed(message.ChannelID, message.ID, embed)
+	content := ""
+	s.ChannelMessageEditComplex(&discordgo.MessageEdit{
+		Content: &content,
+		Embed:   embed,
+		ID:      message.ID,
+		Channel: message.ChannelID,
+	})
 	return
 }
