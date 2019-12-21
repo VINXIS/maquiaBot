@@ -19,7 +19,7 @@ import (
 )
 
 // Compare compares finds a score from the current user on the previous map linked by the bot
-func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache []structs.PlayerData, serverPrefix string, mapCache []structs.MapData) {
+func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache []structs.PlayerData, mapCache []structs.MapData) {
 	mapRegex, _ := regexp.Compile(`(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	compareRegex, _ := regexp.Compile(`(c|compare)\s*(.+)?`)
@@ -46,34 +46,10 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, ca
 	}
 
 	// Get the map
+	var submatches []string
 	if mapRegex.MatchString(m.Content) {
-		submatches := mapRegex.FindStringSubmatch(m.Content)
-		switch submatches[3] {
-		case "s":
-			beatmap = osutools.BeatmapParse(submatches[4], "set", osuapi.ParseMods(mods))
-		case "b":
-			beatmap = osutools.BeatmapParse(submatches[4], "map", osuapi.ParseMods(mods))
-		case "beatmaps":
-			beatmap = osutools.BeatmapParse(submatches[4], "map", osuapi.ParseMods(mods))
-		case "beatmapsets":
-			if len(submatches[7]) > 0 {
-				beatmap = osutools.BeatmapParse(submatches[7], "map", osuapi.ParseMods(mods))
-			} else {
-				beatmap = osutools.BeatmapParse(submatches[4], "set", osuapi.ParseMods(mods))
-			}
-		}
-		if beatmap.BeatmapID == 0 {
-			s.ChannelMessageSend(m.ChannelID, "Map does not exist!")
-			return
-		} else if beatmap.Approved < 1 {
-			s.ChannelMessageSend(m.ChannelID, "The map `"+beatmap.Artist+" - "+beatmap.Title+"` does not have a leaderboard!")
-			return
-		}
-		username = strings.TrimSpace(strings.Replace(username, submatches[0], "", -1))
-	}
-
-	// Check if message linked a map or not, if not then check previous messages instead
-	if beatmap.BeatmapID == 0 {
+		submatches = mapRegex.FindStringSubmatch(m.Content)
+	} else {
 		// Get prev messages
 		messages, err := s.ChannelMessages(m.ChannelID, -1, "", "", "")
 		if err != nil {
@@ -81,44 +57,52 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, ca
 			return
 		}
 
-		beatmapRegex, _ := regexp.Compile(`https://osu.ppy.sh/beatmaps/(\d+)`)
-		mapID := 0
-		found := false
-
 		// Look for a valid beatmap ID
 		for _, msg := range messages {
-			msgTime, _ := msg.Timestamp.Parse()
-			if msg.Author.ID == s.State.User.ID && time.Since(msgTime) < time.Hour {
-				if msg.ID != (discordgo.Message{}).ID && len(msg.Embeds) > 0 && msg.Embeds[0].Author != nil {
-					if beatmapRegex.MatchString(msg.Embeds[0].URL) {
-						mapID, _ = strconv.Atoi(beatmapRegex.FindStringSubmatch(msg.Embeds[0].URL)[1])
-						found = true
-						break
-					} else if beatmapRegex.MatchString(msg.Embeds[0].Author.URL) {
-						mapID, _ = strconv.Atoi(beatmapRegex.FindStringSubmatch(msg.Embeds[0].Author.URL)[1])
-						found = true
-						break
-					}
+			if len(msg.Embeds) > 0 && msg.Embeds[0].Author != nil {
+				if mapRegex.MatchString(msg.Embeds[0].URL) {
+					submatches = mapRegex.FindStringSubmatch(msg.Embeds[0].URL)
+					break
+				} else if mapRegex.MatchString(msg.Embeds[0].Author.URL) {
+					submatches = mapRegex.FindStringSubmatch(msg.Embeds[0].Author.URL)
+					break
 				}
+			} else if mapRegex.MatchString(msg.Content) {
+				submatches = mapRegex.FindStringSubmatch(msg.Content)
+				break
 			}
 		}
+	}
 
-		// Check if found
-		if found == false {
-			s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
-			return
-		}
+	// Check if found
+	if len(submatches) == 0 {
+		s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
+		return
+	}
 
-		// Get the map
-		beatmap = osutools.BeatmapParse(strconv.Itoa(mapID), "map", osuapi.ParseMods(mods))
-		if beatmap.BeatmapID == 0 {
-			s.ChannelMessageSend(m.ChannelID, "Map does not exist!")
-			return
-		} else if beatmap.Approved < 1 {
-			s.ChannelMessageSend(m.ChannelID, "The map `"+beatmap.Artist+" - "+beatmap.Title+"` does not have a leaderboard!")
-			return
+	// Get the map
+	switch submatches[3] {
+	case "s":
+		beatmap = osutools.BeatmapParse(submatches[4], "set")
+	case "b":
+		beatmap = osutools.BeatmapParse(submatches[4], "map")
+	case "beatmaps":
+		beatmap = osutools.BeatmapParse(submatches[4], "map")
+	case "beatmapsets":
+		if len(submatches[7]) > 0 {
+			beatmap = osutools.BeatmapParse(submatches[7], "map")
+		} else {
+			beatmap = osutools.BeatmapParse(submatches[4], "set")
 		}
 	}
+	if beatmap.BeatmapID == 0 {
+		s.ChannelMessageSend(m.ChannelID, "Map does not exist!")
+		return
+	} else if beatmap.Approved < 1 {
+		s.ChannelMessageSend(m.ChannelID, "The map `"+beatmap.Artist+" - "+beatmap.Title+"` does not have a leaderboard!")
+		return
+	}
+	username = strings.TrimSpace(strings.Replace(username, submatches[0], "", -1))
 
 	if beatmap.BeatmapID == 0 {
 		s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
@@ -215,7 +199,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, ca
 	mods = score.Mods.String()
 	accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 	Color := osutools.ModeColour(beatmap.Mode)
-	sr, _, _, _, _, _ := osutools.BeatmapCache(mods, beatmap, mapCache)
+	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 	scorePrint := " **" + tools.Comma(score.Score.Score) + "** "

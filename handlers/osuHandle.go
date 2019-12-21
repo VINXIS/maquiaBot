@@ -10,8 +10,9 @@ import (
 )
 
 // OsuHandle handles commands that are regarding osu!
-func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, playerCache []structs.PlayerData, mapCache []structs.MapData, mapperData []structs.MapperData, serverPrefix string) {
+func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, playerCache []structs.PlayerData, mapCache []structs.MapData, mapperData []structs.MapperData) {
 	profileRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(u|users)\/(\S+)`)
+	beatmapRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	// Check if any args were even given
 	if len(args) == 1 {
 		go osucommands.ProfileMessage(s, m, profileRegex, playerCache)
@@ -30,11 +31,13 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 		case "bpm":
 			go osucommands.BPM(s, m, playerCache)
 		case "c", "compare":
-			go osucommands.Compare(s, m, args, playerCache, serverPrefix, mapCache)
+			go osucommands.Compare(s, m, args, playerCache, mapCache)
 		case "farm":
 			go osucommands.Farm(s, m, playerCache)
 		case "link", "set":
 			go osucommands.Link(s, m, args, playerCache)
+		case "m", "map":
+			go osucommands.BeatmapMessage(s, m, beatmapRegex, mapCache)
 		case "mt", "mtrack", "maptrack", "mappertrack":
 			go osucommands.TrackMapper(s, m, mapperData)
 		case "mti", "mtinfo", "mtrackinfo", "maptracking", "mappertracking", "mappertrackinfo":
@@ -55,6 +58,6 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 			go osucommands.ProfileMessage(s, m, profileRegex, playerCache)
 		}
 	} else {
-		s.ChannelMessageSend(m.ChannelID, "Please specify a command! Check `"+serverPrefix+"help` for more details!")
+		s.ChannelMessageSend(m.ChannelID, "Please specify a command! Check `help` for more details!")
 	}
 }

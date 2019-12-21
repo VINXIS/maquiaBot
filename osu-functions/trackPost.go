@@ -55,7 +55,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 						}
 
 						// Save beatmap
-						beatmap := BeatmapParse(strconv.Itoa(score.BeatmapID), "map", score.Mods)
+						beatmap := BeatmapParse(strconv.Itoa(score.BeatmapID), "map")
 
 						// Assign timing variables for values below
 						totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
@@ -72,7 +72,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []struc
 						// Assign values
 						accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 						Color := ModeColour(osuapi.ModeOsu)
-						sr, _, _, _, _, _ := BeatmapCache(mods, beatmap, mapCache)
+						sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
 						length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 						bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 						scorePrint := " **" + tools.Comma(score.Score.Score) + "** "

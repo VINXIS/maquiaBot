@@ -162,7 +162,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "h", serverPrefix + "help":
 			go HelpHandle(s, m, serverPrefix)
 		case serverPrefix + "o", serverPrefix + "osu":
-			go OsuHandle(s, m, args, profileCache, mapCache, mapperData, serverPrefix)
+			go OsuHandle(s, m, args, profileCache, mapCache, mapperData)
 		case serverPrefix + "pokemon":
 			go PokemonHandle(s, m, args, serverPrefix)
 
@@ -264,11 +264,13 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				go osucommands.BPM(s, m, profileCache)
 			}
 		case serverPrefix + "c", serverPrefix + "compare":
-			go osucommands.Compare(s, m, args, profileCache, serverPrefix, mapCache)
+			go osucommands.Compare(s, m, args, profileCache, mapCache)
 		case serverPrefix + "farm":
 			go osucommands.Farm(s, m, profileCache)
 		case serverPrefix + "link", serverPrefix + "set":
 			go osucommands.Link(s, m, args, profileCache)
+		case serverPrefix + "m", serverPrefix + "map":
+			go osucommands.BeatmapMessage(s, m, beatmapRegex, mapCache)
 		case serverPrefix + "mt", serverPrefix + "mtrack", serverPrefix + "maptrack", serverPrefix + "mappertrack":
 			go osucommands.TrackMapper(s, m, mapperData)
 		case serverPrefix + "mti", serverPrefix + "mtinfo", serverPrefix + "mtrackinfo", serverPrefix + "maptracking", serverPrefix + "mappertracking", serverPrefix + "mappertrackinfo":

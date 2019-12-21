@@ -103,7 +103,7 @@ func main() {
 	// Get osu! mapper tracking data
 	// go osutools.TrackMapperPost(discord) Commented until a solution is found for its issues
 
-	// OpenDB
+	// Open DB
 	tools.DB, err = gorm.Open("mysql", config.Conf.Database.Username+":"+config.Conf.Database.Password+"@/"+config.Conf.Database.Name)
 	tools.ErrRead(err)
 

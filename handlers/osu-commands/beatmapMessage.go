@@ -18,7 +18,39 @@ import (
 // BeatmapMessage is a handler executed when a message contains a beatmap link
 func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp, cache []structs.MapData) {
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
-	submatches := regex.FindStringSubmatch(m.Content)
+	accRegex, _ := regexp.Compile(`-acc\s*(\S+)`)
+	comboRegex, _ := regexp.Compile(`-c\s*(\S+)`)
+	missRegex, _ := regexp.Compile(`-x\s*(\S+)`)
+	mapRegex, _ := regexp.Compile(`[^-]m`)
+
+	// See if map was linked or if the map command was used
+	var submatches []string
+	if (strings.Contains(m.Content, "map") || mapRegex.MatchString(m.Content)) && !regex.MatchString(m.Content) {
+		// Get prev messages
+		messages, err := s.ChannelMessages(m.ChannelID, -1, "", "", "")
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
+			return
+		}
+
+		// Look for a valid beatmap ID
+		for _, msg := range messages {
+			if len(msg.Embeds) > 0 && msg.Embeds[0].Author != nil {
+				if regex.MatchString(msg.Embeds[0].URL) {
+					submatches = regex.FindStringSubmatch(msg.Embeds[0].URL)
+					break
+				} else if regex.MatchString(msg.Embeds[0].Author.URL) {
+					submatches = regex.FindStringSubmatch(msg.Embeds[0].Author.URL)
+					break
+				}
+			} else if regex.MatchString(msg.Content) {
+				submatches = regex.FindStringSubmatch(msg.Content)
+				break
+			}
+		}
+	} else {
+		submatches = regex.FindStringSubmatch(m.Content)
+	}
 
 	message, err := s.ChannelMessageSend(m.ChannelID, "Processing beatmap...")
 	if err != nil {
@@ -39,16 +71,16 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	// Check if the format uses a /b/, /s/, /beatmaps/, or /beatmapsets/ link
 	switch submatches[2] {
 	case "s":
-		beatmap = osutools.BeatmapParse(submatches[3], "set", osuapi.ParseMods(mods))
+		beatmap = osutools.BeatmapParse(submatches[3], "set")
 	case "b":
-		beatmap = osutools.BeatmapParse(submatches[3], "map", osuapi.ParseMods(mods))
+		beatmap = osutools.BeatmapParse(submatches[3], "map")
 	case "beatmaps":
-		beatmap = osutools.BeatmapParse(submatches[3], "map", osuapi.ParseMods(mods))
+		beatmap = osutools.BeatmapParse(submatches[3], "map")
 	case "beatmapsets":
 		if len(submatches[6]) > 0 {
-			beatmap = osutools.BeatmapParse(submatches[6], "map", osuapi.ParseMods(mods))
+			beatmap = osutools.BeatmapParse(submatches[6], "map")
 		} else {
-			beatmap = osutools.BeatmapParse(submatches[3], "set", osuapi.ParseMods(mods))
+			beatmap = osutools.BeatmapParse(submatches[3], "set")
 		}
 	}
 
@@ -83,6 +115,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		hitSeconds = "0" + hitSeconds
 	}
 
+	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + totalSeconds + " (" + fmt.Sprint(hitMinutes) + ":" + hitSeconds + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 	combo := "**FC:** " + strconv.Itoa(beatmap.MaxCombo) + "x"
@@ -99,8 +132,52 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		diffs = "**" + strconv.Itoa(len(beatmaps)) + "** difficulties <:ahFuck:550808614202245131>"
 	}
 
+	// Get acc value
+	accVal := ""
+	if accRegex.MatchString(m.Content) {
+		accVal = accRegex.FindStringSubmatch(m.Content)[1]
+		_, err = strconv.ParseFloat(accVal, 64)
+		if err != nil {
+			accVal = ""
+		}
+	}
+
+	// Get combo value
+	comboVal := ""
+	if comboRegex.MatchString(m.Content) {
+		comboVal = comboRegex.FindStringSubmatch(m.Content)[1]
+		comboNum, err := strconv.Atoi(comboVal)
+		if err != nil || comboNum <= 0 || comboNum > beatmap.MaxCombo {
+			comboVal = ""
+		}
+	}
+
+	// Get miss value
+	missVal := ""
+	if missRegex.MatchString(m.Content) {
+		missVal = missRegex.FindStringSubmatch(m.Content)[1]
+		missNum, err := strconv.Atoi(missVal)
+		if err != nil || missNum <= 0 || missNum > beatmap.Circles+beatmap.Sliders+beatmap.Spinners {
+			missVal = ""
+		}
+	}
+
 	// Calculate SR and PP
-	starRating, ppSS, pp99, pp98, pp97, pp95 := osutools.BeatmapCache(mods, beatmap, cache)
+	values := osutools.BeatmapCalc(mods, accVal, comboVal, missVal, beatmap, cache)
+	ppText := ""
+	if len(values) == 1 {
+		ppText = values[0]
+	} else {
+		ppText = values[0] + values[1] + values[2] + values[3] + values[4]
+	}
+
+	ppTextHeader := "**[" + beatmap.DiffName + "]** with mods: **" + strings.ToUpper(mods) + "**"
+	if comboVal != "" {
+		ppTextHeader += ", combo: **" + comboVal + "**"
+	}
+	if missVal != "" {
+		ppTextHeader += ", misses: **" + missVal + "**"
+	}
 
 	// Create embed
 	embed := &discordgo.MessageEmbed{
@@ -110,15 +187,15 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 			IconURL: "https://a.ppy.sh/" + strconv.Itoa(beatmap.CreatorID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
 		Color: Color,
-		Description: starRating + length + bpm + combo + "\n" +
+		Description: sr + length + bpm + combo + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n" +
 			status + "\n" +
 			download + "\n" +
 			diffs + "\n" + "\n" +
-			"**[" + beatmap.DiffName + "]** with mods: **" + strings.ToUpper(mods) + "**\n" +
+			ppTextHeader + "\n" +
 			//aimRating + speedRating + totalRating + "\n" + TODO: Make SR calc work
-			ppSS + pp99 + pp98 + pp97 + pp95,
+			ppText,
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 		},

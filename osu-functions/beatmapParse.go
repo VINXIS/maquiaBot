@@ -10,7 +10,7 @@ import (
 )
 
 // BeatmapParse parses beatmap and obtains the .osu file
-func BeatmapParse(id, format string, mods osuapi.Mods) (beatmap osuapi.Beatmap) {
+func BeatmapParse(id, format string) (beatmap osuapi.Beatmap) {
 	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
 
 	mapID, err := strconv.Atoi(id)

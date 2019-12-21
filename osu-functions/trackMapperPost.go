@@ -52,7 +52,7 @@ func TrackMapperPost(s *discordgo.Session) {
 					setsChecked[beatmap.BeatmapSetID] = true
 
 					// see if set satisfies approvalstatus change/submission requirements
-					osuMap := BeatmapParse(strconv.Itoa(beatmap.BeatmapSetID), "set", osuapi.ParseMods("NM"))
+					osuMap := BeatmapParse(strconv.Itoa(beatmap.BeatmapSetID), "set")
 					var targetMap osuapi.Beatmap
 					var approvals []osuapi.ApprovedStatus // Store all approvedstatuses because sometimes the osu!api gives sets with multiple approved status
 					for _, dataMap := range mapperData[i].Beatmaps {
@@ -113,7 +113,7 @@ func TrackMapperPost(s *discordgo.Session) {
 					file, err := ioutil.ReadFile("./data/osuData/mapCache.json")
 					tools.ErrRead(err)
 					_ = json.Unmarshal(file, &mapCache)
-					starRating, ppSS, pp99, pp98, pp97, pp95 := BeatmapCache("NM", osuMap, mapCache)
+					values := BeatmapCalc("NM", "", "", "", osuMap, mapCache)
 
 					// Create embed
 					embed := &discordgo.MessageEmbed{
@@ -123,7 +123,7 @@ func TrackMapperPost(s *discordgo.Session) {
 							IconURL: "https://a.ppy.sh/" + strconv.Itoa(osuMap.CreatorID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 						},
 						Color: Color,
-						Description: starRating + length + bpm + combo + "\n" +
+						Description: values[0] + length + bpm + combo + "\n" +
 							mapStats + "\n" +
 							mapObjs + "\n" +
 							status + "\n" +
@@ -131,7 +131,7 @@ func TrackMapperPost(s *discordgo.Session) {
 							diffs + "\n" + "\n" +
 							"**[" + osuMap.DiffName + "]** with mods: **NM**\n" +
 							//aimRating + speedRating + totalRating + "\n" + TODO: Make SR calc work
-							ppSS + pp99 + pp98 + pp97 + pp95,
+							values[1] + values[2] + values[3] + values[4] + values[5],
 						Thumbnail: &discordgo.MessageEmbedThumbnail{
 							URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 						},

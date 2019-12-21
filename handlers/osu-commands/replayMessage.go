@@ -53,7 +53,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	}
 	replay.ParseReplay(OsuAPI)
 	if replay.Beatmap.BeatmapID != 0 {
-		osutools.BeatmapParse(strconv.Itoa(replay.Beatmap.BeatmapID), "map", replay.Score.Mods)
+		osutools.BeatmapParse(strconv.Itoa(replay.Beatmap.BeatmapID), "map")
 	}
 
 	// Get time since play
@@ -75,7 +75,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	mods := replay.Score.Mods.String()
 	accCalc := (50.0*float64(replay.Score.Count50) + 100.0*float64(replay.Score.Count100) + 300.0*float64(replay.Score.Count300)) / (300.0 * float64(replay.Score.CountMiss+replay.Score.Count50+replay.Score.Count100+replay.Score.Count300)) * 100.0
 	Color := osutools.ModeColour(replay.Beatmap.Mode)
-	sr, _, _, _, _, _ := osutools.BeatmapCache(mods, replay.Beatmap, mapCache)
+	sr := "**SR:** " + strconv.FormatFloat(replay.Beatmap.DifficultyRating, 'f', 2, 64) + " "
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(replay.Beatmap.BPM) + " "
 	scorePrint := " **" + tools.Comma(replay.Score.Score) + "** "

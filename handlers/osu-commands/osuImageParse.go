@@ -228,6 +228,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		hitSeconds = "0" + hitSeconds
 	}
 
+	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 	combo := "**FC:** " + strconv.Itoa(beatmap.MaxCombo) + "x"
@@ -244,8 +245,8 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		diffs = "**" + strconv.Itoa(len(beatmaps)) + "** difficulties <:ahFuck:550808614202245131>"
 	}
 
-	// Calculate SR and PP
-	starRating, ppSS, pp99, pp98, pp97, pp95 := osutools.BeatmapCache("NM", beatmap, cache)
+	// Calculate PP
+	values := osutools.BeatmapCalc("NM", "", "", "", beatmap, cache)
 
 	// Create embed
 	embed := &discordgo.MessageEmbed{
@@ -255,7 +256,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			IconURL: "https://a.ppy.sh/" + strconv.Itoa(beatmap.CreatorID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
 		Color: Color,
-		Description: starRating + length + bpm + combo + "\n" +
+		Description: sr + length + bpm + combo + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n" +
 			status + "\n" +
@@ -263,7 +264,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			diffs + "\n" + "\n" +
 			"**[" + beatmap.DiffName + "]** " + warning + "\n" +
 			//aimRating + speedRating + totalRating + "\n" + TODO: Make SR calc work
-			ppSS + pp99 + pp98 + pp97 + pp95,
+			values[1] + values[2] + values[3] + values[4] + values[5],
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 		},
