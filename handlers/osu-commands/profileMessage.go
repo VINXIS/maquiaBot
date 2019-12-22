@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"math/rand"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -24,6 +25,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 	profileCmd3Regex, _ := regexp.Compile(`osutop`)
 	profileCmd4Regex, _ := regexp.Compile(`osudetail`)
 	modeRegex, _ := regexp.Compile(`-m\s+(.+)`)
+	recentRegex, _ := regexp.Compile(`-r(ecent)?`)
 	mode := osuapi.ModeOsu
 
 	mValue := ""
@@ -50,6 +52,10 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 		value = profileCmd2Regex.FindStringSubmatch(m.Content)[1]
 	} else if profileCmd1Regex.MatchString(m.Content) {
 		value = profileCmd1Regex.FindStringSubmatch(m.Content)[2]
+	}
+
+	if recentRegex.MatchString(m.Content) {
+		value = strings.TrimSpace(strings.Replace(value, recentRegex.FindStringSubmatch(m.Content)[0], "", -1))
 	}
 	value = strings.TrimSpace(strings.Replace(value, mValue, "", -1))
 
@@ -136,9 +142,29 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			return
 		}
 
+		userRecent := userBest
+		if recentRegex.MatchString(m.Content) {
+			// Sort scores by date and get score
+			sort.Slice(userRecent, func(i, j int) bool {
+				time1, err := time.Parse("2006-01-02 15:04:05", userRecent[i].Date.String())
+				tools.ErrRead(err)
+				time2, err := time.Parse("2006-01-02 15:04:05", userRecent[j].Date.String())
+				tools.ErrRead(err)
+
+				return time1.Unix() > time2.Unix()
+			})
+		}
+
+		amount := 5
+		if amount > len(userBest) {
+			amount = len(userBest)
+		}
 		var mapList []*discordgo.MessageEmbedField
-		for i := 0; i < 5; i++ {
+		for i := 0; i < amount; i++ {
 			score := userBest[i]
+			if recentRegex.MatchString(m.Content) {
+				score = userRecent[i]
+			}
 
 			beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 				BeatmapID: score.BeatmapID,
@@ -184,7 +210,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			}
 			hits := "[" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 			timeParse, _ := time.Parse("2006-01-02 15:04:05", score.Date.String())
-			time := tools.TimeSince(timeParse)
+			scoreTime := tools.TimeSince(timeParse)
 			mods = " **+" + mods + "** "
 
 			mapField := &discordgo.MessageEmbedField{
@@ -192,7 +218,26 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 				Value: "[**Link**](https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID) + ") | <osu://dl/" + strconv.Itoa(beatmap.BeatmapSetID) + ">\n" +
 					scoreRank + scorePrint + mods + combo + acc + "\n" +
 					pp + hits + "\n" +
-					time,
+					scoreTime,
+			}
+			if recentRegex.MatchString(m.Content) {
+				// Sort userBest back to original
+				sort.Slice(userBest, func(i, j int) bool { return userBest[i].PP > userBest[j].PP })
+				for j, bestScore := range userBest {
+					if score.BeatmapID == bestScore.BeatmapID {
+						mapField.Name = "#" + strconv.Itoa(j+1) + " " + beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "]"
+						break
+					}
+				}
+				// Sort scores back to chronological
+				sort.Slice(userRecent, func(i, j int) bool {
+					time1, err := time.Parse("2006-01-02 15:04:05", userRecent[i].Date.String())
+					tools.ErrRead(err)
+					time2, err := time.Parse("2006-01-02 15:04:05", userRecent[j].Date.String())
+					tools.ErrRead(err)
+
+					return time1.Unix() > time2.Unix()
+				})
 			}
 
 			mapList = append(mapList, mapField)

@@ -58,7 +58,7 @@ func ProfileDetail(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // ProfileTop explains the profiletop functionality
 func ProfileTop(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: osutop"
-	embed.Description = "`osutop [osu! username] [-m <mode>]` lets you obtain user top information."
+	embed.Description = "`osutop [osu! username] [-m <mode>] [-r]` lets you obtain user top information."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[osu! username]",
@@ -68,6 +68,11 @@ func ProfileTop(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		&discordgo.MessageEmbedField{
 			Name:   "[-m <mode>]",
 			Value:  "The mode to show user information for (Default: osu!standard).",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:   "[-r]",
+			Value:  "Show in chronological order instead of by PP (includes the graph).",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
