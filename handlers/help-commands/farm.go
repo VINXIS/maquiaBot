@@ -7,7 +7,7 @@ import (
 // Farm explains the farm functionality
 func Farm(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: farm"
-	embed.Description = "`[osu] farm [username] [-a num]` shows your farm rating alongside your most farmy scores."
+	embed.Description = "`[osu] farm [username] [-n num]` shows your farm rating alongside your most farmy scores."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[username]",

@@ -26,7 +26,7 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 
 	// Obtain user if any user was stated
 	userRegex, _ := regexp.Compile(`(.+)farm\s*(.+)?`)
-	amountRegex, _ := regexp.Compile(`-a\s*(\d*)`)
+	amountRegex, _ := regexp.Compile(`-n\s*(\d*)`)
 	prefix := userRegex.FindStringSubmatch(m.Content)[1]
 	username = userRegex.FindStringSubmatch(m.Content)[2]
 	if amountRegex.MatchString(m.Content) {
@@ -107,7 +107,10 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 		list += "`" + user.Farm.List[n].Name + "`: " + strconv.FormatFloat(user.Farm.List[n].FarmScore, 'f', 2, 64) + " Farmerdog rating (" + strconv.FormatFloat(user.Farm.List[n].PP, 'f', 2, 64) + ")\n"
 	}
 
-	s.ChannelMessageSend(m.ChannelID, "Farmerdog rating for **"+user.Osu.Username+":** "+strconv.FormatFloat(user.Farm.Rating, 'f', 2, 64)+"\n**Your top "+strconv.Itoa(amount)+" farmerdog scores:** \n"+list)
+	_, err = s.ChannelMessageSend(m.ChannelID, "Farmerdog rating for **"+user.Osu.Username+":** "+strconv.FormatFloat(user.Farm.Rating, 'f', 2, 64)+"\n**Your top "+strconv.Itoa(amount)+" farmerdog scores:** \n"+list)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Message probably went over the 2000 character limit!")
+	}
 }
 
 // TopFarm gives the top farmerdogs in the game based on who's been run
