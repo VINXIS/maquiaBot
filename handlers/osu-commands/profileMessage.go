@@ -190,8 +190,8 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			mapField := &discordgo.MessageEmbedField{
 				Name: "#" + strconv.Itoa(i+1) + " " + beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "]",
 				Value: "[**Link**](https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID) + ") | <osu://dl/" + strconv.Itoa(beatmap.BeatmapSetID) + ">\n" +
-					scorePrint + mods + combo + acc + scoreRank + "\n" +
-					pp + hits +"\n" + 
+					scoreRank + scorePrint + mods + combo + acc + "\n" +
+					pp + hits + "\n" +
 					time,
 			}
 

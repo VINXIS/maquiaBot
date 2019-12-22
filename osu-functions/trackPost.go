@@ -217,7 +217,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 								Description: sr + length + bpm + "\n" +
 									mapStats + "\n" +
 									mapObjs + "\n\n" +
-									scorePrint + mods + combo + acc + scoreRank + "\n" +
+									scoreRank + scorePrint + mods + combo + acc + "\n" +
 									mapCompletion + "\n" +
 									pp + hits + "\n\n",
 								Footer: &discordgo.MessageEmbedFooter{

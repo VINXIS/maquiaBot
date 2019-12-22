@@ -221,7 +221,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		Description: sr + length + bpm + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n\n" +
-			scorePrint + mods + combo + acc + scoreRank + "\n" +
+			scoreRank + scorePrint + mods + combo + acc + "\n" +
 			mapCompletion + "\n" +
 			pp + hits + "\n\n",
 		Thumbnail: &discordgo.MessageEmbedThumbnail{

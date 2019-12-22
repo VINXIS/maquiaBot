@@ -203,6 +203,12 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 	initial := i
 	for {
 		for j, score := range scores[i-initial : i] {
+			scoreRank := ""
+			for _, emoji := range g.Emojis {
+				if emoji.Name == score.Rank+"_" {
+					scoreRank = emoji.MessageFormat()
+				}
+			}
 			scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
 			scoreMods := score.Mods.String()
 			if strings.Contains(scoreMods, "DTNC") {
@@ -220,12 +226,6 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 				combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
 			}
 			acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
-			scoreRank := ""
-			for _, emoji := range g.Emojis {
-				if emoji.Name == score.Rank+"_" {
-					scoreRank = emoji.MessageFormat()
-				}
-			}
 			var pp string
 			totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
 			if score.Score.FullCombo { // If play was a perfect combo
@@ -243,7 +243,7 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 
 			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 				Name: "#" + strconv.Itoa(i-initial+j+1) + " **" + score.Username + "** (" + strconv.Itoa(score.UserID) + ")",
-				Value: scorePrint + scoreMods + combo + acc + scoreRank + "\n" +
+				Value: scoreRank + scorePrint + scoreMods + combo + acc + "\n" +
 					pp + hits + "\n" +
 					time,
 			})

@@ -308,7 +308,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 
 		if !allRegex.MatchString(m.Content) || len(scores) == 1 {
 			embed.Description +=
-				scorePrint + mods + combo + acc + scoreRank + "\n" +
+				scoreRank + scorePrint + mods + combo + acc + "\n" +
 					mapCompletion + "\n" +
 					pp + hits + "\n\n"
 			embed.Footer = &discordgo.MessageEmbedFooter{
@@ -319,7 +319,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 		}
 		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 			Name: "#" + strconv.Itoa(i+1) + " | " + time,
-			Value: scorePrint + mods + combo + acc + scoreRank + "\n" +
+			Value: scoreRank + scorePrint + mods + combo + acc + "\n" +
 				mapCompletion +
 				pp + hits + "\n\n",
 		})

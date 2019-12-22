@@ -28,7 +28,7 @@ func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Pla
 	// Check if only pp was given, or if a user was also given as well
 	ppSplit := strings.Split(username, " ")
 	for _, txt := range ppSplit {
-		if i, err := strconv.ParseFloat(strings.Replace(txt, "pp", "", -1), 64); err == nil && i > 0 {
+		if i, err := strconv.ParseFloat(strings.Replace(txt, "pp", "", -1), 64); err == nil {
 			username = strings.TrimSpace(strings.Replace(username, txt, "", 1))
 			pp = i
 			break
@@ -78,9 +78,13 @@ func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Pla
 		originalPP += score.Score.PP * math.Pow(0.95, float64(i))
 	}
 	sort.Slice(ppOnly, func(i, j int) bool { return ppOnly[i] > ppOnly[j] })
+	placement := 101
 	for i, ppVal := range ppOnly {
 		if i == 100 {
 			break
+		}
+		if ppVal == pp {
+			placement = i + 1
 		}
 		newPP += ppVal * math.Pow(0.95, float64(i))
 	}
@@ -88,5 +92,5 @@ func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Pla
 	// The result
 	ppChange := newPP - originalPP
 	totalPP := user.PP + ppChange
-	s.ChannelMessageSend(m.ChannelID, "**"+user.Username+"**: "+strconv.FormatFloat(user.PP, 'f', 2, 64)+" -> "+strconv.FormatFloat(totalPP, 'f', 2, 64)+" (+"+strconv.FormatFloat(ppChange, 'f', 2, 64)+"pp)")
+	s.ChannelMessageSend(m.ChannelID, "**"+user.Username+"**: "+strconv.FormatFloat(user.PP, 'f', 2, 64)+" -> "+strconv.FormatFloat(totalPP, 'f', 2, 64)+" (+"+strconv.FormatFloat(ppChange, 'f', 2, 64)+"pp) | **#"+strconv.Itoa(placement)+"** in top performances!")
 }
