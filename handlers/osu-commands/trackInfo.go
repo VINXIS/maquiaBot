@@ -4,8 +4,9 @@ import (
 	"strconv"
 	"strings"
 
-	tools "../../tools"
 	osutools "../../osu-functions"
+	structs "../../structs"
+	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -135,4 +136,28 @@ func TrackInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Embed:   &embed,
 	})
 	return
+}
+
+// TrackMapperInfo gives information about mapper tracking for the channel
+func TrackMapperInfo(s *discordgo.Session, m *discordgo.MessageCreate, mapperData []structs.MapperData) {
+	channel, err := s.Channel(m.ChannelID)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "This is not an allowed channel!")
+		return
+	}
+
+	var mappers []string
+	for _, mapper := range mapperData {
+		for _, ch := range mapper.Channels {
+			if ch == channel.ID {
+				mappers = append(mappers, mapper.Mapper.Username)
+			}
+		}
+	}
+	if len(mappers) == 0 {
+		s.ChannelMessageSend(m.ChannelID, "No mappers are currently being tracked!")
+		return
+	}
+
+	s.ChannelMessageSend(m.ChannelID, "This channel is following "+strconv.Itoa(len(mappers))+" mapper(s). They are:\n"+strings.Join(mappers, ", "))
 }

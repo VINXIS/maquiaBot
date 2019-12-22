@@ -44,9 +44,9 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 			go osucommands.TrackMapperInfo(s, m, mapperData)
 		case "ppadd":
 			go osucommands.PPAdd(s, m, playerCache)
-		case "recent", "r", "rs":
+		case "r", "rs", "recent":
 			go osucommands.Recent(s, m, "recent", playerCache, mapCache)
-		case "recentb", "rb", "recentbest":
+		case "rb", "recentb", "recentbest":
 			go osucommands.Recent(s, m, "best", playerCache, mapCache)
 		case "t", "top":
 			go osucommands.Top(s, m, playerCache, mapCache)

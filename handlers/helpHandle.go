@@ -19,7 +19,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			Name:    "Click here to invite MaquiaBot!",
 			IconURL: s.State.User.AvatarURL("2048"),
 		},
-		Description: "Detailed version of the commands list [here](https://docs.google.com/spreadsheets/d/12VzMXGoxliSVv6Rrr6tEy_-Qe9oJ0TNF4MoPGcxIpcU/edit?usp=sharing). **Most commands have other forms as well for convenience!**" + "\n\n" +
+		Description: "**Most commands have other forms as well for convenience!**" + "\n\n" +
 			"**Please do `" + prefix + "help <command>` for more information about the command!** \n" +
 			"Help information format: `(cmd|names) <args> [optional args]`",
 		Fields: []*discordgo.MessageEmbedField{
@@ -27,7 +27,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 				Name: "Admin commands:",
 				Value: "`(prefix|maquiaprefix|newprefix)`, " +
 					"`purge`, " +
-					"`toggle`, " + 
+					"`toggle`, " +
 					"`(tr|track)`, " +
 					"`(tt|trackt|ttoggle|tracktoggle)`, ",
 			},
@@ -75,8 +75,17 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 				Name: "osu! commands:",
 				Value: "`(bfarm|bottomfarm)`, " +
 					"`bpm`, " +
+					"`(c|compare)`, " +
 					"`farm`, " +
 					"`(link|set)`, " +
+					"`(m|map)`, " +
+					"`(osu|profile)`, " +
+					"`osudetail`, " +
+					"`osutop`, " +
+					"`ppadd`, " +
+					"`(r|rs|recent)`, " +
+					"`(rb|recentb|recentbest)`, " +
+					"`(t|top)`, " +
 					"`(tfarm|topfarm)`, " +
 					"`(ti|tinfo|tracking|trackinfo)`, ",
 			},
@@ -89,10 +98,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		arg := argRegex.FindStringSubmatch(m.Content)[1]
 		args := strings.Split(arg, " ")
 		if (args[0] == "pokemon" || args[0] == "osu") && len(args) > 1 {
-			args := strings.Split(argRegex.FindStringSubmatch(m.Content)[1], " ")
-			if len(args) > 1 {
-				arg = args[1]
-			}
+			arg = args[1]
 		}
 		switch arg {
 		// Admin commands
@@ -188,10 +194,28 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.BottomFarm(embed)
 		case "bpm":
 			embed = helpcommands.BPM(embed)
+		case "c", "compare":
+			embed = helpcommands.Compare(embed)
 		case "farm":
 			embed = helpcommands.Farm(embed)
 		case "link", "set":
 			embed = helpcommands.Link(embed)
+		case "m", "map":
+			embed = helpcommands.Map(embed)
+		case "osu", "profile":
+			embed = helpcommands.Profile(embed)
+		case "osudetail":
+			embed = helpcommands.ProfileDetail(embed)
+		case "osutop":
+			embed = helpcommands.ProfileTop(embed)
+		case "ppadd":
+			embed = helpcommands.PPAdd(embed)
+		case "r", "rs", "recent":
+			embed = helpcommands.Recent(embed)
+		case "rb", "recentb", "recentbest":
+			embed = helpcommands.RecentBest(embed)
+		case "t", "top":
+			embed = helpcommands.Top(embed)
 		case "tfarm", "topfarm":
 			embed = helpcommands.TopFarm(embed)
 		case "ti", "tinfo", "tracking", "trackinfo":
@@ -199,7 +223,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		}
 	}
 
-	if !strings.HasPrefix(embed.Description, "Detailed") && embed.Fields[0].Name == "Admin commands:" {
+	if !strings.HasPrefix(embed.Description, "**Most") && embed.Fields[0].Name == "Admin commands:" {
 		embed.Fields = []*discordgo.MessageEmbedField{}
 	}
 

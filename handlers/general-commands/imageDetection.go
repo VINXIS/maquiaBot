@@ -39,7 +39,7 @@ func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
 		url = linkRegex.FindStringSubmatch(m.Content)[0]
 	} else {
 		// Get prev messages
-		messages, err := s.ChannelMessages(m.ChannelID, 100, "", "", "")
+		messages, err := s.ChannelMessages(m.ChannelID, -1, "", "", "")
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Error fetching messages.")
 			return
@@ -177,7 +177,7 @@ func Face(s *discordgo.Session, m *discordgo.MessageCreate) {
 		url = linkRegex.FindStringSubmatch(m.Content)[0]
 	} else {
 		// Get prev messages
-		messages, err := s.ChannelMessages(m.ChannelID, 100, "", "", "")
+		messages, err := s.ChannelMessages(m.ChannelID, -1, "", "", "")
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Error fetching messages.")
 			return

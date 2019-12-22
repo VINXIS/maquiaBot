@@ -28,7 +28,7 @@ func FunnyData(s *discordgo.Session) {
 			for j, channel := range guild.Channels {
 				fmt.Println("Running channel #" + strconv.Itoa(j+1))
 				if channel.Type == discordgo.ChannelTypeGuildText {
-					messages, err := s.ChannelMessages(channel.ID, 100, "", "", "")
+					messages, err := s.ChannelMessages(channel.ID, -1, "", "", "")
 					if err == nil {
 						for _, message := range messages {
 							exists := false

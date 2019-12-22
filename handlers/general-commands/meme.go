@@ -51,7 +51,7 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Look at prev messages if no url is given
 	if url == "" {
-		messages, err := s.ChannelMessages(m.ChannelID, 100, "", "", "")
+		messages, err := s.ChannelMessages(m.ChannelID, -1, "", "", "")
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Error fetching messages.")
 			return
