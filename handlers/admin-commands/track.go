@@ -8,15 +8,14 @@ import (
 	"strings"
 
 	osuapi "../../osu-api"
-	osucommands "../osu-commands"
 	osutools "../../osu-functions"
-	structs "../../structs"
 	tools "../../tools"
+	osucommands "../osu-commands"
 	"github.com/bwmarrin/discordgo"
 )
 
 // Track executes the track command, used for when people want to track/untrack users/pp/etc
-func Track(s *discordgo.Session, m *discordgo.MessageCreate, mapCache []structs.MapData) {
+func Track(s *discordgo.Session, m *discordgo.MessageCreate) {
 	channel, err := s.Channel(m.ChannelID)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "This is not an allowed channel!")
@@ -171,13 +170,13 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate, mapCache []structs.
 
 	// Call trackpost if new, otherwise just post track information
 	if new {
-		go osutools.TrackPost(*channel, s, mapCache)
+		go osutools.TrackPost(*channel, s)
 	}
 	osucommands.TrackInfo(s, m)
 }
 
 // TrackToggle stops tracking for the channel
-func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate, mapCache []structs.MapData) {
+func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	channel, err := s.Channel(m.ChannelID)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "This is not an allowed channel!")
@@ -214,7 +213,7 @@ func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate, mapCache []st
 	tools.ErrRead(err)
 
 	if channelData.Tracking {
-		go osutools.TrackPost(*channel, s, mapCache)
+		go osutools.TrackPost(*channel, s)
 		s.ChannelMessageSend(m.ChannelID, "Started tracking for this channel!")
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "Stopped tracking for this channel!")

@@ -10,13 +10,12 @@ import (
 
 	osuapi "../../osu-api"
 	osutools "../../osu-functions"
-	structs "../../structs"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 // BeatmapMessage is a handler executed when a message contains a beatmap link
-func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp, cache []structs.MapData) {
+func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp) {
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	accRegex, _ := regexp.Compile(`-acc\s*(\S+)`)
 	comboRegex, _ := regexp.Compile(`-c\s*(\S+)`)
@@ -163,7 +162,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	}
 
 	// Calculate SR and PP
-	values := osutools.BeatmapCalc(mods, accVal, comboVal, missVal, beatmap, cache)
+	values := osutools.BeatmapCalc(mods, accVal, comboVal, missVal, beatmap)
 	ppText := ""
 	if len(values) == 1 {
 		ppText = values[0]

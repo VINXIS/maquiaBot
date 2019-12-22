@@ -149,25 +149,50 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			}
 			beatmap := beatmaps[0]
 
+			scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
 			mods := score.Mods.String()
 			if strings.Contains(mods, "DTNC") {
 				mods = strings.Replace(mods, "DTNC", "NC", -1)
 			}
+			accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
+			var combo string
+			if score.MaxCombo == beatmap.MaxCombo {
+				if accCalc == 100.0 {
+					combo = " **SS** "
+				} else {
+					combo = " **FC** "
+				}
+			} else {
+				combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
+			}
+			acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 			scoreRank := ""
 			for _, emoji := range g.Emojis {
 				if emoji.Name == score.Rank+"_" {
 					scoreRank = emoji.MessageFormat()
 				}
 			}
-			accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
+			var pp string
+			totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
+			if score.Score.FullCombo { // If play was a perfect combo
+				pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp "
+			} else { // If map was finished, but play was not a perfect combo
+				ppValues := make(chan string, 1)
+				accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
+				go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", mods, ppValues)
+				pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
+			}
+			hits := "[" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
+			timeParse, _ := time.Parse("2006-01-02 15:04:05", score.Date.String())
+			time := tools.TimeSince(timeParse)
+			mods = " **+" + mods + "** "
 
 			mapField := &discordgo.MessageEmbedField{
-				Name: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] **+" + mods + "**",
+				Name: "#" + strconv.Itoa(i+1) + " " + beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "]",
 				Value: "[**Link**](https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID) + ") | <osu://dl/" + strconv.Itoa(beatmap.BeatmapSetID) + ">\n" +
-					"**PP:** " + strconv.FormatFloat(score.PP, 'f', 2, 64) + " " + scoreRank + "\n" +
-					"**Acc:** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%\n" +
-					"**Score:** " + strconv.FormatInt(score.Score.Score, 10) + "\n" +
-					"**Combo:** " + strconv.Itoa(score.MaxCombo) + "/" + strconv.Itoa(beatmap.MaxCombo) + "x\n",
+					scorePrint + mods + combo + acc + scoreRank + "\n" +
+					pp + hits +"\n" + 
+					time,
 			}
 
 			mapList = append(mapList, mapField)

@@ -19,7 +19,7 @@ import (
 )
 
 // Recent gets the most recent score done/nth score done
-func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cache []structs.PlayerData, mapCache []structs.MapData) {
+func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cache []structs.PlayerData) {
 	recentRegex, _ := regexp.Compile(`(r|recent|rs|rb|recentb|recentbest)\s+(.+)`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S{2,})`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)

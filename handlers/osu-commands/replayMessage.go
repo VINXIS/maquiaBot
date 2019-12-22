@@ -20,7 +20,7 @@ import (
 )
 
 // ReplayMessage posts replay information fopr a given replay
-func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp, mapCache []structs.MapData) {
+func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp) {
 	// Get URL
 	url := ""
 	if len(m.Attachments) > 0 {

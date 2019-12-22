@@ -23,10 +23,8 @@ import (
 
 // MessageHandler handles any incoming messages
 func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	negateRegex, _ := regexp.Compile(`\s(-n\s|-n$)`)
-
-	// Ignore all messages created by the bot itself or if the negate command was stated
-	if m.Author.ID == s.State.User.ID || negateRegex.MatchString(m.Content) {
+	// Ignore all messages created by the bot itself
+	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
@@ -44,15 +42,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		noEmoji = emojiRegex.ReplaceAllString(m.Content, emojiRegex.FindStringSubmatch(m.Content)[1])
 	}
 
-	// Obtain map cache data
-	var mapCache []structs.MapData
-	f, err := ioutil.ReadFile("./data/osuData/mapCache.json")
-	tools.ErrRead(err)
-	_ = json.Unmarshal(f, &mapCache)
-
 	// Obtain profile cache data
 	var profileCache []structs.PlayerData
-	f, err = ioutil.ReadFile("./data/osuData/profileCache.json")
+	f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
 	tools.ErrRead(err)
 	_ = json.Unmarshal(f, &profileCache)
 
@@ -162,7 +154,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "h", serverPrefix + "help":
 			go HelpHandle(s, m, serverPrefix)
 		case serverPrefix + "o", serverPrefix + "osu":
-			go OsuHandle(s, m, args, profileCache, mapCache, mapperData)
+			go OsuHandle(s, m, args, profileCache, mapperData)
 		case serverPrefix + "pokemon":
 			go PokemonHandle(s, m, args, serverPrefix)
 
@@ -174,9 +166,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "toggle":
 			go admincommands.Toggle(s, m)
 		case serverPrefix + "tr", serverPrefix + "track":
-			go admincommands.Track(s, m, mapCache)
+			go admincommands.Track(s, m)
 		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "ttoggle", serverPrefix + "tracktoggle":
-			go admincommands.TrackToggle(s, m, mapCache)
+			go admincommands.TrackToggle(s, m)
 
 		// General commands
 		case serverPrefix + "adj", serverPrefix + "adjective", serverPrefix + "adjectives":
@@ -205,7 +197,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Info(s, m, profileCache)
 		case serverPrefix + "kanye":
 			go gencommands.Kanye(s, m)
-		case serverPrefix + "l", serverPrefix + "leven", serverPrefix + "levenshtein":
+		case serverPrefix + "leven", serverPrefix + "levenshtein":
 			go gencommands.Levenshtein(s, m)
 		case serverPrefix + "late", serverPrefix + "old", serverPrefix + "ancient":
 			go gencommands.Late(s, m)
@@ -264,13 +256,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				go osucommands.BPM(s, m, profileCache)
 			}
 		case serverPrefix + "c", serverPrefix + "compare":
-			go osucommands.Compare(s, m, args, profileCache, mapCache)
+			go osucommands.Compare(s, m, profileCache)
 		case serverPrefix + "farm":
 			go osucommands.Farm(s, m, profileCache)
+		case serverPrefix + "l", serverPrefix + "leader", serverPrefix + "leaderboard":
+			go osucommands.Leaderboard(s, m, beatmapRegex, profileCache)
 		case serverPrefix + "link", serverPrefix + "set":
 			go osucommands.Link(s, m, args, profileCache)
 		case serverPrefix + "m", serverPrefix + "map":
-			go osucommands.BeatmapMessage(s, m, beatmapRegex, mapCache)
+			go osucommands.BeatmapMessage(s, m, beatmapRegex)
 		case serverPrefix + "mt", serverPrefix + "mtrack", serverPrefix + "maptrack", serverPrefix + "mappertrack":
 			go osucommands.TrackMapper(s, m, mapperData)
 		case serverPrefix + "mti", serverPrefix + "mtinfo", serverPrefix + "mtrackinfo", serverPrefix + "maptracking", serverPrefix + "mappertracking", serverPrefix + "mappertrackinfo":
@@ -282,11 +276,11 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "profile":
 			go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
 		case serverPrefix + "r", serverPrefix + "rs", serverPrefix + "recent":
-			go osucommands.Recent(s, m, "recent", profileCache, mapCache)
+			go osucommands.Recent(s, m, "recent", profileCache)
 		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
-			go osucommands.Recent(s, m, "best", profileCache, mapCache)
+			go osucommands.Recent(s, m, "best", profileCache)
 		case serverPrefix + "t", serverPrefix + "top":
-			go osucommands.Top(s, m, profileCache, mapCache)
+			go osucommands.Top(s, m, profileCache)
 		case serverPrefix + "tfarm", serverPrefix + "topfarm":
 			go osucommands.TopFarm(s, m, profileCache)
 		case serverPrefix + "ti", serverPrefix + "tinfo", serverPrefix + "tracking", serverPrefix + "trackinfo":
@@ -299,7 +293,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go tools.CommandLog(s, m, args[0])
 		return
 	} else if beatmapRegex.MatchString(m.Content) && serverData.OsuToggle { // If a beatmap was linked
-		go osucommands.BeatmapMessage(s, m, beatmapRegex, mapCache)
+		go osucommands.BeatmapMessage(s, m, beatmapRegex)
 		return
 	} else if profileRegex.MatchString(m.Content) && serverData.OsuToggle { // If a profile was linked
 		go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
@@ -324,7 +318,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Check if an image was linked
 	if len(m.Attachments) > 0 || linkRegex.MatchString(m.Content) || (len(m.Embeds) > 0 && m.Embeds[0].Image != nil) {
-		go osucommands.OsuImageParse(s, m, linkRegex, mapCache)
-		go osucommands.ReplayMessage(s, m, linkRegex, mapCache)
+		go osucommands.OsuImageParse(s, m, linkRegex)
+		go osucommands.ReplayMessage(s, m, linkRegex)
 	}
 }

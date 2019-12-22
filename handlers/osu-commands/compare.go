@@ -19,7 +19,7 @@ import (
 )
 
 // Compare compares finds a score from the current user on the previous map linked by the bot
-func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache []structs.PlayerData, mapCache []structs.MapData) {
+func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
 	mapRegex, _ := regexp.Compile(`(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	compareRegex, _ := regexp.Compile(`(c|compare)\s*(.+)?`)
@@ -96,18 +96,13 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, args []string, ca
 		}
 	}
 	if beatmap.BeatmapID == 0 {
-		s.ChannelMessageSend(m.ChannelID, "Map does not exist!")
+		s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
 		return
 	} else if beatmap.Approved < 1 {
 		s.ChannelMessageSend(m.ChannelID, "The map `"+beatmap.Artist+" - "+beatmap.Title+"` does not have a leaderboard!")
 		return
 	}
 	username = strings.TrimSpace(strings.Replace(username, submatches[0], "", -1))
-
-	if beatmap.BeatmapID == 0 {
-		s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
-		return
-	}
 
 	// Get user
 	var user osuapi.User

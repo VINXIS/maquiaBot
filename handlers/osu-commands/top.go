@@ -18,7 +18,7 @@ import (
 )
 
 // Top gets the nth top pp score
-func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData, mapCache []structs.MapData) {
+func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
 	topRegex, _ := regexp.Compile(`t(op)?\s+(.+)`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S{2,})`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)

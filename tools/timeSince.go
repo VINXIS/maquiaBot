@@ -25,7 +25,11 @@ func TimeSince(timeParse time.Time) (timeString string) {
 			months = months + " months"
 		}
 
-		timeString = years + " and " + months + " ago."
+		if months == "0 months" {
+			timeString = years + " ago."
+		} else {
+			timeString = years + " and " + months + " ago."
+		}
 	} else if timeSince.Hours() > 730 {
 		months := strconv.FormatFloat(math.Floor(timeSince.Hours()/730.0), 'f', 0, 64)
 		days := strconv.FormatFloat(math.Floor(math.Mod(timeSince.Hours(), 730)/24.0), 'f', 0, 64)
@@ -42,7 +46,11 @@ func TimeSince(timeParse time.Time) (timeString string) {
 			days = days + " days"
 		}
 
-		timeString = months + " and " + days + " ago."
+		if days == "0 days" {
+			timeString = months + " ago."
+		} else {
+			timeString = months + " and " + days + " ago."
+		}
 	} else if timeSince.Hours() > 24 {
 		days := strconv.FormatFloat(math.Floor(timeSince.Hours()/24.0), 'f', 0, 64)
 		hours := strconv.FormatFloat(math.Mod(timeSince.Hours(), 24), 'f', 0, 64)
@@ -59,7 +67,11 @@ func TimeSince(timeParse time.Time) (timeString string) {
 			hours = hours + " hours"
 		}
 
-		timeString = days + " and " + hours + " ago."
+		if hours == "0 hours" {
+			timeString = days + " ago."
+		} else {
+			timeString = days + " and " + hours + " ago."
+		}
 	} else if timeSince.Hours() > 1 {
 		hours := strconv.FormatFloat(timeSince.Hours(), 'f', 0, 64)
 		minutes := strconv.FormatFloat(math.Mod(timeSince.Minutes(), 60), 'f', 0, 64)
@@ -76,7 +88,11 @@ func TimeSince(timeParse time.Time) (timeString string) {
 			minutes = minutes + " minutes"
 		}
 
-		timeString = hours + " and " + minutes + " ago."
+		if minutes == "0 minutes" {
+			timeString = hours + " ago."
+		} else {
+			timeString = hours + " and " + minutes + " ago."
+		}
 	} else if timeSince.Minutes() > 1 {
 		minutes := strconv.FormatFloat(timeSince.Minutes(), 'f', 0, 64)
 		seconds := strconv.FormatFloat(math.Mod(timeSince.Seconds(), 60), 'f', 0, 64)
@@ -93,7 +109,11 @@ func TimeSince(timeParse time.Time) (timeString string) {
 			seconds = seconds + " seconds"
 		}
 
-		timeString = minutes + " and " + seconds + " ago."
+		if seconds == "0 seconds" {
+			timeString = minutes + " ago."
+		} else {
+			timeString = minutes + " and " + seconds + " ago."
+		}
 	} else {
 		seconds := strconv.FormatFloat(math.Min(0, timeSince.Seconds()), 'f', 0, 64)
 
@@ -103,7 +123,11 @@ func TimeSince(timeParse time.Time) (timeString string) {
 			seconds = seconds + " seconds"
 		}
 
-		timeString = seconds + " ago."
+		if seconds == "0 seconds" {
+			timeString = "just now."
+		} else {
+			timeString = seconds + " ago."
+		}
 	}
 	return timeString
 }

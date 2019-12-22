@@ -46,7 +46,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(idea|niceidea)`, " +
 					"`info`, " +
 					"`kanye`, " +
-					"`(l|leven|levenshtein)`, " +
+					"`(leven|levenshtein)`, " +
 					"`(late|old|ancient)`, " +
 					"`meme`, " +
 					"`(noun|nouns)`, " +
@@ -77,6 +77,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`bpm`, " +
 					"`(c|compare)`, " +
 					"`farm`, " +
+					"`(l|leader|leaderboard)`, " +
 					"`(link|set)`, " +
 					"`(m|map)`, " +
 					"`(osu|profile)`, " +
@@ -145,7 +146,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Info(embed)
 		case "kanye":
 			embed = helpcommands.Kanye(embed)
-		case "l", "leven", "levenshtein":
+		case "leven", "levenshtein":
 			embed = helpcommands.Levenshtein(embed)
 		case "late", "old", "ancient":
 			embed = helpcommands.Late(embed)
@@ -203,6 +204,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Compare(embed)
 		case "farm":
 			embed = helpcommands.Farm(embed)
+		case "l", "leader", "leaderboard":
+			embed = helpcommands.Leaderboard(embed)
 		case "link", "set":
 			embed = helpcommands.Link(embed)
 		case "m", "map":

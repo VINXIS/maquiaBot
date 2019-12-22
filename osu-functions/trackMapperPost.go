@@ -109,11 +109,7 @@ func TrackMapperPost(s *discordgo.Session) {
 					}
 
 					// Calculate SR and PP
-					var mapCache []structs.MapData
-					file, err := ioutil.ReadFile("./data/osuData/mapCache.json")
-					tools.ErrRead(err)
-					_ = json.Unmarshal(file, &mapCache)
-					values := BeatmapCalc("NM", "", "", "", osuMap, mapCache)
+					values := BeatmapCalc("NM", "", "", "", osuMap)
 
 					// Create embed
 					embed := &discordgo.MessageEmbed{

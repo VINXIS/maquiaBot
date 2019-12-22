@@ -13,13 +13,12 @@ import (
 
 	config "../config"
 	osuapi "../osu-api"
-	structs "../structs"
 	tools "../tools"
 	"github.com/bwmarrin/discordgo"
 )
 
 // TrackPost posts scores for users tracked for that channel
-func TrackPost(channel discordgo.Channel, s *discordgo.Session, mapCache []structs.MapData) {
+func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 
 	startTime := time.Now()
 

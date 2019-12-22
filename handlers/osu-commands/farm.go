@@ -117,12 +117,15 @@ func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 	farmAmount := 1
 
 	if strings.Contains(m.Content, "-s") {
-		guild, err := s.Guild(m.GuildID)
-		tools.ErrRead(err)
+		members, err := s.GuildMembers(m.GuildID, "", 1000)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "This is not a server!")
+			return
+		}
 		trueCache := []structs.PlayerData{}
 
 		for _, player := range cache {
-			for _, member := range guild.Members {
+			for _, member := range members {
 				if player.Discord.ID == member.User.ID && math.Round(player.Farm.Rating*100)/100 != 0.00 {
 					trueCache = append(trueCache, player)
 					break
@@ -195,12 +198,15 @@ func BottomFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []struct
 	farmAmount := 1
 
 	if strings.Contains(m.Content, "-s") {
-		guild, err := s.Guild(m.GuildID)
-		tools.ErrRead(err)
+		members, err := s.GuildMembers(m.GuildID, "", 1000)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "This is not a server!")
+			return
+		}
 		trueCache := []structs.PlayerData{}
 
 		for _, player := range cache {
-			for _, member := range guild.Members {
+			for _, member := range members {
 				if player.Discord.ID == member.User.ID && player.Farm.Rating != 0.00 {
 					trueCache = append(trueCache, player)
 					break

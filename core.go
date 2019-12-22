@@ -38,12 +38,6 @@ func main() {
 	// Handle farm data
 	go osutools.FarmUpdate()
 
-	// Obtain map cache data
-	mapCache := []structs.MapData{}
-	f, err := ioutil.ReadFile("./data/osuData/mapCache.json")
-	tools.ErrRead(err)
-	_ = json.Unmarshal(f, &mapCache)
-
 	// Add handlers
 	discord.AddHandler(handlers.MessageHandler)
 	discord.AddHandler(handlers.ReactAdd)
@@ -95,7 +89,7 @@ func main() {
 			chID := strings.Replace(strings.Replace(channel, "data\\channelData\\", "", -1), ".json", "", -1)
 			ch, err := discord.Channel(chID)
 			if err == nil {
-				go osutools.TrackPost(*ch, discord, mapCache)
+				go osutools.TrackPost(*ch, discord)
 			}
 		}
 	}

@@ -5,11 +5,10 @@ import (
 	"strconv"
 
 	osuapi "../osu-api"
-	structs "../structs"
 )
 
 // BeatmapCalc calculates PP for the map
-func BeatmapCalc(mods, acc, combo, misses string, beatmap osuapi.Beatmap, cache []structs.MapData) (values []string) {
+func BeatmapCalc(mods, acc, combo, misses string, beatmap osuapi.Beatmap) (values []string) {
 	if beatmap.Mode != osuapi.ModeCatchTheBeat && acc != "N/A" {
 		accVal, err := strconv.ParseFloat(acc, 64)
 		if err != nil || accVal <= 0 || accVal >= 100 {

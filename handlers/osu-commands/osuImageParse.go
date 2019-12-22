@@ -20,13 +20,12 @@ import (
 
 	osuapi "../../osu-api"
 	osutools "../../osu-functions"
-	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
 )
 
 // OsuImageParse detects for an osu image
-func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp, cache []structs.MapData) {
+func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp) {
 
 	// Create regexps for checks
 	mapperRegex, _ := regexp.Compile(`(?i)b?e?a?t?mapp?e?d? by (\S*)`)
@@ -178,7 +177,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 				break
 			}
 		}
-		
+
 		// Check if anything was actually found
 		if beatmap.BeatmapID == 0 || len(beatmaps) == 0 {
 			if diagnosisRegex.MatchString(m.Message.Content) {
@@ -246,7 +245,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	}
 
 	// Calculate PP
-	values := osutools.BeatmapCalc("NM", "", "", "", beatmap, cache)
+	values := osutools.BeatmapCalc("NM", "", "", "", beatmap)
 
 	// Create embed
 	embed := &discordgo.MessageEmbed{
