@@ -263,7 +263,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			diffs + "\n" + "\n" +
 			"**[" + beatmap.DiffName + "]** " + warning + "\n" +
 			//aimRating + speedRating + totalRating + "\n" + TODO: Make SR calc work
-			values[1] + values[2] + values[3] + values[4] + values[5],
+			values[0] + values[1] + values[2] + values[3] + values[4],
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 		},
