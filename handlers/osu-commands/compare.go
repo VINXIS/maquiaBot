@@ -318,12 +318,12 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 			return
 		}
 		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-			Name: time,
+			Name: "#" + strconv.Itoa(i+1) + " | " + time,
 			Value: scorePrint + mods + combo + acc + scoreRank + "\n" +
 				mapCompletion +
 				pp + hits + "\n\n",
 		})
-		if i+1%25 == 0 {
+		if (i+1)%25 == 0 {
 			s.ChannelMessageSendEmbed(m.ChannelID, embed)
 			embed.Fields = []*discordgo.MessageEmbedField{}
 		}
