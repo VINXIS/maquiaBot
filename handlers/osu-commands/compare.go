@@ -24,6 +24,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	compareRegex, _ := regexp.Compile(`(c|compare)\s*(.+)?`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)
+	allRegex, _ := regexp.Compile(`-all`)
 	var beatmap osuapi.Beatmap
 
 	// Obtain username and mods
@@ -42,6 +43,9 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 		if strictRegex.MatchString(m.Content) {
 			strict = false
 			username = strings.TrimSpace(strings.Replace(username, strictRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if allRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, allRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 	}
 
@@ -137,6 +141,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 	scoreOpts := osuapi.GetScoresOpts{
 		BeatmapID: beatmap.BeatmapID,
 		UserID:    user.UserID,
+		Limit:     100,
 	}
 	scores, err := OsuAPI.GetScores(scoreOpts)
 	if err != nil {
@@ -166,18 +171,14 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 			return
 		}
 	}
+	topScore := scores[0]
 
 	// Sort by PP
 	sort.Slice(scores, func(i, j int) bool {
 		return scores[i].PP > scores[j].PP
 	})
 
-	score := scores[0]
-
-	// Get time since play
-	timeParse, _ := time.Parse("2006-01-02 15:04:05", score.Date.String())
-	time := tools.TimeSince(timeParse)
-
+	// Create embed
 	// Assign timing variables for map specs
 	totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
 	totalSeconds := fmt.Sprint(math.Mod(float64(beatmap.TotalLength), float64(60)))
@@ -189,91 +190,13 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 	if len(hitSeconds) == 1 {
 		hitSeconds = "0" + hitSeconds
 	}
-
-	// Assign values
-	mods = score.Mods.String()
-	accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
-	Color := osutools.ModeColour(beatmap.Mode)
 	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
-	scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
 	mapStats := "**CS:** " + strconv.FormatFloat(beatmap.CircleSize, 'f', 1, 64) + " **AR:** " + strconv.FormatFloat(beatmap.ApproachRate, 'f', 1, 64) + " **OD:** " + strconv.FormatFloat(beatmap.OverallDifficulty, 'f', 1, 64) + " **HP:** " + strconv.FormatFloat(beatmap.HPDrain, 'f', 1, 64)
 	mapObjs := "**Circles:** " + strconv.Itoa(beatmap.Circles) + " **Sliders:** " + strconv.Itoa(beatmap.Sliders) + " **Spinners:** " + strconv.Itoa(beatmap.Spinners)
-	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
-	hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
+	Color := osutools.ModeColour(beatmap.Mode)
 
-	if mods == "" {
-		mods = "NM"
-	}
-
-	if strings.Contains(mods, "DTNC") {
-		mods = strings.Replace(mods, "DTNC", "NC", 1)
-	}
-
-	var combo string
-	if score.MaxCombo == beatmap.MaxCombo {
-		if accCalc == 100.0 {
-			combo = " **SS** "
-		} else {
-			combo = " **FC** "
-		}
-	} else {
-		combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
-	}
-
-	mapCompletion := ""
-	orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
-		Username: user.Username,
-		Limit:    100,
-	})
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-		return
-	}
-	for i, orderedScore := range orderedScores {
-		if score.Score.Score == orderedScore.Score.Score {
-			mapCompletion += "**#" + strconv.Itoa(i+1) + "** in top performances! \n"
-			break
-		}
-	}
-	mapScores, err := OsuAPI.GetScores(osuapi.GetScoresOpts{
-		BeatmapID: beatmap.BeatmapID,
-		Limit:     100,
-	})
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-		return
-	}
-	for i, mapScore := range mapScores {
-		if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
-			mapCompletion += "**#" + strconv.Itoa(i+1) + "** on leaderboard! \n"
-			break
-		}
-	}
-
-	// Get pp values
-	var pp string
-	totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
-	if score.Score.FullCombo { // If play was a perfect combo
-		pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp "
-	} else { // If map was finished, but play was not a perfect combo
-		ppValues := make(chan string, 1)
-		accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
-		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", mods, ppValues)
-		pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
-	}
-	mods = " **+" + mods + "** "
-
-	g, _ := s.Guild(config.Conf.Server)
-	scoreRank := ""
-	for _, emoji := range g.Emojis {
-		if emoji.Name == score.Rank+"_" {
-			scoreRank = emoji.MessageFormat()
-		}
-	}
-
-	// Create embed
 	embed := &discordgo.MessageEmbed{
 		Color: Color,
 		Author: &discordgo.MessageEmbedAuthor{
@@ -281,19 +204,13 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 			Name:    user.Username,
 			IconURL: "https://a.ppy.sh/" + strconv.Itoa(user.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
+		Description: sr + length + bpm + "\n" +
+			mapStats + "\n" +
+			mapObjs + "\n\n",
 		Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,
 		URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
-		},
-		Description: sr + length + bpm + "\n" +
-			mapStats + "\n" +
-			mapObjs + "\n\n" +
-			scorePrint + mods + combo + acc + scoreRank + "\n" +
-			mapCompletion + "\n" +
-			pp + hits + "\n\n",
-		Footer: &discordgo.MessageEmbedFooter{
-			Text: time,
 		},
 	}
 	if strings.ToLower(beatmap.Title) == "crab rave" {
@@ -301,5 +218,117 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 			URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
 		}
 	}
-	s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	for i := 0; i < len(scores); i++ {
+		score := scores[i]
+
+		// Get time since play
+		timeParse, _ := time.Parse("2006-01-02 15:04:05", score.Date.String())
+		time := tools.TimeSince(timeParse)
+
+		// Assign values
+		mods = score.Mods.String()
+		accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
+		scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
+		acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
+		hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
+
+		if mods == "" {
+			mods = "NM"
+		}
+
+		if strings.Contains(mods, "DTNC") {
+			mods = strings.Replace(mods, "DTNC", "NC", 1)
+		}
+
+		var combo string
+		if score.MaxCombo == beatmap.MaxCombo {
+			if accCalc == 100.0 {
+				combo = " **SS** "
+			} else {
+				combo = " **FC** "
+			}
+		} else {
+			combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
+		}
+
+		mapCompletion := ""
+		if i == 0 { // Only matters for the top pp score Lol
+			orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
+				Username: user.Username,
+				Limit:    100,
+			})
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+				return
+			}
+			for i, orderedScore := range orderedScores {
+				if score.Score.Score == orderedScore.Score.Score {
+					mapCompletion += "**#" + strconv.Itoa(i+1) + "** in top performances! \n"
+					break
+				}
+			}
+		}
+		if topScore.Score.Score == score.Score.Score { // Only matters for the top score Lol
+			mapScores, err := OsuAPI.GetScores(osuapi.GetScoresOpts{
+				BeatmapID: beatmap.BeatmapID,
+				Limit:     100,
+			})
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+				return
+			}
+			for i, mapScore := range mapScores {
+				if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
+					mapCompletion += "**#" + strconv.Itoa(i+1) + "** on leaderboard! \n"
+					break
+				}
+			}
+		}
+
+		// Get pp values
+		var pp string
+		totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
+		if score.Score.FullCombo { // If play was a perfect combo
+			pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp "
+		} else { // If map was finished, but play was not a perfect combo
+			ppValues := make(chan string, 1)
+			accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
+			go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", mods, ppValues)
+			pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
+		}
+		mods = " **+" + mods + "** "
+
+		g, _ := s.Guild(config.Conf.Server)
+		scoreRank := ""
+		for _, emoji := range g.Emojis {
+			if emoji.Name == score.Rank+"_" {
+				scoreRank = emoji.MessageFormat()
+			}
+		}
+
+		if !allRegex.MatchString(m.Content) || len(scores) == 1 {
+			embed.Description +=
+				scorePrint + mods + combo + acc + scoreRank + "\n" +
+					mapCompletion + "\n" +
+					pp + hits + "\n\n"
+			embed.Footer = &discordgo.MessageEmbedFooter{
+				Text: time,
+			}
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			return
+		}
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+			Name: time,
+			Value: scorePrint + mods + combo + acc + scoreRank + "\n" +
+				mapCompletion +
+				pp + hits + "\n\n",
+		})
+		if i+1%25 == 0 {
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			embed.Fields = []*discordgo.MessageEmbedField{}
+		}
+	}
+	if len(scores)%25 != 0 {
+		s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	}
 }
