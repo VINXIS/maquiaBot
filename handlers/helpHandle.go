@@ -29,7 +29,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`purge`, " +
 					"`toggle`, " +
 					"`(tr|track)`, " +
-					"`(tt|trackt|ttoggle|tracktoggle)`, ",
+					"`(tt|trackt|ttoggle|tracktoggle)`",
 			},
 			&discordgo.MessageEmbedField{
 				Name: "General commands:",
@@ -87,7 +87,12 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(rb|recentb|recentbest)`, " +
 					"`(t|top)`, " +
 					"`(tfarm|topfarm)`, " +
-					"`(ti|tinfo|tracking|trackinfo)`, ",
+					"`(ti|tinfo|tracking|trackinfo)`",
+			},
+			&discordgo.MessageEmbedField{
+				Name: "Pokemon commands:",
+				Value: "`(b|berry)`, " +
+					"`pokemon`",
 			},
 		},
 		Color: osutools.ModeColour(osuapi.ModeOsu),
@@ -220,6 +225,12 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.TopFarm(embed)
 		case "ti", "tinfo", "tracking", "trackinfo":
 			embed = helpcommands.TrackInfo(embed)
+
+		// Pokemon commands
+		case "b", "berry":
+			embed = helpcommands.Berry(embed)
+		case "pokemon":
+			embed = helpcommands.Pokemon(embed)
 		}
 	}
 
