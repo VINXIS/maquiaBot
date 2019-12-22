@@ -125,7 +125,7 @@ func PenisCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	year, month, day := time.Now().Date()
+	year, month, day := time.Now().UTC().Date()
 	id1, _ := strconv.Atoi(user1)
 	random1 := rand.New(rand.NewSource(int64(id1 + day + int(month) + year)))
 	id2, _ := strconv.Atoi(user2)

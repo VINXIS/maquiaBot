@@ -90,7 +90,7 @@ func BPM(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 	stddevBPM = math.Sqrt(stddevBPM / float64(len(mapBPMs)-1))
 
 	// Create randomizer based on osu! ID and date
-	year, month, day := time.Now().Date()
+	year, month, day := time.Now().UTC().Date()
 	random := rand.New(rand.NewSource(int64(player.UserID + day + int(month) + year)))
 
 	todayBPM := math.Min(math.Max(50, random.NormFloat64()*stddevBPM+averageBPM), 400)
