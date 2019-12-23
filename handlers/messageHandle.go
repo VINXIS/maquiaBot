@@ -183,7 +183,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "avatar", serverPrefix + "ava", serverPrefix + "a":
 			go gencommands.Avatar(s, m)
 		case serverPrefix + "cc", serverPrefix + "cp", serverPrefix + "comparec", serverPrefix + "comparep", serverPrefix + "comparecock", serverPrefix + "comparepenis":
-			go gencommands.PenisCompare(s, m)
+			if serverData.Daily {
+				go gencommands.PenisCompare(s, m)
+			}
 		case serverPrefix + "ch", serverPrefix + "choose":
 			go gencommands.Choose(s, m)
 		case serverPrefix + "cheers":
@@ -198,6 +200,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Encrypt(s, m)
 		case serverPrefix + "face":
 			go gencommands.Face(s, m)
+		case serverPrefix + "hc", serverPrefix + "hp", serverPrefix + "historyc", serverPrefix + "historyp", serverPrefix + "historycock", serverPrefix + "historypenis":
+			if serverData.Daily {
+				go gencommands.PenisHistory(s, m)
+			}
 		case serverPrefix + "idea", serverPrefix + "niceidea":
 			go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
 		case serverPrefix + "info":
@@ -235,7 +241,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "qs", serverPrefix + "quotes":
 			go gencommands.Quotes(s, m)
 		case serverPrefix + "rc", serverPrefix + "rp", serverPrefix + "rankc", serverPrefix + "rankp", serverPrefix + "rankcock", serverPrefix + "rankpenis":
-			go gencommands.PenisRank(s, m)
+			if serverData.Daily {
+				go gencommands.PenisRank(s, m)
+			}
 		case serverPrefix + "remind", serverPrefix + "reminder":
 			go gencommands.Remind(s, m)
 		case serverPrefix + "reminders":

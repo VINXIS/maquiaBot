@@ -26,6 +26,8 @@ type ServerData struct {
 	Skills           []string
 	AllowAnyoneStats bool
 	Quotes           []discordgo.Message
+	Largest          PenisData
+	Smallest         PenisData
 }
 
 // NewServer creates a new ServerData
@@ -41,6 +43,9 @@ func NewServer(server discordgo.Guild) ServerData {
 		OverIt:    true,
 		Announce:  true,
 		Server:    server,
+		Smallest: PenisData{
+			Size: 1e308,
+		},
 	}
 }
 

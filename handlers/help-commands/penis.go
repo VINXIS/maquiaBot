@@ -15,7 +15,7 @@ func Penis(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`comparepenis`, `rankpenis`",
+			Value: "`comparepenis`, `rankpenis`, `historypenis`",
 		},
 	}
 	return embed
@@ -32,7 +32,7 @@ func PenisCompare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`penis`, `rankpenis`",
+			Value: "`penis`, `rankpenis`, `historypenis`",
 		},
 	}
 	return embed
@@ -44,18 +44,36 @@ func PenisRank(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Description = "`(rc|rp|rankc|rankp|rankcock|rankpenis) [number] [-s]` ranks the largest / smallest penis sizes in the server."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
-			Name:  "[number]",
-			Value: "Display a certain number of largest / smallest penises (Default: 1).",
+			Name:   "[number]",
+			Value:  "Display a certain number of largest / smallest penises (Default: 1).",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:  "[-s]",
-			Value: "Add this to show the smallest sizes. If this is not added, it will show the largest sizes instead.",
+			Name:   "[-s]",
+			Value:  "Add this to show the smallest sizes. If this is not added, it will show the largest sizes instead.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
-			Value: "`penis`, `comparepenis`",
+			Value: "`penis`, `comparepenis`, `historypenis`",
+		},
+	}
+	return embed
+}
+
+// PenisHistory explains the penis history functionality
+func PenisHistory(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
+	embed.Author.Name = "Command: hc / hp / historyc / historyp / historycock / historypenis"
+	embed.Description = "`(hc|hp|historyc|historyp|historycock|historypenis) [-s]` shows the largest and smallest sizes ever recorded."
+	embed.Fields = []*discordgo.MessageEmbedField{
+		&discordgo.MessageEmbedField{
+			Name:   "[-s]",
+			Value:  "Show the largest and smallest in the server instead of all servers.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:  "Related Commands:",
+			Value: "`penis`, `comparepenis`, `rankpenis`",
 		},
 	}
 	return embed

@@ -1,6 +1,8 @@
 package gencommands
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"math"
 	"math/rand"
 	"regexp"
@@ -9,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -54,7 +57,7 @@ func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
-	year, month, day := time.Now().Date()
+	year, month, day := time.Now().UTC().Date()
 	authorid, _ := strconv.Atoi(user)
 	random := rand.New(rand.NewSource(int64(authorid + day + int(month) + year)))
 
@@ -71,6 +74,7 @@ func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
 		emote = ":eggplant:"
 	}
 	s.ChannelMessageSend(m.ChannelID, username+" erect size for the day is "+strconv.FormatFloat(penisSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisSize/2.54, 'f', 2, 64)+"in) which is larger than approximately "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of penises. "+emote)
+	penisRecords(s, m, penisSize, user)
 }
 
 // PenisCompare compares ur penis size to someone else's
@@ -150,6 +154,7 @@ func PenisCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	s.ChannelMessageSend(m.ChannelID, mainText)
+	penisRecords(s, m, penisSize1, user1)
 }
 
 // PenisRank displays the largest / smallest penises in the server
@@ -178,7 +183,7 @@ func PenisRank(s *discordgo.Session, m *discordgo.MessageCreate) {
 	penisSizes := []penis{}
 	average := 13.91
 	stddev := 2.20
-	year, month, day := time.Now().Date()
+	year, month, day := time.Now().UTC().Date()
 
 	// Get average server size, member sizes, and percentiles
 	var avgSize float64
@@ -210,6 +215,7 @@ func PenisRank(s *discordgo.Session, m *discordgo.MessageCreate) {
 				emote = ":eggplant: WTF"
 			}
 			s.ChannelMessageSend(m.ChannelID, "**"+penisSizes[0].member.User.Username+"'s** erect size for the day is "+strconv.FormatFloat(penisSizes[0].size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisSizes[0].size/2.54, 'f', 2, 64)+"in) which is larger than approximately "+strconv.FormatFloat(penisSizes[0].percentile, 'f', 2, 64)+"% of penises. Their size is the smallest in this server today! "+emote+"\n**Average size in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
+			penisRecords(s, m, penisSizes[0].size, penisSizes[0].member.User.ID)
 			return
 		}
 
@@ -224,6 +230,7 @@ func PenisRank(s *discordgo.Session, m *discordgo.MessageCreate) {
 				emote = ":eggplant:"
 			}
 			s.ChannelMessageSend(m.ChannelID, "**"+penisSizes[0].member.User.Username+"'s** erect size for the day is "+strconv.FormatFloat(penisSizes[0].size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisSizes[0].size/2.54, 'f', 2, 64)+"in) which is larger than approximately "+strconv.FormatFloat(penisSizes[0].percentile, 'f', 2, 64)+"% of penises. Their size is the largest in this server today! "+emote+"\n**Average size in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
+			penisRecords(s, m, penisSizes[0].size, penisSizes[0].member.User.ID)
 			return
 		}
 
@@ -239,4 +246,105 @@ func PenisRank(s *discordgo.Session, m *discordgo.MessageCreate) {
 		text += "**" + penisSizes[i].member.User.Username + ":** " + strconv.FormatFloat(penisSizes[i].size, 'f', 2, 64) + "cm (" + strconv.FormatFloat(penisSizes[i].size/2.54, 'f', 2, 64) + "in) " + emote + "\n"
 	}
 	s.ChannelMessageSend(m.ChannelID, text+"**Average size in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
+	penisRecords(s, m, penisSizes[0].size, penisSizes[0].member.User.ID)
+}
+
+// PenisHistory shows the largest and smallest penis sizes ever recorded
+func PenisHistory(s *discordgo.Session, m *discordgo.MessageCreate) {
+	serverRegex, _ := regexp.Compile(`-s`)
+	average := 13.91
+	stddev := 2.20
+
+	penisRecord := tools.GetPenisRecord()
+	text := "Records for all servers:\n"
+	largestUsername := ""
+	smallestUsername := ""
+
+	// Check server flag
+	if serverRegex.MatchString(m.Content) {
+		text = "Records for this server:\n"
+		server, err := s.Guild(m.GuildID)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "This is not a server!")
+			return
+		}
+		serverData := tools.GetServer(*server)
+		penisRecord.Largest = serverData.Largest
+		penisRecord.Smallest = serverData.Smallest
+	}
+
+	// Get usernames
+	largestUser, err := s.User(penisRecord.Largest.UserID)
+	if err != nil {
+		largestUsername = "Unknown user (" + penisRecord.Largest.UserID + ")"
+	} else {
+		largestUsername = largestUser.Username
+	}
+
+	smallestUser, err := s.User(penisRecord.Smallest.UserID)
+	if err != nil {
+		smallestUsername = "Unknown user (" + penisRecord.Smallest.UserID + ")"
+	} else {
+		smallestUsername = smallestUser.Username
+	}
+
+	largestPercentile := 100 * 0.5 * math.Erfc((average-penisRecord.Largest.Size)/(math.Sqrt(2.0)*stddev))
+	smallestPercentile := 100 * 0.5 * math.Erfc((average-penisRecord.Smallest.Size)/(math.Sqrt(2.0)*stddev))
+	s.ChannelMessageSend(m.ChannelID, text+
+		"**" + largestUsername+"** on "+strings.Replace(penisRecord.Largest.Date.Format(time.RFC822Z), " +0000", "UTC", -1)+": "+strconv.FormatFloat(penisRecord.Largest.Size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisRecord.Largest.Size/2.54, 'f', 2, 64)+"in) larger than approximately "+strconv.FormatFloat(largestPercentile, 'f', 2, 64)+"% of penises.\n"+
+		"**" + smallestUsername+"** on "+strings.Replace(penisRecord.Smallest.Date.Format(time.RFC822Z), " +0000", "UTC", -1)+": "+strconv.FormatFloat(penisRecord.Smallest.Size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisRecord.Smallest.Size/2.54, 'f', 2, 64)+"in) larger than approximately "+strconv.FormatFloat(smallestPercentile, 'f', 2, 64)+"% of penises.")
+}
+
+func penisRecords(s *discordgo.Session, m *discordgo.MessageCreate, penisSize float64, userID string) {
+	// Check full records
+	penisRecords := tools.GetPenisRecord()
+	recordBroken := false
+
+	if penisSize > penisRecords.Largest.Size {
+		penisRecords.Largest.Size = penisSize
+		penisRecords.Largest.UserID = userID
+		penisRecords.Largest.Date = time.Now().UTC()
+		recordBroken = true
+	} else if penisSize < penisRecords.Smallest.Size {
+		penisRecords.Smallest.Size = penisSize
+		penisRecords.Smallest.UserID = userID
+		penisRecords.Smallest.Date = time.Now().UTC()
+		recordBroken = true
+	}
+
+	if recordBroken {
+		jsonCache, err := json.Marshal(penisRecords)
+		tools.ErrRead(err)
+
+		err = ioutil.WriteFile("./data/penisRecords.json", jsonCache, 0644)
+		tools.ErrRead(err)
+	}
+
+	// Check server records
+	server, err := s.Guild(m.GuildID)
+	if err != nil {
+		return
+	}
+	serverData := tools.GetServer(*server)
+	recordBroken = false
+
+	if penisSize > serverData.Largest.Size {
+		serverData.Largest.Size = penisSize
+		serverData.Largest.UserID = userID
+		serverData.Largest.Date = time.Now().UTC()
+		recordBroken = true
+	} else if penisSize < serverData.Smallest.Size {
+		serverData.Smallest.Size = penisSize
+		serverData.Smallest.UserID = userID
+		serverData.Smallest.Date = time.Now().UTC()
+		recordBroken = true
+	}
+
+	if recordBroken {
+		jsonCache, err := json.Marshal(serverData)
+		tools.ErrRead(err)
+
+		err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
+		tools.ErrRead(err)
+	}
 }

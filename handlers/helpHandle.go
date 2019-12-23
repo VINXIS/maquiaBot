@@ -43,6 +43,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(e|emoji|emote)`, " +
 					"`encrypt`, " +
 					"`face`, " +
+					"`(hc|hp|historyc|historyp|historycock|historypenis)`, " +
 					"`(idea|niceidea)`, " +
 					"`info`, " +
 					"`kanye`, " +
@@ -142,6 +143,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Encrypt(embed)
 		case "face":
 			embed = helpcommands.Face(embed)
+		case "hc", "hp", "historyc", "historyp", "historycock", "historypenis":
+			embed = helpcommands.PenisHistory(embed)
 		case "idea", "niceidea":
 			embed = helpcommands.NiceIdea(embed)
 		case "info":
