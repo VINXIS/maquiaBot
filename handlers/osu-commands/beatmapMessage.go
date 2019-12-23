@@ -60,26 +60,32 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	// Get requested mods
 	mods := "NM"
 	if modRegex.MatchString(m.Content) {
-		modCheck := modRegex.FindStringSubmatch(m.Content)
-		modsRaw := strings.ToUpper(modCheck[1])
-		if len(modsRaw)%2 == 0 && len(osuapi.ParseMods(modsRaw).String()) > 0 {
-			mods = osuapi.ParseMods(modsRaw).String()
+		mods = strings.ToUpper(modRegex.FindStringSubmatch(m.Content)[1])
+		if strings.Contains(mods, "NC") && !strings.Contains(mods, "DT") {
+			mods += "DT"
 		}
 	}
 
 	// Check if the format uses a /b/, /s/, /beatmaps/, or /beatmapsets/ link
+	diffMods := 338 & osuapi.ParseMods(mods)
+	if diffMods&256 != 0 && diffMods&64 != 0 { // Remove DTHT
+		diffMods -= 320
+	}
+	if diffMods&2 != 0 && diffMods&16 != 0 { // Remove EZHR
+		diffMods -= 18
+	}
 	switch submatches[2] {
 	case "s":
-		beatmap = osutools.BeatmapParse(submatches[3], "set")
+		beatmap = osutools.BeatmapParse(submatches[3], "set", &diffMods)
 	case "b":
-		beatmap = osutools.BeatmapParse(submatches[3], "map")
+		beatmap = osutools.BeatmapParse(submatches[3], "map", &diffMods)
 	case "beatmaps":
-		beatmap = osutools.BeatmapParse(submatches[3], "map")
+		beatmap = osutools.BeatmapParse(submatches[3], "map", &diffMods)
 	case "beatmapsets":
 		if len(submatches[6]) > 0 {
-			beatmap = osutools.BeatmapParse(submatches[6], "map")
+			beatmap = osutools.BeatmapParse(submatches[6], "map", &diffMods)
 		} else {
-			beatmap = osutools.BeatmapParse(submatches[3], "set")
+			beatmap = osutools.BeatmapParse(submatches[3], "set", &diffMods)
 		}
 	}
 

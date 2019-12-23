@@ -53,7 +53,8 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	}
 	replay.ParseReplay(OsuAPI)
 	if replay.Beatmap.BeatmapID != 0 {
-		osutools.BeatmapParse(strconv.Itoa(replay.Beatmap.BeatmapID), "map")
+		diffMods := osuapi.Mods(338) & replay.Score.Mods
+		osutools.BeatmapParse(strconv.Itoa(replay.Beatmap.BeatmapID), "map", &diffMods)
 	}
 
 	// Get time since play
@@ -135,12 +136,12 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	}
 
 	g, _ := s.Guild(config.Conf.Server)
-		tools.ErrRead(err)
-		for _, emoji := range g.Emojis {
-			if emoji.Name == replay.Score.Rank+"_" {
-				scoreRank = emoji.MessageFormat()
-			}
+	tools.ErrRead(err)
+	for _, emoji := range g.Emojis {
+		if emoji.Name == replay.Score.Rank+"_" {
+			scoreRank = emoji.MessageFormat()
 		}
+	}
 
 	ppValues := make(chan string, 2)
 	var ppValueArray [2]string
@@ -192,7 +193,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			},
 			Description: sr + length + bpm + "\n" +
 				mapStats + "\n" +
-				mapObjs + "\n" + 
+				mapObjs + "\n" +
 				status + "\n\n" +
 				scorePrint + mods + combo + acc + scoreRank + "\n" +
 				mapCompletion + "\n" +

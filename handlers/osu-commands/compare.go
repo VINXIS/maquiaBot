@@ -29,7 +29,8 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 
 	// Obtain username and mods
 	username := ""
-	mods := ""
+	mods := "NM"
+	parsedMods := osuapi.Mods(0)
 	strict := true
 	if compareRegex.MatchString(m.Content) {
 		username = compareRegex.FindStringSubmatch(m.Content)[2]
@@ -38,6 +39,8 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 			if strings.Contains(mods, "NC") && !strings.Contains(mods, "DT") {
 				mods += "DT"
 			}
+			parsedMods = osuapi.ParseMods(mods)
+
 			username = strings.TrimSpace(strings.Replace(username, modRegex.FindStringSubmatch(username)[0], "", 1))
 		}
 		if strictRegex.MatchString(m.Content) {
@@ -85,18 +88,25 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 	}
 
 	// Get the map
+	diffMods := 338 & osuapi.ParseMods(mods)
+	if diffMods&256 != 0 && diffMods&64 != 0 { // Remove DTHT
+		diffMods -= 320
+	}
+	if diffMods&2 != 0 && diffMods&16 != 0 { // Remove EZHR
+		diffMods -= 18
+	}
 	switch submatches[3] {
 	case "s":
-		beatmap = osutools.BeatmapParse(submatches[4], "set")
+		beatmap = osutools.BeatmapParse(submatches[4], "set", &diffMods)
 	case "b":
-		beatmap = osutools.BeatmapParse(submatches[4], "map")
+		beatmap = osutools.BeatmapParse(submatches[4], "map", &diffMods)
 	case "beatmaps":
-		beatmap = osutools.BeatmapParse(submatches[4], "map")
+		beatmap = osutools.BeatmapParse(submatches[4], "map", &diffMods)
 	case "beatmapsets":
 		if len(submatches[7]) > 0 {
-			beatmap = osutools.BeatmapParse(submatches[7], "map")
+			beatmap = osutools.BeatmapParse(submatches[7], "map", &diffMods)
 		} else {
-			beatmap = osutools.BeatmapParse(submatches[4], "set")
+			beatmap = osutools.BeatmapParse(submatches[4], "set", &diffMods)
 		}
 	}
 	if beatmap.BeatmapID == 0 {
@@ -158,8 +168,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 	}
 
 	// Mod filter
-	if mods != "" {
-		parsedMods := osuapi.ParseMods(mods)
+	if mods != "NM" {
 		for i := 0; i < len(scores); i++ {
 			if (strict && scores[i].Mods != parsedMods) || (!strict && ((parsedMods == 0 && scores[i].Mods != 0) || scores[i].Mods&parsedMods != parsedMods)) {
 				scores = append(scores[:i], scores[i+1:]...)

@@ -111,7 +111,8 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 	score = scoreList[index-1]
 
 	// Get beatmap, acc, and mods
-	beatmap := osutools.BeatmapParse(strconv.Itoa(score.BeatmapID), "map")
+	diffMods := osuapi.Mods(338) & score.Mods
+	beatmap := osutools.BeatmapParse(strconv.Itoa(score.BeatmapID), "map", &diffMods)
 	accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 	mods = score.Mods.String()
 	if mods == "" {

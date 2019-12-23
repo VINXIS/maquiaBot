@@ -54,7 +54,8 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 						}
 
 						// Save beatmap
-						beatmap := BeatmapParse(strconv.Itoa(score.BeatmapID), "map")
+						diffMods := osuapi.Mods(338) & score.Mods
+						beatmap := BeatmapParse(strconv.Itoa(score.BeatmapID), "map", &diffMods)
 
 						// Assign timing variables for values below
 						totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))

@@ -1,6 +1,8 @@
 package osutools
 
 import (
+	"fmt"
+	"math"
 	"regexp"
 	"sort"
 	"strconv"
@@ -10,7 +12,7 @@ import (
 )
 
 // BeatmapParse parses beatmap and obtains the .osu file
-func BeatmapParse(id, format string) (beatmap osuapi.Beatmap) {
+func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap) {
 	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
 
 	mapID, err := strconv.Atoi(id)
@@ -20,6 +22,7 @@ func BeatmapParse(id, format string) (beatmap osuapi.Beatmap) {
 		// Fetch the beatmap
 		beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapID: mapID,
+			Mods:      mods,
 		})
 		tools.ErrRead(err)
 		if len(beatmaps) > 0 {
@@ -41,6 +44,7 @@ func BeatmapParse(id, format string) (beatmap osuapi.Beatmap) {
 		// Fetch the beatmap
 		beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 			BeatmapSetID: mapID,
+			Mods:         mods,
 		})
 		tools.ErrRead(err)
 
@@ -66,5 +70,61 @@ func BeatmapParse(id, format string) (beatmap osuapi.Beatmap) {
 			beatmap = beatmaps[0]
 		}
 	}
+
+	// Mod scaling
+	scaleMods := *mods
+
+	// HR / EZ scaling
+	if scaleMods&osuapi.ModHardRock != 0 {
+		beatmap.CircleSize = math.Min(10.0, beatmap.CircleSize*1.3)
+		beatmap.ApproachRate = math.Min(10.0, beatmap.ApproachRate*1.4)
+		beatmap.OverallDifficulty = math.Min(10.0, beatmap.OverallDifficulty*1.4)
+		beatmap.HPDrain = math.Min(10.0, beatmap.HPDrain*1.4)
+	} else if scaleMods&osuapi.ModEasy != 0 {
+		beatmap.CircleSize /= 2.0
+		beatmap.ApproachRate /= 2.0
+		beatmap.OverallDifficulty /= 2.0
+		beatmap.HPDrain /= 2.0
+	}
+
+	// DT / HT scaling
+	ARMS := diffRange(beatmap.ApproachRate)
+	HPMS := diffRange(beatmap.HPDrain)
+	fmt.Println(ARMS)
+	clock := float64(1)
+	if scaleMods&osuapi.ModDoubleTime != 0 {
+		beatmap.BPM /= 0.75
+		clock = 1.5
+	} else if scaleMods&osuapi.ModHalfTime != 0 {
+		beatmap.BPM /= 1.5
+		clock = 0.75
+	}
+	beatmap.TotalLength = int(float64(beatmap.TotalLength) / clock)
+	beatmap.HitLength = int(float64(beatmap.HitLength) / clock)
+	ARMS /= clock
+	ODScale := (80.0 - 6.0*beatmap.OverallDifficulty) / clock
+	HPMS /= clock
+	beatmap.OverallDifficulty = (80.0 - ODScale) / 6.0
+	beatmap.ApproachRate = diffValue(ARMS)
+	beatmap.HPDrain = diffValue(HPMS)
+
+	fmt.Println(ARMS)
+
 	return beatmap
+}
+
+func diffRange(value float64) float64 {
+	if value > 5.0 {
+		return 1200 + (450-1200)*(value-5)/5
+	} else if value < 5.0 {
+		return 1200 - (1200-1800)*(5-value)/5
+	}
+	return 1200
+}
+
+func diffValue(value float64) float64 {
+	if value > 1200 {
+		return (1800 - value) / 120
+	}
+	return (1200-value)/150 + 5
 }

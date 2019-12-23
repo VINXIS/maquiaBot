@@ -52,7 +52,8 @@ func TrackMapperPost(s *discordgo.Session) {
 					setsChecked[beatmap.BeatmapSetID] = true
 
 					// see if set satisfies approvalstatus change/submission requirements
-					osuMap := BeatmapParse(strconv.Itoa(beatmap.BeatmapSetID), "set")
+					nomod := osuapi.Mods(0)
+					osuMap := BeatmapParse(strconv.Itoa(beatmap.BeatmapSetID), "set", &nomod)
 					var targetMap osuapi.Beatmap
 					var approvals []osuapi.ApprovedStatus // Store all approvedstatuses because sometimes the osu!api gives sets with multiple approved status
 					for _, dataMap := range mapperData[i].Beatmaps {

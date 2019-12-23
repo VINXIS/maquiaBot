@@ -69,7 +69,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// LATE
-	if serverData.Late && (strings.Contains(m.Content, "late") || strings.Contains(m.Content, "old") || strings.Contains(m.Content, "ancient")) && !strings.HasPrefix(m.Content, serverPrefix+"late") {
+	if serverData.Late && (strings.Contains(m.Content, "late") || (strings.Contains(m.Content, "old") && !strings.Contains(m.Content, "old.ppy.sh")) || strings.Contains(m.Content, "ancient")) && !strings.HasPrefix(m.Content, serverPrefix+"late") {
 		go gencommands.Late(s, m)
 		go tools.CommandLog(s, m, "late")
 	}

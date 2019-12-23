@@ -80,18 +80,25 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 	}
 
 	// Get the map
+	diffMods := 338 & parsedMods
+	if diffMods&256 != 0 && diffMods&64 != 0 { // Remove DTHT
+		diffMods -= 320
+	}
+	if diffMods&2 != 0 && diffMods&16 != 0 { // Remove EZHR
+		diffMods -= 18
+	}
 	switch submatches[3] {
 	case "s":
-		beatmap = osutools.BeatmapParse(submatches[4], "set")
+		beatmap = osutools.BeatmapParse(submatches[4], "set", &diffMods)
 	case "b":
-		beatmap = osutools.BeatmapParse(submatches[4], "map")
+		beatmap = osutools.BeatmapParse(submatches[4], "map", &diffMods)
 	case "beatmaps":
-		beatmap = osutools.BeatmapParse(submatches[4], "map")
+		beatmap = osutools.BeatmapParse(submatches[4], "map", &diffMods)
 	case "beatmapsets":
 		if len(submatches[7]) > 0 {
-			beatmap = osutools.BeatmapParse(submatches[7], "map")
+			beatmap = osutools.BeatmapParse(submatches[7], "map", &diffMods)
 		} else {
-			beatmap = osutools.BeatmapParse(submatches[4], "set")
+			beatmap = osutools.BeatmapParse(submatches[4], "set", &diffMods)
 		}
 	}
 	if beatmap.BeatmapID == 0 {
