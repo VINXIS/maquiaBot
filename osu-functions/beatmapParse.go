@@ -1,7 +1,6 @@
 package osutools
 
 import (
-	"fmt"
 	"math"
 	"regexp"
 	"sort"
@@ -90,7 +89,6 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 	// DT / HT scaling
 	ARMS := diffRange(beatmap.ApproachRate)
 	HPMS := diffRange(beatmap.HPDrain)
-	fmt.Println(ARMS)
 	clock := float64(1)
 	if scaleMods&osuapi.ModDoubleTime != 0 {
 		beatmap.BPM /= 0.75
@@ -107,8 +105,6 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 	beatmap.OverallDifficulty = (80.0 - ODScale) / 6.0
 	beatmap.ApproachRate = diffValue(ARMS)
 	beatmap.HPDrain = diffValue(HPMS)
-
-	fmt.Println(ARMS)
 
 	return beatmap
 }
