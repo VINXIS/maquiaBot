@@ -19,6 +19,7 @@ type Config struct {
 	Crab         string
 	Cheers       string
 	Late         string
+	OverIt       string
 }
 
 // BotHoster holds info about who is hosting the bot (also known as Bot Creator)

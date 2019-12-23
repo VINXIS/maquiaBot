@@ -293,6 +293,7 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 		"Late: " + strconv.FormatBool(serverData.Late) + "\n" +
 		"Nice Idea: " + strconv.FormatBool(serverData.NiceIdea) + "\n" +
 		"osu!: " + strconv.FormatBool(serverData.OsuToggle) + "\n" +
+		"Over it: " + strconv.FormatBool(serverData.OverIt) + "\n" +
 		"Vibe Check: " + strconv.FormatBool(serverData.Vibe) + "\n" +
 		"Announcements: " + strconv.FormatBool(serverData.Announce) + "\n"
 

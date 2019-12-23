@@ -18,6 +18,7 @@ type ServerData struct {
 	Late             bool
 	NiceIdea         bool
 	OsuToggle        bool
+	OverIt           bool
 	Vibe             bool
 	Announce         bool
 	Adjectives       []string
@@ -37,6 +38,7 @@ func NewServer(server discordgo.Guild) ServerData {
 		Daily:     true,
 		Late:      true,
 		NiceIdea:  true,
+		OverIt:    true,
 		Announce:  true,
 		Server:    server,
 	}

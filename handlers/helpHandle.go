@@ -51,6 +51,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`meme`, " +
 					"`(noun|nouns)`, " +
 					"`ocr`, " +
+					"`over`, " +
 					"`(p|per|percent|percentage)`, " +
 					"`parse`, " +
 					"`(penis|cock)`, " +
@@ -156,6 +157,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Nouns(embed)
 		case "ocr":
 			embed = helpcommands.OCR(embed)
+		case "over":
+			embed = helpcommands.OverIt(embed)
 		case "p", "per", "percent", "percentage":
 			embed = helpcommands.Percentage(embed)
 		case "parse":

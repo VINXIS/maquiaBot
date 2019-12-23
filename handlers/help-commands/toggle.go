@@ -7,7 +7,7 @@ import (
 // Toggle explains the toggle functionality
 func Toggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: toggle"
-	embed.Description = "`toggle <[-a] [-ch] [-cr] [-d] [-i] [-l] [-o] [-s] [-v]>` lets admins toggle specific server options."
+	embed.Description = "`toggle <[-a] [-ch] [-cr] [-d] [-i] [-l] [-os] [-ov] [-s] [-v]>` lets admins toggle specific server options."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[-a]",
@@ -40,8 +40,13 @@ func Toggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:   "[-o]",
+			Name:   "[-os]",
 			Value:  "Toggle whether map links, profile links, and timestamps should be read by the bot.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:   "[-ov]",
+			Value:  "Toggle whether any message containing over it should trigger an over it message.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{

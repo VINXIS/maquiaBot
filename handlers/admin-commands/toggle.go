@@ -54,8 +54,12 @@ func Toggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 		serverData.Late = !serverData.Late
 		flagged = true
 	}
-	if strings.Contains(m.Content, "-o") || strings.Contains(m.Content, "-osu") {
+	if strings.Contains(m.Content, "-os") || strings.Contains(m.Content, "-osu") {
 		serverData.OsuToggle = !serverData.OsuToggle
+		flagged = true
+	}
+	if strings.Contains(m.Content, "-ov") || strings.Contains(m.Content, "-over") {
+		serverData.OverIt = !serverData.OverIt
 		flagged = true
 	}
 	if strings.Contains(m.Content, "-s") || strings.Contains(m.Content, "-stats") {

@@ -86,11 +86,17 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
 	timestampRegex, _ := regexp.Compile(`(\d+):(\d{2}):(\d{3})\s*(\(((\d\,?)+)\))?`)
 	ideaRegex, _ := regexp.Compile(`(n+i+c+e*|g+o+d+|g+u+d+|c+o+l+)\s*i+d+e+a+`)
+	overRegex, _ := regexp.Compile(`ove*r\s+it+`)
 
 	// NICE IDEA
-	if serverData.NiceIdea && ideaRegex.MatchString(m.Content) {
+	if ideaRegex.MatchString(m.Content) && serverData.NiceIdea {
 		go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
 		go tools.CommandLog(s, m, "nice idea")
+	}
+
+	if overRegex.MatchString(m.Content) && serverData.OverIt {
+		go gencommands.OverIt(s, m)
+		go tools.CommandLog(s, m, "over it")
 	}
 
 	// Timestamp conversions
@@ -207,6 +213,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Nouns(s, m)
 		case serverPrefix + "ocr":
 			go gencommands.OCR(s, m)
+		case serverPrefix + "over":
+			go gencommands.OverIt(s, m)
 		case serverPrefix + "p", serverPrefix + "per", serverPrefix + "percent", serverPrefix + "percentage":
 			go gencommands.Percentage(s, m)
 		case serverPrefix + "parse":
