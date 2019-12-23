@@ -89,12 +89,13 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	overRegex, _ := regexp.Compile(`ove*r\s+it+`)
 
 	// NICE IDEA
-	if ideaRegex.MatchString(m.Content) && serverData.NiceIdea {
+	if ideaRegex.MatchString(m.Content) && serverData.NiceIdea && (!strings.HasPrefix(m.Content, serverPrefix+"idea") || !strings.HasPrefix(m.Content, serverPrefix+"niceidea")) {
 		go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
 		go tools.CommandLog(s, m, "nice idea")
 	}
 
-	if overRegex.MatchString(m.Content) && serverData.OverIt {
+	// OVER IT
+	if overRegex.MatchString(m.Content) && serverData.OverIt && !strings.HasPrefix(m.Content, serverPrefix+"over") {
 		go gencommands.OverIt(s, m)
 		go tools.CommandLog(s, m, "over it")
 	}
