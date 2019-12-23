@@ -12,6 +12,7 @@ import (
 	"time"
 
 	tools "../../tools"
+	structs "../../structs"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -271,6 +272,13 @@ func PenisHistory(s *discordgo.Session, m *discordgo.MessageCreate) {
 		serverData := tools.GetServer(*server)
 		penisRecord.Largest = serverData.Largest
 		penisRecord.Smallest = serverData.Smallest
+		if serverData.Smallest.Size == 1e308 {
+			penisRecord.Smallest = structs.PenisData{}
+		}
+	}
+	if penisRecord.Largest.Size == 0 {
+		s.ChannelMessageSend(m.ChannelID, "No recorded penis sizes for this server currently! Please use one of the other penis commands 2+ times before checking again!")
+		return
 	}
 
 	// Get usernames
@@ -290,9 +298,11 @@ func PenisHistory(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	largestPercentile := 100 * 0.5 * math.Erfc((average-penisRecord.Largest.Size)/(math.Sqrt(2.0)*stddev))
 	smallestPercentile := 100 * 0.5 * math.Erfc((average-penisRecord.Smallest.Size)/(math.Sqrt(2.0)*stddev))
-	s.ChannelMessageSend(m.ChannelID, text+
-		"**" + largestUsername+"** on "+strings.Replace(penisRecord.Largest.Date.Format(time.RFC822Z), "+0000", "UTC", -1)+": "+strconv.FormatFloat(penisRecord.Largest.Size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisRecord.Largest.Size/2.54, 'f', 2, 64)+"in) larger than approximately "+strconv.FormatFloat(largestPercentile, 'f', 2, 64)+"% of penises.\n"+
-		"**" + smallestUsername+"** on "+strings.Replace(penisRecord.Smallest.Date.Format(time.RFC822Z), "+0000", "UTC", -1)+": "+strconv.FormatFloat(penisRecord.Smallest.Size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisRecord.Smallest.Size/2.54, 'f', 2, 64)+"in) larger than approximately "+strconv.FormatFloat(smallestPercentile, 'f', 2, 64)+"% of penises.")
+	text += "**" + largestUsername+"** on "+strings.Replace(penisRecord.Largest.Date.Format(time.RFC822Z), "+0000", "UTC", -1)+": "+strconv.FormatFloat(penisRecord.Largest.Size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisRecord.Largest.Size/2.54, 'f', 2, 64)+"in) larger than approximately "+strconv.FormatFloat(largestPercentile, 'f', 2, 64)+"% of penises.\n"
+	if penisRecord.Smallest.Size != 0 {
+		text += "**" + smallestUsername+"** on "+strings.Replace(penisRecord.Smallest.Date.Format(time.RFC822Z), "+0000", "UTC", -1)+": "+strconv.FormatFloat(penisRecord.Smallest.Size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(penisRecord.Smallest.Size/2.54, 'f', 2, 64)+"in) larger than approximately "+strconv.FormatFloat(smallestPercentile, 'f', 2, 64)+"% of penises."
+	}
+	s.ChannelMessageSend(m.ChannelID, text)
 }
 
 func penisRecords(s *discordgo.Session, m *discordgo.MessageCreate, penisSize float64, userID string) {
