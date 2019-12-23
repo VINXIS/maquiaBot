@@ -8,6 +8,10 @@
         "Password": "",
         "Name": ""
     },
+    "Twitch": {
+        "ID": "",
+        "Secret": ""
+    },
     "Server": "",
     "DiscordToken": "",
     "OsuToken": "",

@@ -251,6 +251,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Skills(s, m)
 		case serverPrefix + "stats", serverPrefix + "class":
 			go gencommands.Stats(s, m)
+		case serverPrefix + "twitch", serverPrefix + "twitchdl":
+			go gencommands.Twitch(s, m)
 		case serverPrefix + "twitter", serverPrefix + "twitterdl":
 			go gencommands.Twitter(s, m)
 		case serverPrefix + "vibe", serverPrefix + "vibec", serverPrefix + "vibecheck":

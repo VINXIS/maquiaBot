@@ -18,6 +18,8 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 		ID       int64
 	)
 	twitterRegex, _ := regexp.Compile(`twitter.com\/(\S+)\/status\/(\d+)`)
+
+	// Get ID / link
 	if twitterRegex.MatchString(m.Content) {
 		linkType = "mp4"
 		ID, _ = strconv.ParseInt(twitterRegex.FindStringSubmatch(m.Content)[2], 10, 64)
@@ -40,9 +42,18 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if linkType == "" {
 		s.ChannelMessageSend(m.ChannelID, "No twitter video / image found!")
 		return
-	} else if linkType == "png" {
+	}
+
+	msg, err := s.ChannelMessageSend(m.ChannelID, "Obtaining twitter video / image...")
+	if err != nil {
+		return
+	}
+	
+	// Check if image or gif / video
+	if linkType == "png" {
 		response, err := http.Get(link)
 		if err != nil {
+			s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 			s.ChannelMessageSend(m.ChannelID, "Error obtaining image!")
 			return
 		}
@@ -53,7 +64,9 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 			},
 		}
 		s.ChannelMessageSendComplex(m.ChannelID, message)
+		s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 	} else {
+		// API call
 		api := anaconda.NewTwitterApiWithCredentials(
 			os.Getenv("TWITTER_ACCESS_TOKEN"),
 			os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"),
@@ -62,9 +75,12 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 		)
 		tweet, err := api.GetTweet(ID, nil)
 		if err != nil {
+			s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 			s.ChannelMessageSend(m.ChannelID, "Error obtaining tweet!")
 			return
 		}
+
+		// Find video link
 		for _, media := range tweet.ExtendedEntities.Media {
 			if media.Type == "video" || media.Type == "animated_gif" {
 				for _, variant := range media.VideoInfo.Variants {
@@ -89,8 +105,11 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 				}
 			}
 		}
+
+		// Get video and post
 		response, err := http.Get(link)
 		if err != nil {
+			s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 			s.ChannelMessageSend(m.ChannelID, "Error obtaining video / gif!")
 			return
 		}
@@ -100,6 +119,11 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 				Reader: response.Body,
 			},
 		}
-		s.ChannelMessageSendComplex(m.ChannelID, message)
+		_, err = s.ChannelMessageSendComplex(m.ChannelID, message)
+		s.ChannelMessageDelete(msg.ChannelID, msg.ID)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "File too large! Here's a link to the video instead: "+link)
+			return
+		}
 	}
 }

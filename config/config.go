@@ -13,6 +13,7 @@ var Conf Config
 type Config struct {
 	BotHoster    BotHoster
 	Database     Database
+	Twitch       Twitch
 	Server       string
 	DiscordToken string
 	OsuToken     string
@@ -33,6 +34,12 @@ type Database struct {
 	Username string
 	Password string
 	Name     string
+}
+
+// Twitch holds info about the twitch application
+type Twitch struct {
+	ID     string
+	Secret string
 }
 
 // NewConfig creates the new configuration from the JSON file
