@@ -259,6 +259,11 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 	hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 	mods = " **+" + mods + "** "
 
+	replay := ""
+	if score.Replay {
+		replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(score.ScoreID, 10) + "/download)"
+	}
+
 	g, _ := s.Guild(config.Conf.Server)
 	tools.ErrRead(err)
 	scoreRank := ""
@@ -282,7 +287,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			length + bpm + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n\n" +
-			scoreRank + scorePrint + mods + combo + acc + "\n" +
+			scoreRank + scorePrint + mods + combo + acc + replay + "\n" +
 			mapCompletion + "\n" +
 			pp + hits + "\n\n",
 		Thumbnail: &discordgo.MessageEmbedThumbnail{

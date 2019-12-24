@@ -22,7 +22,8 @@ type GetUserScoresOpts struct {
 // Yeah, I suck at choosing names. but that's what programming is all about,
 // after all.
 type GUSScore struct {
-	BeatmapID int `json:"beatmap_id,string"`
+	ScoreID   int64 `json:"score_id,string"`
+	BeatmapID int   `json:"beatmap_id,string"`
 	Score
 }
 

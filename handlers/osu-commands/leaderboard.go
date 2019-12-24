@@ -234,6 +234,10 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 				combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 			}
 			acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
+			replay := ""
+			if score.Replay {
+				replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(score.ScoreID, 10) + "/download)"
+			}
 			var pp string
 			totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
 			if score.Score.FullCombo { // If play was a perfect combo
@@ -251,7 +255,7 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 
 			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 				Name: "#" + strconv.Itoa(i-initial+j+1) + " **" + score.Username + "** (" + strconv.Itoa(score.UserID) + ")",
-				Value: scoreRank + scorePrint + scoreMods + combo + acc + "\n" +
+				Value: scoreRank + scorePrint + scoreMods + combo + acc + replay + "\n" +
 					pp + hits + "\n" +
 					time,
 			})

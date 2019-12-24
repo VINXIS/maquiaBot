@@ -175,6 +175,12 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			}
 			beatmap := beatmaps[0]
 
+			scoreRank := ""
+			for _, emoji := range g.Emojis {
+				if emoji.Name == score.Rank+"_" {
+					scoreRank = emoji.MessageFormat()
+				}
+			}
 			scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
 			mods := score.Mods.String()
 			if strings.Contains(mods, "DTNC") {
@@ -192,11 +198,9 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 				combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 			}
 			acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
-			scoreRank := ""
-			for _, emoji := range g.Emojis {
-				if emoji.Name == score.Rank+"_" {
-					scoreRank = emoji.MessageFormat()
-				}
+			replay := ""
+			if score.Replay {
+				replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(score.ScoreID, 10) + "/download)"
 			}
 			var pp string
 			totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
@@ -216,7 +220,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			mapField := &discordgo.MessageEmbedField{
 				Name: "#" + strconv.Itoa(i+1) + " " + beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "]",
 				Value: "[**Link**](https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID) + ") | <osu://dl/" + strconv.Itoa(beatmap.BeatmapSetID) + ">\n" +
-					scoreRank + scorePrint + mods + combo + acc + "\n" +
+					scoreRank + scorePrint + mods + combo + acc + replay + "\n" +
 					pp + hits + "\n" +
 					scoreTime,
 			}

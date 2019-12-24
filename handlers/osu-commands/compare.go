@@ -252,6 +252,11 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 		acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 		hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 
+		replay := ""
+		if score.Replay {
+			replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(score.ScoreID, 10) + "/download)"
+		}
+
 		if mods == "" {
 			mods = "NM"
 		}
@@ -327,10 +332,9 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 		}
 
 		if !allRegex.MatchString(m.Content) || len(scores) == 1 {
-			embed.Description +=
-				scoreRank + scorePrint + mods + combo + acc + "\n" +
-					mapCompletion + "\n" +
-					pp + hits + "\n\n"
+			embed.Description += scoreRank + scorePrint + mods + combo + acc + replay + "\n" +
+				mapCompletion + "\n" +
+				pp + hits + "\n\n"
 			embed.Footer = &discordgo.MessageEmbedFooter{
 				Text: time,
 			}
@@ -342,7 +346,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 		}
 		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 			Name: "#" + strconv.Itoa(i+1) + " | " + time,
-			Value: scoreRank + scorePrint + mods + combo + acc + "\n" +
+			Value: scoreRank + scorePrint + mods + combo + acc + replay + "\n" +
 				mapCompletion +
 				pp + hits + "\n\n",
 		})

@@ -204,6 +204,11 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 	hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 
+	replay := ""
+	if score.Replay {
+		replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(score.ScoreID, 10) + "/download)"
+	}
+
 	g, _ := s.Guild(config.Conf.Server)
 	tools.ErrRead(err)
 	scoreRank := ""
@@ -227,7 +232,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 			length + bpm + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n\n" +
-			scoreRank + scorePrint + mods + combo + acc + "\n" +
+			scoreRank + scorePrint + mods + combo + acc + replay + "\n" +
 			mapCompletion + "\n" +
 			pp + hits + "\n\n",
 		Thumbnail: &discordgo.MessageEmbedThumbnail{

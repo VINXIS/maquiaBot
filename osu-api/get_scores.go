@@ -35,6 +35,7 @@ type Score struct {
 	Date      MySQLDate `json:"date"`
 	Rank      string    `json:"rank"` // Rank = SSH, SS, SH, S, A, B, C, D
 	PP        float64   `json:"pp,string"`
+	Replay    OsuBool   `json:"replay_available,string"`
 }
 
 // GSScore is basically Score, with the exception it also has ScoreID.
