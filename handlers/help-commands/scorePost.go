@@ -4,10 +4,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// Compare explains the compare functionality
-func Compare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: c / compare"
-	embed.Description = "`[osu] (c|compare) [link] <osu! username> [-m <mod> [-nostrict]|-all] [-sp]` lets you show your score(s) on a map."
+// ScorePost explains the score post functionality
+func ScorePost(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
+	embed.Author.Name = "Command: s / sc / scorepost"
+	embed.Description = "`[osu] (s|sc|scorepost) [link] <osu! username> [-m <mod>] [-sp]` prints out a scorepost."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[link]",
@@ -22,16 +22,6 @@ func Compare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		&discordgo.MessageEmbedField{
 			Name:   "[-m <mod>]",
 			Value:  "The score's mod combination to look for.",
-			Inline: true,
-		},
-		&discordgo.MessageEmbedField{
-			Name:   "[-nostrict]",
-			Value:  "If the score should have that mod combination exactly, or if it can have other mods included.",
-			Inline: true,
-		},
-		&discordgo.MessageEmbedField{
-			Name:   "[-all]",
-			Value:  "Show all scores the user has made on the map.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{

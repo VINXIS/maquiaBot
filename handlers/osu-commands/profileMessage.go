@@ -189,7 +189,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 					combo = " **FC** "
 				}
 			} else {
-				combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
+				combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 			}
 			acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 			scoreRank := ""

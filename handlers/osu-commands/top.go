@@ -20,8 +20,9 @@ import (
 // Top gets the nth top pp score
 func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
 	topRegex, _ := regexp.Compile(`t(op)?\s+(.+)`)
-	modRegex, _ := regexp.Compile(`-m\s*(\S{2,})`)
+	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)
+	scorePostRegex, _ := regexp.Compile(`-sp`)
 
 	username := ""
 	mods := ""
@@ -49,6 +50,9 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		if strictRegex.MatchString(m.Content) {
 			strict = false
 			username = strings.TrimSpace(strings.Replace(username, strictRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if scorePostRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, scorePostRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 	}
 
@@ -159,7 +163,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 			combo = " **FC** "
 		}
 	} else {
-		combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
+		combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 	}
 
 	mapCompletion := ""
@@ -217,9 +221,9 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 			Name:    user.Username,
 			IconURL: "https://a.ppy.sh/" + strconv.Itoa(user.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
-		Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,
+		Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + strings.Replace(beatmap.Creator, "_", `\_`, -1),
 		URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
-		Description: sr + "\n" + 
+		Description: sr + "\n" +
 			length + bpm + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n\n" +
@@ -238,12 +242,11 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 			URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
 		}
 	}
-	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+	message, err := s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 		Content: warning,
 		Embed:   embed,
 	})
-	return
-
-	s.ChannelMessageSend(m.ChannelID, "Could not find any osu! account linked for "+m.Author.Mention()+" !")
-	return
+	if scorePostRegex.MatchString(m.Content) && err == nil {
+		ScorePost(s, &discordgo.MessageCreate{message}, cache, "")
+	}
 }

@@ -21,8 +21,9 @@ import (
 // Recent gets the most recent score done/nth score done
 func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cache []structs.PlayerData) {
 	recentRegex, _ := regexp.Compile(`(r|recent|rs|rb|recentb|recentbest)\s+(.+)`)
-	modRegex, _ := regexp.Compile(`-m\s*(\S{2,})`)
+	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)
+	scorePostRegex, _ := regexp.Compile(`-sp`)
 
 	username := ""
 	mods := ""
@@ -50,6 +51,9 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		if strictRegex.MatchString(m.Content) {
 			strict = false
 			username = strings.TrimSpace(strings.Replace(username, strictRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if scorePostRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, scorePostRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 	}
 
@@ -190,7 +194,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			combo = " **FC** "
 		}
 	} else {
-		combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
+		combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 	}
 
 	if objCount != playObjCount {
@@ -272,9 +276,9 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			Name:    userP.Username,
 			IconURL: "https://a.ppy.sh/" + strconv.Itoa(userP.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
-		Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,
+		Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + strings.Replace(beatmap.Creator, "_", `\_`, -1),
 		URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
-		Description: sr + "\n" + 
+		Description: sr + "\n" +
 			length + bpm + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n\n" +
@@ -299,8 +303,15 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			Text: "Try #" + strconv.Itoa(try) + " | " + tools.TimeSince(timeParse),
 		}
 	}
-	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+	message, err := s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 		Content: warning,
 		Embed:   embed,
 	})
+	if scorePostRegex.MatchString(m.Content) && err == nil {
+		if option == "best" {
+			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recentBest")
+		} else if option == "recent" {
+			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recent")
+		}
+	}
 }

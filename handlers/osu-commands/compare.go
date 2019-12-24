@@ -25,7 +25,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 	compareRegex, _ := regexp.Compile(`(c|compare)\s*(.+)?`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)
 	allRegex, _ := regexp.Compile(`-all`)
-	var beatmap osuapi.Beatmap
+	scorePostRegex, _ := regexp.Compile(`-sp`)
 
 	// Obtain username and mods
 	username := ""
@@ -50,9 +50,13 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 		if allRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, allRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
+		if scorePostRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, scorePostRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
 	}
 
 	// Get the map
+	var beatmap osuapi.Beatmap
 	var submatches []string
 	if mapRegex.MatchString(m.Content) {
 		submatches = mapRegex.FindStringSubmatch(m.Content)
@@ -219,11 +223,11 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 			Name:    user.Username,
 			IconURL: "https://a.ppy.sh/" + strconv.Itoa(user.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
-		Description: sr + "\n" + 
+		Description: sr + "\n" +
 			length + bpm + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n\n",
-		Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,
+		Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + strings.Replace(beatmap.Creator, "_", `\_`, -1),
 		URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
@@ -264,7 +268,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 				combo = " **FC** "
 			}
 		} else {
-			combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
+			combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 		}
 
 		mapCompletion := ""
@@ -330,7 +334,10 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 			embed.Footer = &discordgo.MessageEmbedFooter{
 				Text: time,
 			}
-			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			message, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			if scorePostRegex.MatchString(m.Content) && err == nil {
+				ScorePost(s, &discordgo.MessageCreate{message}, cache, "")
+			}
 			return
 		}
 		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{

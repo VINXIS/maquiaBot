@@ -50,6 +50,8 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 			go osucommands.Recent(s, m, "recent", playerCache)
 		case "rb", "recentb", "recentbest":
 			go osucommands.Recent(s, m, "best", playerCache)
+		case "s", "sc", "scorepost":
+			go osucommands.ScorePost(s, m, playerCache, "scorePost")
 		case "t", "top":
 			go osucommands.Top(s, m, playerCache)
 		case "tfarm", "topfarm":

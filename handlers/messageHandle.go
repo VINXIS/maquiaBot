@@ -298,6 +298,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go osucommands.Recent(s, m, "recent", profileCache)
 		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
 			go osucommands.Recent(s, m, "best", profileCache)
+		case serverPrefix + "s", serverPrefix + "sc", serverPrefix + "scorepost":
+			go osucommands.ScorePost(s, m, profileCache, "scorePost")
 		case serverPrefix + "t", serverPrefix + "top":
 			go osucommands.Top(s, m, profileCache)
 		case serverPrefix + "tfarm", serverPrefix + "topfarm":

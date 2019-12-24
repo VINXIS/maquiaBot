@@ -89,6 +89,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`ppadd`, " +
 					"`(r|rs|recent)`, " +
 					"`(rb|recentb|recentbest)`, " +
+					"`(s|sc|scorepost)`, " +
 					"`(t|top)`, " +
 					"`(tfarm|topfarm)`, " +
 					"`(ti|tinfo|tracking|trackinfo)`",
@@ -231,6 +232,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Recent(embed)
 		case "rb", "recentb", "recentbest":
 			embed = helpcommands.RecentBest(embed)
+		case "s", "sc", "scorepost":
+			embed = helpcommands.ScorePost(embed)
 		case "t", "top":
 			embed = helpcommands.Top(embed)
 		case "tfarm", "topfarm":

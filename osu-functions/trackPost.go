@@ -95,7 +95,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 								combo = " **FC** "
 							}
 						} else {
-							combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
+							combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 						}
 
 						mapCompletion := ""
@@ -210,7 +210,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 									URL:     "https://osu.ppy.sh/users/" + strconv.Itoa(user.UserID),
 									IconURL: "https://a.ppy.sh/" + strconv.Itoa(user.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 								},
-								Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,
+								Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + strings.Replace(beatmap.Creator, "_", `\_`, -1),
 								URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
 								Thumbnail: &discordgo.MessageEmbedThumbnail{
 									URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",

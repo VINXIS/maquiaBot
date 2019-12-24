@@ -186,7 +186,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 				Name:    replay.Player.Username,
 				IconURL: "https://a.ppy.sh/" + strconv.Itoa(replay.Player.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 			},
-			Title: replay.Beatmap.Artist + " - " + replay.Beatmap.Title + " [" + replay.Beatmap.DiffName + "] by " + replay.Beatmap.Creator,
+			Title: replay.Beatmap.Artist + " - " + replay.Beatmap.Title + " [" + replay.Beatmap.DiffName + "] by " + strings.Replace(replay.Beatmap.Creator, "_", `\_`, -1),
 			URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(replay.Beatmap.BeatmapID),
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
 				URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(replay.Beatmap.BeatmapSetID) + "l.jpg",

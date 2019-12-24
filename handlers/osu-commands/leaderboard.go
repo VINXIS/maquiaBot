@@ -192,7 +192,7 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 			IconURL: "https://a.ppy.sh/" + strconv.Itoa(beatmap.CreatorID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
 		Color: Color,
-		Description: sr + "\n" + 
+		Description: sr + "\n" +
 			length + bpm + combo + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n" +
@@ -231,7 +231,7 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 					combo = " **FC** "
 				}
 			} else {
-				combo = " **x" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + " "
+				combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 			}
 			acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 			var pp string
