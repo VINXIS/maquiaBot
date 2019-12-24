@@ -52,8 +52,8 @@ func QuoteAdd(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 
 // QuoteRemove explains the quoteremove functionality
 func QuoteRemove(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: qd / qr / qremove / qdelete / quoter / quoted / quoteremove / quotedelete"
-	embed.Description = "`(qd|qr|qremove|qdelete|quoter|quoted|quoteremove|quotedelete) <messageID>` removes a quote."
+	embed.Author.Name = "Command: qd / qr / qremove / qdelete / quoteremove / quotedelete"
+	embed.Description = "`(qd|qr|qremove|qdelete|quoteremove|quotedelete) <messageID>` removes a quote."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:  "[messageID]",

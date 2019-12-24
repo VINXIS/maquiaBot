@@ -236,7 +236,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Quote(s, m)
 		case serverPrefix + "qa", serverPrefix + "qadd", serverPrefix + "quotea", serverPrefix + "quoteadd":
 			go gencommands.QuoteAdd(s, m)
-		case serverPrefix + "qd", serverPrefix + "qr", serverPrefix + "quoted", serverPrefix + "quoter", serverPrefix + "qdelete", serverPrefix + "qremove", serverPrefix + "quotedelete", serverPrefix + "quoteremove":
+		case serverPrefix + "qd", serverPrefix + "qr", serverPrefix + "qdelete", serverPrefix + "qremove", serverPrefix + "quotedelete", serverPrefix + "quoteremove":
 			go gencommands.QuoteRemove(s, m)
 		case serverPrefix + "qs", serverPrefix + "quotes":
 			go gencommands.Quotes(s, m)
