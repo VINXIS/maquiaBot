@@ -169,10 +169,10 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 
 	// Calculate SR and PP
 	values := osutools.BeatmapCalc(mods, accVal, comboVal, missVal, beatmap)
-	ppText := ""
+	ppText := "Catch the Beat calc does not work currently!"
 	if len(values) == 1 {
 		ppText = values[0]
-	} else {
+	} else if len(values) != 0 {
 		ppText = values[0] + values[1] + values[2] + values[3] + values[4]
 	}
 
@@ -200,7 +200,6 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 			download + "\n" +
 			diffs + "\n" + "\n" +
 			ppTextHeader + "\n" +
-			//aimRating + speedRating + totalRating + "\n" + TODO: Make SR calc work
 			ppText,
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",

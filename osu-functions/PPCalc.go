@@ -10,7 +10,7 @@ import (
 	tools "../tools"
 )
 
-// PPCalc calculates the pp given by the beatmap with specified acc and mods TODO: More args
+// PPCalc calculates the pp given by the beatmap with specified acc and mods
 func PPCalc(beatmap osuapi.Beatmap, acc float64, combo string, misses string, mods string, store chan<- string) {
 	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
 

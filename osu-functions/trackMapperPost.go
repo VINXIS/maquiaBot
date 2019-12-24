@@ -93,6 +93,7 @@ func TrackMapperPost(s *discordgo.Session) {
 						hitSeconds = "0" + hitSeconds
 					}
 
+					sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " **Aim:** " + strconv.FormatFloat(beatmap.DifficultyAim, 'f', 2, 64) + " **Speed:** " + strconv.FormatFloat(beatmap.DifficultySpeed, 'f', 2, 64)
 					length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + totalSeconds + " (" + fmt.Sprint(hitMinutes) + ":" + hitSeconds + ") "
 					bpm := "**BPM:** " + fmt.Sprint(osuMap.BPM) + " "
 					combo := "**FC:** " + strconv.Itoa(osuMap.MaxCombo) + "x"
@@ -109,8 +110,12 @@ func TrackMapperPost(s *discordgo.Session) {
 						diffs = "**" + strconv.Itoa(len(set)) + "** difficulties <:ahFuck:550808614202245131>"
 					}
 
-					// Calculate SR and PP
-					values := BeatmapCalc("NM", "", "", "", osuMap)
+					// Calculate PP
+					values := BeatmapCalc("NM", "", "", "", beatmap)
+					ppText := "Catch the Beat calc does not work currently!"
+					if len(values) != 0 {
+						ppText = values[0] + values[1] + values[2] + values[3] + values[4]
+					}
 
 					// Create embed
 					embed := &discordgo.MessageEmbed{
@@ -120,15 +125,15 @@ func TrackMapperPost(s *discordgo.Session) {
 							IconURL: "https://a.ppy.sh/" + strconv.Itoa(osuMap.CreatorID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 						},
 						Color: Color,
-						Description: values[0] + length + bpm + combo + "\n" +
+						Description: sr + "\n" +
+							length + bpm + combo + "\n" +
 							mapStats + "\n" +
 							mapObjs + "\n" +
 							status + "\n" +
 							download + "\n" +
 							diffs + "\n" + "\n" +
 							"**[" + osuMap.DiffName + "]** with mods: **NM**\n" +
-							//aimRating + speedRating + totalRating + "\n" + TODO: Make SR calc work
-							values[1] + values[2] + values[3] + values[4] + values[5],
+							ppText,
 						Thumbnail: &discordgo.MessageEmbedThumbnail{
 							URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 						},

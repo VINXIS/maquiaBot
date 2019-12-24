@@ -246,6 +246,10 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 
 	// Calculate PP
 	values := osutools.BeatmapCalc("NM", "", "", "", beatmap)
+	ppText := "Catch the Beat calc does not work currently!"
+	if len(values) != 0 {
+		ppText = values[0] + values[1] + values[2] + values[3] + values[4]
+	}
 
 	// Create embed
 	embed := &discordgo.MessageEmbed{
@@ -255,7 +259,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			IconURL: "https://a.ppy.sh/" + strconv.Itoa(beatmap.CreatorID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
 		Color: Color,
-		Description: sr + "\n" + 
+		Description: sr + "\n" +
 			length + bpm + combo + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n" +
@@ -263,8 +267,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			download + "\n" +
 			diffs + "\n" + "\n" +
 			"**[" + beatmap.DiffName + "]** " + warning + "\n" +
-			//aimRating + speedRating + totalRating + "\n" + TODO: Make SR calc work
-			values[0] + values[1] + values[2] + values[3] + values[4],
+			ppText,
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(beatmap.BeatmapSetID) + "l.jpg",
 		},
