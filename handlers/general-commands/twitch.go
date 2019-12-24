@@ -2,10 +2,10 @@ package gencommands
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
-	"time"
 
 	config "../../config"
 	"github.com/bwmarrin/discordgo"
@@ -14,20 +14,20 @@ import (
 // TwitchClip holds twitch API information for clips
 type TwitchClip struct {
 	Data []struct {
-		ID              string    `json:"id"`
-		URL             string    `json:"url"`
-		EmbedURL        string    `json:"embed_url"`
-		BroadcasterID   int       `json:"broadcaster_id,string"`
-		BroadcasterName string    `json:"broadcaster_name"`
-		CreatorID       int       `json:"creator_id,string"`
-		CreatorName     string    `json:"creator_name"`
-		VideoID         int       `json:"video_id,string"`
-		GameID          int       `json:"game_id,string"`
-		Language        string    `json:"language"`
-		Title           string    `json:"title"`
-		ViewCount       int       `json:"view_count"`
-		CreatedAt       time.Time `json:"created_at,"`
-		ThumbnailURL    string    `json:"thumbnail_url"`
+		// ID              string    `json:"id"`
+		// URL             string    `json:"url"`
+		// EmbedURL        string    `json:"embed_url"`
+		// BroadcasterID   int       `json:"broadcaster_id,string"`
+		// BroadcasterName string    `json:"broadcaster_name"`
+		// CreatorID       int       `json:"creator_id,string"`
+		// CreatorName     string    `json:"creator_name"`
+		// VideoID         int       `json:"video_id,string"`
+		// GameID          int       `json:"game_id,string"`
+		// Language        string    `json:"language"`
+		// Title           string    `json:"title"`
+		// ViewCount       int       `json:"view_count"`
+		// CreatedAt       time.Time `json:"created_at,"`
+		ThumbnailURL string `json:"thumbnail_url"`
 	} `json:"data"`
 }
 
@@ -61,11 +61,11 @@ func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
 	req, _ := http.NewRequest("GET", "https://api.twitch.tv/helix/clips?id="+ID, nil)
 	req.Header.Set("Client-ID", config.Conf.Twitch.ID)
 	res, err := client.Do(req)
-	defer res.Body.Close()
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Error in obtaining clip information! Error 1")
 		return
 	}
+	defer res.Body.Close()
 	byteArray, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Error in obtaining clip information! Error 2")
@@ -76,6 +76,8 @@ func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var clipData TwitchClip
 	err = json.Unmarshal(byteArray, &clipData)
 	if err != nil {
+		fmt.Println(err)
+		fmt.Println(string(byteArray))
 		s.ChannelMessageSend(m.ChannelID, "Error in obtaining clip information! Error 3")
 		return
 	}
@@ -83,6 +85,7 @@ func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "No twitch clip found!")
 		return
 	}
+	fmt.Println(clipData)
 
 	// Find URL
 	if !thumbnailRegex.MatchString(clipData.Data[0].ThumbnailURL) {
@@ -98,12 +101,12 @@ func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Get video
 	response, err := http.Get(video)
-	defer response.Body.Close()
 	if err != nil {
 		s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 		s.ChannelMessageSend(m.ChannelID, "Error obtaining video / gif!")
 		return
 	}
+	defer response.Body.Close()
 	message := &discordgo.MessageSend{
 		File: &discordgo.File{
 			Name:   ID + ".mp4",
