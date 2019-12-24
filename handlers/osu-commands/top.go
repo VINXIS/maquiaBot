@@ -138,7 +138,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 
 	// Assign misc variables
 	Color := osutools.ModeColour(beatmap.Mode)
-	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
+	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " **Aim:** " + strconv.FormatFloat(beatmap.DifficultyAim, 'f', 2, 64) + " **Speed:** " + strconv.FormatFloat(beatmap.DifficultySpeed, 'f', 2, 64)
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 	mapStats := "**CS:** " + strconv.FormatFloat(beatmap.CircleSize, 'f', 1, 64) + " **AR:** " + strconv.FormatFloat(beatmap.ApproachRate, 'f', 1, 64) + " **OD:** " + strconv.FormatFloat(beatmap.OverallDifficulty, 'f', 1, 64) + " **HP:** " + strconv.FormatFloat(beatmap.HPDrain, 'f', 1, 64)
@@ -219,7 +219,8 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		},
 		Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,
 		URL:   "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
-		Description: sr + length + bpm + "\n" +
+		Description: sr + "\n" + 
+			length + bpm + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n\n" +
 			scoreRank + scorePrint + mods + combo + acc + "\n" +

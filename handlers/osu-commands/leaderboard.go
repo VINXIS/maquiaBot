@@ -173,7 +173,7 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 		hitSeconds = "0" + hitSeconds
 	}
 
-	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
+	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " **Aim:** " + strconv.FormatFloat(beatmap.DifficultyAim, 'f', 2, 64) + " **Speed:** " + strconv.FormatFloat(beatmap.DifficultySpeed, 'f', 2, 64)
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + totalSeconds + " (" + fmt.Sprint(hitMinutes) + ":" + hitSeconds + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 	combo := "**FC:** " + strconv.Itoa(beatmap.MaxCombo) + "x"
@@ -188,11 +188,12 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 	embed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://osu.ppy.sh/beatmaps/" + strconv.Itoa(beatmap.BeatmapID),
-			Name:    beatmap.Artist + " - " + beatmap.Title + " by " + beatmap.Creator,
+			Name:    beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,
 			IconURL: "https://a.ppy.sh/" + strconv.Itoa(beatmap.CreatorID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
 		Color: Color,
-		Description: sr + length + bpm + combo + "\n" +
+		Description: sr + "\n" + 
+			length + bpm + combo + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n" +
 			status + "\n" +

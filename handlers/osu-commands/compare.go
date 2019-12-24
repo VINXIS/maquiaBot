@@ -88,25 +88,19 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 	}
 
 	// Get the map
-	diffMods := 338 & osuapi.ParseMods(mods)
-	if diffMods&256 != 0 && diffMods&64 != 0 { // Remove DTHT
-		diffMods -= 320
-	}
-	if diffMods&2 != 0 && diffMods&16 != 0 { // Remove EZHR
-		diffMods -= 18
-	}
+	nomod := osuapi.Mods(0)
 	switch submatches[3] {
 	case "s":
-		beatmap = osutools.BeatmapParse(submatches[4], "set", &diffMods)
+		beatmap = osutools.BeatmapParse(submatches[4], "set", &nomod)
 	case "b":
-		beatmap = osutools.BeatmapParse(submatches[4], "map", &diffMods)
+		beatmap = osutools.BeatmapParse(submatches[4], "map", &nomod)
 	case "beatmaps":
-		beatmap = osutools.BeatmapParse(submatches[4], "map", &diffMods)
+		beatmap = osutools.BeatmapParse(submatches[4], "map", &nomod)
 	case "beatmapsets":
 		if len(submatches[7]) > 0 {
-			beatmap = osutools.BeatmapParse(submatches[7], "map", &diffMods)
+			beatmap = osutools.BeatmapParse(submatches[7], "map", &nomod)
 		} else {
-			beatmap = osutools.BeatmapParse(submatches[4], "set", &diffMods)
+			beatmap = osutools.BeatmapParse(submatches[4], "set", &nomod)
 		}
 	}
 	if beatmap.BeatmapID == 0 {
@@ -187,6 +181,18 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 		return scores[i].PP > scores[j].PP
 	})
 
+	// Get the beatmap but with mods applied if not all
+	if !allRegex.MatchString(m.Content) {
+		diffMods := 338 & scores[0].Mods
+		if diffMods&256 != 0 && diffMods&64 != 0 { // Remove DTHT
+			diffMods -= 320
+		}
+		if diffMods&2 != 0 && diffMods&16 != 0 { // Remove EZHR
+			diffMods -= 18
+		}
+		beatmap = osutools.BeatmapParse(strconv.Itoa(beatmap.BeatmapID), "map", &diffMods)
+	}
+
 	// Create embed
 	// Assign timing variables for map specs
 	totalMinutes := math.Floor(float64(beatmap.TotalLength / 60))
@@ -199,7 +205,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 	if len(hitSeconds) == 1 {
 		hitSeconds = "0" + hitSeconds
 	}
-	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " "
+	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + " **Aim:** " + strconv.FormatFloat(beatmap.DifficultyAim, 'f', 2, 64) + " **Speed:** " + strconv.FormatFloat(beatmap.DifficultySpeed, 'f', 2, 64)
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "
 	mapStats := "**CS:** " + strconv.FormatFloat(beatmap.CircleSize, 'f', 1, 64) + " **AR:** " + strconv.FormatFloat(beatmap.ApproachRate, 'f', 1, 64) + " **OD:** " + strconv.FormatFloat(beatmap.OverallDifficulty, 'f', 1, 64) + " **HP:** " + strconv.FormatFloat(beatmap.HPDrain, 'f', 1, 64)
@@ -213,7 +219,8 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 			Name:    user.Username,
 			IconURL: "https://a.ppy.sh/" + strconv.Itoa(user.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 		},
-		Description: sr + length + bpm + "\n" +
+		Description: sr + "\n" + 
+			length + bpm + "\n" +
 			mapStats + "\n" +
 			mapObjs + "\n\n",
 		Title: beatmap.Artist + " - " + beatmap.Title + " [" + beatmap.DiffName + "] by " + beatmap.Creator,

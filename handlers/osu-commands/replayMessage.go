@@ -76,7 +76,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	mods := replay.Score.Mods.String()
 	accCalc := (50.0*float64(replay.Score.Count50) + 100.0*float64(replay.Score.Count100) + 300.0*float64(replay.Score.Count300)) / (300.0 * float64(replay.Score.CountMiss+replay.Score.Count50+replay.Score.Count100+replay.Score.Count300)) * 100.0
 	Color := osutools.ModeColour(replay.Beatmap.Mode)
-	sr := "**SR:** " + strconv.FormatFloat(replay.Beatmap.DifficultyRating, 'f', 2, 64) + " "
+	sr := "**SR:** " + strconv.FormatFloat(replay.Beatmap.DifficultyRating, 'f', 2, 64) + " **Aim:** " + strconv.FormatFloat(replay.Beatmap.DifficultyAim, 'f', 2, 64) + " **Speed:** " + strconv.FormatFloat(replay.Beatmap.DifficultySpeed, 'f', 2, 64)
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(replay.Beatmap.BPM) + " "
 	scorePrint := " **" + tools.Comma(replay.Score.Score) + "** "
@@ -191,7 +191,8 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
 				URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(replay.Beatmap.BeatmapSetID) + "l.jpg",
 			},
-			Description: sr + length + bpm + "\n" +
+			Description: sr + "\n" + 
+				length + bpm + "\n" +
 				mapStats + "\n" +
 				mapObjs + "\n" +
 				status + "\n\n" +
