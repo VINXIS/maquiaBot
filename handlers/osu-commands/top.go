@@ -1,6 +1,7 @@
 package osucommands
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"math/rand"
@@ -207,10 +208,31 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 	replay := ""
 	if score.Replay {
 		replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(score.ScoreID, 10) + "/download)"
+		reader, _ := OsuAPI.GetReplay(osuapi.GetReplayOpts{
+			Username:  user.Username,
+			Mode:      beatmap.Mode,
+			BeatmapID: beatmap.BeatmapID,
+		})
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(reader)
+		replayData := structs.ReplayData{
+			Mode:    beatmap.Mode,
+			Beatmap: beatmap,
+			Score:   score.Score,
+			Data:    buf.Bytes(),
+		}
+		replayData.PlayData = replayData.GetPlayData(true)
+		UR := replayData.GetUnstableRate()
+		replay += " | " + strconv.FormatFloat(UR, 'f', 2, 64)
+		if strings.Contains(mods, "DT") || strings.Contains(mods, "NC") || strings.Contains(mods, "HT") {
+			replay += " cv. UR"
+		} else {
+			replay += " UR"
+		}
 	}
 
+	score.Rank = strings.Replace(score.Rank, "X", "SS", -1)
 	g, _ := s.Guild(config.Conf.Server)
-	tools.ErrRead(err)
 	scoreRank := ""
 	for _, emoji := range g.Emojis {
 		if emoji.Name == score.Rank+"_" {

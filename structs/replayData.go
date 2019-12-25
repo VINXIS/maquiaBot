@@ -3,12 +3,14 @@ package structs
 import (
 	"bytes"
 	"io/ioutil"
+	"math"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	osuapi "../osu-api"
-	"github.com/ulikunitz/xz"
+	"github.com/ulikunitz/xz/lzma"
 )
 
 // ReplayData stores the replay information of a play
@@ -22,6 +24,8 @@ type ReplayData struct {
 	LifeBar      []HealthData
 	PlayData     []PlayData
 	UnstableRate float64
+	Seed         float64
+	HitErrors    []float64
 }
 
 // HealthData holds the health data of the player in the replay
@@ -69,7 +73,7 @@ func (r *ReplayData) ParseReplay(osuAPI *osuapi.Client) {
 	r.Score = r.getScore(osuAPI)
 	r.LifeBar = r.getLife()
 	r.Time = r.getTime()
-	r.PlayData = r.getPlayData()
+	r.PlayData = r.GetPlayData(false)
 }
 
 func (r *ReplayData) getMode() osuapi.Mode {
@@ -206,18 +210,24 @@ func (r *ReplayData) getTime() time.Time {
 	return scoreTime
 }
 
-func (r *ReplayData) getPlayData() []PlayData {
+// GetPlayData obtains the play data from the replay
+func (r *ReplayData) GetPlayData(isAPI bool) []PlayData {
 	if r.Mode != 0 {
 		r.Data = []byte{}
 		return []PlayData{}
 	}
 
 	// Get length, and decompress LZMA stream
-	l := int(uint32(r.Data[3])<<24 | uint32(r.Data[2])<<16 | uint32(r.Data[1])<<8 | uint32(r.Data[0]))
-	r.Data = r.Data[4:]
-	playBytes := r.Data[:l]
+	var playBytes []byte
+	if !isAPI {
+		l := int(uint32(r.Data[3])<<24 | uint32(r.Data[2])<<16 | uint32(r.Data[1])<<8 | uint32(r.Data[0]))
+		r.Data = r.Data[4:]
+		playBytes = r.Data[:l]
+	} else {
+		playBytes = r.Data
+	}
 	buffer := bytes.NewBuffer(playBytes)
-	reader, err := xz.NewReader(buffer)
+	reader, err := lzma.NewReader(buffer)
 	if err != nil {
 		r.Data = []byte{}
 		return []PlayData{}
@@ -231,6 +241,11 @@ func (r *ReplayData) getPlayData() []PlayData {
 	timeElapsed := int64(0)
 	for _, hit := range hits {
 		parts := strings.Split(hit, "|")
+
+		if parts[0] == "-12345" && parts[1] == "0" && parts[2] == "0" {
+			r.Seed, _ = strconv.ParseFloat(parts[3], 64)
+			break
+		}
 
 		// Obtain data
 		timeSince, _ := strconv.ParseInt(parts[0], 10, 64)
@@ -251,6 +266,123 @@ func (r *ReplayData) getPlayData() []PlayData {
 
 	r.Data = []byte{}
 	return playData
+}
+
+// GetUnstableRate gets the unstable rate of the play MUST BE CALLED AFTER osutools.BeatmapParse
+func (r *ReplayData) GetUnstableRate() float64 {
+	if len(r.PlayData) == 0 {
+		return 0
+	}
+
+	// Get info for helping to determine hit error
+	radius := 64 * (1 - 0.7*(r.Beatmap.CircleSize-5)/5) / 2
+	window50 := 199.5 - r.Beatmap.OverallDifficulty*10
+
+	// Get map
+	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
+	mapByte, err := ioutil.ReadFile("./data/osuFiles/" +
+		strconv.Itoa(r.Beatmap.BeatmapID) +
+		" " +
+		replacer.ReplaceAllString(r.Beatmap.Artist, "") +
+		" - " +
+		replacer.ReplaceAllString(r.Beatmap.Title, "") +
+		".osu")
+	if err != nil {
+		return 0
+	}
+
+	// Calculate hit errors
+	text := string(mapByte)
+	lines := strings.Split(text, "\n")
+	passed := false
+	objects := []struct {
+		time int64
+		x    float64
+		y    float64
+	}{}
+	for _, line := range lines {
+		if !passed {
+			if strings.Contains(line, "[HitObjects]") {
+				passed = true
+			}
+			continue
+		} else if !strings.Contains(line, ",") {
+			break
+		}
+
+		parts := strings.Split(line, ",")
+		if len(parts) < 4 {
+			break
+		}
+		noteType, _ := strconv.ParseInt(parts[3], 10, 64)
+		if noteType&3 == 0 {
+			continue
+		}
+
+		x, _ := strconv.ParseFloat(parts[0], 64)
+		y, _ := strconv.ParseFloat(parts[1], 64)
+		noteTime, _ := strconv.ParseInt(parts[2], 10, 64)
+		if r.Score.Mods&osuapi.ModHardRock != 0 {
+			y = 384 - y
+		}
+		objects = append(objects, struct {
+			time int64
+			x    float64
+			y    float64
+		}{noteTime, x, y})
+	}
+
+	usedPlays := []PlayData{}
+	for _, obj := range objects {
+		for j, play := range r.PlayData {
+			difference := float64(play.TimeStamp - obj.time)
+			if play.TimeStamp < obj.time-int64(window50) {
+				continue
+			} else if play.TimeStamp > obj.time+int64(window50) {
+				break
+			}
+			used := false
+			for _, usedPlay := range usedPlays {
+				if usedPlay == play {
+					used = true
+					break
+				}
+			}
+			if !used {
+				inCircle := math.Pow(play.X-obj.x, 2)+math.Pow(play.Y-obj.y, 2) < math.Pow(radius, 2)
+				m1 := play.PressType&1 != 0 && r.PlayData[j-1].PressType&1 == 0
+				m2 := play.PressType&2 != 0 && r.PlayData[j-1].PressType&2 == 0
+				k1 := play.PressType&4 != 0 && r.PlayData[j-1].PressType&4 == 0
+				k2 := play.PressType&8 != 0 && r.PlayData[j-1].PressType&8 == 0
+				press := m1 || m2 || k1 || k2
+				if inCircle && press {
+					r.HitErrors = append(r.HitErrors, difference)
+					usedPlays = append(usedPlays, play)
+					break
+				}
+			}
+		}
+	}
+
+	// Get Std Deviation
+	avgHitError := 0.0
+	for _, hitError := range r.HitErrors {
+		avgHitError += hitError
+	}
+	avgHitError /= float64(len(r.HitErrors) - 1)
+	stdDevHitError := 0.0
+	for _, hitError := range r.HitErrors {
+		stdDevHitError += math.Pow(hitError-avgHitError, 2)
+	}
+	stdDevHitError /= float64(len(r.HitErrors))
+	stdDevHitError = math.Sqrt(stdDevHitError)
+	unstableRate := stdDevHitError * 10
+	if r.Score.Mods&osuapi.ModDoubleTime != 0 {
+		unstableRate /= 1.5
+	} else if r.Score.Mods&osuapi.ModHalfTime != 0 {
+		unstableRate /= 0.75
+	}
+	return unstableRate
 }
 
 func uleb(byteArray []byte) (int, int) {

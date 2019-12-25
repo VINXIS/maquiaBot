@@ -1,6 +1,7 @@
 package osucommands
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"math/rand"
@@ -262,6 +263,27 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 	replay := ""
 	if score.Replay {
 		replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(score.ScoreID, 10) + "/download)"
+		reader, _ := OsuAPI.GetReplay(osuapi.GetReplayOpts{
+			Username:  userP.Username,
+			Mode:      beatmap.Mode,
+			BeatmapID: beatmap.BeatmapID,
+		})
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(reader)
+		replayData := structs.ReplayData{
+			Mode:    beatmap.Mode,
+			Beatmap: beatmap,
+			Score:   score.Score,
+			Data:    buf.Bytes(),
+		}
+		replayData.PlayData = replayData.GetPlayData(true)
+		UR := replayData.GetUnstableRate()
+		replay += " | " + strconv.FormatFloat(UR, 'f', 2, 64)
+		if strings.Contains(mods, "DT") || strings.Contains(mods, "NC") || strings.Contains(mods, "HT") {
+			replay += " cv. UR"
+		} else {
+			replay += " UR"
+		}
 	} else if option == "recent" && objCount == playObjCount {
 		replayScore, _ := OsuAPI.GetScores(osuapi.GetScoresOpts{
 			BeatmapID: beatmap.BeatmapID,
@@ -270,11 +292,32 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		})
 		if replayScore[0].Replay && replayScore[0].Score.Score == score.Score.Score {
 			replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(replayScore[0].ScoreID, 10) + "/download)"
+			reader, _ := OsuAPI.GetReplay(osuapi.GetReplayOpts{
+				Username:  userP.Username,
+				Mode:      beatmap.Mode,
+				BeatmapID: beatmap.BeatmapID,
+			})
+			buf := new(bytes.Buffer)
+			buf.ReadFrom(reader)
+			replayData := structs.ReplayData{
+				Mode:    beatmap.Mode,
+				Beatmap: beatmap,
+				Score:   replayScore[0].Score,
+				Data:    buf.Bytes(),
+			}
+			replayData.PlayData = replayData.GetPlayData(true)
+			UR := replayData.GetUnstableRate()
+			replay += " | " + strconv.FormatFloat(UR, 'f', 2, 64)
+			if strings.Contains(mods, "DT") || strings.Contains(mods, "NC") || strings.Contains(mods, "HT") {
+				replay += " cv. UR"
+			} else {
+				replay += " UR"
+			}
 		}
 	}
 
+	score.Rank = strings.Replace(score.Rank, "X", "SS", -1)
 	g, _ := s.Guild(config.Conf.Server)
-	tools.ErrRead(err)
 	scoreRank := ""
 	for _, emoji := range g.Emojis {
 		if emoji.Name == score.Rank+"_" {

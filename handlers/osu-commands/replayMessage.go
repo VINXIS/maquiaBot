@@ -20,13 +20,16 @@ import (
 )
 
 // ReplayMessage posts replay information fopr a given replay
-func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp) {
+func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp, cache []structs.PlayerData) {
+	scorePostRegex, _ := regexp.Compile(`-sp`)
+
 	// Get URL
 	url := ""
 	if len(m.Attachments) > 0 {
 		url = m.Attachments[0].URL
 	} else if linkRegex.MatchString(m.Content) {
-		url = linkRegex.FindStringSubmatch(m.Content)[0]
+		m.Message, _ = s.ChannelMessage(m.ChannelID, m.ID)
+		url = linkRegex.FindStringSubmatch(m.Message.Content)[0]
 	} else {
 		return
 	}
@@ -34,6 +37,8 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	if !strings.HasSuffix(url, ".osr") {
 		return
 	}
+
+	fmt.Println(url)
 
 	// Get byte array
 	res, err := http.Get(url)
@@ -54,8 +59,9 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	replay.ParseReplay(OsuAPI)
 	if replay.Beatmap.BeatmapID != 0 {
 		diffMods := osuapi.Mods(338) & replay.Score.Mods
-		osutools.BeatmapParse(strconv.Itoa(replay.Beatmap.BeatmapID), "map", &diffMods)
+		replay.Beatmap = osutools.BeatmapParse(strconv.Itoa(replay.Beatmap.BeatmapID), "map", &diffMods)
 	}
+	replay.UnstableRate = replay.GetUnstableRate()
 
 	// Get time since play
 	time := tools.TimeSince(replay.Time)
@@ -93,6 +99,16 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		mods = strings.Replace(mods, "DTNC", "NC", 1)
 	}
 
+	unstableRate := ""
+	if replay.UnstableRate != 0 {
+		unstableRate = strconv.FormatFloat(replay.UnstableRate, 'f', 2, 64)
+		if strings.Contains(mods, "DT") || strings.Contains(mods, "NC") || strings.Contains(mods, "HT") {
+			unstableRate += " cv. UR"
+		} else {
+			unstableRate += " UR"
+		}
+	}
+
 	var combo string
 	if replay.Score.MaxCombo == replay.Beatmap.MaxCombo {
 		if accCalc == 100.0 {
@@ -105,7 +121,6 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	}
 
 	mapCompletion := ""
-	scoreRank := replay.Score.Rank
 	if replay.Beatmap.Approved > 0 {
 		orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 			Username: replay.Player.Username,
@@ -135,8 +150,9 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		}
 	}
 
+	replay.Score.Rank = strings.Replace(replay.Score.Rank, "X", "SS", -1)
 	g, _ := s.Guild(config.Conf.Server)
-	tools.ErrRead(err)
+	scoreRank := ""
 	for _, emoji := range g.Emojis {
 		if emoji.Name == replay.Score.Rank+"_" {
 			scoreRank = emoji.MessageFormat()
@@ -171,7 +187,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 				IconURL: "https://a.ppy.sh/" + strconv.Itoa(replay.Player.UserID) + "?" + strconv.Itoa(rand.Int()) + ".jpeg",
 			},
 			Title: "Unknown / Unsubmitted map",
-			Description: scorePrint + mods + combo + acc + scoreRank + "\n" +
+			Description: scoreRank + scorePrint + mods + combo + acc + "\n" +
 				mapCompletion + "\n" +
 				hits + "\n\n",
 			Footer: &discordgo.MessageEmbedFooter{
@@ -191,12 +207,12 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
 				URL: "https://b.ppy.sh/thumb/" + strconv.Itoa(replay.Beatmap.BeatmapSetID) + "l.jpg",
 			},
-			Description: sr + "\n" + 
+			Description: sr + "\n" +
 				length + bpm + "\n" +
 				mapStats + "\n" +
 				mapObjs + "\n" +
 				status + "\n\n" +
-				scorePrint + mods + combo + acc + scoreRank + "\n" +
+				scoreRank + scorePrint + mods + combo + acc + unstableRate + "\n" +
 				mapCompletion + "\n" +
 				pp + hits + "\n\n",
 			Footer: &discordgo.MessageEmbedFooter{
@@ -222,5 +238,8 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			}
 		}
 	}
-	s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	message, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	if scorePostRegex.MatchString(m.Content) && err == nil {
+		ScorePost(s, &discordgo.MessageCreate{message}, cache, "")
+	}
 }

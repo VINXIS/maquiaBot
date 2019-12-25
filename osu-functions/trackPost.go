@@ -204,8 +204,8 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 								replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(replayScore[0].ScoreID, 10) + "/download)"
 							}
 
+							score.Rank = strings.Replace(score.Rank, "X", "SS", -1)
 							g, _ := s.Guild(config.Conf.Server)
-							tools.ErrRead(err)
 							scoreRank := ""
 							for _, emoji := range g.Emojis {
 								if emoji.Name == score.Rank+"_" {

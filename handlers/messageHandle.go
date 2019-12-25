@@ -340,6 +340,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Check if an image was linked
 	if len(m.Attachments) > 0 || linkRegex.MatchString(m.Content) || (len(m.Embeds) > 0 && m.Embeds[0].Image != nil) {
 		go osucommands.OsuImageParse(s, m, linkRegex)
-		go osucommands.ReplayMessage(s, m, linkRegex)
+		go osucommands.ReplayMessage(s, m, linkRegex, profileCache)
 	}
 }

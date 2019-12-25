@@ -211,6 +211,7 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 	initial := i
 	for {
 		for j, score := range scores[i-initial : i] {
+			score.Rank = strings.Replace(score.Rank, "X", "SS", -1)
 			scoreRank := ""
 			for _, emoji := range g.Emojis {
 				if emoji.Name == score.Rank+"_" {
