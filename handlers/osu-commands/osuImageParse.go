@@ -14,7 +14,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/disintegration/imaging"
 
@@ -277,9 +276,13 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
 		}
 	}
-	s.ChannelMessageEdit(message.ChannelID, message.ID, "")
-	time.Sleep(time.Millisecond)
-	s.ChannelMessageEditEmbed(message.ChannelID, message.ID, embed)
+	content := ""
+	s.ChannelMessageEditComplex(&discordgo.MessageEdit{
+		Content: &content,
+		Embed:   embed,
+		ID:      message.ID,
+		Channel: message.ChannelID,
+	})
 
 	// Close files
 	tools.DeleteFile("./" + name + ".png")
