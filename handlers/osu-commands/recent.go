@@ -262,6 +262,15 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 	replay := ""
 	if score.Replay {
 		replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(score.ScoreID, 10) + "/download)"
+	} else if option == "recent" && objCount == playObjCount {
+		replayScore, _ := OsuAPI.GetScores(osuapi.GetScoresOpts{
+			BeatmapID: beatmap.BeatmapID,
+			UserID:    userP.UserID,
+			Mods:      &score.Mods,
+		})
+		if replayScore[0].Replay {
+			replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(score.ScoreID, 10) + "/download)"
+		}
 	}
 
 	g, _ := s.Guild(config.Conf.Server)

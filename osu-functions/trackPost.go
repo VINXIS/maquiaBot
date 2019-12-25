@@ -195,7 +195,12 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 							hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"
 
 							replay := ""
-							if score.Replay {
+							replayScore, _ := OsuAPI.GetScores(osuapi.GetScoresOpts{
+								BeatmapID: beatmap.BeatmapID,
+								UserID:    user.UserID,
+								Mods:      &score.Mods,
+							})
+							if replayScore[0].Replay {
 								replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(score.ScoreID, 10) + "/download)"
 							}
 
