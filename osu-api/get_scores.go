@@ -22,6 +22,7 @@ type GetScoresOpts struct {
 // Score is an osu! score. Used in both get_scores, get_user_best and get_user_recent.
 type Score struct {
 	Score     int64     `json:"score,string"`
+	ScoreID   int64     `json:"score_id,string"`
 	MaxCombo  int       `json:"maxcombo,string"`
 	Count50   int       `json:"count50,string"`
 	Count100  int       `json:"count100,string"`

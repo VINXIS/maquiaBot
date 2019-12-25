@@ -200,8 +200,8 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 								UserID:    user.UserID,
 								Mods:      &score.Mods,
 							})
-							if replayScore[0].Replay {
-								replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(score.ScoreID, 10) + "/download)"
+							if replayScore[0].Replay && replayScore[0].Score.Score == score.Score.Score {
+								replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(replayScore[0].ScoreID, 10) + "/download)"
 							}
 
 							g, _ := s.Guild(config.Conf.Server)
