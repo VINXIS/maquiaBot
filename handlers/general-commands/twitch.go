@@ -2,7 +2,6 @@ package gencommands
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -76,8 +75,6 @@ func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var clipData TwitchClip
 	err = json.Unmarshal(byteArray, &clipData)
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println(string(byteArray))
 		s.ChannelMessageSend(m.ChannelID, "Error in obtaining clip information! Error 3")
 		return
 	}
@@ -85,7 +82,6 @@ func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "No twitch clip found!")
 		return
 	}
-	fmt.Println(clipData)
 
 	// Find URL
 	if !thumbnailRegex.MatchString(clipData.Data[0].ThumbnailURL) {
