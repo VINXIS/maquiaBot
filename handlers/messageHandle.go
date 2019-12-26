@@ -186,6 +186,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if serverData.Daily {
 				go gencommands.PenisCompare(s, m)
 			}
+		case serverPrefix + "cv", serverPrefix + "comparev", serverPrefix + "comparevagina":
+			if serverData.Daily {
+				go gencommands.VaginaCompare(s, m)
+			}
 		case serverPrefix + "ch", serverPrefix + "choose":
 			go gencommands.Choose(s, m)
 		case serverPrefix + "cheers":
@@ -200,9 +204,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Encrypt(s, m)
 		case serverPrefix + "face":
 			go gencommands.Face(s, m)
-		case serverPrefix + "hc", serverPrefix + "hp", serverPrefix + "historyc", serverPrefix + "historyp", serverPrefix + "historycock", serverPrefix + "historypenis":
+		case serverPrefix + "history":
 			if serverData.Daily {
-				go gencommands.PenisHistory(s, m)
+				go gencommands.History(s, m)
 			}
 		case serverPrefix + "idea", serverPrefix + "niceidea":
 			go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
@@ -254,6 +258,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.RoleInfo(s, m)
 		case serverPrefix + "roll":
 			go gencommands.Roll(s, m)
+		case serverPrefix + "rv", serverPrefix + "rankv", serverPrefix + "rankvagina":
+			if serverData.Daily {
+				go gencommands.VaginaRank(s, m)
+			}
 		case serverPrefix + "sinfo", serverPrefix + "serverinfo":
 			go gencommands.ServerInfo(s, m)
 		case serverPrefix + "skill", serverPrefix + "skills":
@@ -264,6 +272,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Twitch(s, m)
 		case serverPrefix + "twitter", serverPrefix + "twitterdl":
 			go gencommands.Twitter(s, m)
+		case serverPrefix + "vagina":
+			if serverData.Daily {
+				go gencommands.Vagina(s, m)
+			}
 		case serverPrefix + "vibe", serverPrefix + "vibec", serverPrefix + "vibecheck":
 			go gencommands.Vibe(s, m, "notRandom")
 

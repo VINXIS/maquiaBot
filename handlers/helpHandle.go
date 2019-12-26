@@ -36,6 +36,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 				Value: "`(adj|adjective|adjectives)`, " +
 					"`(a|ava|avatar)`, " +
 					"`(cc|cp|comparec|comparep|comparecock|comparepenis)`, " +
+					"`(cv|comparev|comparevagina)`, " +
 					"`(ch|choose)`, " +
 					"`cheers`, " +
 					"`crab`, " +
@@ -43,7 +44,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(e|emoji|emote)`, " +
 					"`encrypt`, " +
 					"`face`, " +
-					"`(hc|hp|historyc|historyp|historycock|historypenis)`, " +
+					"`history`, " +
 					"`(idea|niceidea)`, " +
 					"`info`, " +
 					"`kanye`, " +
@@ -62,6 +63,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(qd|qr|qremove|qdelete|quoter|quoted|quoteremove|quotedelete)`, " +
 					"`(qs|quotes)`, " +
 					"`(rc|rp|rankc|rankp|rankcock|rankpenis)`, " +
+					"`(rv|rankv|rankvagina)`, " +
 					"`(remind|reminder)`, " +
 					"`reminders`, " +
 					"`(remindremove|rremove)`, " +
@@ -72,6 +74,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(stats|class)`, " +
 					"`(twitch|twitchdl)`, " +
 					"`(twitter|twitterdl)`, " +
+					"`vagina`, " +
 					"`(vibe|vibec|vibecheck)`",
 			},
 			&discordgo.MessageEmbedField{
@@ -130,6 +133,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Avatar(embed)
 		case "cc", "cp", "comparec", "comparep", "comparecock", "comparepenis":
 			embed = helpcommands.PenisCompare(embed)
+		case "cv", "comparev", "comparevagina":
+			embed = helpcommands.VaginaCompare(embed)
 		case "ch", "choose":
 			embed = helpcommands.Choose(embed)
 		case "cheers":
@@ -144,8 +149,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Encrypt(embed)
 		case "face":
 			embed = helpcommands.Face(embed)
-		case "hc", "hp", "historyc", "historyp", "historycock", "historypenis":
-			embed = helpcommands.PenisHistory(embed)
+		case "history":
+			embed = helpcommands.History(embed)
 		case "idea", "niceidea":
 			embed = helpcommands.NiceIdea(embed)
 		case "info":
@@ -182,6 +187,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Quotes(embed)
 		case "rc", "rp", "rankc", "rankp", "rankcock", "rankpenis":
 			embed = helpcommands.PenisRank(embed)
+		case "rv", "rankv", "rankvagina":
+			embed = helpcommands.VaginaRank(embed)
 		case "remind", "reminder":
 			embed = helpcommands.Remind(embed)
 		case "reminders":
@@ -202,6 +209,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Twitch(embed)
 		case "twitter", "twitterdl":
 			embed = helpcommands.Twitter(embed)
+		case "vagina":
+			embed = helpcommands.Vagina(embed)
 		case "vibe", "vibec", "vibecheck":
 			embed = helpcommands.Vibe(embed)
 
