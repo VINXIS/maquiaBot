@@ -31,11 +31,9 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	unstable := ""
 	leaderboard := ""
 	if postType == "scorePost" {
-		if !scorePostRegex.MatchString(m.Content) {
-			s.ChannelMessageSend(m.ChannelID, "You did not give a username / map / mods / anything! See `help sc` for more details.")
-			return
+		if scorePostRegex.MatchString(m.Content) {
+			username = scorePostRegex.FindStringSubmatch(m.Content)[2]
 		}
-		username = scorePostRegex.FindStringSubmatch(m.Content)[2]
 		if modRegex.MatchString(username) {
 			mods = strings.ToUpper(modRegex.FindStringSubmatch(username)[1])
 			if strings.Contains(mods, "NC") && !strings.Contains(mods, "DT") {
@@ -47,6 +45,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		}
 		// Get the map
 		var submatches []string
+		parsed := false
 		if mapRegex.MatchString(m.Content) {
 			submatches = mapRegex.FindStringSubmatch(m.Content)
 		} else {
@@ -62,6 +61,42 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 				if len(msg.Embeds) > 0 && msg.Embeds[0].Author != nil {
 					if mapRegex.MatchString(msg.Embeds[0].URL) {
 						submatches = mapRegex.FindStringSubmatch(msg.Embeds[0].URL)
+						if username == "" && mods == "" && mapRegex.FindStringSubmatch(m.Embeds[0].URL)[3] == "beatmaps" && m.Author.ID == s.State.User.ID {
+							nomod := osuapi.Mods(0)
+							beatmap = osutools.BeatmapParse(mapRegex.FindStringSubmatch(m.Embeds[0].URL)[4], "map", &nomod)
+
+							username = m.Embeds[0].Author.Name
+							test, err := OsuAPI.GetUser(osuapi.GetUserOpts{
+								Username: username,
+							})
+							if err != nil {
+								s.ChannelMessageSend(m.ChannelID, "User "+username+" may not exist! Are you sure you replaced spaces with `_`?")
+								return
+							}
+							user = *test
+
+							mods = mod2Regex.FindStringSubmatch(m.Embeds[0].Description)[1]
+							if strings.Contains(mods, "NC") && !strings.Contains(mods, "DT") {
+								mods += "DT"
+							}
+							parsedMods = osuapi.ParseMods(mods)
+
+							scoreText := strings.Replace(scoreRegex.FindStringSubmatch(m.Embeds[0].Description)[1], ",", "", -1)
+							scoreVal, _ = strconv.ParseInt(scoreText, 10, 64)
+
+							if URRegex.MatchString(m.Embeds[0].Description) {
+								unstable = URRegex.FindStringSubmatch(m.Embeds[0].Description)[0]
+							} else {
+								unstable = "N/A"
+							}
+
+							if leaderboardRegex.MatchString(m.Embeds[0].Description) {
+								leaderboard = leaderboardRegex.FindStringSubmatch(m.Embeds[0].Description)[1] + " "
+							} else {
+								leaderboard = "N/A"
+							}
+							parsed = true
+						}
 						break
 					} else if mapRegex.MatchString(msg.Embeds[0].Author.URL) {
 						submatches = mapRegex.FindStringSubmatch(msg.Embeds[0].Author.URL)
@@ -74,63 +109,65 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 			}
 		}
 
-		// Check if found
-		if len(submatches) == 0 {
-			s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
-			return
-		}
-
-		// Get the map
-		nomod := osuapi.Mods(0)
-		switch submatches[3] {
-		case "s":
-			beatmap = osutools.BeatmapParse(submatches[4], "set", &nomod)
-		case "b":
-			beatmap = osutools.BeatmapParse(submatches[4], "map", &nomod)
-		case "beatmaps":
-			beatmap = osutools.BeatmapParse(submatches[4], "map", &nomod)
-		case "beatmapsets":
-			if len(submatches[7]) > 0 {
-				beatmap = osutools.BeatmapParse(submatches[7], "map", &nomod)
-			} else {
-				beatmap = osutools.BeatmapParse(submatches[4], "set", &nomod)
+		if !parsed {
+			// Check if found
+			if len(submatches) == 0 {
+				s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
+				return
 			}
-		}
-		if beatmap.BeatmapID == 0 {
-			s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
-			return
-		} else if beatmap.Approved < 1 {
-			s.ChannelMessageSend(m.ChannelID, "The map `"+beatmap.Artist+" - "+beatmap.Title+"` does not have a leaderboard!")
-			return
-		}
-		username = strings.TrimSpace(strings.Replace(username, submatches[0], "", -1))
 
-		// Get user
-		for _, player := range cache {
-			if username != "" {
-				if username == player.Osu.Username {
+			// Get the map
+			nomod := osuapi.Mods(0)
+			switch submatches[3] {
+			case "s":
+				beatmap = osutools.BeatmapParse(submatches[4], "set", &nomod)
+			case "b":
+				beatmap = osutools.BeatmapParse(submatches[4], "map", &nomod)
+			case "beatmaps":
+				beatmap = osutools.BeatmapParse(submatches[4], "map", &nomod)
+			case "beatmapsets":
+				if len(submatches[7]) > 0 {
+					beatmap = osutools.BeatmapParse(submatches[7], "map", &nomod)
+				} else {
+					beatmap = osutools.BeatmapParse(submatches[4], "set", &nomod)
+				}
+			}
+			if beatmap.BeatmapID == 0 {
+				s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
+				return
+			} else if beatmap.Approved < 1 {
+				s.ChannelMessageSend(m.ChannelID, "The map `"+beatmap.Artist+" - "+beatmap.Title+"` does not have a leaderboard!")
+				return
+			}
+			username = strings.TrimSpace(strings.Replace(username, submatches[0], "", -1))
+
+			// Get user
+			for _, player := range cache {
+				if username != "" {
+					if username == player.Osu.Username {
+						user = player.Osu
+						break
+					}
+				} else if m.Author.ID == player.Discord.ID && player.Osu.Username != "" {
 					user = player.Osu
 					break
 				}
-			} else if m.Author.ID == player.Discord.ID && player.Osu.Username != "" {
-				user = player.Osu
-				break
 			}
-		}
 
-		// Check if user even exists
-		if user.UserID == 0 {
-			if username == "" {
-				s.ChannelMessageSend(m.ChannelID, "No user mentioned in message/linked to your account! Please use `set` or `link` to link an osu! account to you, or name a user to obtain their recent score of!")
+			// Check if user even exists
+			if user.UserID == 0 {
+				if username == "" {
+					s.ChannelMessageSend(m.ChannelID, "No user mentioned in message/linked to your account! Please use `set` or `link` to link an osu! account to you, or name a user to obtain their recent score of!")
+				}
+				test, err := OsuAPI.GetUser(osuapi.GetUserOpts{
+					Username: username,
+				})
+				if err != nil {
+					s.ChannelMessageSend(m.ChannelID, "User "+username+" may not exist! Are you sure you replaced spaces with `_`?")
+					return
+				}
+				user = *test
 			}
-			test, err := OsuAPI.GetUser(osuapi.GetUserOpts{
-				Username: username,
-			})
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "User "+username+" may not exist! Are you sure you replaced spaces with `_`?")
-				return
-			}
-			user = *test
 		}
 	} else {
 		nomod := osuapi.Mods(0)
