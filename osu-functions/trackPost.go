@@ -1,6 +1,7 @@
 package osutools
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +14,7 @@ import (
 
 	config "../config"
 	osuapi "../osu-api"
+	structs "../structs"
 	tools "../tools"
 	"github.com/bwmarrin/discordgo"
 )
@@ -28,9 +30,9 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 		case <-ticker.C:
 
 			// Get channel data
-			ch, new := tools.GetChannel(channel)
+			ch, newCh := tools.GetChannel(channel)
 
-			if !ch.Tracking || len(ch.Users) == 0 || new {
+			if !ch.Tracking || len(ch.Users) == 0 || newCh {
 				return
 			}
 
@@ -202,6 +204,27 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 							})
 							if replayScore[0].Replay && replayScore[0].Score.Score == score.Score.Score {
 								replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(replayScore[0].ScoreID, 10) + "/download)"
+								reader, _ := OsuAPI.GetReplay(osuapi.GetReplayOpts{
+									Username:  user.Username,
+									Mode:      beatmap.Mode,
+									BeatmapID: beatmap.BeatmapID,
+								})
+								buf := new(bytes.Buffer)
+								buf.ReadFrom(reader)
+								replayData := structs.ReplayData{
+									Mode:    beatmap.Mode,
+									Beatmap: beatmap,
+									Score:   replayScore[0].Score,
+									Data:    buf.Bytes(),
+								}
+								replayData.PlayData = replayData.GetPlayData(true)
+								UR := replayData.GetUnstableRate()
+								replay += " | " + strconv.FormatFloat(UR, 'f', 2, 64)
+								if strings.Contains(mods, "DT") || strings.Contains(mods, "NC") || strings.Contains(mods, "HT") {
+									replay += " cv. UR"
+								} else {
+									replay += " UR"
+								}
 							}
 
 							score.Rank = strings.Replace(score.Rank, "X", "SS", -1)
