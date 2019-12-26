@@ -87,21 +87,19 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 	}
 
 	// DT / HT scaling
-	ARMS := diffRange(beatmap.ApproachRate)
-	HPMS := diffRange(beatmap.HPDrain)
 	clock := float64(1)
 	if scaleMods&osuapi.ModDoubleTime != 0 {
 		clock = 1.5
-		beatmap.BPM *= clock
 	} else if scaleMods&osuapi.ModHalfTime != 0 {
 		clock = 0.75
-		beatmap.BPM *= clock
 	}
+
+	beatmap.BPM *= clock
 	beatmap.TotalLength = int(float64(beatmap.TotalLength) / clock)
 	beatmap.HitLength = int(float64(beatmap.HitLength) / clock)
-	ARMS /= clock
+	ARMS := diffRange(beatmap.ApproachRate) / clock
 	ODScale := (80.0 - 6.0*beatmap.OverallDifficulty) / clock
-	HPMS /= clock
+	HPMS := diffRange(beatmap.HPDrain) / clock
 	beatmap.OverallDifficulty = (80.0 - ODScale) / 6.0
 	beatmap.ApproachRate = diffValue(ARMS)
 	beatmap.HPDrain = diffValue(HPMS)
