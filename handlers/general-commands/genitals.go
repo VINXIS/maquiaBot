@@ -129,7 +129,7 @@ func Vagina(s *discordgo.Session, m *discordgo.MessageCreate) {
 	} else if percentile > 75 {
 		emote = ":ocean:"
 	}
-	s.ChannelMessageSend(m.ChannelID, username+" size for the day is "+strconv.FormatFloat(vaginaSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(vaginaSize/2.54, 'f', 2, 64)+"in) which is larger than approximately "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of vaginas. "+emote)
+	s.ChannelMessageSend(m.ChannelID, username+" depth for the day is "+strconv.FormatFloat(vaginaSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(vaginaSize/2.54, 'f', 2, 64)+"in) which is deeper than approximately "+strconv.FormatFloat(percentile, 'f', 2, 64)+"% of vaginas. "+emote)
 	records(s, m, vaginaSize, user, "vagina")
 }
 
@@ -213,7 +213,7 @@ func PenisCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 	records(s, m, penisSize1, user1, "penis")
 }
 
-// VaginaCompare compares ur vagina size to someone else's
+// VaginaCompare compares ur vagina depth to someone else's
 func VaginaCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 	userRegex, _ := regexp.Compile(`(cv|comparev|comparevagina)\s+(.+)`)
 	vaginaRegex, _ := regexp.Compile(`(vagina|cv|comparev|comparevagina)`)
@@ -280,13 +280,13 @@ func VaginaCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 	percentile1 := 100 * 0.5 * math.Erfc((average-vaginaSize1)/(math.Sqrt(2.0)*stddev))
 	percentile2 := 100 * 0.5 * math.Erfc((average-vaginaSize2)/(math.Sqrt(2.0)*stddev))
 
-	mainText := "**Your** size: " + strconv.FormatFloat(vaginaSize1, 'f', 2, 64) + "cm (" + strconv.FormatFloat(vaginaSize1/2.54, 'f', 2, 64) + "in) larger than approximately " + strconv.FormatFloat(percentile1, 'f', 2, 64) + "%\n" +
-		"**" + user2name + "'s** size: " + strconv.FormatFloat(vaginaSize2, 'f', 2, 64) + "cm (" + strconv.FormatFloat(vaginaSize2/2.54, 'f', 2, 64) + "in) larger than approximately " + strconv.FormatFloat(percentile2, 'f', 2, 64) + "%\n"
+	mainText := "**Your** depth: " + strconv.FormatFloat(vaginaSize1, 'f', 2, 64) + "cm (" + strconv.FormatFloat(vaginaSize1/2.54, 'f', 2, 64) + "in) deeper than approximately " + strconv.FormatFloat(percentile1, 'f', 2, 64) + "%\n" +
+		"**" + user2name + "'s** depth: " + strconv.FormatFloat(vaginaSize2, 'f', 2, 64) + "cm (" + strconv.FormatFloat(vaginaSize2/2.54, 'f', 2, 64) + "in) deeper than approximately " + strconv.FormatFloat(percentile2, 'f', 2, 64) + "%\n"
 
 	if vaginaSize1 > vaginaSize2 {
-		mainText += "You are fucking DEEP compared to **" + user2name + "!** You are " + strconv.FormatFloat(vaginaSize1-vaginaSize2, 'f', 2, 64) + "cm (" + strconv.FormatFloat((vaginaSize1-vaginaSize2)/2.54, 'f', 2, 64) + "in) larger and " + strconv.FormatFloat(vaginaSize1/vaginaSize2*100, 'f', 2, 64) + "% their size! Holy fuck!"
+		mainText += "You are fucking DEEP compared to **" + user2name + "!** You are " + strconv.FormatFloat(vaginaSize1-vaginaSize2, 'f', 2, 64) + "cm (" + strconv.FormatFloat((vaginaSize1-vaginaSize2)/2.54, 'f', 2, 64) + "in) deeper and " + strconv.FormatFloat(vaginaSize1/vaginaSize2*100, 'f', 2, 64) + "% their depth! Holy fuck!"
 	} else {
-		mainText += "You are fucking SHALLOW compared to **" + user2name + "!** They are " + strconv.FormatFloat(vaginaSize2-vaginaSize1, 'f', 2, 64) + "cm (" + strconv.FormatFloat((vaginaSize2-vaginaSize1)/2.54, 'f', 2, 64) + "in) larger and " + strconv.FormatFloat(vaginaSize2/vaginaSize1*100, 'f', 2, 64) + "% your size! TINY BITCH!"
+		mainText += "You are fucking SHALLOW compared to **" + user2name + "!** They are " + strconv.FormatFloat(vaginaSize2-vaginaSize1, 'f', 2, 64) + "cm (" + strconv.FormatFloat((vaginaSize2-vaginaSize1)/2.54, 'f', 2, 64) + "in) deeper and " + strconv.FormatFloat(vaginaSize2/vaginaSize1*100, 'f', 2, 64) + "% your depth! TINY BITCH!"
 	}
 
 	s.ChannelMessageSend(m.ChannelID, mainText)
@@ -442,12 +442,12 @@ func VaginaRank(s *discordgo.Session, m *discordgo.MessageCreate) {
 			} else if vaginaSizes[0].percentile > 75 {
 				emote = ":ocean: WTF"
 			}
-			s.ChannelMessageSend(m.ChannelID, "**"+vaginaSizes[0].member.User.Username+"'s** size for the day is "+strconv.FormatFloat(vaginaSizes[0].size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(vaginaSizes[0].size/2.54, 'f', 2, 64)+"in) which is larger than approximately "+strconv.FormatFloat(vaginaSizes[0].percentile, 'f', 2, 64)+"% of vaginas. Their size is the smallest in this server today! "+emote+"\n**Average size in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
+			s.ChannelMessageSend(m.ChannelID, "**"+vaginaSizes[0].member.User.Username+"'s** depth for the day is "+strconv.FormatFloat(vaginaSizes[0].size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(vaginaSizes[0].size/2.54, 'f', 2, 64)+"in) which is deeper than approximately "+strconv.FormatFloat(vaginaSizes[0].percentile, 'f', 2, 64)+"% of vaginas. Their depth is the smallest in this server today! "+emote+"\n**Average depth in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
 			records(s, m, vaginaSizes[0].size, vaginaSizes[0].member.User.ID, "vagina")
 			return
 		}
 
-		text = "Smallest **" + strconv.Itoa(num) + "** sizes in this server: \n"
+		text = "Smallest **" + strconv.Itoa(num) + "** depths in this server: \n"
 	} else {
 		sort.Slice(vaginaSizes, func(i, j int) bool { return vaginaSizes[i].size > vaginaSizes[j].size })
 		if num <= 1 {
@@ -457,12 +457,12 @@ func VaginaRank(s *discordgo.Session, m *discordgo.MessageCreate) {
 			} else if vaginaSizes[0].percentile > 75 {
 				emote = ":ocean:"
 			}
-			s.ChannelMessageSend(m.ChannelID, "**"+vaginaSizes[0].member.User.Username+"'s** size for the day is "+strconv.FormatFloat(vaginaSizes[0].size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(vaginaSizes[0].size/2.54, 'f', 2, 64)+"in) which is larger than approximately "+strconv.FormatFloat(vaginaSizes[0].percentile, 'f', 2, 64)+"% of vaginas. Their size is the largest in this server today! "+emote+"\n**Average size in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
+			s.ChannelMessageSend(m.ChannelID, "**"+vaginaSizes[0].member.User.Username+"'s** depth for the day is "+strconv.FormatFloat(vaginaSizes[0].size, 'f', 2, 64)+"cm ("+strconv.FormatFloat(vaginaSizes[0].size/2.54, 'f', 2, 64)+"in) which is deeper than approximately "+strconv.FormatFloat(vaginaSizes[0].percentile, 'f', 2, 64)+"% of vaginas. Their depth is the largest in this server today! "+emote+"\n**Average depth in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
 			records(s, m, vaginaSizes[0].size, vaginaSizes[0].member.User.ID, "vagina")
 			return
 		}
 
-		text = "Largest **" + strconv.Itoa(num) + "** sizes in this server: \n"
+		text = "Largest **" + strconv.Itoa(num) + "** depths in this server: \n"
 	}
 	for i := 0; i < num; i++ {
 		emote := ""
@@ -473,7 +473,7 @@ func VaginaRank(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		text += "**" + vaginaSizes[i].member.User.Username + ":** " + strconv.FormatFloat(vaginaSizes[i].size, 'f', 2, 64) + "cm (" + strconv.FormatFloat(vaginaSizes[i].size/2.54, 'f', 2, 64) + "in) " + emote + "\n"
 	}
-	s.ChannelMessageSend(m.ChannelID, text+"**Average size in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
+	s.ChannelMessageSend(m.ChannelID, text+"**Average depth in the server:** "+strconv.FormatFloat(avgSize, 'f', 2, 64)+"cm ("+strconv.FormatFloat(avgSize/2.54, 'f', 2, 64)+"in)")
 	records(s, m, vaginaSizes[0].size, vaginaSizes[0].member.User.ID, "vagina")
 }
 
@@ -532,7 +532,7 @@ func History(s *discordgo.Session, m *discordgo.MessageCreate) {
 			vaginaText += "**" + user.Username + "** "
 		}
 		percentile := 100 * 0.5 * math.Erfc((averagePenis-genitalRecord.Vagina.Largest.Size)/(math.Sqrt(2.0)*stddevPenis))
-		vaginaText += "on " + strings.Replace(genitalRecord.Vagina.Largest.Date.Format(time.RFC822Z), "+0000", "UTC", -1) + ": " + strconv.FormatFloat(genitalRecord.Vagina.Largest.Size, 'f', 2, 64) + "cm (" + strconv.FormatFloat(genitalRecord.Vagina.Largest.Size/2.54, 'f', 2, 64) + "in) larger than approximately " + strconv.FormatFloat(percentile, 'f', 2, 64) + "% of vaginas.\n"
+		vaginaText += "on " + strings.Replace(genitalRecord.Vagina.Largest.Date.Format(time.RFC822Z), "+0000", "UTC", -1) + ": " + strconv.FormatFloat(genitalRecord.Vagina.Largest.Size, 'f', 2, 64) + "cm (" + strconv.FormatFloat(genitalRecord.Vagina.Largest.Size/2.54, 'f', 2, 64) + "in) deeper than approximately " + strconv.FormatFloat(percentile, 'f', 2, 64) + "% of vaginas.\n"
 	}
 	if genitalRecord.Vagina.Smallest.Size != 1e308 {
 		user, err := s.User(genitalRecord.Vagina.Smallest.UserID)
@@ -542,7 +542,7 @@ func History(s *discordgo.Session, m *discordgo.MessageCreate) {
 			vaginaText += "**" + user.Username + "** "
 		}
 		percentile := 100 * 0.5 * math.Erfc((averageVagina-genitalRecord.Vagina.Smallest.Size)/(math.Sqrt(2.0)*stddevVagina))
-		vaginaText += "on " + strings.Replace(genitalRecord.Vagina.Smallest.Date.Format(time.RFC822Z), "+0000", "UTC", -1) + ": " + strconv.FormatFloat(genitalRecord.Vagina.Smallest.Size, 'f', 2, 64) + "cm (" + strconv.FormatFloat(genitalRecord.Vagina.Smallest.Size/2.54, 'f', 2, 64) + "in) larger than approximately " + strconv.FormatFloat(percentile, 'f', 2, 64) + "% of vaginas.\n"
+		vaginaText += "on " + strings.Replace(genitalRecord.Vagina.Smallest.Date.Format(time.RFC822Z), "+0000", "UTC", -1) + ": " + strconv.FormatFloat(genitalRecord.Vagina.Smallest.Size, 'f', 2, 64) + "cm (" + strconv.FormatFloat(genitalRecord.Vagina.Smallest.Size/2.54, 'f', 2, 64) + "in) deeper than approximately " + strconv.FormatFloat(percentile, 'f', 2, 64) + "% of vaginas.\n"
 	}
 	text += "__Penis:__\n" + penisText + "\n\n__Vaginas:__\n" + vaginaText
 
