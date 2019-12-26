@@ -91,11 +91,11 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 	HPMS := diffRange(beatmap.HPDrain)
 	clock := float64(1)
 	if scaleMods&osuapi.ModDoubleTime != 0 {
-		beatmap.BPM /= 0.75
 		clock = 1.5
+		beatmap.BPM *= clock
 	} else if scaleMods&osuapi.ModHalfTime != 0 {
-		beatmap.BPM /= 1.5
 		clock = 0.75
+		beatmap.BPM *= clock
 	}
 	beatmap.TotalLength = int(float64(beatmap.TotalLength) / clock)
 	beatmap.HitLength = int(float64(beatmap.HitLength) / clock)
