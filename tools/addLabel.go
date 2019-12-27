@@ -17,7 +17,7 @@ func AddLabel(img image.Image, x, y int, label, fontname string, size float64, c
 		X: fixed.Int26_6(x * 64),
 		Y: fixed.Int26_6(y * 64),
 	}
-	b, _ := ioutil.ReadFile("./data/fonts/" + fontname + ".ttf")
+	b, _ := ioutil.ReadFile("./fonts/" + fontname + ".ttf")
 	writingFont, _ := truetype.Parse(b)
 
 	dimg, _ := img.(draw.Image)
