@@ -2,6 +2,10 @@ package osucommands
 
 import (
 	"bytes"
+	"fmt"
+	"image/png"
+	"io/ioutil"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -19,7 +23,6 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	mod2Regex, _ := regexp.Compile(`\+(\S+)`)
 	scoreRegex, _ := regexp.Compile(`\*\*(([0-9]|,)+)\*\* `)
-	URRegex, _ := regexp.Compile(`((\d|\.)+) (cv\. )?UR`)
 	leaderboardRegex, _ := regexp.Compile(`\*\*(#\d+)\*\* on leaderboard!`)
 
 	var beatmap osuapi.Beatmap
@@ -28,7 +31,6 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	mods := "NM"
 	parsedMods := osuapi.Mods(0)
 	scoreVal := int64(0)
-	unstable := ""
 	leaderboard := ""
 	if postType == "scorePost" {
 		if scorePostRegex.MatchString(m.Content) {
@@ -84,12 +86,6 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 							scoreText := strings.Replace(scoreRegex.FindStringSubmatch(m.Embeds[0].Description)[1], ",", "", -1)
 							scoreVal, _ = strconv.ParseInt(scoreText, 10, 64)
 
-							if URRegex.MatchString(m.Embeds[0].Description) {
-								unstable = URRegex.FindStringSubmatch(m.Embeds[0].Description)[0]
-							} else {
-								unstable = "N/A"
-							}
-
 							if leaderboardRegex.MatchString(m.Embeds[0].Description) {
 								leaderboard = leaderboardRegex.FindStringSubmatch(m.Embeds[0].Description)[1] + " "
 							} else {
@@ -112,7 +108,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		if !parsed {
 			// Check if found
 			if len(submatches) == 0 {
-				s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
+				s.ChannelMessageSend(m.ChannelID, "No map to create a score post for!")
 				return
 			}
 
@@ -133,7 +129,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 				}
 			}
 			if beatmap.BeatmapID == 0 {
-				s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
+				s.ChannelMessageSend(m.ChannelID, "No map to create a score post for!")
 				return
 			} else if beatmap.Approved < 1 {
 				s.ChannelMessageSend(m.ChannelID, "The map `"+beatmap.Artist+" - "+beatmap.Title+"` does not have a leaderboard!")
@@ -171,7 +167,9 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		}
 	} else {
 		nomod := osuapi.Mods(0)
-		beatmap = osutools.BeatmapParse(mapRegex.FindStringSubmatch(m.Embeds[0].URL)[4], "map", &nomod)
+		if mapRegex.MatchString(m.Embeds[0].URL) {
+			beatmap = osutools.BeatmapParse(mapRegex.FindStringSubmatch(m.Embeds[0].URL)[4], "map", &nomod)
+		}
 
 		username = m.Embeds[0].Author.Name
 		test, err := OsuAPI.GetUser(osuapi.GetUserOpts{
@@ -192,12 +190,6 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		scoreText := strings.Replace(scoreRegex.FindStringSubmatch(m.Embeds[0].Description)[1], ",", "", -1)
 		scoreVal, _ = strconv.ParseInt(scoreText, 10, 64)
 
-		if URRegex.MatchString(m.Embeds[0].Description) {
-			unstable = URRegex.FindStringSubmatch(m.Embeds[0].Description)[0]
-		} else {
-			unstable = "N/A"
-		}
-
 		if leaderboardRegex.MatchString(m.Embeds[0].Description) {
 			leaderboard = leaderboardRegex.FindStringSubmatch(m.Embeds[0].Description)[1] + " "
 		} else {
@@ -207,6 +199,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 
 	// API call
 	var score osuapi.Score
+	var replayData structs.ReplayData
 	if postType == "recent" {
 		scoreOpts := osuapi.GetUserScoresOpts{
 			UserID: user.UserID,
@@ -249,6 +242,32 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 			}
 		}
 
+	} else if postType != "" {
+		res, err := http.Get(postType)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above! Can't create scoreposts for unfinished scores currently.")
+			return
+		}
+		defer res.Body.Close()
+
+		replayInfo, err := ioutil.ReadAll(res.Body)
+		if err != nil || len(replayInfo) <= 81 {
+			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above! Can't create scoreposts for unfinished scores currently.")
+			return
+		}
+
+		// Parse replay data
+		replayData = structs.ReplayData{
+			Data: replayInfo,
+		}
+		replayData.ParseReplay(OsuAPI)
+		if replayData.Beatmap.BeatmapID != 0 {
+			diffMods := osuapi.Mods(338) & replayData.Score.Mods
+			replayData.Beatmap = osutools.BeatmapParse(strconv.Itoa(replayData.Beatmap.BeatmapID), "map", &diffMods)
+		}
+		replayData.UnstableRate = replayData.GetUnstableRate()
+		score = replayData.Score
+		beatmap = replayData.Beatmap
 	} else {
 		scoreOpts := osuapi.GetScoresOpts{
 			BeatmapID: beatmap.BeatmapID,
@@ -269,14 +288,16 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		score = scores[0].Score
 	}
 
-	diffMods := 338 & score.Mods
-	if diffMods&256 != 0 && diffMods&64 != 0 { // Remove DTHT
-		diffMods -= 320
+	if replayData.UnstableRate == 0 {
+		diffMods := 338 & score.Mods
+		if diffMods&256 != 0 && diffMods&64 != 0 { // Remove DTHT
+			diffMods -= 320
+		}
+		if diffMods&2 != 0 && diffMods&16 != 0 { // Remove EZHR
+			diffMods -= 18
+		}
+		beatmap = osutools.BeatmapParse(strconv.Itoa(beatmap.BeatmapID), "map", &diffMods)
 	}
-	if diffMods&2 != 0 && diffMods&16 != 0 { // Remove EZHR
-		diffMods -= 18
-	}
-	beatmap = osutools.BeatmapParse(strconv.Itoa(beatmap.BeatmapID), "map", &diffMods)
 
 	accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 	acc := strconv.FormatFloat(accCalc, 'f', 2, 64) + "%"
@@ -339,7 +360,15 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		text += "| " + strconv.FormatFloat(ppVal, 'f', 0, 64) + "pp | "
 	}
 
-	if unstable == "" && score.Replay {
+	if replayData.UnstableRate != 0 {
+		text += strconv.FormatFloat(replayData.UnstableRate, 'f', 2, 64)
+		score.Replay = true
+		if score.Mods&256 != 0 || score.Mods&64 != 0 {
+			text += " cv. UR"
+		} else {
+			text += " UR"
+		}
+	} else if score.Replay {
 		reader, _ := OsuAPI.GetReplay(osuapi.GetReplayOpts{
 			Username:  user.Username,
 			Mode:      beatmap.Mode,
@@ -347,7 +376,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		})
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(reader)
-		replayData := structs.ReplayData{
+		replayData = structs.ReplayData{
 			Mode:    beatmap.Mode,
 			Beatmap: beatmap,
 			Score:   score,
@@ -356,15 +385,30 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		replayData.PlayData = replayData.GetPlayData(true)
 		UR := replayData.GetUnstableRate()
 		text += strconv.FormatFloat(UR, 'f', 2, 64)
+		score.Replay = true
 		if score.Mods&256 != 0 || score.Mods&64 != 0 {
 			text += " cv. UR"
 		} else {
 			text += " UR"
 		}
-	} else if unstable != "N/A" {
-		text += unstable
+		replayData.UnstableRate = UR
 	}
 
 	s.ChannelMessageSend(m.ChannelID, text)
 
+	img, err := osutools.ResultImage(score, beatmap, user, replayData)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		imgBytes := new(bytes.Buffer)
+		_ = png.Encode(imgBytes, img)
+		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+			Files: []*discordgo.File{
+				&discordgo.File{
+					Name:   "image.png",
+					Reader: imgBytes,
+				},
+			},
+		})
+	}
 }

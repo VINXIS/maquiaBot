@@ -24,6 +24,8 @@ type ReplayData struct {
 	LifeBar      []HealthData
 	PlayData     []PlayData
 	UnstableRate float64
+	Early        float64
+	Late         float64
 	Seed         float64
 	HitErrors    []float64
 }
@@ -366,8 +368,25 @@ func (r *ReplayData) GetUnstableRate() float64 {
 
 	// Get Std Deviation
 	avgHitError := 0.0
+	earlyCount := 0
+	earlyTotal := float64(0)
+	lateCount := 0
+	lateTotal := float64(0)
 	for _, hitError := range r.HitErrors {
 		avgHitError += hitError
+		if hitError >= 0 {
+			lateTotal += hitError
+			lateCount++
+		} else {
+			earlyTotal += hitError
+			earlyCount++
+		}
+	}
+	if earlyCount > 0 {
+		r.Early = earlyTotal / float64(earlyCount)
+	}
+	if lateCount > 0 {
+		r.Late = lateTotal / float64(lateCount)
 	}
 	avgHitError /= float64(len(r.HitErrors) - 1)
 	stdDevHitError := 0.0

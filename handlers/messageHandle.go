@@ -24,7 +24,7 @@ import (
 // MessageHandler handles any incoming messages
 func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
-	if m.Author.ID == s.State.User.ID {
+	if m.Author.Bot {
 		return
 	}
 

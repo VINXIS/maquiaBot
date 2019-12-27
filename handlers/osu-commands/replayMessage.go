@@ -240,6 +240,6 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	}
 	message, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	if scorePostRegex.MatchString(m.Content) && err == nil {
-		ScorePost(s, &discordgo.MessageCreate{message}, cache, "")
+		ScorePost(s, &discordgo.MessageCreate{message}, cache, url)
 	}
 }
