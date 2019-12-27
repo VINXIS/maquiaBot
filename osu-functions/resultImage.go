@@ -39,7 +39,7 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 	bounds := ctx.Image().Bounds()
 
 	// Draw dark overlay
-	ctx.SetRGBA(0, 0, 0, 0.28)
+	ctx.SetRGBA(0, 0, 0, 0.35)
 	ctx.DrawRectangle(0, 0, float64(bounds.Dx()), float64(bounds.Dy()))
 	ctx.Fill()
 
@@ -96,7 +96,7 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 	if err == nil {
 		img, _, err := image.Decode(f)
 		if err == nil {
-			scale := yScale * 1000 / float64(img.Bounds().Dy())
+			scale := yScale * 950 / float64(img.Bounds().Dy())
 			img = imaging.Fit(img, int(scale*float64(img.Bounds().Dx())), int(scale*float64(img.Bounds().Dy())), imaging.Lanczos)
 			img = imaging.Rotate(img, rand.Float64()*360, color.Transparent)
 			ctx.DrawImageAnchored(img, int(xScale*1510), int(yScale*460), 0.5, 0.5)
@@ -105,7 +105,7 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 	writeImage("./osu-images/"+score.Rank+".png", ctx, int(xScale*1375), int(yScale*760), yScale*600)
 
 	// Draw upper rectangle now so it's above the wheel thing
-	ctx.SetRGBA(0, 0, 0, 0.89)
+	ctx.SetRGBA(0, 0, 0, 0.8)
 	ctx.DrawRectangle(0, 0, float64(bounds.Dx()), float64(bounds.Dy())/8)
 	ctx.Fill()
 
@@ -139,14 +139,15 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 	for i < len(mods)-1 {
 		f, err := os.Open("./osu-images/" + mods[i] + mods[i+1] + ".png")
 		if err == nil {
-			img, _, err := image.Decode(f)
+			modImg, _, err := image.Decode(f)
 			if err == nil {
-				scale := yScale * 89 / float64(img.Bounds().Dy())
-				img = imaging.Fit(img, int(scale*float64(img.Bounds().Dx())), int(scale*float64(img.Bounds().Dy())), imaging.Lanczos)
-				ctx.DrawImageAnchored(img, int(xScale*x), int(yScale*590), 0.5, 0.5)
+				modY := yScale * 62
+				modX := modY * 88 / 62
+				modImg = imaging.Resize(modImg, int(1.5*modX), int(1.5*modY), imaging.Lanczos)
+				ctx.DrawImageAnchored(modImg, int(xScale*x), int(yScale*590), 0.5, 0.5)
 			}
 		}
-		x -= 45
+		x -= 50
 		i += 2
 	}
 
