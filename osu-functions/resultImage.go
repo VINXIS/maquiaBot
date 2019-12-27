@@ -47,7 +47,7 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 	xScale := float64(bounds.Dx()) / 1920
 	yScale := float64(bounds.Dy()) / 1080
 	imgScale := yScale * 62
-	fontScale := yScale * 100
+	fontScale := yScale * 112
 
 	// Paths
 	font := "./fonts/Aller-Light.ttf"
@@ -59,12 +59,12 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 
 	// Write score
 	ctx.SetRGB255(234, 234, 234)
-	ctx.LoadFontFace(font, yScale*120)
+	ctx.LoadFontFace(font, fontScale*1.2)
 	scoreText := strconv.FormatInt(score.Score, 10)
 	for len(scoreText) < 8 {
 		scoreText = "0" + scoreText
 	}
-	ctx.DrawStringAnchored(scoreText, xScale*(918/2+14), yScale*(210), 0.5, 0.5)
+	ctx.DrawStringAnchored(scoreText, xScale*(918*0.53+14), yScale*(210), 0.5, 0.5)
 
 	// Write 300 100 50
 	writeCount(strconv.Itoa(score.Count300), font, ctx, xScale*180, yScale*400, fontScale)
@@ -100,8 +100,6 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 			img = imaging.Fit(img, int(scale*float64(img.Bounds().Dx())), int(scale*float64(img.Bounds().Dy())), imaging.Lanczos)
 			img = imaging.Rotate(img, rand.Float64()*360, color.Transparent)
 			ctx.DrawImageAnchored(img, int(xScale*1510), int(yScale*460), 0.5, 0.5)
-			ctx.DrawImageAnchored(img, int(xScale*1510), int(yScale*460), 0.5, 0.5)
-			ctx.DrawImageAnchored(img, int(xScale*1510), int(yScale*460), 0.5, 0.5)
 		}
 	}
 	writeImage("./osu-images/"+score.Rank+".png", ctx, int(xScale*1375), int(yScale*760), yScale*600)
@@ -127,7 +125,7 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 		ctx.DrawRectangle(xScale*1344, yScale*770, xScale*(1920-1344), yScale*120)
 		ctx.Fill()
 
-		ctx.SetRGB255(234, 234, 234)
+		ctx.SetRGBA(0.917647059, 0.917647059, 0.917647059, 0.5)
 		w3, _ := ctx.MeasureString("Watch")
 		ctx.DrawStringAnchored("Watch", xScale*1344+(xScale*(1920-1344)-w3)/2, yScale*770+yScale*60, 0, 0.5)
 	}
