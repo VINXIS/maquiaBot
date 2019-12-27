@@ -22,7 +22,6 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	scorePostRegex, _ := regexp.Compile(`sc?(orepost)?\s+(\S+)`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	mod2Regex, _ := regexp.Compile(`\+(\S+)`)
-	scoreRegex, _ := regexp.Compile(`\*\*(([0-9]|,)+)\*\* `)
 	leaderboardRegex, _ := regexp.Compile(`\*\*(#\d+)\*\* on leaderboard!`)
 
 	var beatmap osuapi.Beatmap
@@ -30,7 +29,6 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	var user osuapi.User
 	mods := "NM"
 	parsedMods := osuapi.Mods(0)
-	scoreVal := int64(0)
 	leaderboard := ""
 	if postType == "scorePost" {
 		if scorePostRegex.MatchString(m.Content) {
@@ -82,9 +80,6 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 								mods += "DT"
 							}
 							parsedMods = osuapi.ParseMods(mods)
-
-							scoreText := strings.Replace(scoreRegex.FindStringSubmatch(m.Embeds[0].Description)[1], ",", "", -1)
-							scoreVal, _ = strconv.ParseInt(scoreText, 10, 64)
 
 							if leaderboardRegex.MatchString(m.Embeds[0].Description) {
 								leaderboard = leaderboardRegex.FindStringSubmatch(m.Embeds[0].Description)[1] + " "
@@ -187,9 +182,6 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		}
 		parsedMods = osuapi.ParseMods(mods)
 
-		scoreText := strings.Replace(scoreRegex.FindStringSubmatch(m.Embeds[0].Description)[1], ",", "", -1)
-		scoreVal, _ = strconv.ParseInt(scoreText, 10, 64)
-
 		if leaderboardRegex.MatchString(m.Embeds[0].Description) {
 			leaderboard = leaderboardRegex.FindStringSubmatch(m.Embeds[0].Description)[1] + " "
 		} else {
@@ -201,46 +193,12 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	var score osuapi.Score
 	var replayData structs.ReplayData
 	if postType == "recent" {
-		scoreOpts := osuapi.GetUserScoresOpts{
-			UserID: user.UserID,
-			Limit:  50,
-		}
-		scores, err := OsuAPI.GetUserRecent(scoreOpts)
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-			return
-		}
-		if len(scores) == 0 {
-			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above! Can't create scoreposts for unfinished scores currently.")
-			return
-		}
-		for _, recentScore := range scores {
-			if recentScore.Score.Score == scoreVal {
-				score = recentScore.Score
-				break
-			}
-		}
-
-	} else if postType == "recentBest" {
-		scoreOpts := osuapi.GetUserScoresOpts{
-			UserID: user.UserID,
-			Limit:  100,
-		}
-		scores, err := OsuAPI.GetUserBest(scoreOpts)
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-			return
-		}
-		if len(scores) == 0 {
-			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above! Can't create scoreposts for unfinished scores currently.")
-			return
-		}
-		for _, recentScore := range scores {
-			if recentScore.Score.Score == scoreVal {
-				score = recentScore.Score
-				break
-			}
-		}
+		replayScore, _ := OsuAPI.GetScores(osuapi.GetScoresOpts{
+			BeatmapID: beatmap.BeatmapID,
+			UserID:    user.UserID,
+			Mods:      &parsedMods,
+		})
+		score = replayScore[0].Score
 
 	} else if postType != "" {
 		res, err := http.Get(postType)

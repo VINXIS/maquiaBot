@@ -100,6 +100,8 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 			img = imaging.Fit(img, int(scale*float64(img.Bounds().Dx())), int(scale*float64(img.Bounds().Dy())), imaging.Lanczos)
 			img = imaging.Rotate(img, rand.Float64()*360, color.Transparent)
 			ctx.DrawImageAnchored(img, int(xScale*1510), int(yScale*460), 0.5, 0.5)
+			ctx.DrawImageAnchored(img, int(xScale*1510), int(yScale*460), 0.5, 0.5)
+			ctx.DrawImageAnchored(img, int(xScale*1510), int(yScale*460), 0.5, 0.5)
 		}
 	}
 	writeImage("./osu-images/"+score.Rank+".png", ctx, int(xScale*1375), int(yScale*760), yScale*600)
@@ -208,6 +210,8 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 		}
 		ctx.DrawStringAnchored("Unstable Rate: "+strconv.FormatFloat(replay.UnstableRate, 'f', 2, 64), boxX+xScale*3, boxY+yScale*43, 0, 1)
 	}
+
+	writeImage("./osu-images/back.png", ctx, 0, int(yScale*1080), imgScale*3)
 
 	return ctx.Image(), nil
 }

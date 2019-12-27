@@ -92,5 +92,9 @@ func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Pla
 	// The result
 	ppChange := newPP - originalPP
 	totalPP := user.PP + ppChange
-	s.ChannelMessageSend(m.ChannelID, "**"+user.Username+"**: "+strconv.FormatFloat(user.PP, 'f', 2, 64)+" -> "+strconv.FormatFloat(totalPP, 'f', 2, 64)+" (+"+strconv.FormatFloat(ppChange, 'f', 2, 64)+"pp) | **#"+strconv.Itoa(placement)+"** in top performances!")
+	text := "**"+user.Username+"**: "+strconv.FormatFloat(user.PP, 'f', 2, 64)+" -> "+strconv.FormatFloat(totalPP, 'f', 2, 64)+" (+"+strconv.FormatFloat(ppChange, 'f', 2, 64)+"pp)"
+	if placement <= 100 {
+		text += " | **#"+strconv.Itoa(placement)+"** in top performances!"
+	}
+	s.ChannelMessageSend(m.ChannelID, text)
 }
