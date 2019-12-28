@@ -33,17 +33,23 @@ type TwitchClip struct {
 // Twitch uploads a twitch clip onto discord directly
 func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
 	twitchRegex, _ := regexp.Compile(`https://clips.twitch.tv/(\S+)`)
+	largeTwitchRegex, _ := regexp.Compile(`https://www.twitch.tv/osulive/clip/(\S+)`)
 	thumbnailRegex, _ := regexp.Compile(`-preview-\d+x\d+\.jpg`)
 
 	// Get ID
 	ID := ""
 	if twitchRegex.MatchString(m.Content) {
 		ID = twitchRegex.FindStringSubmatch(m.Content)[1]
+	} else if largeTwitchRegex.MatchString(m.Content) {
+		ID = largeTwitchRegex.FindStringSubmatch(m.Content)[1]
 	} else {
 		msgs, _ := s.ChannelMessages(m.ChannelID, -1, m.ID, "", "")
 		for _, msg := range msgs {
 			if twitchRegex.MatchString(msg.Content) {
 				ID = twitchRegex.FindStringSubmatch(msg.Content)[1]
+				break
+			} else if largeTwitchRegex.MatchString(msg.Content) {
+				ID = largeTwitchRegex.FindStringSubmatch(msg.Content)[1]
 				break
 			}
 		}
