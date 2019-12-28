@@ -42,6 +42,7 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 			img = imaging.CropAnchor(img, int(float64(imgBounds.Dy())*16/9), imgBounds.Dy(), imaging.Center)
 		}
 	}
+	img = imaging.Resize(img, 1920, 1080, imaging.Lanczos)
 
 	ctx := gg.NewContextForImage(img)
 	bounds := ctx.Image().Bounds()
