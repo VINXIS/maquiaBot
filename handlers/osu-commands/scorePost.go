@@ -22,6 +22,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	scorePostRegex, _ := regexp.Compile(`sc?(orepost)?\s+(\S+)`)
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	mod2Regex, _ := regexp.Compile(`\+(\S+)`)
+	scoreRegex, _ := regexp.Compile(`\*\*(([0-9]|,)+)\*\* `)
 	leaderboardRegex, _ := regexp.Compile(`\*\*(#\d+)\*\* on leaderboard!`)
 
 	var beatmap osuapi.Beatmap
@@ -30,6 +31,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	mods := "NM"
 	parsedMods := osuapi.Mods(0)
 	leaderboard := ""
+	scoreVal := int64(0)
 	if postType == "scorePost" {
 		if scorePostRegex.MatchString(m.Content) {
 			username = scorePostRegex.FindStringSubmatch(m.Content)[2]
@@ -80,6 +82,9 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 								mods += "DT"
 							}
 							parsedMods = osuapi.ParseMods(mods)
+
+							scoreText := strings.Replace(scoreRegex.FindStringSubmatch(m.Embeds[0].Description)[1], ",", "", -1)
+							scoreVal, _ = strconv.ParseInt(scoreText, 10, 64)
 
 							if leaderboardRegex.MatchString(m.Embeds[0].Description) {
 								leaderboard = leaderboardRegex.FindStringSubmatch(m.Embeds[0].Description)[1] + " "
@@ -182,6 +187,9 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		}
 		parsedMods = osuapi.ParseMods(mods)
 
+		scoreText := strings.Replace(scoreRegex.FindStringSubmatch(m.Embeds[0].Description)[1], ",", "", -1)
+		scoreVal, _ = strconv.ParseInt(scoreText, 10, 64)
+
 		if leaderboardRegex.MatchString(m.Embeds[0].Description) {
 			leaderboard = leaderboardRegex.FindStringSubmatch(m.Embeds[0].Description)[1] + " "
 		} else {
@@ -192,7 +200,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	// API call
 	var score osuapi.Score
 	var replayData structs.ReplayData
-	if postType == "recent" {
+	if postType == "recent" || postType == "recentBest" {
 		replayScore, _ := OsuAPI.GetScores(osuapi.GetScoresOpts{
 			BeatmapID: beatmap.BeatmapID,
 			UserID:    user.UserID,
@@ -200,18 +208,45 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		})
 		score = replayScore[0].Score
 
+		if score.Score != scoreVal {
+			scoreOpts := osuapi.GetUserScoresOpts{
+				UserID: user.UserID,
+				Limit:  50,
+			}
+			scores, err := OsuAPI.GetUserRecent(scoreOpts)
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+				return
+			}
+			if len(scores) == 0 {
+				s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above!")
+				return
+			}
+			for _, recentScore := range scores {
+				if recentScore.Score.Score == scoreVal {
+					score = recentScore.Score
+					break
+				}
+			}
+
+			if score.Score != scoreVal {
+				s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above!")
+				return
+			}
+		}
+
 	} else if postType != "" {
 		res, err := http.Get(postType)
 		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above! Can't create scoreposts for unfinished scores currently.")
-			return
+			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above!")
+				return
 		}
 		defer res.Body.Close()
 
 		replayInfo, err := ioutil.ReadAll(res.Body)
 		if err != nil || len(replayInfo) <= 81 {
-			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above! Can't create scoreposts for unfinished scores currently.")
-			return
+			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above! Replay does not have enough information.")
+				return
 		}
 
 		// Parse replay data
@@ -240,7 +275,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 			return
 		}
 		if len(scores) == 0 {
-			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above! Can't create scoreposts for unfinished scores currently.")
+			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above!")
 			return
 		}
 		score = scores[0].Score

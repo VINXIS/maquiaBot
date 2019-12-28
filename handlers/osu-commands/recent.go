@@ -365,6 +365,10 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		Embed:   embed,
 	})
 	if scorePostRegex.MatchString(m.Content) && err == nil {
-		ScorePost(s, &discordgo.MessageCreate{message}, cache, "recent")
+		if option == "best" {
+			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recentBest")
+		} else if option == "recent" {
+			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recent")
+		}
 	}
 }
