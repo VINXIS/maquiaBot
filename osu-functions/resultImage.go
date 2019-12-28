@@ -24,7 +24,15 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 	defer res.Body.Close()
 	img, _, err := image.Decode(res.Body)
 	if err != nil {
-		return nil, err
+		f, err := os.Open("./osu-images/default.png")
+		if err != nil {
+			return nil, err
+		}
+
+		img, _, err = image.Decode(f)
+		if err != nil {
+			return nil, err
+		}
 	}
 	imgBounds := img.Bounds()
 	if float64(imgBounds.Dx())/float64(imgBounds.Dy()) != 16/9 {
@@ -112,7 +120,12 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 	// Write upper text
 	ctx.SetRGB255(234, 234, 234)
 	ctx.LoadFontFace(font, yScale*40)
-	ctx.DrawStringAnchored(beatmap.Artist+" - "+beatmap.Title+" ["+beatmap.DiffName+"]", xScale*7, yScale*40, 0, 0) // first line
+	// first line
+	if beatmap.Artist == "" {
+		ctx.DrawStringAnchored(beatmap.Title+" ["+beatmap.DiffName+"]", xScale*7, yScale*40, 0, 0)
+	} else {
+		ctx.DrawStringAnchored(beatmap.Artist+" - "+beatmap.Title+" ["+beatmap.DiffName+"]", xScale*7, yScale*40, 0, 0)
+	}
 
 	ctx.LoadFontFace(font, yScale*30)
 	ctx.DrawStringAnchored("Beatmap by "+beatmap.Creator, xScale*7, yScale*76, 0, 0)                                                                     // second line

@@ -276,9 +276,10 @@ func (r *ReplayData) GetUnstableRate() float64 {
 		return 0
 	}
 
-	// Get info for helping to determine hit error
-	radius := 64 * (1 - 0.7*(r.Beatmap.CircleSize-5)/5) / 2
-	window50 := 199.5 - r.Beatmap.OverallDifficulty*10
+	// Get info for helping to determine hit error // TODO: stacks
+	circleScale := (1.0 - 0.7*(r.Beatmap.CircleSize-5.0)/5.0) / 2.0
+	radius := 64.0 * circleScale
+	window50 := 199.5 - r.Beatmap.OverallDifficulty*10.0
 
 	// Get map
 	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
@@ -298,9 +299,10 @@ func (r *ReplayData) GetUnstableRate() float64 {
 	lines := strings.Split(text, "\n")
 	passed := false
 	objects := []struct {
-		time int64
-		x    float64
-		y    float64
+		noteType int
+		time     int64
+		x        float64
+		y        float64
 	}{}
 	for _, line := range lines {
 		if !passed {
@@ -316,7 +318,7 @@ func (r *ReplayData) GetUnstableRate() float64 {
 		if len(parts) < 4 {
 			break
 		}
-		noteType, _ := strconv.ParseInt(parts[3], 10, 64)
+		noteType, _ := strconv.Atoi(parts[3])
 		if noteType&3 == 0 {
 			continue
 		}
@@ -328,21 +330,24 @@ func (r *ReplayData) GetUnstableRate() float64 {
 			y = 384 - y
 		}
 		objects = append(objects, struct {
-			time int64
-			x    float64
-			y    float64
-		}{noteTime, x, y})
+			noteType int
+			time     int64
+			x        float64
+			y        float64
+		}{noteType, noteTime, x, y})
 	}
 
 	usedPlays := []PlayData{}
 	for _, obj := range objects {
 		for j, play := range r.PlayData {
-			difference := float64(play.TimeStamp - obj.time)
+			// Check if in 50 window
 			if play.TimeStamp < obj.time-int64(window50) {
 				continue
 			} else if play.TimeStamp > obj.time+int64(window50) {
 				break
 			}
+
+			// Check if used already
 			used := false
 			for _, usedPlay := range usedPlays {
 				if usedPlay == play {
@@ -351,6 +356,7 @@ func (r *ReplayData) GetUnstableRate() float64 {
 				}
 			}
 			if !used {
+				// Check if play is a press and in circle
 				inCircle := math.Pow(play.X-obj.x, 2)+math.Pow(play.Y-obj.y, 2) < math.Pow(radius, 2)
 				m1 := play.PressType&1 != 0 && r.PlayData[j-1].PressType&1 == 0
 				m2 := play.PressType&2 != 0 && r.PlayData[j-1].PressType&2 == 0
@@ -358,7 +364,7 @@ func (r *ReplayData) GetUnstableRate() float64 {
 				k2 := play.PressType&8 != 0 && r.PlayData[j-1].PressType&8 == 0
 				press := m1 || m2 || k1 || k2
 				if inCircle && press {
-					r.HitErrors = append(r.HitErrors, difference)
+					r.HitErrors = append(r.HitErrors, float64(play.TimeStamp-obj.time))
 					usedPlays = append(usedPlays, play)
 					break
 				}

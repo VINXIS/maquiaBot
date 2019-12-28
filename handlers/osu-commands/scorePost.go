@@ -298,6 +298,12 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	text := user.Username + " | " +
 		beatmap.Artist + " - " + beatmap.Title +
 		" [" + beatmap.DiffName + "] +"
+	
+	if beatmap.Artist == "" {
+		text = user.Username + " | " +
+		beatmap.Title +
+		" [" + beatmap.DiffName + "] +"
+	}
 
 	modText := strings.Replace(score.Mods.String(), "DTNC", "NC", -1)
 	newModText := ""
