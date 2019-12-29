@@ -2,8 +2,13 @@ package structs
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/binary"
+	"encoding/hex"
+	"io"
 	"io/ioutil"
 	"math"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -75,11 +80,11 @@ func (r *ReplayData) ParseReplay(osuAPI *osuapi.Client) {
 		r.Data = r.Data[1:]
 	} else {
 		r.Data = r.Data[1:]
-		hashLength, offset := uleb(r.Data)
+		hashLength, offset := ulebDecode(r.Data)
 		r.Data = r.Data[hashLength+offset-1:]
 	}
 
-	r.Score = r.getScore(osuAPI)
+	r.Score = r.getScore()
 	r.LifeBar = r.getLife()
 	r.Time = r.getTime()
 	r.PlayData = r.GetPlayData(false)
@@ -101,7 +106,7 @@ func (r *ReplayData) getBeatmap(osuAPI *osuapi.Client) osuapi.Beatmap {
 		return osuapi.Beatmap{}
 	}
 	r.Data = r.Data[1:]
-	hashLength, offset := uleb(r.Data)
+	hashLength, offset := ulebDecode(r.Data)
 	hash = string(r.Data[offset:hashLength])
 	r.Data = r.Data[hashLength+offset-1:]
 
@@ -121,7 +126,7 @@ func (r *ReplayData) getUser(osuAPI *osuapi.Client) osuapi.User {
 		return osuapi.User{}
 	}
 	r.Data = r.Data[1:]
-	usernameLength, offset := uleb(r.Data)
+	usernameLength, offset := ulebDecode(r.Data)
 	username = string(r.Data[offset:usernameLength])
 	r.Data = r.Data[usernameLength+offset-1:]
 
@@ -134,7 +139,7 @@ func (r *ReplayData) getUser(osuAPI *osuapi.Client) osuapi.User {
 	return *user
 }
 
-func (r *ReplayData) getScore(osuAPI *osuapi.Client) osuapi.Score {
+func (r *ReplayData) getScore() osuapi.Score {
 	score := osuapi.Score{}
 	score.Count300 = int(uint32(r.Data[1])<<8 | uint32(r.Data[0]))
 	score.Count100 = int(uint32(r.Data[3])<<8 | uint32(r.Data[2]))
@@ -178,7 +183,7 @@ func (r *ReplayData) getLife() []HealthData {
 		return []HealthData{}
 	}
 	r.Data = r.Data[1:]
-	lifeLength, offset := uleb(r.Data)
+	lifeLength, offset := ulebDecode(r.Data)
 	life := string(r.Data[offset:lifeLength])
 	lifeData := strings.Split(life, ",")
 	healthData := []HealthData{}
@@ -396,7 +401,139 @@ func (r *ReplayData) GetUnstableRate() float64 {
 	return unstableRate
 }
 
-func uleb(byteArray []byte) (int, int) {
+// CreateOSR encodes a full replay file based off of the data given (score, data, user, playdata, e.t.c)
+func (r *ReplayData) CreateOSR() (result []byte) {
+	var (
+		mode       byte
+		version    = make([]byte, binary.MaxVarintLen32)
+		mapHash    []byte
+		username   []byte
+		replayHash []byte = []byte{0}
+		greats            = make([]byte, binary.MaxVarintLen16)
+		goods             = make([]byte, binary.MaxVarintLen16)
+		mehs              = make([]byte, binary.MaxVarintLen16)
+		geki              = make([]byte, binary.MaxVarintLen16)
+		katu              = make([]byte, binary.MaxVarintLen16)
+		misses            = make([]byte, binary.MaxVarintLen16)
+		score             = make([]byte, binary.MaxVarintLen32)
+		maxCombo          = make([]byte, binary.MaxVarintLen16)
+		fullCombo  byte
+		mods              = make([]byte, binary.MaxVarintLen32)
+		life       []byte = []byte{0}
+		timestamp         = make([]byte, binary.MaxVarintLen64)
+		playLength        = make([]byte, binary.MaxVarintLen32)
+		playData   []byte
+		scoreID    = make([]byte, binary.MaxVarintLen64)
+	)
+
+	mode = byte(r.Mode)
+
+	binary.LittleEndian.PutUint32(version, 0)
+
+	// Beatmap Hash
+	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
+	f, _ := os.Open("./data/osuFiles/" + strconv.Itoa(r.Beatmap.BeatmapID) + " " + replacer.ReplaceAllString(r.Beatmap.Artist, "") + " - " + replacer.ReplaceAllString(r.Beatmap.Title, "") + ".osu")
+	h := md5.New()
+	io.Copy(h, f)
+	mapBytes := []byte(hex.EncodeToString(h.Sum(nil)))
+	lenMap := ulebEncode(len(mapBytes))
+	if len(mapBytes) == 0 {
+		mapHash = []byte{0}
+	} else {
+		mapHash = []byte{11}
+		mapHash = append(mapHash, lenMap...)
+		mapHash = append(mapHash, mapBytes...)
+	}
+
+	// Username
+	userBytes := []byte(r.Player.Username)
+	lenUser := ulebEncode(len(userBytes))
+	if len(userBytes) == 0 {
+		username = []byte{0}
+	} else {
+		username = []byte{11}
+		username = append(username, lenUser...)
+		username = append(username, userBytes...)
+	}
+
+	// Score stuff super ez
+	binary.LittleEndian.PutUint16(greats, uint16(r.Score.Count300))
+	binary.LittleEndian.PutUint16(goods, uint16(r.Score.Count100))
+	binary.LittleEndian.PutUint16(mehs, uint16(r.Score.Count50))
+	binary.LittleEndian.PutUint16(geki, uint16(r.Score.CountGeki))
+	binary.LittleEndian.PutUint16(katu, uint16(r.Score.CountKatu))
+	binary.LittleEndian.PutUint16(misses, uint16(r.Score.CountMiss))
+	binary.LittleEndian.PutUint32(score, uint32(r.Score.Score))
+	binary.LittleEndian.PutUint16(maxCombo, uint16(r.Score.MaxCombo))
+	if r.Score.FullCombo {
+		fullCombo = 1
+	} else {
+		fullCombo = 0
+	}
+	binary.LittleEndian.PutUint32(mods, uint32(r.Score.Mods))
+	binary.LittleEndian.PutUint64(timestamp, uint64(r.Time.Sub(time.Time{}).Nanoseconds()/100))
+
+	// Play data stuff (the aids part)
+	replayText := ""
+	for _, play := range r.PlayData {
+		replayText += strconv.FormatInt(play.TimeSince, 10) + "|" +
+			strconv.FormatFloat(play.X, 'f', 6, 64) + "|" +
+			strconv.FormatFloat(play.Y, 'f', 6, 64) + "|" +
+			strconv.Itoa(int(play.PressType)) + ","
+	}
+	replayText += "-12345|0|0|" + strconv.FormatFloat(r.Seed, 'f', 0, 64)
+	buf := new(bytes.Buffer)
+	writer, _ := lzma.NewWriter(buf)
+	io.WriteString(writer, replayText)
+	writer.Close()
+	playData = buf.Bytes()
+
+	// Play length
+	binary.LittleEndian.PutUint32(playLength, uint32(len(playData)))
+
+	// Score ID if there is one
+	binary.LittleEndian.PutUint64(scoreID, uint64(r.Score.ScoreID))
+
+	result = append(result, mode)
+	result = append(result, version[:len(version)-1]...)
+	result = append(result, mapHash...)
+	result = append(result, username...)
+	result = append(result, replayHash...)
+	result = append(result, greats[:len(greats)-1]...)
+	result = append(result, goods[:len(goods)-1]...)
+	result = append(result, mehs[:len(mehs)-1]...)
+	result = append(result, geki[:len(geki)-1]...)
+	result = append(result, katu[:len(katu)-1]...)
+	result = append(result, misses[:len(misses)-1]...)
+	result = append(result, score[:len(score)-1]...)
+	result = append(result, maxCombo[:len(maxCombo)-1]...)
+	result = append(result, fullCombo)
+	result = append(result, mods[:len(mods)-1]...)
+	result = append(result, life...)
+	result = append(result, timestamp[:len(timestamp)-2]...)
+	result = append(result, playLength[:len(playLength)-1]...)
+	result = append(result, playData...)
+	result = append(result, scoreID[:len(scoreID)-2]...)
+	return result
+}
+
+func ulebEncode(value int) []byte {
+	byteArr := []byte{}
+	for {
+		c := value & 0x7f
+		value >>= 7
+		if value != 0 {
+			c |= 0x80
+		}
+		byteArr = append(byteArr, byte(c))
+		if c&0x80 == 0 {
+			break
+		}
+	}
+	return byteArr
+}
+
+func ulebDecode(byteArray []byte) (int, int) {
 	result := 0
 	shift := 0
 	i := 0
