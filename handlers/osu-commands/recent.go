@@ -3,6 +3,7 @@ package osucommands
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"math/rand"
 	"regexp"
@@ -25,6 +26,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)
 	scorePostRegex, _ := regexp.Compile(`-sp`)
+	genOSR, _ := regexp.Compile(`-osr`)
 
 	username := ""
 	mods := ""
@@ -55,6 +57,9 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		}
 		if scorePostRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, scorePostRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if genOSR.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, genOSR.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 	}
 
@@ -267,13 +272,16 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			Username:  userP.Username,
 			Mode:      beatmap.Mode,
 			BeatmapID: beatmap.BeatmapID,
+			Mods: &score.Mods,
 		})
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(reader)
 		replayData := structs.ReplayData{
+			Time:    score.Date.GetTime().UTC(),
 			Mode:    beatmap.Mode,
 			Beatmap: beatmap,
 			Score:   score.Score,
+			Player:  *userP,
 			Data:    buf.Bytes(),
 		}
 		replayData.PlayData = replayData.GetPlayData(true)
@@ -283,6 +291,10 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			replay += " cv. UR"
 		} else {
 			replay += " UR"
+		}
+		if genOSR.MatchString(m.Content) && m.Author.ID == config.Conf.BotHoster.UserID {
+			fileContent := replayData.CreateOSR()
+			ioutil.WriteFile("./"+userP.Username+strconv.Itoa(beatmap.BeatmapID)+strconv.Itoa(int(score.Mods))+".osr", fileContent, 0644)
 		}
 	} else if option == "recent" && objCount == playObjCount {
 		replayScore, _ := OsuAPI.GetScores(osuapi.GetScoresOpts{
@@ -296,13 +308,16 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 				Username:  userP.Username,
 				Mode:      beatmap.Mode,
 				BeatmapID: beatmap.BeatmapID,
+				Mods: &score.Mods,
 			})
 			buf := new(bytes.Buffer)
 			buf.ReadFrom(reader)
 			replayData := structs.ReplayData{
+				Time:    score.Date.GetTime().UTC(),
 				Mode:    beatmap.Mode,
 				Beatmap: beatmap,
 				Score:   replayScore[0].Score,
+				Player:  *userP,
 				Data:    buf.Bytes(),
 			}
 			replayData.PlayData = replayData.GetPlayData(true)

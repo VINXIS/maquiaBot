@@ -206,13 +206,16 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 					Username:  user.Username,
 					Mode:      beatmap.Mode,
 					BeatmapID: beatmap.BeatmapID,
+					Mods: &score.Mods,
 				})
 				buf := new(bytes.Buffer)
 				buf.ReadFrom(reader)
 				replayData := structs.ReplayData{
+					Time:    score.Date.GetTime().UTC(),
 					Mode:    beatmap.Mode,
 					Beatmap: beatmap,
 					Score:   score.Score,
+					Player:  *user,
 					Data:    buf.Bytes(),
 				}
 				replayData.PlayData = replayData.GetPlayData(true)

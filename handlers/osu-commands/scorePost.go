@@ -372,6 +372,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 			Username:  user.Username,
 			Mode:      beatmap.Mode,
 			BeatmapID: beatmap.BeatmapID,
+			Mods: &score.Mods,
 		})
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(reader)

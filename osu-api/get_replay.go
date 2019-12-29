@@ -17,6 +17,7 @@ type GetReplayOpts struct {
 	UserID    int
 	Username  string
 	Mode      Mode
+	Mods      *Mods // Pointer because must have the possibility to be 0 (nomod) but also nil (whatever is fine)
 	BeatmapID int
 }
 
@@ -42,6 +43,9 @@ func (c Client) GetReplay(opts GetReplayOpts) (io.Reader, error) {
 		vals.Add("type", "string")
 	default:
 		return nil, errors.New("osuapi: either UserID or Username MUST be set in GetReplayOpts")
+	}
+	if opts.Mods != nil {
+		vals.Add("mods", strconv.Itoa(int(*opts.Mods)))
 	}
 	data, err := c.makerq("get_replay", vals)
 	if err != nil {
