@@ -215,7 +215,7 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 		ctx.SetRGB255(234, 234, 234)
 		ctx.LoadFontFace(font, yScale*17)
 		ctx.DrawStringAnchored("Accuracy:", boxX+xScale*3, boxY+yScale*4, 0, 1)
-		ctx.DrawStringAnchored("Error: "+strconv.FormatFloat(replay.Early, 'f', 2, 64)+" - "+strconv.FormatFloat(replay.Late, 'f', 2, 64)+"ms avg", boxX+xScale*3, boxY+yScale*23, 0, 1)
+		ctx.DrawStringAnchored("Error: "+strconv.FormatFloat(replay.Early, 'f', 2, 64)+"ms - "+strconv.FormatFloat(replay.Late, 'f', 2, 64)+"ms avg", boxX+xScale*3, boxY+yScale*23, 0, 1)
 		if score.Mods&osuapi.ModDoubleTime != 0 {
 			replay.UnstableRate *= 1.5
 		} else if score.Mods&osuapi.ModHalfTime != 0 {

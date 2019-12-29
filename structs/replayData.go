@@ -10,6 +10,7 @@ import (
 	"time"
 
 	osuapi "../osu-api"
+	parser "github.com/natsukagami/go-osu-parser"
 	"github.com/ulikunitz/xz/lzma"
 )
 
@@ -56,6 +57,12 @@ const (
 	K2
 	Smoke
 )
+
+// Object extends parser.HitObject
+type Object struct {
+	parser.HitObject
+	stackHeight int
+}
 
 // ParseReplay parses the replay and fills in the ReplayData's values
 func (r *ReplayData) ParseReplay(osuAPI *osuapi.Client) {
@@ -277,73 +284,47 @@ func (r *ReplayData) GetUnstableRate() float64 {
 	}
 
 	// Get info for helping to determine hit error // TODO: stacks
-	circleScale := (1.0 - 0.7*(r.Beatmap.CircleSize-5.0)/5.0) / 2.0
-	radius := 64.0 * circleScale
+	radius := 64.0 * (1.0 - 0.7*(r.Beatmap.CircleSize-5.0)/5.0) / 2.0
 	window50 := 199.5 - r.Beatmap.OverallDifficulty*10.0
 
 	// Get map
 	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
-	mapByte, err := ioutil.ReadFile("./data/osuFiles/" +
-		strconv.Itoa(r.Beatmap.BeatmapID) +
-		" " +
-		replacer.ReplaceAllString(r.Beatmap.Artist, "") +
-		" - " +
-		replacer.ReplaceAllString(r.Beatmap.Title, "") +
-		".osu")
+	beatmap, err := parser.ParseFile("./data/osuFiles/" + strconv.Itoa(r.Beatmap.BeatmapID) + " " + replacer.ReplaceAllString(r.Beatmap.Artist, "") + " - " + replacer.ReplaceAllString(r.Beatmap.Title, "") + ".osu")
 	if err != nil {
 		return 0
 	}
 
-	// Calculate hit errors
-	text := string(mapByte)
-	lines := strings.Split(text, "\n")
-	passed := false
-	objects := []struct {
-		noteType int
-		time     int64
-		x        float64
-		y        float64
-	}{}
-	for _, line := range lines {
-		if !passed {
-			if strings.Contains(line, "[HitObjects]") {
-				passed = true
+	if r.Score.Mods&osuapi.ModHardRock != 0 {
+		for i := 0; i < len(beatmap.HitObjects); i++ {
+			obj := &beatmap.HitObjects[i]
+
+			if obj.ObjectName == "spinner" {
+				continue
 			}
-			continue
-		} else if !strings.Contains(line, ",") {
-			break
-		}
 
-		parts := strings.Split(line, ",")
-		if len(parts) < 4 {
-			break
+			obj.Position.Y = 384 - obj.Position.Y
+			if obj.ObjectName == "slider" {
+				obj.EndPosition.Y = 384 - obj.Position.Y
+				for j := 0; j < len(obj.Points); j++ {
+					obj.Points[j].Y = 384 - obj.Points[j].Y
+				}
+			}
 		}
-		noteType, _ := strconv.Atoi(parts[3])
-		if noteType&3 == 0 {
-			continue
-		}
-
-		x, _ := strconv.ParseFloat(parts[0], 64)
-		y, _ := strconv.ParseFloat(parts[1], 64)
-		noteTime, _ := strconv.ParseInt(parts[2], 10, 64)
-		if r.Score.Mods&osuapi.ModHardRock != 0 {
-			y = 384 - y
-		}
-		objects = append(objects, struct {
-			noteType int
-			time     int64
-			x        float64
-			y        float64
-		}{noteType, noteTime, x, y})
 	}
 
+	applyStacking(&beatmap)
+
 	usedPlays := []PlayData{}
-	for _, obj := range objects {
+	for _, obj := range beatmap.HitObjects {
+		if obj.ObjectName == "spinner" {
+			continue
+		}
+
 		for j, play := range r.PlayData {
 			// Check if in 50 window
-			if play.TimeStamp < obj.time-int64(window50) {
+			if play.TimeStamp < int64(obj.StartTime)-int64(window50) {
 				continue
-			} else if play.TimeStamp > obj.time+int64(window50) {
+			} else if play.TimeStamp > int64(obj.StartTime)+int64(window50) {
 				break
 			}
 
@@ -357,14 +338,14 @@ func (r *ReplayData) GetUnstableRate() float64 {
 			}
 			if !used {
 				// Check if play is a press and in circle
-				inCircle := math.Pow(play.X-obj.x, 2)+math.Pow(play.Y-obj.y, 2) < math.Pow(radius, 2)
+				inCircle := math.Pow(play.X-obj.Position.X, 2)+math.Pow(play.Y-obj.Position.Y, 2) < math.Pow(radius, 2)
 				m1 := play.PressType&1 != 0 && r.PlayData[j-1].PressType&1 == 0
 				m2 := play.PressType&2 != 0 && r.PlayData[j-1].PressType&2 == 0
 				k1 := play.PressType&4 != 0 && r.PlayData[j-1].PressType&4 == 0
 				k2 := play.PressType&8 != 0 && r.PlayData[j-1].PressType&8 == 0
 				press := m1 || m2 || k1 || k2
 				if inCircle && press {
-					r.HitErrors = append(r.HitErrors, float64(play.TimeStamp-obj.time))
+					r.HitErrors = append(r.HitErrors, float64(play.TimeStamp-int64(obj.StartTime)))
 					usedPlays = append(usedPlays, play)
 					break
 				}
@@ -424,4 +405,99 @@ func uleb(byteArray []byte) (int, int) {
 		shift += 7
 	}
 	return result + 1, i
+}
+
+func applyStacking(beatmap *parser.Beatmap) {
+	scale := (1.0 - 0.7*(beatmap.CircleSize-5.0)/5.0) / 2.0
+	ARMS := diffRange(beatmap.ApproachRate)
+
+	// Add stack height feature
+	rawObjs := beatmap.HitObjects
+	objs := []Object{}
+	for _, object := range rawObjs {
+		objs = append(objs, Object{object, 0})
+	}
+
+	// Obtain stack heights
+	for i := len(objs) - 1; i > 0; i-- {
+		n := i - 1
+
+		obji := &objs[i]
+		if obji.stackHeight != 0 || obji.ObjectName == "spinner" {
+			continue
+		}
+
+		stackThresh := int(beatmap.StackLeniency * ARMS)
+
+		if obji.ObjectName == "circle" {
+			for n-1 >= 0 {
+				objn := &objs[n]
+				n--
+				if objn.ObjectName == "spinner" {
+					continue
+				}
+
+				if obji.StartTime-objn.EndTime > stackThresh {
+					break
+				}
+
+				if objn.ObjectName == "slider" && distance(objn.EndPosition, obji.Position) < 3 {
+					offset := obji.stackHeight - objn.stackHeight + 1
+
+					for j := n + 1; j <= i; j++ {
+						objj := &objs[j]
+						if distance(objn.EndPosition, objj.Position) < 3 {
+							objj.stackHeight -= offset
+						}
+					}
+
+					break
+				}
+
+				if distance(objn.Position, obji.Position) < 3 {
+					objn.stackHeight = obji.stackHeight + 1
+					obji = objn
+				}
+			}
+		} else if obji.ObjectName == "slider" {
+			for n-1 >= 0 {
+				objn := &objs[n]
+				n--
+				if objn.ObjectName == "spinner" {
+					continue
+				}
+
+				if obji.StartTime-objn.StartTime > stackThresh {
+					break
+				}
+
+				if distance(objn.Position, obji.Position) < 3 {
+					objn.stackHeight = obji.stackHeight + 1
+					obji = objn
+				}
+			}
+		}
+
+	}
+
+	for i := 0; i < len(beatmap.HitObjects)-1; i++ {
+		offset := float64(objs[i].stackHeight) * scale * -6.4
+		beatmap.HitObjects[i].Position.X += offset
+		beatmap.HitObjects[i].Position.Y += offset
+	}
+}
+
+func diffRange(value float64) float64 {
+	if value > 5.0 {
+		return 1200 + (450-1200)*(value-5)/5
+	} else if value < 5.0 {
+		return 1200 - (1200-1800)*(5-value)/5
+	}
+	return 1200
+}
+
+func distance(v1, v2 parser.Point) float64 {
+	x := v1.X - v2.X
+	y := v1.Y - v2.Y
+	return math.Sqrt(math.Pow(x, 2) + math.Pow(y, 2))
 }

@@ -15,7 +15,9 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
 
 	mapID, err := strconv.Atoi(id)
-	tools.ErrRead(err)
+	if err != nil {
+		return beatmap
+	}
 
 	if format == "map" {
 		// Fetch the beatmap
@@ -23,7 +25,9 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 			BeatmapID: mapID,
 			Mods:      mods,
 		})
-		tools.ErrRead(err)
+		if err != nil {
+			return beatmap
+		}
 		if len(beatmaps) > 0 {
 			beatmap = beatmaps[0]
 		}
@@ -45,8 +49,9 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 			BeatmapSetID: mapID,
 			Mods:         mods,
 		})
-		tools.ErrRead(err)
-
+		if err != nil {
+			return beatmap
+		}
 		// Reorder the maps so that it returns the highest difficulty in the set
 		sort.Slice(beatmaps, func(i, j int) bool {
 			return beatmaps[i].DifficultyRating > beatmaps[j].DifficultyRating
