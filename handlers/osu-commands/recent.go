@@ -277,7 +277,6 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(reader)
 		replayData := structs.ReplayData{
-			Time:    score.Date.GetTime().UTC(),
 			Mode:    beatmap.Mode,
 			Beatmap: beatmap,
 			Score:   score.Score,
@@ -313,7 +312,6 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			buf := new(bytes.Buffer)
 			buf.ReadFrom(reader)
 			replayData := structs.ReplayData{
-				Time:    score.Date.GetTime().UTC(),
 				Mode:    beatmap.Mode,
 				Beatmap: beatmap,
 				Score:   replayScore[0].Score,

@@ -64,7 +64,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	replay.UnstableRate = replay.GetUnstableRate()
 
 	// Get time since play
-	time := tools.TimeSince(replay.Time)
+	time := tools.TimeSince(replay.Score.Date.GetTime())
 
 	// Assign timing variables for map specs
 	totalMinutes := math.Floor(float64(replay.Beatmap.TotalLength / 60))

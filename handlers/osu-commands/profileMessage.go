@@ -211,7 +211,6 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 				buf := new(bytes.Buffer)
 				buf.ReadFrom(reader)
 				replayData := structs.ReplayData{
-					Time:    score.Date.GetTime().UTC(),
 					Mode:    beatmap.Mode,
 					Beatmap: beatmap,
 					Score:   score.Score,

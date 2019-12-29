@@ -213,7 +213,6 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 								buf := new(bytes.Buffer)
 								buf.ReadFrom(reader)
 								replayData := structs.ReplayData{
-									Time:    score.Date.GetTime().UTC(),
 									Mode:    beatmap.Mode,
 									Beatmap: beatmap,
 									Score:   replayScore[0].Score,

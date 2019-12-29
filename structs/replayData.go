@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"math"
@@ -21,7 +22,6 @@ import (
 
 // ReplayData stores the replay information of a play
 type ReplayData struct {
-	Time         time.Time
 	Data         []byte
 	Mode         osuapi.Mode
 	Beatmap      osuapi.Beatmap
@@ -86,7 +86,7 @@ func (r *ReplayData) ParseReplay(osuAPI *osuapi.Client) {
 
 	r.Score = r.getScore()
 	r.LifeBar = r.getLife()
-	r.Time = r.getTime()
+	r.Score.Date = osuapi.MySQLDate(r.getTime())
 	r.PlayData = r.GetPlayData(false)
 }
 
@@ -325,7 +325,8 @@ func (r *ReplayData) GetUnstableRate() float64 {
 	}
 
 	usedPlays := []PlayData{}
-	for _, obj := range beatmap.HitObjects {
+	difference := -1
+	for i, obj := range beatmap.HitObjects {
 		if obj.ObjectName == "spinner" {
 			continue
 		}
@@ -361,7 +362,14 @@ func (r *ReplayData) GetUnstableRate() float64 {
 				}
 			}
 		}
+
+		if i-len(r.HitErrors) != difference {
+			fmt.Println(i, len(r.HitErrors))
+			difference = i - len(r.HitErrors)
+		}
 	}
+	fmt.Println(len(r.HitErrors))
+	fmt.Println(len(beatmap.HitObjects) - r.Beatmap.Spinners - r.Score.CountMiss)
 
 	// Get Std Deviation
 	avgHitError := 0.0
@@ -471,7 +479,7 @@ func (r *ReplayData) CreateOSR() (result []byte) {
 		fullCombo = 0
 	}
 	binary.LittleEndian.PutUint32(mods, uint32(r.Score.Mods))
-	binary.LittleEndian.PutUint64(timestamp, uint64(r.Time.Sub(time.Time{}).Nanoseconds()/100))
+	binary.LittleEndian.PutUint64(timestamp, uint64(r.Score.Date.GetTime().UTC().Sub(time.Time{}).Nanoseconds()/100))
 
 	// Play data stuff (the aids part)
 	replayText := ""
