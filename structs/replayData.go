@@ -312,7 +312,12 @@ func (r *ReplayData) GetUnstableRate() float64 {
 		}
 	}
 
-	applyStacking(&beatmap)
+	version, _ := strconv.Atoi(beatmap.FileFormat[1:])
+	if version >= 6 {
+		applyStacking(&beatmap)
+	} else {
+		applyStackingOld(&beatmap)
+	}
 
 	usedPlays := []PlayData{}
 	for _, obj := range beatmap.HitObjects {
@@ -410,6 +415,7 @@ func uleb(byteArray []byte) (int, int) {
 func applyStacking(beatmap *parser.Beatmap) {
 	scale := (1.0 - 0.7*(beatmap.CircleSize-5.0)/5.0) / 2.0
 	ARMS := diffRange(beatmap.ApproachRate)
+	stackThresh := int(beatmap.StackLeniency * ARMS)
 
 	// Add stack height feature
 	rawObjs := beatmap.HitObjects
@@ -426,8 +432,6 @@ func applyStacking(beatmap *parser.Beatmap) {
 		if obji.stackHeight != 0 || obji.ObjectName == "spinner" {
 			continue
 		}
-
-		stackThresh := int(beatmap.StackLeniency * ARMS)
 
 		if obji.ObjectName == "circle" {
 			for n-1 >= 0 {
@@ -478,6 +482,63 @@ func applyStacking(beatmap *parser.Beatmap) {
 			}
 		}
 
+	}
+
+	for i := 0; i < len(beatmap.HitObjects)-1; i++ {
+		offset := float64(objs[i].stackHeight) * scale * -6.4
+		beatmap.HitObjects[i].Position.X += offset
+		beatmap.HitObjects[i].Position.Y += offset
+	}
+}
+
+func applyStackingOld(beatmap *parser.Beatmap) {
+	scale := (1.0 - 0.7*(beatmap.CircleSize-5.0)/5.0) / 2.0
+	ARMS := diffRange(beatmap.ApproachRate)
+	stackThresh := int(beatmap.StackLeniency * ARMS)
+
+	// Add stack height feature
+	rawObjs := beatmap.HitObjects
+	objs := []Object{}
+	for _, object := range rawObjs {
+		objs = append(objs, Object{object, 0})
+	}
+
+	for i := 0; i < len(objs); i++ {
+		currObj := &objs[i]
+		if currObj.stackHeight != 0 && currObj.ObjectName != "slider" {
+			continue
+		}
+
+		sliderStack := 0
+		startTime := currObj.StartTime
+		pos2 := currObj.Position
+		if currObj.ObjectName == "slider" {
+			startTime = currObj.EndTime
+			pos2 = currObj.EndPosition
+		}
+
+		for j := i + 1; j < len(objs); j++ {
+			nextObj := &objs[j]
+			if nextObj.StartTime-stackThresh > startTime {
+				break
+			}
+
+			if distance(nextObj.Position, currObj.Position) < 3 {
+				currObj.stackHeight++
+				startTime = nextObj.StartTime
+				if nextObj.ObjectName == "slider" {
+					startTime = nextObj.EndTime
+				}
+			}
+			if distance(nextObj.Position, pos2) < 3 {
+				sliderStack++
+				currObj.stackHeight -= sliderStack
+				startTime = nextObj.StartTime
+				if nextObj.ObjectName == "slider" {
+					startTime = nextObj.EndTime
+				}
+			}
+		}
 	}
 
 	for i := 0; i < len(beatmap.HitObjects)-1; i++ {
