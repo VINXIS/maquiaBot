@@ -288,7 +288,7 @@ func (r *ReplayData) GetUnstableRate() float64 {
 		return 0
 	}
 
-	// Get info for helping to determine hit error // TODO: stacks
+	// Get info for helping to determine hit error // TODO: more analysis into slider notelock
 	radius := 64.0 * (1.0 - 0.7*(r.Beatmap.CircleSize-5.0)/5.0) / 2.0
 	window50 := 199.5 - r.Beatmap.OverallDifficulty*10.0
 
@@ -317,7 +317,10 @@ func (r *ReplayData) GetUnstableRate() float64 {
 		}
 	}
 
-	version, _ := strconv.Atoi(beatmap.FileFormat[1:])
+	version := 6
+	if len(beatmap.FileFormat) != 0 {
+		version, _ = strconv.Atoi(beatmap.FileFormat[1:])
+	}
 	if version >= 6 {
 		applyStacking(&beatmap)
 	} else {
@@ -325,12 +328,13 @@ func (r *ReplayData) GetUnstableRate() float64 {
 	}
 
 	usedPlays := []PlayData{}
-	difference := -1
+	prevHit := true // NOTELOCK CHECKER
 	for i, obj := range beatmap.HitObjects {
 		if obj.ObjectName == "spinner" {
 			continue
 		}
 
+		replayFound := false
 		for j, play := range r.PlayData {
 			// Check if in 50 window
 			if play.TimeStamp < int64(obj.StartTime)-int64(window50) {
@@ -355,17 +359,24 @@ func (r *ReplayData) GetUnstableRate() float64 {
 				k1 := play.PressType&4 != 0 && r.PlayData[j-1].PressType&4 == 0
 				k2 := play.PressType&8 != 0 && r.PlayData[j-1].PressType&8 == 0
 				press := m1 || m2 || k1 || k2
-				if inCircle && press {
+
+				// Check notelock
+				notelock := false
+				if i > 0 {
+					notelock = !prevHit && play.TimeStamp < int64(beatmap.HitObjects[i-1].StartTime)+int64(window50)
+				}
+				if inCircle && press && !notelock {
 					r.HitErrors = append(r.HitErrors, float64(play.TimeStamp-int64(obj.StartTime)))
 					usedPlays = append(usedPlays, play)
+					replayFound = true
 					break
 				}
 			}
 		}
+		prevHit = replayFound
 
-		if i-len(r.HitErrors) != difference {
-			fmt.Println(i, len(r.HitErrors))
-			difference = i - len(r.HitErrors)
+		if !replayFound {
+			fmt.Println(obj.StartTime)
 		}
 	}
 	fmt.Println(len(r.HitErrors))
