@@ -21,9 +21,11 @@ import (
 // Top gets the nth top pp score
 func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
 	topRegex, _ := regexp.Compile(`t(op)?\s+(.+)`)
-	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
+	modRegex, _ := regexp.Compile(`-m\s+(\S+)`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)
 	scorePostRegex, _ := regexp.Compile(`-sp`)
+	mapperRegex, _ := regexp.Compile(`-mapper`)
+	starRegex, _ := regexp.Compile(`-sr`)
 
 	username := ""
 	mods := ""
@@ -40,6 +42,21 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 			}
 			username = strings.TrimSpace(strings.Replace(username, modRegex.FindStringSubmatch(username)[0], "", 1))
 		}
+
+		if strictRegex.MatchString(m.Content) {
+			strict = false
+			username = strings.TrimSpace(strings.Replace(username, strictRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if scorePostRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, scorePostRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if mapperRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, mapperRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if starRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, starRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+
 		usernameSplit := strings.Split(username, " ")
 		for _, txt := range usernameSplit {
 			if i, err := strconv.Atoi(txt); err == nil && i > 0 && i <= 100 {
@@ -48,14 +65,8 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 				break
 			}
 		}
-		if strictRegex.MatchString(m.Content) {
-			strict = false
-			username = strings.TrimSpace(strings.Replace(username, strictRegex.FindStringSubmatch(m.Content)[0], "", 1))
-		}
-		if scorePostRegex.MatchString(m.Content) {
-			username = strings.TrimSpace(strings.Replace(username, scorePostRegex.FindStringSubmatch(m.Content)[0], "", 1))
-		}
 	}
+	fmt.Println(username, mods, index, strict)
 
 	// Get message author's osu! user if no user was specified
 	if username == "" {
@@ -212,7 +223,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 			Username:  user.Username,
 			Mode:      beatmap.Mode,
 			BeatmapID: beatmap.BeatmapID,
-			Mods: &score.Mods,
+			Mods:      &score.Mods,
 		})
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(reader)
@@ -276,6 +287,13 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		Embed:   embed,
 	})
 	if scorePostRegex.MatchString(m.Content) && err == nil {
-		ScorePost(s, &discordgo.MessageCreate{message}, cache, "")
+		var params []string
+		if mapperRegex.MatchString(m.Content) {
+			params = append(params, "mapper")
+		}
+		if starRegex.MatchString(m.Content) {
+			params = append(params, "sr")
+		}
+		ScorePost(s, &discordgo.MessageCreate{message}, cache, "", params...)
 	}
 }

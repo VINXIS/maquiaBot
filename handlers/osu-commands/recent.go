@@ -23,9 +23,11 @@ import (
 // Recent gets the most recent score done/nth score done
 func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cache []structs.PlayerData) {
 	recentRegex, _ := regexp.Compile(`(r|recent|rs|rb|recentb|recentbest)\s+(.+)`)
-	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
+	modRegex, _ := regexp.Compile(`-m\s+(\S+)`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)
 	scorePostRegex, _ := regexp.Compile(`-sp`)
+	mapperRegex, _ := regexp.Compile(`-mapper`)
+	starRegex, _ := regexp.Compile(`-sr`)
 	genOSR, _ := regexp.Compile(`-osr`)
 
 	username := ""
@@ -43,14 +45,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			}
 			username = strings.TrimSpace(strings.Replace(username, modRegex.FindStringSubmatch(username)[0], "", 1))
 		}
-		usernameSplit := strings.Split(username, " ")
-		for _, txt := range usernameSplit {
-			if i, err := strconv.Atoi(txt); err == nil && i > 0 && i <= 100 {
-				username = strings.TrimSpace(strings.Replace(username, txt, "", 1))
-				index = i
-				break
-			}
-		}
+
 		if strictRegex.MatchString(m.Content) {
 			strict = false
 			username = strings.TrimSpace(strings.Replace(username, strictRegex.FindStringSubmatch(m.Content)[0], "", 1))
@@ -58,8 +53,23 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		if scorePostRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, scorePostRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
+		if mapperRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, mapperRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if starRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, starRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
 		if genOSR.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, genOSR.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+
+		usernameSplit := strings.Split(username, " ")
+		for _, txt := range usernameSplit {
+			if i, err := strconv.Atoi(txt); err == nil && i > 0 && i <= 100 {
+				username = strings.TrimSpace(strings.Replace(username, txt, "", 1))
+				index = i
+				break
+			}
 		}
 	}
 
@@ -272,7 +282,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			Username:  userP.Username,
 			Mode:      beatmap.Mode,
 			BeatmapID: beatmap.BeatmapID,
-			Mods: &score.Mods,
+			Mods:      &score.Mods,
 		})
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(reader)
@@ -307,7 +317,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 				Username:  userP.Username,
 				Mode:      beatmap.Mode,
 				BeatmapID: beatmap.BeatmapID,
-				Mods: &score.Mods,
+				Mods:      &score.Mods,
 			})
 			buf := new(bytes.Buffer)
 			buf.ReadFrom(reader)
@@ -378,10 +388,17 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		Embed:   embed,
 	})
 	if scorePostRegex.MatchString(m.Content) && err == nil {
+		var params []string
+		if mapperRegex.MatchString(m.Content) {
+			params = append(params, "mapper")
+		}
+		if starRegex.MatchString(m.Content) {
+			params = append(params, "sr")
+		}
 		if option == "best" {
-			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recentBest")
+			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recentBest", params...)
 		} else if option == "recent" {
-			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recent")
+			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recent", params...)
 		}
 	}
 }

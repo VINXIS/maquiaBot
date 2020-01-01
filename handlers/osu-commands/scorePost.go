@@ -17,13 +17,15 @@ import (
 )
 
 // ScorePost posts your score in a single line format
-func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData, postType string) {
+func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData, postType string, params ...string) {
 	mapRegex, _ := regexp.Compile(`(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	scorePostRegex, _ := regexp.Compile(`sc?(orepost)?\s+(\S+)`)
-	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
+	modRegex, _ := regexp.Compile(`-m\s+(\S+)`)
 	mod2Regex, _ := regexp.Compile(`\+(\S+)`)
 	scoreRegex, _ := regexp.Compile(`\*\*(([0-9]|,)+)\*\* `)
 	leaderboardRegex, _ := regexp.Compile(`\*\*(#\d+)\*\* on leaderboard!`)
+	mapperRegex, _ := regexp.Compile(`-mapper`)
+	starRegex, _ := regexp.Compile(`-sr`)
 
 	var beatmap osuapi.Beatmap
 	var username string
@@ -45,6 +47,13 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 
 			username = strings.TrimSpace(strings.Replace(username, modRegex.FindStringSubmatch(username)[0], "", 1))
 		}
+		if mapperRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, mapperRegex.FindStringSubmatch(username)[0], "", 1))
+		}
+		if starRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, starRegex.FindStringSubmatch(username)[0], "", 1))
+		}
+
 		// Get the map
 		var submatches []string
 		parsed := false
@@ -313,23 +322,47 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 			newModText += ","
 		}
 	}
-	text += newModText +
-		" (" + acc + ")" +
-		" (" + strings.Replace(beatmap.Creator, "_", `\_`, -1) + " | " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + "★) "
+	text += newModText
+	if accCalc != 100.0 {
+		text += " (" + acc + ")"
+	}
+
+	mapper := true
+	sr := true
+	for _, param := range params {
+		if param == "mapper" {
+			mapper = false
+		} else if param == "sr" {
+			sr = false
+		}
+	}
+
+	mapperSR := " (" + strings.Replace(beatmap.Creator, "_", `\_`, -1) + " | " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + "★)"
+	if starRegex.MatchString(m.Content) || !sr {
+		mapperSR = " (mapset by " + strings.Replace(beatmap.Creator, "_", `\_`, -1) + ")"
+	}
+	if mapperRegex.MatchString(m.Content) || !mapper {
+		mapperSR = " " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + "★"
+	}
+	if (starRegex.MatchString(m.Content) && mapperRegex.MatchString(m.Content)) || (!mapper && !sr) {
+		mapperSR = ""
+	}
+	text += mapperSR
+	
 
 	text = strings.Replace(text, " +NM", "", -1)
 
 	if score.MaxCombo == beatmap.MaxCombo {
 		if accCalc == 100.0 {
-			text += "SS "
+			text += " SS "
 		} else {
-			text += "FC "
+			text += " FC "
 		}
 	} else {
 		if score.CountMiss == 0 {
-			text += strconv.Itoa(score.MaxCombo) + "/" + strconv.Itoa(beatmap.MaxCombo) + "x "
+			text += " " + strconv.Itoa(score.MaxCombo) + "/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 		} else {
-			text += strconv.Itoa(score.CountMiss) + "m " + strconv.Itoa(score.MaxCombo) + "/" + strconv.Itoa(beatmap.MaxCombo) + "x "
+			text += " " + strconv.Itoa(score.CountMiss) + "m " + strconv.Itoa(score.MaxCombo) + "/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 		}
 	}
 

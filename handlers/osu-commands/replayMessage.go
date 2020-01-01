@@ -22,6 +22,8 @@ import (
 // ReplayMessage posts replay information fopr a given replay
 func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp, cache []structs.PlayerData) {
 	scorePostRegex, _ := regexp.Compile(`-sp`)
+	mapperRegex, _ := regexp.Compile(`-mapper`)
+	starRegex, _ := regexp.Compile(`-sr`)
 
 	// Get URL
 	url := ""
@@ -240,6 +242,13 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	}
 	message, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	if scorePostRegex.MatchString(m.Content) && err == nil {
-		ScorePost(s, &discordgo.MessageCreate{message}, cache, url)
+		var params []string
+		if mapperRegex.MatchString(m.Content) {
+			params = append(params, "mapper")
+		}
+		if starRegex.MatchString(m.Content) {
+			params = append(params, "sr")
+		}
+		ScorePost(s, &discordgo.MessageCreate{message}, cache, url, params...)
 	}
 }

@@ -7,7 +7,7 @@ import (
 // Compare explains the compare functionality
 func Compare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: c / compare"
-	embed.Description = "`[osu] (c|compare) [link] <osu! username> [-m <mod> [-nostrict]|-all] [-sp]` lets you show your score(s) on a map."
+	embed.Description = "`[osu] (c|compare) [link] <osu! username> [-m <mod> [-nostrict]|-all] [-sp [-mapper] [-sr]]` lets you show your score(s) on a map."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[link]",
@@ -37,6 +37,16 @@ func Compare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		&discordgo.MessageEmbedField{
 			Name:   "[-sp]",
 			Value:  "Print out the score in a scorepost format after.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:   "[-mapper]",
+			Value:  "Remove the mapset host from the scorepost generation.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:   "[-sr]",
+			Value:  "Remove the star rating from the scorepost generation.",
 			Inline: true,
 		},
 	}

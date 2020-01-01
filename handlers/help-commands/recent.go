@@ -7,7 +7,7 @@ import (
 // Recent explains the recent functionality
 func Recent(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: r / rs / recent"
-	embed.Description = "`[osu] (r|rs|recent) [osu! username] [num] [-m mod] [-sp]` shows the player's recent score."
+	embed.Description = "`[osu] (r|rs|recent) [osu! username] [num] [-m mod] [-sp [-mapper] [-sr]]` shows the player's recent score."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[osu! username]",
@@ -30,6 +30,16 @@ func Recent(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
+			Name:   "[-mapper]",
+			Value:  "Remove the mapset host from the scorepost generation.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:   "[-sr]",
+			Value:  "Remove the star rating from the scorepost generation.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
 			Value: "`recentbest`",
 		},
@@ -40,7 +50,7 @@ func Recent(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // RecentBest explains the recentbest functionality
 func RecentBest(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: rb / recentb / recentbest"
-	embed.Description = "`[osu] (rb|recentb|recentbest) [osu! username] [num] [-m mod] [-sp]` shows the player's recent top 100 pp score."
+	embed.Description = "`[osu] (rb|recentb|recentbest) [osu! username] [num] [-m mod] [-sp [-mapper] [-sr]]` shows the player's recent top 100 pp score."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[osu! username]",
@@ -60,6 +70,16 @@ func RecentBest(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		&discordgo.MessageEmbedField{
 			Name:   "[-sp]",
 			Value:  "Print out the score in a scorepost format after.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:   "[-mapper]",
+			Value:  "Remove the mapset host from the scorepost generation.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:   "[-sr]",
+			Value:  "Remove the star rating from the scorepost generation.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{

@@ -23,11 +23,13 @@ import (
 // Compare compares finds a score from the current user on the previous map linked by the bot
 func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
 	mapRegex, _ := regexp.Compile(`(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
-	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
+	modRegex, _ := regexp.Compile(`-m\s+(\S+)`)
 	compareRegex, _ := regexp.Compile(`(c|compare)\s*(.+)?`)
 	strictRegex, _ := regexp.Compile(`-nostrict`)
 	allRegex, _ := regexp.Compile(`-all`)
 	scorePostRegex, _ := regexp.Compile(`-sp`)
+	mapperRegex, _ := regexp.Compile(`-mapper`)
+	starRegex, _ := regexp.Compile(`-sr`)
 	genOSR, _ := regexp.Compile(`-osr`)
 
 	// Obtain username and mods
@@ -55,6 +57,12 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 		}
 		if scorePostRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, scorePostRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if mapperRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, mapperRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if starRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, starRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 		if genOSR.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, genOSR.FindStringSubmatch(m.Content)[0], "", 1))
@@ -265,7 +273,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 				Username:  user.Username,
 				Mode:      beatmap.Mode,
 				BeatmapID: beatmap.BeatmapID,
-				Mods: &score.Mods,
+				Mods:      &score.Mods,
 			})
 			buf := new(bytes.Buffer)
 			buf.ReadFrom(reader)
@@ -374,7 +382,14 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 			}
 			message, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
 			if scorePostRegex.MatchString(m.Content) && err == nil {
-				ScorePost(s, &discordgo.MessageCreate{message}, cache, "")
+				var params []string
+				if mapperRegex.MatchString(m.Content) {
+					params = append(params, "mapper")
+				}
+				if starRegex.MatchString(m.Content) {
+					params = append(params, "sr")
+				}
+				ScorePost(s, &discordgo.MessageCreate{message}, cache, "", params...)
 			}
 			return
 		}
