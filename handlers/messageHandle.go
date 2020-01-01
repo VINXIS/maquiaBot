@@ -156,6 +156,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go botcreatorcommands.Update(s, m)
 		case serverPrefix + "updatestatus":
 			go botcreatorcommands.UpdateStatus(s, m)
+		case serverPrefix + "servers":
+			go botcreatorcommands.Servers(s, m)
 
 		// Sub-handles for pokemon and osu!
 		case serverPrefix + "h", serverPrefix + "help":
