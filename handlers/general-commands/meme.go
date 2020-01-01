@@ -14,7 +14,7 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 	memeRegex, _ := regexp.Compile(`meme\s+(https:\/\/(\S+)\s+)?([^|]+)?(\|)?([^|]+)?`)
 
 	if !memeRegex.MatchString(m.Content) {
-		s.ChannelMessageSend(m.ChannelID, "Please give text to add onto the image!")
+		s.ChannelMessageSend(m.ChannelID, "Please give text to add and maybe an image as well!")
 		return
 	}
 
@@ -74,6 +74,24 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 	}
+
+	// Replace special characters for bottom text
+	bottomText = strings.Replace(bottomText, "?", "~q", -1)
+	bottomText = strings.Replace(bottomText, "%", "~p", -1)
+	bottomText = strings.Replace(bottomText, "#", "~h", -1)
+	bottomText = strings.Replace(bottomText, "/", "~s", -1)
+	bottomText = strings.Replace(bottomText, "\"", "''", -1)
+	bottomText = strings.Replace(bottomText, "_", "__", -1)
+	bottomText = strings.Replace(bottomText, "-", "--", -1)
+
+	// Replace special characters for top text
+	topText = strings.Replace(topText, "?", "~q", -1)
+	topText = strings.Replace(topText, "%", "~p", -1)
+	topText = strings.Replace(topText, "#", "~h", -1)
+	topText = strings.Replace(topText, "/", "~s", -1)
+	topText = strings.Replace(topText, "\"", "''", -1)
+	topText = strings.Replace(topText, "_", "__", -1)
+	topText = strings.Replace(topText, "-", "--", -1)
 
 	// Fetch the image data
 	msg, err := s.ChannelMessageSend(m.ChannelID, "Generating meme...")
