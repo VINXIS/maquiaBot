@@ -328,7 +328,7 @@ func (r *ReplayData) GetUnstableRate() float64 {
 	}
 
 	usedPlays := []PlayData{}
-	prevHit := true // NOTELOCK CHECKER
+	prevHit := true // NOTELOCK BOOLEAN
 	for i, obj := range beatmap.HitObjects {
 		if obj.ObjectName == "spinner" {
 			continue
@@ -364,7 +364,16 @@ func (r *ReplayData) GetUnstableRate() float64 {
 				notelock := false
 				if i > 0 {
 					notelock = !prevHit && play.TimeStamp < int64(beatmap.HitObjects[i-1].StartTime)+int64(window50)
+
+					// Sliders are kinda fucked
+					if beatmap.HitObjects[i-1].ObjectName == "slider" {
+						inPrevCircle := math.Pow(play.X-beatmap.HitObjects[i-1].Position.X, 2)+math.Pow(play.Y-beatmap.HitObjects[i-1].Position.Y, 2) < math.Pow(radius, 2)
+						sliderLock := press && inPrevCircle && play.TimeStamp < int64(beatmap.HitObjects[i-1].EndTime)
+						notelock = notelock || sliderLock
+					}
 				}
+
+				// If valid then add play
 				if inCircle && press && !notelock {
 					r.HitErrors = append(r.HitErrors, float64(play.TimeStamp-int64(obj.StartTime)))
 					usedPlays = append(usedPlays, play)
