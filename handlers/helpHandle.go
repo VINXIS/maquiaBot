@@ -79,6 +79,18 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(vibe|vibec|vibecheck)`",
 			},
 			&discordgo.MessageEmbedField{
+				Name: "math commands:",
+				Value: "`(ave|average|mean)`, " +
+					"`(d|dist|distance|dir|direction)`, " +
+					"`(stddev|standarddev|stddeviation|standarddeviation)`, " +
+					"`(va|vadd|vectora|vectoradd)`, " +
+					"`(vc|vcross|vectorc|vectorcross)`, " +
+					"`(vd|vdiv|vdivide|vectord|vectordiv|vectordivide)`, " +
+					"`(vdot|vectordot)`, " +
+					"`(vm|vmult|vmultiply|vectorm|vectormult|vectormultiply)`, " +
+					"`(vs|vsub|vsubtract|vectors|vectorsub|vectorsubtract)`",
+			},
+			&discordgo.MessageEmbedField{
 				Name: "osu! commands:",
 				Value: "`(bfarm|bottomfarm)`, " +
 					"`bpm`, " +
@@ -216,6 +228,25 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Vagina(embed)
 		case "vibe", "vibec", "vibecheck":
 			embed = helpcommands.Vibe(embed)
+
+		case "ave", "average", "mean":
+			embed = helpcommands.Average(embed)
+		case "d", "dist", "distance", "dir", "direction":
+			embed = helpcommands.DistanceDirection(embed)
+		case "stddev", "standarddev", "stddeviation", "standarddeviation":
+			embed = helpcommands.StandardDeviation(embed)
+		case "va", "vadd", "vectora", "vectoradd":
+			embed = helpcommands.VectorAdd(embed)
+		case "vc", "vcross", "vectorc", "vectorcross":
+			embed = helpcommands.VectorCross(embed)
+		case "vd", "vdiv", "vdivide", "vectord", "vectordiv", "vectordivide":
+			embed = helpcommands.VectorDivide(embed)
+		case "vdot", "vectordot":
+			embed = helpcommands.VectorDot(embed)
+		case "vm", "vmult", "vmultiply", "vectorm", "vectormult", "vectormultiply":
+			embed = helpcommands.VectorMultiply(embed)
+		case "vs", "vsub", "vsubtract", "vectors", "vectorsub", "vectorsubtract":
+			embed = helpcommands.VectorSubtract(embed)
 
 		// osu! commands
 		case "bfarm", "bottomfarm":

@@ -16,6 +16,7 @@ import (
 	admincommands "./admin-commands"
 	botcreatorcommands "./bot-creator-commands"
 	gencommands "./general-commands"
+	mathcommands "./math-commands"
 	osucommands "./osu-commands"
 	pokemoncommands "./pokemon-commands"
 	"github.com/bwmarrin/discordgo"
@@ -166,6 +167,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go OsuHandle(s, m, args, profileCache, mapperData)
 		case serverPrefix + "pokemon":
 			go PokemonHandle(s, m, args, serverPrefix)
+		case serverPrefix + "math":
+			go MathHandle(s, m, args)
 
 		// Admin commands'
 		case serverPrefix + "prefix", serverPrefix + "newprefix":
@@ -282,6 +285,26 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		case serverPrefix + "vibe", serverPrefix + "vibec", serverPrefix + "vibecheck":
 			go gencommands.Vibe(s, m, "notRandom")
+
+		// math commands
+		case serverPrefix + "ave", serverPrefix + "average", serverPrefix + "mean":
+			go mathcommands.Average(s, m)
+		case serverPrefix + "d", serverPrefix + "dist", serverPrefix + "distance", serverPrefix + "dir", serverPrefix + "direction":
+			go mathcommands.DistanceDirection(s, m)
+		case serverPrefix + "stddev", serverPrefix + "standarddev", serverPrefix + "stddeviation", serverPrefix + "standarddeviation":
+			go mathcommands.StandardDeviation(s, m)
+		case serverPrefix + "va", serverPrefix + "vadd", serverPrefix + "vectora", serverPrefix + "vectoradd":
+			go mathcommands.VectorAdd(s, m)
+		case serverPrefix + "vc", serverPrefix + "vcross", serverPrefix + "vectorc", serverPrefix + "vectorcross":
+			go mathcommands.VectorCross(s, m)
+		case serverPrefix + "vd", serverPrefix + "vdiv", serverPrefix + "vdivide", serverPrefix + "vectord", serverPrefix + "vectordiv", serverPrefix + "vectordivide":
+			go mathcommands.VectorDivide(s, m)		
+		case serverPrefix + "vdot", serverPrefix + "vectordot":
+			go mathcommands.VectorDot(s, m)
+		case serverPrefix + "vm", serverPrefix + "vmult", serverPrefix + "vmultiply", serverPrefix + "vectorm", serverPrefix + "vectormult", serverPrefix + "vectormultiply":
+			go mathcommands.VectorMultiply(s, m)
+		case serverPrefix + "vs", serverPrefix + "vsub", serverPrefix + "vsubtract", serverPrefix + "vectors", serverPrefix + "vectorsub", serverPrefix + "vectorsubtract":
+			go mathcommands.VectorSubtract(s, m)
 
 		// osu! commands
 		case serverPrefix + "bfarm", serverPrefix + "bottomfarm":
