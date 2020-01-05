@@ -1,6 +1,7 @@
 package mathcommands
 
 import (
+	"math"
 	"strconv"
 	"strings"
 
@@ -35,8 +36,8 @@ func StandardDeviation(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	text = strings.TrimSuffix(text, ", ") + "\n\n"
 
-	text += "Population: **" + strconv.FormatFloat(stddev, 'f', 2, 64) + "**\n" +
-		"Sample: **" + strconv.FormatFloat(stddevSample, 'f', 2, 64) + "**\n"
+	text += "Population: **" + strconv.FormatFloat(stddev, 'f', 2, 64) + "** σ | **" + strconv.FormatFloat(math.Pow(stddev, 2.0), 'f', 2, 64) + "** σ²\n" +
+		"Sample: **" + strconv.FormatFloat(stddevSample, 'f', 2, 64) + "** σ | **" + strconv.FormatFloat(math.Pow(stddevSample, 2.0), 'f', 2, 64) + "** σ²\n"
 
 	s.ChannelMessageSend(m.ChannelID, text)
 }
