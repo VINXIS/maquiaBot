@@ -14,6 +14,7 @@ type Config struct {
 	BotHoster    BotHoster
 	Database     Database
 	Twitch       Twitch
+	Twitter      Twitter
 	Server       string
 	DiscordToken string
 	OsuToken     string
@@ -40,6 +41,14 @@ type Database struct {
 type Twitch struct {
 	ID     string
 	Secret string
+}
+
+// Twitter holds info about the twitch application
+type Twitter struct {
+	Token          string
+	Secret         string
+	ConsumerToken  string
+	ConsumerSecret string
 }
 
 // NewConfig creates the new configuration from the JSON file

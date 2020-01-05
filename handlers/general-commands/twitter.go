@@ -2,10 +2,10 @@ package gencommands
 
 import (
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 
+	config "../../config"
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/bwmarrin/discordgo"
 )
@@ -68,10 +68,10 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 	} else {
 		// API call
 		api := anaconda.NewTwitterApiWithCredentials(
-			os.Getenv("TWITTER_ACCESS_TOKEN"),
-			os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"),
-			os.Getenv("TWITTER_CONSUMER_KEY"),
-			os.Getenv("TWITTER_CONSUMER_SECRET"),
+			config.Conf.Twitter.Token,
+			config.Conf.Twitter.Secret,
+			config.Conf.Twitter.ConsumerToken,
+			config.Conf.Twitter.ConsumerSecret,
 		)
 		tweet, err := api.GetTweet(ID, nil)
 		if err != nil {
