@@ -7,7 +7,7 @@ import (
 // DistanceDirection explains the distance / direction functionality
 func DistanceDirection(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: d / dist / distance / dir / direction"
-	embed.Description = "`(d|dist|distance|ir|direction) <vector1> <vector2>` will gives the distance between the 2 vectors and the direction of the distance vector."
+	embed.Description = "`[math] (d|dist|distance|ir|direction) <vector1> <vector2>` will gives the distance between the 2 vectors and the direction of the distance vector."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<vector1> <vector2>",
@@ -26,7 +26,7 @@ func DistanceDirection(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // VectorAdd explains the vector addition functionality
 func VectorAdd(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: va / vadd / vectora / vectoradd"
-	embed.Description = "`(va|vadd|vectora|vectoradd) <vector1> <vector2>` will add the 2 vectors together."
+	embed.Description = "`[math] (va|vadd|vectora|vectoradd) <vector1> <vector2>` will add the 2 vectors together."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<vector1> <vector2>",
@@ -49,7 +49,7 @@ func VectorAdd(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // VectorCross explains the vector cross product functionality
 func VectorCross(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: vc / vcross / vectorc / vectorcross"
-	embed.Description = "`(vc|vcross|vectorc|vectorcross) <vector1> <vector2>` will give the cross product of 2 vectors."
+	embed.Description = "`[math] (vc|vcross|vectorc|vectorcross) <vector1> <vector2>` will give the cross product of 2 vectors."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<vector1> <vector2>",
@@ -72,7 +72,7 @@ func VectorCross(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // VectorDivide explains the vector division functionality
 func VectorDivide(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: va / vadd / vectora / vectoradd"
-	embed.Description = "`(va|vadd|vectora|vectoradd) <vector1> <number>` will divide the vector with the number."
+	embed.Description = "`[math] (va|vadd|vectora|vectoradd) <vector1> <number>` will divide the vector with the number."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<vector1> <vector2>",
@@ -100,7 +100,7 @@ func VectorDivide(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // VectorDot explains the vector dot product functionality
 func VectorDot(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: vdot / vectordot"
-	embed.Description = "`(vdot|vectordot) <vector1> <vector2>` will get the dot product of the 2 vectors."
+	embed.Description = "`[math] (vdot|vectordot) <vector1> <vector2>` will get the dot product of the 2 vectors."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<vector1> <vector2>",
@@ -123,7 +123,7 @@ func VectorDot(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // VectorMultiply explains the vector multiplication functionality
 func VectorMultiply(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: va / vadd / vectora / vectoradd"
-	embed.Description = "`(va|vadd|vectora|vectoradd) <vector1> <number>` will add the 2 vectors together."
+	embed.Description = "`[math] (va|vadd|vectora|vectoradd) <vector1> <number>` will add the 2 vectors together."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<vector1> <vector2>",
@@ -151,7 +151,7 @@ func VectorMultiply(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // VectorSubtract explains the vector substraction functionality
 func VectorSubtract(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: va / vadd / vectora / vectoradd"
-	embed.Description = "`(va|vadd|vectora|vectoradd) <vector1> <vector2>` will subtract the 2 vectors from each other."
+	embed.Description = "`[math] (va|vadd|vectora|vectoradd) <vector1> <vector2>` will subtract the 2 vectors from each other."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<vector1> <vector2>",
