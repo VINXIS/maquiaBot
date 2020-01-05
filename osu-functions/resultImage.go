@@ -56,10 +56,11 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 	xScale := float64(bounds.Dx()) / 1920
 	yScale := float64(bounds.Dy()) / 1080
 	imgScale := yScale * 62
-	fontScale := yScale * 112
+	font2Scale := yScale * 90
 
 	// Paths
 	font := "./fonts/Aller-Light.ttf"
+	font2 := "./fonts/Montserrat-Regular.ttf"
 
 	// Draw results panel rectangle
 	ctx.SetRGBA(0, 0, 0, 0.95)
@@ -68,7 +69,7 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 
 	// Write score
 	ctx.SetRGB255(234, 234, 234)
-	ctx.LoadFontFace(font, fontScale*1.2)
+	ctx.LoadFontFace(font2, font2Scale*1.2)
 	scoreText := strconv.FormatInt(score.Score, 10)
 	for len(scoreText) < 8 {
 		scoreText = "0" + scoreText
@@ -76,26 +77,26 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 	ctx.DrawStringAnchored(scoreText, xScale*(918*0.53+14), yScale*(210), 0.5, 0.5)
 
 	// Write 300 100 50
-	writeCount(strconv.Itoa(score.Count300), font, ctx, xScale*180, yScale*400, fontScale)
-	writeCount(strconv.Itoa(score.Count100), font, ctx, xScale*180, yScale*525, fontScale)
-	writeCount(strconv.Itoa(score.Count50), font, ctx, xScale*180, yScale*650, fontScale)
+	writeCount(strconv.Itoa(score.Count300), font2, ctx, xScale*180, yScale*400, font2Scale)
+	writeCount(strconv.Itoa(score.Count100), font2, ctx, xScale*180, yScale*525, font2Scale)
+	writeCount(strconv.Itoa(score.Count50), font2, ctx, xScale*180, yScale*650, font2Scale)
 
 	// Add 100 50 images
 	writeImage("./osu-images/100.png", ctx, int(xScale*45), int(yScale*525), imgScale) // 100
 	writeImage("./osu-images/50.png", ctx, int(xScale*45), int(yScale*650), imgScale)  // 50
 
 	// Write Geki Katu Miss
-	writeCount(strconv.Itoa(score.CountGeki), font, ctx, xScale*635, yScale*400, fontScale)
-	writeCount(strconv.Itoa(score.CountKatu), font, ctx, xScale*635, yScale*525, fontScale)
-	writeCount(strconv.Itoa(score.CountMiss), font, ctx, xScale*635, yScale*650, fontScale)
+	writeCount(strconv.Itoa(score.CountGeki), font2, ctx, xScale*635, yScale*400, font2Scale)
+	writeCount(strconv.Itoa(score.CountKatu), font2, ctx, xScale*635, yScale*525, font2Scale)
+	writeCount(strconv.Itoa(score.CountMiss), font2, ctx, xScale*635, yScale*650, font2Scale)
 
 	// Add Katu Miss images
 	writeImage("./osu-images/katu.png", ctx, int(xScale*515), int(yScale*525), imgScale) // Katu
 	writeImage("./osu-images/miss.png", ctx, int(xScale*515), int(yScale*650), imgScale) // Miss
 
 	// Write Combo and accuracy
-	writeCount(strconv.Itoa(score.MaxCombo), font, ctx, xScale*49, yScale*800, fontScale)
-	ctx.LoadFontFace(font, fontScale) // Reload font
+	writeCount(strconv.Itoa(score.MaxCombo), font2, ctx, xScale*49, yScale*800, font2Scale)
+	ctx.LoadFontFace(font2, font2Scale) // Reload font
 	accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
 	acc := strconv.FormatFloat(accCalc, 'f', 2, 64) + "%"
 	ctx.DrawStringAnchored(acc, xScale*(918/2+14), yScale*800, 0, 0)
@@ -133,7 +134,7 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 	ctx.DrawStringAnchored("Played by "+user.Username+" on "+score.Date.GetTime().UTC().Format("2006-01-02 3:04:05 PM")+".", xScale*7, yScale*108, 0, 0) // third line
 
 	// Draw watch rectangle and write watch
-	ctx.LoadFontFace(font, fontScale)
+	ctx.LoadFontFace(font2, font2Scale)
 	if score.Replay {
 		ctx.SetRGBA(0, 0, 0, 0.5)
 		ctx.DrawRectangle(xScale*1344, yScale*770, xScale*(1920-1344), yScale*120)
