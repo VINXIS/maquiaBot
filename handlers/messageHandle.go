@@ -126,7 +126,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go botcreatorcommands.Clean(s, m, profileCache)
 		return
 	} else if strings.HasPrefix(m.Content, serverPrefix) {
-		args := strings.Split(m.Content, " ")
+		args := strings.Split(strings.Split(m.Content, "\n")[0], " ")
 		switch args[0] {
 		// Commands without functions
 		case serverPrefix + "complain":
@@ -216,10 +216,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Info(s, m, profileCache)
 		case serverPrefix + "kanye":
 			go gencommands.Kanye(s, m)
-		case serverPrefix + "leven", serverPrefix + "levenshtein":
-			go gencommands.Levenshtein(s, m)
 		case serverPrefix + "late", serverPrefix + "old", serverPrefix + "ancient":
 			go gencommands.Late(s, m)
+		case serverPrefix + "leven", serverPrefix + "levenshtein":
+			go gencommands.Levenshtein(s, m)
+		case serverPrefix + "list":
+			go gencommands.List(s, m)
 		case serverPrefix + "meme":
 			go gencommands.Meme(s, m)
 		case serverPrefix + "noun", serverPrefix + "nouns":

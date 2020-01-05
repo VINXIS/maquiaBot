@@ -48,7 +48,7 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if err != nil {
 		return
 	}
-	
+
 	// Check if image or gif / video
 	if linkType == "png" {
 		response, err := http.Get(link)

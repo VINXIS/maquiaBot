@@ -48,8 +48,9 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(idea|niceidea)`, " +
 					"`info`, " +
 					"`kanye`, " +
-					"`(leven|levenshtein)`, " +
 					"`(late|old|ancient)`, " +
+					"`(leven|levenshtein)`, " +
+					"`list`, " +
 					"`meme`, " +
 					"`(noun|nouns)`, " +
 					"`ocr`, " +
@@ -157,10 +158,12 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Info(embed)
 		case "kanye":
 			embed = helpcommands.Kanye(embed)
-		case "leven", "levenshtein":
-			embed = helpcommands.Levenshtein(embed)
 		case "late", "old", "ancient":
 			embed = helpcommands.Late(embed)
+		case "leven", "levenshtein":
+			embed = helpcommands.Levenshtein(embed)
+		case "list":
+			embed = helpcommands.List(embed)
 		case "meme":
 			embed = helpcommands.Meme(embed)
 		case "noun", "nouns":
