@@ -1,7 +1,6 @@
 package gencommands
 
 import (
-	"fmt"
 	"math/rand"
 	"strings"
 
@@ -10,7 +9,6 @@ import (
 
 // List randomizes a list of objects
 func List(s *discordgo.Session, m *discordgo.MessageCreate) {
-	fmt.Println(m.Content)
 	list := strings.Split(m.Content, "\n")[1:]
 
 	if len(list) <= 1 {

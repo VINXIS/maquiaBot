@@ -243,6 +243,7 @@ func BottomFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []struct
 	if farmAmount == 1 {
 		if strings.Contains(m.Content, "-s") {
 			s.ChannelMessageSend(m.ChannelID, "The best farmerdog in this server is **"+cache[0].Osu.Username+"** with a farmerdog rating of "+strconv.FormatFloat(cache[0].Farm.Rating, 'f', 2, 64))
+			return
 		}
 		s.ChannelMessageSend(m.ChannelID, "The best farmerdog is **"+cache[0].Osu.Username+"** with a farmerdog rating of "+strconv.FormatFloat(cache[0].Farm.Rating, 'f', 2, 64))
 		return
