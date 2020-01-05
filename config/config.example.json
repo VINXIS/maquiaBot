@@ -12,6 +12,12 @@
         "ID": "",
         "Secret": ""
     },
+    "Twitter": {
+        "Token": "",
+        "Secret": "",
+        "ConsumerToken": "",
+        "ConsumerSecret": ""
+    },
     "Server": "",
     "DiscordToken": "",
     "OsuToken": "",
