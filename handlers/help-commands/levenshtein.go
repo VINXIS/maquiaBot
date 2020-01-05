@@ -6,8 +6,8 @@ import (
 
 // Levenshtein explains the levenshtein functionality
 func Levenshtein(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: l / leven / levenshtein"
-	embed.Description = "`(l|leven|levenshtein) <word1> <word2>` gives the levenshtein value between 2 words."
+	embed.Author.Name = "Command: leven / levenshtein"
+	embed.Description = "`(leven|levenshtein) <word1> <word2>` gives the levenshtein value between 2 words."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:  "<word1> <word2>",
