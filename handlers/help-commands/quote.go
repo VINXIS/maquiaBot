@@ -39,7 +39,7 @@ func QuoteAdd(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		&discordgo.MessageEmbedField{
 			Name:   "[-r]",
-			Value:  "Randomly choose one of the messages instead of the latest.",
+			Value:  "Randomly choose one of the past 100 messages instead of the latest.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
