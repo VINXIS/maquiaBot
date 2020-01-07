@@ -248,14 +248,14 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		res, err := http.Get(postType)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above!")
-				return
+			return
 		}
 		defer res.Body.Close()
 
 		replayInfo, err := ioutil.ReadAll(res.Body)
 		if err != nil || len(replayInfo) <= 81 {
 			s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above! Replay does not have enough information.")
-				return
+			return
 		}
 
 		// Parse replay data
@@ -307,11 +307,11 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	text := user.Username + " | " +
 		beatmap.Artist + " - " + beatmap.Title +
 		" [" + beatmap.DiffName + "] +"
-	
+
 	if beatmap.Artist == "" {
 		text = user.Username + " | " +
-		beatmap.Title +
-		" [" + beatmap.DiffName + "] +"
+			beatmap.Title +
+			" [" + beatmap.DiffName + "] +"
 	}
 
 	modText := strings.Replace(score.Mods.String(), "DTNC", "NC", -1)
@@ -348,7 +348,6 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		mapperSR = ""
 	}
 	text += mapperSR
-	
 
 	text = strings.Replace(text, " +NM", "", -1)
 
@@ -385,11 +384,19 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	go osutools.PPCalc(beatmap, accCalc, strconv.Itoa(score.MaxCombo), strconv.Itoa(score.CountMiss), modText, ppValues)
 	ppVal, _ := strconv.ParseFloat(<-ppValues, 64)
 	if beatmap.Approved == osuapi.StatusLoved {
-		text += "LOVED | " + strconv.FormatFloat(ppVal, 'f', 0, 64) + "pp if ranked | "
+		text += "LOVED | "
 	} else if beatmap.Approved == osuapi.StatusQualified {
-		text += "QUALIFIED | " + strconv.FormatFloat(ppVal, 'f', 0, 64) + "pp if ranked | "
+		text += "QUALIFIED | "
 	} else {
-		text += "| " + strconv.FormatFloat(ppVal, 'f', 0, 64) + "pp | "
+		text += "| "
+	}
+
+	text += strconv.FormatFloat(ppVal, 'f', 0, 64)
+
+	if beatmap.Approved != osuapi.StatusRanked && beatmap.Approved != osuapi.StatusApproved {
+		text += "pp if ranked | "
+	} else {
+		text += "pp | "
 	}
 
 	if replayData.UnstableRate != 0 {
@@ -405,7 +412,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 			Username:  user.Username,
 			Mode:      beatmap.Mode,
 			BeatmapID: beatmap.BeatmapID,
-			Mods: &score.Mods,
+			Mods:      &score.Mods,
 		})
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(reader)

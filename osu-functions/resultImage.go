@@ -56,7 +56,7 @@ func ResultImage(score osuapi.Score, beatmap osuapi.Beatmap, user osuapi.User, r
 	xScale := float64(bounds.Dx()) / 1920
 	yScale := float64(bounds.Dy()) / 1080
 	imgScale := yScale * 62
-	font2Scale := yScale * 90
+	font2Scale := yScale * 80
 
 	// Paths
 	font := "./fonts/Aller-Light.ttf"
