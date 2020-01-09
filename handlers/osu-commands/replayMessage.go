@@ -40,8 +40,6 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		return
 	}
 
-	fmt.Println(url)
-
 	// Get byte array
 	res, err := http.Get(url)
 	if err != nil {

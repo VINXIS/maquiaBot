@@ -438,6 +438,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 
 	img, err := osutools.ResultImage(score, beatmap, user, replayData)
 	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Failed to create scorepost image! Let VINXIS know.")
 		fmt.Println(err)
 	} else {
 		imgBytes := new(bytes.Buffer)

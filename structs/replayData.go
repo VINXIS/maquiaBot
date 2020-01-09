@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"math"
@@ -383,13 +382,7 @@ func (r *ReplayData) GetUnstableRate() float64 {
 			}
 		}
 		prevHit = replayFound
-
-		if !replayFound {
-			fmt.Println(obj.StartTime)
-		}
 	}
-	fmt.Println(len(r.HitErrors))
-	fmt.Println(len(beatmap.HitObjects) - r.Beatmap.Spinners - r.Score.CountMiss)
 
 	// Get Std Deviation
 	avgHitError := 0.0
