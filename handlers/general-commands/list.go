@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -13,6 +14,9 @@ import (
 // List randomizes a list of objects
 func List(s *discordgo.Session, m *discordgo.MessageCreate) {
 	list := strings.Split(m.Content, "\n")[1:]
+
+	fileType := "txt"
+	fileTypeRegex, _ := regexp.Compile(`\.([^\.]+)$`)
 
 	// Use txt file if given
 	if len(m.Attachments) > 0 {
@@ -30,12 +34,16 @@ func List(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		list = strings.Split(string(b), "\n")
+		if len(list) <= 1 {
+			s.ChannelMessageSend(m.ChannelID, "Please give a list of lines to randomize! Could not find 2+ lines to randomize from file!")
+			return
+		}
+
 		if strings.Contains(list[0], "list") {
 			list = list[1:]
 		}
-	}
-
-	if len(list) <= 1 {
+		fileType = fileTypeRegex.FindStringSubmatch(m.Attachments[0].URL)[1]
+	} else if len(list) <= 1 {
 		s.ChannelMessageSend(m.ChannelID, "Please give a list of lines to randomize!")
 		return
 	}
@@ -49,7 +57,7 @@ func List(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Files: []*discordgo.File{
 				&discordgo.File{
-					Name:   "shuffle.txt",
+					Name:   "shuffle." + fileType,
 					Reader: buf,
 				},
 			},

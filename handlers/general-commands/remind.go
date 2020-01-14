@@ -26,6 +26,7 @@ var ReminderTimers []structs.ReminderTimer
 func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
 	remindRegex, _ := regexp.Compile(`remind(er)?\s+(.+)`)
 	timeRegex, _ := regexp.Compile(`\s(\d+) (month|week|day|hour|minute|second)s?`)
+	dateRegex, _ := regexp.Compile(`at\s+(.+)`)
 	reminderTime := time.Duration(0)
 	text := ""
 	timeResultString := ""
@@ -74,6 +75,17 @@ func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
 			reminderTime += time.Second * time.Duration(hours) * 3600
 			reminderTime += time.Second * time.Duration(minutes) * 60
 			reminderTime += time.Second * time.Duration(seconds)
+		} else if dateRegex.MatchString(m.Content) {
+			// Parse date
+			date := dateRegex.FindStringSubmatch(m.Content)[1]
+			t, err := tools.TimeParse(date)
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "Invalid datetime format!")
+				return
+			}
+
+			reminderTime = t.Sub(time.Now())
+			text = dateRegex.ReplaceAllString(text, "")
 		}
 	}
 	if reminderTime == 0 { // Default to 5 minutes
