@@ -104,7 +104,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 						topNum := 101
 						leaderboardNum := 101
 						orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
-							Username: user.Username,
+							UserID: user.UserID,
 							Limit:    100,
 						})
 						tools.ErrRead(err)
@@ -205,10 +205,10 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 							if replayScore[0].Replay && replayScore[0].Score.Score == score.Score.Score {
 								replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(replayScore[0].ScoreID, 10) + "/download)"
 								reader, _ := OsuAPI.GetReplay(osuapi.GetReplayOpts{
-									Username:  user.Username,
+									UserID: user.UserID,
 									Mode:      beatmap.Mode,
 									BeatmapID: beatmap.BeatmapID,
-									Mods: &score.Mods,
+									Mods:      &score.Mods,
 								})
 								buf := new(bytes.Buffer)
 								buf.ReadFrom(reader)
