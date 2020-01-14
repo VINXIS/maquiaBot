@@ -135,7 +135,7 @@ func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
 	file.Close()
 
 	// Run tesseract to parse the image
-	_, err = exec.Command("tesseract", "./"+name+".png", name, "--dpi", "96", "-l", lang).Output()
+	_, err = exec.Command("tesseract", "./"+name+".png", name, "-l", lang, "--oem", "3", "--psm", "12").Output()
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Invalid language!")
 		tools.DeleteFile("./" + name + ".png")
