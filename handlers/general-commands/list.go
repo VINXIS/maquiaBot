@@ -1,11 +1,9 @@
 package gencommands
 
 import (
-	"bytes"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
-	"regexp"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -14,9 +12,6 @@ import (
 // List randomizes a list of objects
 func List(s *discordgo.Session, m *discordgo.MessageCreate) {
 	list := strings.Split(m.Content, "\n")[1:]
-
-	fileType := "txt"
-	fileTypeRegex, _ := regexp.Compile(`\.([^\.]+)$`)
 
 	// Use txt file if given
 	if len(m.Attachments) > 0 {
@@ -42,7 +37,6 @@ func List(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if strings.Contains(list[0], "list") {
 			list = list[1:]
 		}
-		fileType = fileTypeRegex.FindStringSubmatch(m.Attachments[0].URL)[1]
 	} else if len(list) <= 1 {
 		s.ChannelMessageSend(m.ChannelID, "Please give a list of lines to randomize!")
 		return
@@ -52,15 +46,12 @@ func List(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	_, err := s.ChannelMessageSend(m.ChannelID, strings.Join(list, "\n"))
 	if err != nil {
-		buf := new(bytes.Buffer)
-		buf.Write([]byte(strings.Join(list, "\n")))
-		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-			Files: []*discordgo.File{
-				&discordgo.File{
-					Name:   "shuffle." + fileType,
-					Reader: buf,
-				},
-			},
-		})
+		for i := 0; i < len(list); i++ {
+			if len(strings.Join(list[:i], "\n")) > 2000 {
+				s.ChannelMessageSend(m.ChannelID, strings.Join(list[:i-1], "\n"))
+				list = list[i-1:]
+				i = 0
+			}
+		}
 	}
 }
