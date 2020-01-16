@@ -9,3 +9,5 @@ Create a folder called data. In that folder, create a subfolder called osuFiles 
 Duplicate `config.example.json` in the config folder and call it `config.json` fill in all the slots.
 
 Inspiration from [owo](https://github.com/AznStevy/owo) and [BoatBot](https://github.com/0xg0ldpk3rx0/SupportBot)
+
+cd to the directory and build using `go build -o maquiaBot core.go` and then run the program with `./maquiaBot`
