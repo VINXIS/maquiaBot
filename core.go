@@ -22,7 +22,6 @@ import (
 	tools "./tools"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
@@ -98,8 +97,8 @@ func main() {
 	// go osutools.TrackMapperPost(discord) Commented until a solution is found for its issues
 
 	// Open DB
-	tools.DB, err = gorm.Open("mysql", config.Conf.Database.Username+":"+config.Conf.Database.Password+"@/"+config.Conf.Database.Name)
-	tools.ErrRead(err)
+	// tools.DB, err = gorm.Open("mysql", config.Conf.Database.Username+":"+config.Conf.Database.Password+"@/"+config.Conf.Database.Name)
+	// tools.ErrRead(err)
 
 	// Create a channel to keep the bot running until a prompt is given to close
 	sc := make(chan os.Signal, 1)
@@ -108,5 +107,5 @@ func main() {
 
 	// Close sessions
 	discord.Close()
-	tools.DB.Close()
+	// tools.DB.Close()
 }
