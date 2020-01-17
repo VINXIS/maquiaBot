@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -26,6 +26,44 @@ import (
 )
 
 func main() {
+	// Create data folders and stuff
+	if _, err := os.Stat("./data"); os.IsNotExist(err) {
+		err = os.MkdirAll("./data", 0755)
+		tools.ErrRead(err)
+		log.Println("Created data directory.")
+
+		err = ioutil.WriteFile("./data/genitalRecords.json", []byte{}, 0644)
+		tools.ErrRead(err)
+		log.Println("Created data/genitalRecords.json.")
+		err = ioutil.WriteFile("./data/reminders.json", []byte{}, 0644)
+		tools.ErrRead(err)
+		log.Println("Created data/reminders.json.")
+
+		err = os.MkdirAll("./data/channelData", 0755)
+		tools.ErrRead(err)
+		log.Println("Created data/channelData directory.")
+		err = os.MkdirAll("./data/channelData", 0755)
+		tools.ErrRead(err)
+		log.Println("Created data/channelData directory.")
+
+		err = os.MkdirAll("./data/osuFiles", 0755)
+		tools.ErrRead(err)
+		log.Println("Created data/osuFiles directory.")
+
+		err = os.MkdirAll("./data/osuData", 0755)
+		tools.ErrRead(err)
+		log.Println("Created data/osuData directory.")
+		err = ioutil.WriteFile("./data/osuData/mapFarm.json", []byte{}, 0644)
+		tools.ErrRead(err)
+		log.Println("Created data/osuData/mapFarm.json.")
+		err = ioutil.WriteFile("./data/osuData/mapperData.json", []byte{}, 0644)
+		tools.ErrRead(err)
+		log.Println("Created data/osuData/mapperData.json.")
+		err = ioutil.WriteFile("./data/osuData/profileCache.json", []byte{}, 0644)
+		tools.ErrRead(err)
+		log.Println("Created data/osuData/profileCache.json.")
+	}
+
 	// Obtain config
 	config.NewConfig()
 	osuAPI := osuapi.NewClient(config.Conf.OsuToken)
@@ -50,7 +88,7 @@ func main() {
 			break
 		}
 	}
-	fmt.Println("Bot is now running in " + strconv.Itoa(len(discord.State.Guilds)) + " servers.")
+	log.Println("Bot is now running in " + strconv.Itoa(len(discord.State.Guilds)) + " servers.")
 	discord.UpdateStatus(0, strconv.Itoa(len(discord.State.Guilds))+" servers")
 
 	// Resume all reminder timers
