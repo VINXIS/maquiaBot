@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math"
 	"math/rand"
 	"strconv"
@@ -155,7 +156,7 @@ func TrackMapperPost(s *discordgo.Session) {
 							Embed:   embed,
 						})
 						if err != nil {
-							fmt.Println("TrackMapperPost err: " + err.Error())
+							log.Println("TrackMapperPost err: " + err.Error())
 							mapperData[j].Channels = append(mapperData[i].Channels[:j], mapperData[i].Channels[j+1:]...)
 							j--
 						}

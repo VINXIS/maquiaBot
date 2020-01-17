@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math"
 	"math/rand"
 	"sort"
@@ -105,7 +106,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 						leaderboardNum := 101
 						orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
 							UserID: user.UserID,
-							Limit:    100,
+							Limit:  100,
 						})
 						tools.ErrRead(err)
 						for i, orderedScore := range orderedScores {
@@ -205,7 +206,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 							if replayScore[0].Replay && replayScore[0].Score.Score == score.Score.Score {
 								replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(replayScore[0].ScoreID, 10) + "/download)"
 								reader, _ := OsuAPI.GetReplay(osuapi.GetReplayOpts{
-									UserID: user.UserID,
+									UserID:    user.UserID,
 									Mode:      beatmap.Mode,
 									BeatmapID: beatmap.BeatmapID,
 									Mods:      &score.Mods,
@@ -284,8 +285,8 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 							}
 							_, err = s.ChannelMessageSendEmbed(ch.Channel.ID, embed)
 							if err != nil {
-								fmt.Println("TrackPost err: " + err.Error())
-								fmt.Println(ch)
+								log.Println("TrackPost err: " + err.Error())
+								log.Println(ch)
 							}
 							ch.Users[l] = *recentUser
 						}

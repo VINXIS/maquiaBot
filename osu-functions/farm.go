@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -36,7 +37,7 @@ func FarmUpdate() {
 
 // UpdateFarmSystem updates the whole farm data
 func UpdateFarmSystem() {
-	fmt.Println("Fetching data as more than 24 hours have passed...")
+	log.Println("Fetching data as more than 24 hours have passed...")
 
 	// Obtain data
 	res, err := http.Get("https://raw.githubusercontent.com/grumd/osu-pps/master/data-osu.json")
@@ -50,7 +51,7 @@ func UpdateFarmSystem() {
 	err = json.Unmarshal(byteArray, &info)
 	tools.ErrRead(err)
 
-	fmt.Println("Obtained data! Now parsing...")
+	log.Println("Obtained data! Now parsing...")
 
 	// grumd's Overweightness formula implementation
 	data := []structs.MapFarm{}
@@ -91,13 +92,13 @@ func UpdateFarmSystem() {
 	tools.ErrRead(err)
 	_ = json.Unmarshal(f, &profileCache)
 
-	fmt.Println("Saved data! Updating all " + strconv.Itoa(len(profileCache)) + " players...")
+	log.Println("Saved data! Updating all " + strconv.Itoa(len(profileCache)) + " players...")
 
 	for i, player := range profileCache {
 		if player.Osu.Username != "" {
 			player.FarmCalc(OsuAPI, farmData)
 			profileCache[i] = player
-			fmt.Println("Updated player #" + strconv.Itoa(i+1) + ": " + player.Osu.Username + " Farm Rating " + fmt.Sprint(player.Farm.Rating))
+			log.Println("Updated player #" + strconv.Itoa(i+1) + ": " + player.Osu.Username + " Farm Rating " + fmt.Sprint(player.Farm.Rating))
 		}
 	}
 
@@ -106,5 +107,5 @@ func UpdateFarmSystem() {
 
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
 	tools.ErrRead(err)
-	fmt.Println("Updated all players!")
+	log.Println("Updated all players!")
 }

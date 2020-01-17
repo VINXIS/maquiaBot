@@ -66,7 +66,6 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 			}
 		}
 	}
-	fmt.Println(username, mods, index, strict)
 
 	// Get message author's osu! user if no user was specified
 	if username == "" {
