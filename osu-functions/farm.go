@@ -58,21 +58,23 @@ func UpdateFarmSystem() {
 	max := 0.00
 	for _, raw := range info {
 		ow := raw.X / math.Pow(raw.Adj, 0.65) / math.Pow(float64(raw.Passcount), 0.2) / math.Pow(float64(raw.Age), 0.5)
-		if max < ow {
+		if max < ow && !math.IsNaN(ow) && !math.IsInf(ow, 1) && !math.IsInf(ow, -1) {
 			max = ow
 		}
 	}
 
 	for _, raw := range info {
 		ow := raw.X / math.Pow(raw.Adj, 0.65) / math.Pow(float64(raw.Passcount), 0.2) / math.Pow(float64(raw.Age), 0.5)
-		data = append(data, structs.MapFarm{
-			BeatmapID:      raw.BeatmapID,
-			Artist:         string(raw.Artist),
-			Title:          string(raw.Title),
-			DiffName:       string(raw.DiffName),
-			Overweightness: ow / max * 800.0,
-			Mods:           raw.Mods,
-		})
+		if !math.IsNaN(ow) && !math.IsInf(ow, 1) && !math.IsInf(ow, -1) {
+			data = append(data, structs.MapFarm{
+				BeatmapID:      raw.BeatmapID,
+				Artist:         string(raw.Artist),
+				Title:          string(raw.Title),
+				DiffName:       string(raw.DiffName),
+				Overweightness: ow / max * 800.0,
+				Mods:           raw.Mods,
+			})
+		}
 	}
 
 	farmData := structs.FarmData{
