@@ -155,8 +155,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go botcreatorcommands.CleanFarm(s, m, profileCache)
 		case serverPrefix + "up", serverPrefix + "update":
 			go botcreatorcommands.Update(s, m)
-		case serverPrefix + "updatestatus":
-			go botcreatorcommands.UpdateStatus(s, m)
 		case serverPrefix + "servers":
 			go botcreatorcommands.Servers(s, m)
 

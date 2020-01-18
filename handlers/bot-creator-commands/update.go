@@ -1,49 +1,15 @@
 package botcreatorcommands
 
 import (
-	"log"
-	"os/exec"
 	"regexp"
 	"strconv"
 
 	config "../../config"
-	osutools "../../osu-functions"
 	"github.com/bwmarrin/discordgo"
 )
 
-// Update updates osu-tools
+// Update updates the bot discord status
 func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID != config.Conf.BotHoster.UserID {
-		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
-		return
-	}
-
-	updateRegex, _ := regexp.Compile(`up(date)?\s+(.+)`)
-	if !updateRegex.MatchString(m.Content) {
-		s.ChannelMessageSend(m.ChannelID, "farm or osu-tools dumbass...")
-		return
-	}
-	switch updateRegex.FindStringSubmatch(m.Content)[2] {
-	case "farm":
-		go osutools.FarmUpdate()
-	case "osu":
-		message, err := s.ChannelMessageSend(m.ChannelID, "Updating osu-tools...")
-		if err != nil {
-			return
-		}
-		_, err = exec.Command("dotnet", "build", "./osu-tools/PerformanceCalculator").Output()
-		s.ChannelMessageDelete(m.ChannelID, message.ID)
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "An error occurred in updating osu-tools! Please try manually."+m.Author.Mention())
-			log.Println("Update err: " + err.Error())
-		} else {
-			s.ChannelMessageSend(m.ChannelID, "Updated! "+m.Author.Mention())
-		}
-	}
-}
-
-// UpdateStatus updates the bot discord status
-func UpdateStatus(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID != config.Conf.BotHoster.UserID {
 		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
 		return
