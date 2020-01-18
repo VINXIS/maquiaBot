@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	osuapi "../../osu-api"
-	osutools "../../osu-functions"
+	osutools "../../osu-tools"
 
 	"github.com/bwmarrin/discordgo"
 )

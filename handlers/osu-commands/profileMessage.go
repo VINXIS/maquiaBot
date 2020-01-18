@@ -11,7 +11,7 @@ import (
 
 	config "../../config"
 	osuapi "../../osu-api"
-	osutools "../../osu-functions"
+	osutools "../../osu-tools"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -232,8 +232,13 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 				pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp "
 			} else { // If map was finished, but play was not a perfect combo
 				ppValues := make(chan string, 1)
-				accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
-				go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", mods, ppValues)
+				go osutools.PPCalc(beatmap, osuapi.Score{
+					MaxCombo: beatmap.MaxCombo,
+					Count50: score.Count50,
+					Count100: score.Count100,
+					Count300: totalObjs-score.Count50-score.Count100,
+					Mods: score.Mods,
+				}, ppValues)
 				pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
 			}
 			hits := "[" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"

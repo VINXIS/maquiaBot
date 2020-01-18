@@ -88,7 +88,6 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 						if strings.Contains(mods, "DTNC") {
 							mods = strings.Replace(mods, "DTNC", "NC", 1)
 						}
-						scoreMods := mods
 						mods = " **+" + mods + "** "
 
 						if score.MaxCombo == beatmap.MaxCombo {
@@ -135,9 +134,14 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 						if score.PP == 0 { // If map was not finished
 							ppValues := make(chan string, 2)
 							var ppValueArray [2]string
-							accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
-							go PPCalc(beatmap, accCalcNoMiss, "", "", scoreMods, ppValues)
-							go PPCalc(beatmap, accCalc, strconv.Itoa(score.MaxCombo), strconv.Itoa(score.CountMiss), scoreMods, ppValues)
+							go PPCalc(beatmap, osuapi.Score{
+								MaxCombo: beatmap.MaxCombo,
+								Count50:  score.Count50,
+								Count100: score.Count100,
+								Count300: totalObjs - score.Count50 - score.Count100,
+								Mods:     score.Mods,
+							}, ppValues)
+							go PPCalc(beatmap, score.Score, ppValues)
 							for v := 0; v < 2; v++ {
 								ppValueArray[v] = <-ppValues
 							}
@@ -152,8 +156,13 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 							pp = "**" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp**/" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp "
 						} else { // If map was finished, but play was not a perfect combo
 							ppValues := make(chan string, 1)
-							accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
-							go PPCalc(beatmap, accCalcNoMiss, "", "", scoreMods, ppValues)
+							go PPCalc(beatmap, osuapi.Score{
+								MaxCombo: beatmap.MaxCombo,
+								Count50:  score.Count50,
+								Count100: score.Count100,
+								Count300: totalObjs - score.Count50 - score.Count100,
+								Mods:     score.Mods,
+							}, ppValues)
 							pp = "**" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp**/" + <-ppValues + "pp "
 						}
 

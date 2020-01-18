@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	osuapi "../osu-api"
-	osutools "../osu-functions"
+	osutools "../osu-tools"
 	helpcommands "./help-commands"
 	"github.com/bwmarrin/discordgo"
 )

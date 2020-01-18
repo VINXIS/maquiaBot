@@ -4,7 +4,7 @@ package osuapi
 const (
 	ModNoFail Mods = 1 << iota
 	ModEasy
-	ModNoVideo
+	ModTouchDevice
 	ModHidden
 	ModHardRock
 	ModSuddenDeath

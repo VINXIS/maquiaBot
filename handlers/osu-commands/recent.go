@@ -14,7 +14,7 @@ import (
 
 	config "../../config"
 	osuapi "../../osu-api"
-	osutools "../../osu-functions"
+	osutools "../../osu-tools"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -247,9 +247,14 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 	if score.PP == 0 { // If map was not finished
 		ppValues := make(chan string, 2)
 		var ppValueArray [2]string
-		accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
-		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", mods, ppValues)
-		go osutools.PPCalc(beatmap, accCalc, strconv.Itoa(score.MaxCombo), strconv.Itoa(score.CountMiss), mods, ppValues)
+		go osutools.PPCalc(beatmap, osuapi.Score{
+			MaxCombo: beatmap.MaxCombo,
+			Count50: score.Count50,
+			Count100: score.Count100,
+			Count300: totalObjs-score.Count50-score.Count100,
+			Mods: score.Mods,
+		}, ppValues)
+		go osutools.PPCalc(beatmap, score.Score, ppValues)
 		for v := 0; v < 2; v++ {
 			ppValueArray[v] = <-ppValues
 		}
@@ -267,8 +272,13 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp "
 	} else { // If map was finished, but play was not a perfect combo
 		ppValues := make(chan string, 1)
-		accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
-		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", mods, ppValues)
+		go osutools.PPCalc(beatmap, osuapi.Score{
+			MaxCombo: beatmap.MaxCombo,
+			Count50: score.Count50,
+			Count100: score.Count100,
+			Count300: totalObjs-score.Count50-score.Count100,
+			Mods: score.Mods,
+		}, ppValues)
 		pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
 	}
 	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "

@@ -18,7 +18,7 @@ import (
 	"github.com/disintegration/imaging"
 
 	osuapi "../../osu-api"
-	osutools "../../osu-functions"
+	osutools "../../osu-tools"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
 )

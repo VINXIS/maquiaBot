@@ -13,7 +13,7 @@ import (
 
 	config "../../config"
 	osuapi "../../osu-api"
-	osutools "../../osu-functions"
+	osutools "../../osu-tools"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -162,9 +162,14 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	ppValues := make(chan string, 2)
 	var ppValueArray [2]string
 	totalObjs := replay.Beatmap.Circles + replay.Beatmap.Sliders + replay.Beatmap.Spinners
-	accCalcNoMiss := (50.0*float64(replay.Score.Count50) + 100.0*float64(replay.Score.Count100) + 300.0*float64(totalObjs-replay.Score.Count50-replay.Score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
-	go osutools.PPCalc(replay.Beatmap, accCalcNoMiss, "", "", mods, ppValues)
-	go osutools.PPCalc(replay.Beatmap, accCalc, strconv.Itoa(replay.Score.MaxCombo), strconv.Itoa(replay.Score.CountMiss), mods, ppValues)
+	go osutools.PPCalc(replay.Beatmap, osuapi.Score{
+		MaxCombo: replay.Beatmap.MaxCombo,
+		Count50:  replay.Score.Count50,
+		Count100: replay.Score.Count100,
+		Count300: totalObjs - replay.Score.Count50 - replay.Score.Count100,
+		Mods:     replay.Score.Mods,
+	}, ppValues)
+	go osutools.PPCalc(replay.Beatmap, replay.Score, ppValues)
 	for v := 0; v < 2; v++ {
 		ppValueArray[v] = <-ppValues
 	}

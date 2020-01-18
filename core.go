@@ -17,7 +17,7 @@ import (
 	gencommands "./handlers/general-commands"
 	osucommands "./handlers/osu-commands"
 	osuapi "./osu-api"
-	osutools "./osu-functions"
+	osutools "./osu-tools"
 	structs "./structs"
 	tools "./tools"
 

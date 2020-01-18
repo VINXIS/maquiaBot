@@ -12,7 +12,7 @@ import (
 
 	config "../../config"
 	osuapi "../../osu-api"
-	osutools "../../osu-functions"
+	osutools "../../osu-tools"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -163,7 +163,6 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 	if strings.Contains(mods, "DTNC") {
 		mods = strings.Replace(mods, "DTNC", "NC", 1)
 	}
-	scoreMods := mods
 	mods = " **+" + mods + "** "
 
 	var combo string
@@ -208,8 +207,13 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		pp = "**" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp**/" + strconv.FormatFloat(score.PP, 'f', 0, 64) + "pp "
 	} else { // If play wasn't a perfect combo
 		ppValues := make(chan string, 1)
-		accCalcNoMiss := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(totalObjs-score.Count50-score.Count100)) / (300.0 * float64(totalObjs)) * 100.0
-		go osutools.PPCalc(beatmap, accCalcNoMiss, "", "", scoreMods, ppValues)
+		go osutools.PPCalc(beatmap, osuapi.Score{
+			MaxCombo: beatmap.MaxCombo,
+			Count50:  score.Count50,
+			Count100: score.Count100,
+			Count300: totalObjs - score.Count50 - score.Count100,
+			Mods:     score.Mods,
+		}, ppValues)
 		pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
 	}
 	acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "

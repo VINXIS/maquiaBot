@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	osuapi "../../osu-api"
-	osutools "../../osu-functions"
+	osutools "../../osu-tools"
 	structs "../../structs"
 	"github.com/bwmarrin/discordgo"
 )
@@ -381,7 +381,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	}
 
 	ppValues := make(chan string, 1)
-	go osutools.PPCalc(beatmap, accCalc, strconv.Itoa(score.MaxCombo), strconv.Itoa(score.CountMiss), modText, ppValues)
+	go osutools.PPCalc(beatmap, score, ppValues)
 	ppVal, _ := strconv.ParseFloat(<-ppValues, 64)
 	if beatmap.Approved == osuapi.StatusLoved {
 		text += "LOVED | "

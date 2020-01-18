@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	osutools "../../osu-functions"
+	osutools "../../osu-tools"
 	structs "../../structs"
 	tools "../../tools"
 	"github.com/bwmarrin/discordgo"

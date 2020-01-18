@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	osuapi "../../osu-api"
-	osutools "../../osu-functions"
+	osutools "../../osu-tools"
 	tools "../../tools"
 	osucommands "../osu-commands"
 	"github.com/bwmarrin/discordgo"
