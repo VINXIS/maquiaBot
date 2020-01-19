@@ -31,18 +31,6 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 		if len(beatmaps) > 0 {
 			beatmap = beatmaps[0]
 		}
-
-		// Download the .osu file for the map
-		tools.DownloadFile(
-			"./data/osuFiles/"+
-				strconv.Itoa(beatmap.BeatmapID)+
-				" "+
-				replacer.ReplaceAllString(beatmap.Artist, "")+
-				" - "+
-				replacer.ReplaceAllString(beatmap.Title, "")+
-				".osu",
-			"https://osu.ppy.sh/osu/"+
-				strconv.Itoa(beatmap.BeatmapID))
 	} else if format == "set" {
 		// Fetch the beatmap
 		beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
@@ -57,19 +45,6 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 			return beatmaps[i].DifficultyRating > beatmaps[j].DifficultyRating
 		})
 
-		// Download the .osu files for the set
-		for _, diff := range beatmaps {
-			tools.DownloadFile(
-				"./data/osuFiles/"+
-					strconv.Itoa(diff.BeatmapID)+
-					" "+
-					replacer.ReplaceAllString(diff.Artist, "")+
-					" - "+
-					replacer.ReplaceAllString(diff.Title, "")+
-					".osu",
-				"https://osu.ppy.sh/osu/"+
-					strconv.Itoa(diff.BeatmapID))
-		}
 		if len(beatmaps) > 0 {
 			beatmap = beatmaps[0]
 		}
@@ -92,7 +67,7 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 	}
 
 	// DT / HT scaling
-	clock := float64(1)
+	clock := 1.0
 	if scaleMods&osuapi.ModDoubleTime != 0 {
 		clock = 1.5
 	} else if scaleMods&osuapi.ModHalfTime != 0 {

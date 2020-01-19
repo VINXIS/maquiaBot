@@ -8,8 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"math"
-	"os"
-	"regexp"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -292,8 +291,16 @@ func (r *ReplayData) GetUnstableRate() float64 {
 	window50 := 199.5 - r.Beatmap.OverallDifficulty*10.0
 
 	// Get map
-	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
-	beatmap, err := parser.ParseFile("./data/osuFiles/" + strconv.Itoa(r.Beatmap.BeatmapID) + " " + replacer.ReplaceAllString(r.Beatmap.Artist, "") + " - " + replacer.ReplaceAllString(r.Beatmap.Title, "") + ".osu")
+	resp, err := http.Get("https://osu.ppy.sh/osu/" + strconv.Itoa(r.Beatmap.BeatmapID))
+	if err != nil {
+		return 0
+	}
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0
+	}
+	beatmap, err := parser.ParseBytes(b)
 	if err != nil {
 		return 0
 	}
@@ -452,19 +459,21 @@ func (r *ReplayData) CreateOSR() (result []byte) {
 	binary.LittleEndian.PutUint32(version, 0)
 
 	// Beatmap Hash
-	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
-	f, _ := os.Open("./data/osuFiles/" + strconv.Itoa(r.Beatmap.BeatmapID) + " " + replacer.ReplaceAllString(r.Beatmap.Artist, "") + " - " + replacer.ReplaceAllString(r.Beatmap.Title, "") + ".osu")
-	h := md5.New()
-	io.Copy(h, f)
-	mapBytes := []byte(hex.EncodeToString(h.Sum(nil)))
-	lenMap := ulebEncode(len(mapBytes))
-	if len(mapBytes) == 0 {
-		mapHash = []byte{0}
-	} else {
-		mapHash = []byte{11}
-		mapHash = append(mapHash, lenMap...)
-		mapHash = append(mapHash, mapBytes...)
+	resp, err := http.Get("https://osu.ppy.sh/osu/" + strconv.Itoa(r.Beatmap.BeatmapID))
+	if err == nil {
+		h := md5.New()
+		io.Copy(h, resp.Body)
+		mapBytes := []byte(hex.EncodeToString(h.Sum(nil)))
+		lenMap := ulebEncode(len(mapBytes))
+		if len(mapBytes) == 0 {
+			mapHash = []byte{0}
+		} else {
+			mapHash = []byte{11}
+			mapHash = append(mapHash, lenMap...)
+			mapHash = append(mapHash, mapBytes...)
+		}
 	}
+	resp.Body.Close()
 
 	// Username
 	userBytes := []byte(r.Player.Username)

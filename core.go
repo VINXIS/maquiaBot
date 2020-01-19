@@ -46,10 +46,6 @@ func main() {
 		tools.ErrRead(err)
 		log.Println("Created data/channelData directory.")
 
-		err = os.MkdirAll("./data/osuFiles", 0755)
-		tools.ErrRead(err)
-		log.Println("Created data/osuFiles directory.")
-
 		err = os.MkdirAll("./data/osuData", 0755)
 		tools.ErrRead(err)
 		log.Println("Created data/osuData directory.")
