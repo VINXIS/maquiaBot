@@ -73,7 +73,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 						}
 
 						// Assign values
-						accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
+						accCalc := 100.0 * float64(score.Count50+2*score.Count100+6*score.Count300) / float64(6*(score.CountMiss+score.Count50+score.Count100+score.Count300))
 						Color := ModeColour(osuapi.ModeOsu)
 						sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64)
 						if beatmap.Mode == osuapi.ModeOsu {

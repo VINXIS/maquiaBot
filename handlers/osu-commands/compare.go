@@ -264,7 +264,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 
 		// Assign values
 		mods = score.Mods.String()
-		accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
+		accCalc := 100.0 * float64(score.Count50+2*score.Count100+6*score.Count300) / float64(6*(score.CountMiss+score.Count50+score.Count100+score.Count300))
 		scorePrint := " **" + tools.Comma(score.Score.Score) + "** "
 		acc := "** " + strconv.FormatFloat(accCalc, 'f', 2, 64) + "%** "
 		hits := "**Hits:** [" + strconv.Itoa(score.Count300) + "/" + strconv.Itoa(score.Count100) + "/" + strconv.Itoa(score.Count50) + "/" + strconv.Itoa(score.CountMiss) + "]"

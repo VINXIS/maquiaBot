@@ -80,7 +80,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 
 	// Assign values
 	mods := replay.Score.Mods.String()
-	accCalc := (50.0*float64(replay.Score.Count50) + 100.0*float64(replay.Score.Count100) + 300.0*float64(replay.Score.Count300)) / (300.0 * float64(replay.Score.CountMiss+replay.Score.Count50+replay.Score.Count100+replay.Score.Count300)) * 100.0
+	accCalc := 100.0 * float64(replay.Score.Count50+2*replay.Score.Count100+6*replay.Score.Count300) / float64(6*(replay.Score.CountMiss+replay.Score.Count50+replay.Score.Count100+replay.Score.Count300))
 	Color := osutools.ModeColour(replay.Beatmap.Mode)
 	sr := "**SR:** " + strconv.FormatFloat(replay.Beatmap.DifficultyRating, 'f', 2, 64)
 	if replay.Beatmap.Mode == osuapi.ModeOsu {

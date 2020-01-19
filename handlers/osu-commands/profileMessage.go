@@ -187,7 +187,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			if strings.Contains(mods, "DTNC") {
 				mods = strings.Replace(mods, "DTNC", "NC", -1)
 			}
-			accCalc := (50.0*float64(score.Count50) + 100.0*float64(score.Count100) + 300.0*float64(score.Count300)) / (300.0 * float64(score.CountMiss+score.Count50+score.Count100+score.Count300)) * 100.0
+			accCalc := 100.0 * float64(score.Count50+2*score.Count100+6*score.Count300) / float64(6*(score.CountMiss+score.Count50+score.Count100+score.Count300))
 			var combo string
 			if score.MaxCombo == beatmap.MaxCombo {
 				if accCalc == 100.0 {
