@@ -2,18 +2,14 @@ package osutools
 
 import (
 	"math"
-	"regexp"
 	"sort"
 	"strconv"
 
 	osuapi "../osu-api"
-	tools "../tools"
 )
 
 // BeatmapParse parses beatmap and obtains the .osu file
 func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap) {
-	replacer, _ := regexp.Compile(`[^a-zA-Z0-9\s\(\)]`)
-
 	mapID, err := strconv.Atoi(id)
 	if err != nil {
 		return beatmap
