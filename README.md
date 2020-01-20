@@ -3,7 +3,7 @@ Discord bot that does a bunch of osu! stuff PROPERLY (sooner or later)
 
 ## Installation
  1. [Install golang](https://golang.org/doc/install) and [Tesseract](https://github.com/UB-Mannheim/tesseract/wiki). Ideally you have Go version 1.13 or newer. 
- 2. Clone the repository using `git clone https://github.com/VINXIS/Twitter-Discord-Feed.git` to wherever you want.
+ 2. Clone the repository using `git clone https://github.com/VINXIS/maquiaBot.git` to wherever you want.
  3. Go to the folder and open a console. Install the dependencies with `go get`.
  4. Go to the config folder and duplicate `config.example.json`. Name the duplicate `config.json` and fill in the twitter API credentials, and discord information
 	 1. You can obtain twitter API credentials [here](https://developer.twitter.com/en/docs).
