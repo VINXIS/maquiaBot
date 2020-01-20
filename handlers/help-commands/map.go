@@ -7,7 +7,7 @@ import (
 // Map explains the map functionality
 func Map(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: m / map"
-	embed.Description = "`(m|map|<beatmap link>) [-m <mods>] [-acc <accuracy>] [-c <combo>] [-x <misses>]` lets you obtain beatmap information."
+	embed.Description = "`(m|map|<beatmap link>) [-m <mods>] [-acc <accuracy>] [-c <combo>] [-x <misses>] [-s <score>]` lets you obtain beatmap information."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<beatmap link>",
@@ -32,6 +32,11 @@ func Map(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		&discordgo.MessageEmbedField{
 			Name:   "[-x <misses>]",
 			Value:  "The miss count to get pp information for (Default: 0).",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:   "[-s <score>]",
+			Value:  "The score to get the pp value for. Not for use alongside `-acc`. **osu!mania ONLY!**",
 			Inline: true,
 		},
 	}

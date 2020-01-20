@@ -21,6 +21,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	comboRegex, _ := regexp.Compile(`-c\s*(\S+)`)
 	missRegex, _ := regexp.Compile(`-x\s*(\S+)`)
 	mapRegex, _ := regexp.Compile(`[^-]m`)
+	scoreRegex, _ := regexp.Compile(`-s\s*(\S+)`)
 
 	// See if map was linked or if the map command was used
 	var submatches []string
@@ -170,9 +171,18 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		}
 	}
 
+	// Get score value (only for osu!mania)
+	if beatmap.Mode == osuapi.ModeOsuMania && scoreRegex.MatchString(m.Content) && accVal == "" {
+		accVal = scoreRegex.FindStringSubmatch(m.Content)[1]
+		_, err = strconv.ParseInt(accVal, 10, 64)
+		if err != nil {
+			accVal = ""
+		}
+	}
+
 	// Calculate SR and PP
 	values := osutools.BeatmapCalc(mods, accVal, comboVal, missVal, beatmap)
-	ppText := "Catch the Beat calc does not work currently!"
+	ppText := ""
 	if len(values) == 1 {
 		ppText = values[0]
 	} else if len(values) != 0 {

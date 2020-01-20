@@ -236,7 +236,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 
 	// Calculate PP
 	values := osutools.BeatmapCalc("NM", "", "", "", beatmap)
-	ppText := "Catch the Beat calc does not work currently!"
+	ppText := ""
 	if len(values) != 0 {
 		ppText = values[0] + values[1] + values[2] + values[3] + values[4]
 	}

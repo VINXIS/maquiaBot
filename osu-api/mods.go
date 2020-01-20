@@ -15,7 +15,7 @@ const (
 	ModFlashlight
 	ModAutoplay
 	ModSpunOut
-	ModRelax2
+	ModAutopilot
 	ModPerfect
 	ModKey4
 	ModKey5
@@ -24,14 +24,17 @@ const (
 	ModKey8
 	ModFadeIn
 	ModRandom
-	ModLastMod
+	ModCinema
+	ModTarget
 	ModKey9
-	ModKey10
+	ModKeyCoop
 	ModKey1
 	ModKey3
 	ModKey2
-	ModFreeModAllowed = ModNoFail | ModEasy | ModHidden | ModHardRock | ModSuddenDeath | ModFlashlight | ModFadeIn | ModRelax | ModRelax2 | ModSpunOut | ModKeyMod
-	ModKeyMod         = ModKey4 | ModKey5 | ModKey6 | ModKey7 | ModKey8
+	ModScoreV2
+	ModFreeModAllowed    = ModNoFail | ModEasy | ModHidden | ModHardRock | ModSuddenDeath | ModFlashlight | ModFadeIn | ModRelax | ModAutopilot | ModSpunOut | ModKeyMod
+	ModKeyMod            = ModKey1 | ModKey2 | ModKey3 | ModKey4 | ModKey5 | ModKey6 | ModKey7 | ModKey8 | ModKey9 | ModKeyCoop
+	ModScoreIncreaseMods = ModHidden | ModHardRock | ModDoubleTime | ModNightcore | ModFlashlight | ModFadeIn
 )
 
 // Mods is a bitwise enum of mods used in a score.
@@ -72,14 +75,16 @@ var modsString = [...]string{
 	"K6",
 	"K7",
 	"K8",
+	"FI",
+	"RN",
+	"CN",
+	"TR",
 	"K9",
-	"RN", // Random
-	"LM", // LastMod. Cinema?
-	"K9",
-	"K0",
+	"KC",
 	"K1",
 	"K3",
 	"K2",
+	"V2",
 }
 
 // ParseMods parse a string with mods in the format "HDHRDT"
