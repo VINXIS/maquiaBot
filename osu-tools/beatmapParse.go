@@ -74,9 +74,9 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 	beatmap.TotalLength = int(float64(beatmap.TotalLength) / clock)
 	beatmap.HitLength = int(float64(beatmap.HitLength) / clock)
 	ARMS := diffRange(beatmap.ApproachRate) / clock
-	ODScale := (80.0 - 6.0*beatmap.OverallDifficulty) / clock
+	hitWindowGreat := float64(int(80.0-6.0*beatmap.OverallDifficulty)) / clock
 	HPMS := diffRange(beatmap.HPDrain) / clock
-	beatmap.OverallDifficulty = (80.0 - ODScale) / 6.0
+	beatmap.OverallDifficulty = (80.0 - hitWindowGreat) / 6.0
 	beatmap.ApproachRate = diffValue(ARMS)
 	beatmap.HPDrain = diffValue(HPMS)
 
@@ -84,12 +84,13 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 }
 
 func diffRange(value float64) float64 {
+	val := 1200.0
 	if value > 5.0 {
-		return 1200 + (450-1200)*(value-5)/5
+		val = 1200 + (450-1200)*(value-5)/5
 	} else if value < 5.0 {
-		return 1200 - (1200-1800)*(5-value)/5
+		val = 1200 - (1200-1800)*(5-value)/5
 	}
-	return 1200
+	return float64(int(val))
 }
 
 func diffValue(value float64) float64 {
