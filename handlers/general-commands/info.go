@@ -187,7 +187,30 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Get role
 	if !roleRegex.MatchString(m.Content) {
-		s.ChannelMessageSend(m.ChannelID, "No role name given!")
+		serverData := tools.GetServer(*server)
+		embed := &discordgo.MessageEmbed{
+			Author: &discordgo.MessageEmbedAuthor{
+				Name:    server.Name,
+				IconURL: serverImg,
+			},
+		}
+
+		if len(serverData.RoleAutomation) == 0 {
+			s.ChannelMessageSend(m.ChannelID, "There is no role automation configured for this server currently! Admins can see `help roleautomation` for details on how to add role automation.")
+			return
+		}
+
+		for _, roleAuto := range serverData.RoleAutomation {
+			var roleNames string
+			for _, role := range roleAuto.Roles {
+				roleNames += role.Name + ", "
+			}
+			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+				Name:  strconv.Itoa(roleAuto.ID),
+				Value: "Trigger: " + roleAuto.Text + "\nRoles: " + roleNames,
+			})
+		}
+		s.ChannelMessageSendEmbed(m.ChannelID, embed)
 		return
 	}
 
@@ -225,7 +248,7 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Created at date
 	createdAt, _ := discordgo.SnowflakeTimestamp(role.ID)
 
-	_, err = s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+	s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 		Color: role.Color,
 		Author: &discordgo.MessageEmbedAuthor{
 			Name:    role.Name,

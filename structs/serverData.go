@@ -27,6 +27,14 @@ type ServerData struct {
 	AllowAnyoneStats bool
 	Quotes           []discordgo.Message
 	Genital          GenitalRecordData
+	RoleAutomation   []Role
+}
+
+// Role holds information for role automation
+type Role struct {
+	ID    int
+	Text  string
+	Roles []discordgo.Role
 }
 
 // NewServer creates a new ServerData

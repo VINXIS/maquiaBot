@@ -115,6 +115,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
+	// Role checks
+	for _, roleAuto := range serverData.RoleAutomation {
+		if strings.Contains(m.Content, roleAuto.Text) {
+			for _, role := range roleAuto.Roles {
+				s.GuildMemberRoleAdd(m.GuildID, m.Author.ID, role.ID)
+			}
+		}
+	}
+
 	// Command checks
 	if strings.HasPrefix(m.Content, "maquiaprefix") {
 		go admincommands.Prefix(s, m)
@@ -173,6 +182,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go admincommands.Prefix(s, m)
 		case serverPrefix + "purge":
 			go admincommands.Purge(s, m)
+		case serverPrefix + "rolea", serverPrefix + "roleauto", serverPrefix + "roleautomation":
+			go admincommands.RoleAutomation(s, m)
 		case serverPrefix + "toggle":
 			go admincommands.Toggle(s, m)
 		case serverPrefix + "tr", serverPrefix + "track":

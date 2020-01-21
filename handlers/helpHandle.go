@@ -27,6 +27,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 				Name: "Admin commands:",
 				Value: "`(prefix|maquiaprefix|newprefix)`, " +
 					"`purge`, " +
+					"`(rolea|roleauto|roleautomation)`, " +
 					"`toggle`, " +
 					"`(tr|track)`, " +
 					"`(tt|trackt|ttoggle|tracktoggle)`",
@@ -132,6 +133,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Prefix(embed)
 		case "purge":
 			embed = helpcommands.Purge(embed)
+		case "rolea", "roleauto", "roleautomation":
+			embed = helpcommands.RoleAutomation(embed)
 		case "toggle":
 			embed = helpcommands.Toggle(embed)
 		case "tr", "track":

@@ -24,11 +24,11 @@ func Info(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // RoleInfo explains the role info functionality
 func RoleInfo(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: rinfo / roleinfo"
-	embed.Description = "`(rinfo|roleinfo) <rolename>` gets the information for a role."
+	embed.Description = "`(rinfo|roleinfo) [rolename]` gets the information for a role / the server's role automations"
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
-			Name:  "<rolename>",
-			Value: "The role to get the information for.",
+			Name:  "[rolename]",
+			Value: "The role to get the information for. No role will list the server's role automations instead.",
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",
