@@ -30,7 +30,7 @@ func Quote(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // QuoteAdd explains the quoteadd functionality
 func QuoteAdd(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: qa / qadd / quotea / quoteadd"
-	embed.Description = "`(qa|qadd|quotea|quoteadd) [username] [-r]` adds a quote to the user."
+	embed.Description = "`(qa|qadd|quotea|quoteadd) ([username] [-r]|[message ID/link] [message ID/link]...|[messageID/link] [num])` adds a quote to the user."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[username]",
@@ -40,6 +40,16 @@ func QuoteAdd(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		&discordgo.MessageEmbedField{
 			Name:   "[-r]",
 			Value:  "Randomly choose one of the past 100 messages instead of the latest.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:   "[message ID/link] [message ID/link]...",
+			Value:  "Allows you to merge the message text of 2 or more messages into 1 quote.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
+			Name:   "[messageID/link] [num]",
+			Value:  "Allows you to merge the message text of the message ID given alongside the num amount of messages after, or until another person's message appears after. No num will simply quote the given message ID/link",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{

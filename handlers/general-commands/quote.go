@@ -143,7 +143,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // QuoteAdd lets you add quotes
 func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
-	quoteAddRegex, _ := regexp.Compile(`q(uote)?a(dd)?\s+(.+)`)
+	quoteAddRegex, _ := regexp.Compile(`q(uote)?a(dd)?\s*(.+)`)
 	randomRegex, _ := regexp.Compile(`-r`)
 	channelRegex, _ := regexp.Compile(`https://discordapp.com/channels\/(\d+)\/(\d+)\/(\d+)`)
 
@@ -163,43 +163,129 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "Ur really funny mate")
 		return
 	}
-	if channelRegex.MatchString(m.Content) {
+	if channelRegex.MatchString(m.Content) { // If the message has one or more message links
+		// Check server ID
 		if channelRegex.FindStringSubmatch(m.Content)[1] != server.ID {
 			s.ChannelMessageSend(m.ChannelID, "Please do not quote from other servers!")
 			return
 		}
-		message, _ = s.ChannelMessage(channelRegex.FindStringSubmatch(m.Content)[2], channelRegex.FindStringSubmatch(m.Content)[3])
-	} else if quoteAddRegex.MatchString(m.Content) {
-		username = quoteAddRegex.FindStringSubmatch(m.Content)[3]
-		message, err = s.ChannelMessage(m.ChannelID, username)
-		if err != nil {
-			random := false
-			if randomRegex.MatchString(m.Content) {
-				random = true
-				username = strings.TrimSpace(strings.Replace(username, "-r", "", -1))
-			}
-			if random {
-				msgList := []*discordgo.Message{}
-				if username != "" {
-					for _, msg := range msgs {
-						if strings.HasPrefix(strings.ToLower(msg.Author.Username), username) || (msg.Member != nil && strings.HasPrefix(strings.ToLower(msg.Member.Nick), username)) {
-							msgList = append(msgList, msg)
-						}
+
+		text := quoteAddRegex.FindStringSubmatch(m.Content)[3]
+		IDs := strings.Split(text, " ")
+		if len(IDs) > 1 {
+			for i, ID := range IDs {
+				if channelRegex.MatchString(ID) {
+					msg, _ := s.ChannelMessage(channelRegex.FindStringSubmatch(ID)[2], channelRegex.FindStringSubmatch(ID)[3])
+					if message.ID == "" {
+						message = msg
+					} else {
+						message.Content += "\n" + msg.Content
 					}
+				} else if msg, err := s.ChannelMessage(m.ChannelID, ID); err == nil {
+					if message.ID == "" {
+						message = msg
+					} else {
+						message.Content += "\n" + msg.Content
+					}
+				} else if n, err := strconv.Atoi(ID); err == nil && i != 0 {
+					// Get messages
+					if channelRegex.MatchString(IDs[i-1]) {
+						message, _ = s.ChannelMessage(channelRegex.FindStringSubmatch(IDs[i-1])[2], channelRegex.FindStringSubmatch(IDs[i-1])[3])
+						msgs, _ = s.ChannelMessages(channelRegex.FindStringSubmatch(IDs[i-1])[2], -1, "", channelRegex.FindStringSubmatch(IDs[i-1])[3], "")
+					} else {
+						message, _ = s.ChannelMessage(m.ChannelID, IDs[i-1])
+						msgs, _ = s.ChannelMessages(m.ChannelID, -1, "", IDs[i-1], "")
+					}
+					sort.Slice(msgs, func(i, j int) bool {
+						msg1Time, _ := msgs[i].Timestamp.Parse()
+						msg2Time, _ := msgs[j].Timestamp.Parse()
+						return msg1Time.Before(msg2Time)
+					})
+
+					for i, msg := range msgs {
+						if msg.Author.ID != message.Author.ID || i >= n {
+							break
+						}
+
+						message.Content += "\n" + msg.Content
+					}
+					break
 				} else {
-					msgList = msgs
-				}
-				if len(msgList) == 0 {
-					s.ChannelMessageSend(m.ChannelID, "No message found for the user **"+username+"** to randomly choose from!")
+					s.ChannelMessageSend(m.ChannelID, ID+" is an invalid message ID / number!")
 					return
 				}
-				roll, _ := rand.Int(rand.Reader, big.NewInt(int64(len(msgList))))
-				message = msgList[roll.Int64()]
-			} else {
-				for _, msg := range msgs {
-					if strings.HasPrefix(strings.ToLower(msg.Author.Username), username) || (msg.Member != nil && strings.HasPrefix(strings.ToLower(msg.Member.Nick), username)) {
-						message = msg
+			}
+		} else {
+			message, _ = s.ChannelMessage(channelRegex.FindStringSubmatch(m.Content)[2], channelRegex.FindStringSubmatch(m.Content)[3])
+		}
+	} else if quoteAddRegex.MatchString(m.Content) { // If the message has only the message ID, or a username
+		username = quoteAddRegex.FindStringSubmatch(m.Content)[3]
+		message, err = s.ChannelMessage(m.ChannelID, username)
+		if err != nil { // text was not a message
+			// test if its a series of messages
+			message = &discordgo.Message{}
+			text := quoteAddRegex.FindStringSubmatch(m.Content)[3]
+			IDs := strings.Split(text, " ")
+			if len(IDs) > 1 {
+				for i, ID := range IDs {
+					if msg, err := s.ChannelMessage(m.ChannelID, ID); err == nil {
+						if message.ID == "" {
+							message = msg
+						} else {
+							message.Content += "\n" + msg.Content
+						}
+					} else if n, err := strconv.Atoi(ID); err == nil && i != 0 {
+						// Get messages
+						message, _ = s.ChannelMessage(m.ChannelID, IDs[i-1])
+						msgs, _ := s.ChannelMessages(m.ChannelID, -1, "", IDs[i-1], "")
+						sort.Slice(msgs, func(i, j int) bool {
+							msg1Time, _ := msgs[i].Timestamp.Parse()
+							msg2Time, _ := msgs[j].Timestamp.Parse()
+							return msg1Time.Before(msg2Time)
+						})
+
+						for i, msg := range msgs {
+							if msg.Author.ID != message.Author.ID || i >= n {
+								break
+							}
+
+							message.Content += "\n" + msg.Content
+						}
 						break
+					} else {
+						s.ChannelMessageSend(m.ChannelID, ID+" is an invalid message ID / number!")
+						return
+					}
+				}
+			} else { // not a series of messages
+				random := false
+				if randomRegex.MatchString(m.Content) {
+					random = true
+					username = strings.TrimSpace(strings.Replace(username, "-r", "", -1))
+				}
+				if random {
+					msgList := []*discordgo.Message{}
+					if username != "" {
+						for _, msg := range msgs {
+							if strings.HasPrefix(strings.ToLower(msg.Author.Username), username) || (msg.Member != nil && strings.HasPrefix(strings.ToLower(msg.Member.Nick), username)) {
+								msgList = append(msgList, msg)
+							}
+						}
+					} else {
+						msgList = msgs
+					}
+					if len(msgList) == 0 {
+						s.ChannelMessageSend(m.ChannelID, "No message found for the user **"+username+"** to randomly choose from!")
+						return
+					}
+					roll, _ := rand.Int(rand.Reader, big.NewInt(int64(len(msgList))))
+					message = msgList[roll.Int64()]
+				} else {
+					for _, msg := range msgs {
+						if strings.HasPrefix(strings.ToLower(msg.Author.Username), username) || (msg.Member != nil && strings.HasPrefix(strings.ToLower(msg.Member.Nick), username)) {
+							message = msg
+							break
+						}
 					}
 				}
 			}
