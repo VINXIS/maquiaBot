@@ -30,7 +30,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	serverData := tools.GetServer(*server)
 	if len(serverData.Quotes) == 0 {
-		s.ChannelMessageSend(m.ChannelID, "No quotes saved for this server! Please use `quoteadd` to add a quote!")
+		s.ChannelMessageSend(m.ChannelID, "No quotes saved for this server! Please see `help quoteadd` to see how to add quotes!")
 		return
 	}
 
@@ -74,7 +74,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 		if len(userQuotes) == 0 {
-			s.ChannelMessageSend(m.ChannelID, "No quotes saved for **"+user.Username+"**! Please use `quoteadd` to add a quote!")
+			s.ChannelMessageSend(m.ChannelID, "No quotes saved for **"+user.Username+"**! Please see `help quoteadd` to see how to add quotes!")
 			return
 		}
 	}
