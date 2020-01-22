@@ -1,6 +1,7 @@
 package gencommands
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -31,19 +32,20 @@ func Triggers(s *discordgo.Session, m *discordgo.MessageCreate) {
 		},
 	}
 
-	if len(serverData.RoleAutomation) == 0 {
-		s.ChannelMessageSend(m.ChannelID, "There is no role automation configured for this server currently! Admins can see `help roleautomation` for details on how to add role automation.")
+	if len(serverData.Triggers) == 0 {
+		s.ChannelMessageSend(m.ChannelID, "There are no triggers configuered for this server currently! Admins can see `help trigger` for details on how to add triggers.")
 		return
 	}
 
-	for _, roleAuto := range serverData.RoleAutomation {
-		var roleNames string
-		for _, role := range roleAuto.Roles {
-			roleNames += role.Name + ", "
+	for _, trigger := range serverData.Triggers {
+		regex := false
+		_, err := regexp.Compile(trigger.Cause)
+		if err == nil {
+			regex = true
 		}
 		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-			Name:  strconv.Itoa(roleAuto.ID),
-			Value: "Trigger: " + roleAuto.Text + "\nRoles: " + strings.TrimSuffix(roleNames, ", "),
+			Name:  strconv.Itoa(trigger.ID),
+			Value: "Trigger: " + trigger.Cause + "\nResult: " + trigger.Result+"\nRegex compatible: " + strconv.FormatBool(regex),
 		})
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
