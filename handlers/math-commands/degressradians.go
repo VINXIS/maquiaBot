@@ -24,7 +24,7 @@ func DegreesRadians(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	val *= math.Pi / 180.0
 
-	s.ChannelMessageSend(m.ChannelID, strconv.FormatFloat(val, 'f', 2, 64))
+	s.ChannelMessageSend(m.ChannelID, strconv.FormatFloat(val, 'f', 6, 64))
 }
 
 // RadiansDegrees converts from rad to deg
@@ -43,5 +43,5 @@ func RadiansDegrees(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	val *= 180.0 / math.Pi
 
-	s.ChannelMessageSend(m.ChannelID, strconv.FormatFloat(val, 'f', 2, 64))
+	s.ChannelMessageSend(m.ChannelID, strconv.FormatFloat(val, 'f', 6, 64))
 }
