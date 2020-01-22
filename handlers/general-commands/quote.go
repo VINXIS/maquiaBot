@@ -119,9 +119,10 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 			link = linkRegex.FindStringSubmatch(quote.Content)[0]
 			res := extensionRegex.FindAllStringSubmatch(quote.Content, -1)
 			name = "video." + res[len(res)-1][0]
-		}
-		embed.Image = &discordgo.MessageEmbedImage{
-			URL: linkRegex.FindStringSubmatch(quote.Content)[0],
+		} else {
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: linkRegex.FindStringSubmatch(quote.Content)[0],
+			}
 		}
 	}
 	if link != "" {
