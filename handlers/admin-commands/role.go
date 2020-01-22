@@ -141,7 +141,7 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 			roleData = serverData.RoleAutomation[i]
 			break
 		}
-		if i == roleData.ID {
+		if roleAuto.ID == roleData.ID {
 			roleData.ID++
 		}
 	}

@@ -119,7 +119,8 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 			s.ChannelMessageSend(m.ChannelID, "This trigger already exists!")
 			return
 		}
-		if i == triggerData.ID {
+
+		if trigger.ID == triggerData.ID {
 			triggerData.ID++
 		} 
 	}
