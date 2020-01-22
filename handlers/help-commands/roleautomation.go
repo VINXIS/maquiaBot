@@ -21,6 +21,10 @@ func RoleAutomation(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Name:  "Related Commands:",
 			Value: "`roleinfo`, `serverinfo`",
 		},
+		&discordgo.MessageEmbedField{
+			Name:  "Related Commands:",
+			Value: "`roleinfo`",
+		},
 	}
 	return embed
 }
