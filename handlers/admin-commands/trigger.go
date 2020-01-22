@@ -55,7 +55,7 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 			err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
 			tools.ErrRead(err)
-			s.ChannelMessageSend(m.ChannelID, "Removed role automation ID: "+text)
+			s.ChannelMessageSend(m.ChannelID, "Removed trigger ID: "+text)
 		} else {
 			s.ChannelMessageSend(m.ChannelID, text+" is an invalid ID!")
 		}
