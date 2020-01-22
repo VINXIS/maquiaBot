@@ -7,7 +7,7 @@ import (
 // DistanceDirection explains the distance / direction functionality
 func DistanceDirection(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: d / dist / distance / dir / direction"
-	embed.Description = "`[math] (d|dist|distance|ir|direction) <vector1> <vector2>` will gives the distance between the 2 vectors and the direction of the distance vector."
+	embed.Description = "`[math] (d|dist|distance|ir|direction) <vector1> <vector2>` will give the distance between the 2 vectors and the direction of the distance vector."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<vector1> <vector2>",

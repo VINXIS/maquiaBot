@@ -14,6 +14,10 @@ func MathHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string)
 			go mathcommands.Average(s, m)
 		case "d", "dist", "distance", "dir", "direction":
 			go mathcommands.DistanceDirection(s, m)
+		case "dr", "degrad", "degreesradians":
+			go mathcommands.DegreesRadians(s, m)
+		case "rd", "raddeg", "radiansdegrees":
+			go mathcommands.RadiansDegrees(s, m)
 		case "stddev", "standarddev", "stddeviation", "standarddeviation":
 			go mathcommands.StandardDeviation(s, m)
 		case "va", "vadd", "vectora", "vectoradd":
