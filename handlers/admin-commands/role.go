@@ -122,7 +122,7 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Check duplicate
 	found := false
-	for i, roleAuto := range serverData.RoleAutomation {
+	for _, roleAuto := range serverData.RoleAutomation {
 		if roleAuto.Text == roleData.Text {
 			found = true
 			for _, role := range roleData.Roles {
