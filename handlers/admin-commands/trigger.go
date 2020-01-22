@@ -114,7 +114,7 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 	triggerData.Result = strings.TrimSpace(triggerData.Result)
 
 	// Check duplicate and ID
-	for i, trigger := range serverData.Triggers {
+	for _, trigger := range serverData.Triggers {
 		if trigger.Cause == triggerData.Cause && trigger.Result == triggerData.Result {
 			s.ChannelMessageSend(m.ChannelID, "This trigger already exists!")
 			return
