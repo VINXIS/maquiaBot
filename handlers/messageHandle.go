@@ -311,6 +311,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go mathcommands.Average(s, m)
 		case serverPrefix + "d", serverPrefix + "dist", serverPrefix + "distance", serverPrefix + "dir", serverPrefix + "direction":
 			go mathcommands.DistanceDirection(s, m)
+		case serverPrefix + "dr", serverPrefix + "degrad", serverPrefix + "degreesradians":
+			go mathcommands.DegreesRadians(s, m)
+		case serverPrefix + "rd", serverPrefix + "raddeg", serverPrefix + "radiansdegrees":
+			go mathcommands.RadiansDegrees(s, m)
 		case serverPrefix + "stddev", serverPrefix + "standarddev", serverPrefix + "stddeviation", serverPrefix + "standarddeviation":
 			go mathcommands.StandardDeviation(s, m)
 		case serverPrefix + "va", serverPrefix + "vadd", serverPrefix + "vectora", serverPrefix + "vectoradd":

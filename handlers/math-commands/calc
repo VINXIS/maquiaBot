@@ -1,0 +1,54 @@
+package mathcommands
+
+import (
+	"regexp"
+
+	"github.com/bwmarrin/discordgo"
+)
+
+type bracket struct {
+}
+
+type operation int
+
+const (
+	add operation = iota
+	subtract
+	multiply
+	divide
+	exponent
+	log
+	factorial
+	sin
+	cos
+	tan
+	asin
+	acos
+	atan
+	sinh
+	cosh
+	tanh
+	mod
+	shiftL
+	shiftR
+	and
+	or
+	not
+	nand
+	nor
+	xor
+)
+
+// Calc lets you calculate an expression
+func Calc(s *discordgo.Session, m *discordgo.MessageCreate) {
+	mathRegex, _ := regexp.Compile(`calc\s+(.+)`)
+	if !mathRegex.MatchString(m.Content) {
+		s.ChannelMessageSend(m.ChannelID, "No expression given!")
+		return
+	}
+
+	expression := mathRegex.FindStringSubmatch(m.Content)[1]
+	for _, l := range expression {
+
+	}
+}
