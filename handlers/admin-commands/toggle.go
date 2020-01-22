@@ -34,32 +34,12 @@ func Toggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 		serverData.Announce = !serverData.Announce
 		flagged = true
 	}
-	if strings.Contains(m.Content, "-ch") || strings.Contains(m.Content, "-cheers") {
-		serverData.Cheers = !serverData.Cheers
-		flagged = true
-	}
-	if strings.Contains(m.Content, "-cr") || strings.Contains(m.Content, "-crab") {
-		serverData.Crab = !serverData.Crab
-		flagged = true
-	}
 	if strings.Contains(m.Content, "-d") || strings.Contains(m.Content, "-daily") {
 		serverData.Daily = !serverData.Daily
 		flagged = true
 	}
-	if strings.Contains(m.Content, "-i") || strings.Contains(m.Content, "-idea") {
-		serverData.NiceIdea = !serverData.NiceIdea
-		flagged = true
-	}
-	if strings.Contains(m.Content, "-l") || strings.Contains(m.Content, "-late") {
-		serverData.Late = !serverData.Late
-		flagged = true
-	}
 	if strings.Contains(m.Content, "-os") || strings.Contains(m.Content, "-osu") {
 		serverData.OsuToggle = !serverData.OsuToggle
-		flagged = true
-	}
-	if strings.Contains(m.Content, "-ov") || strings.Contains(m.Content, "-over") {
-		serverData.OverIt = !serverData.OverIt
 		flagged = true
 	}
 	if strings.Contains(m.Content, "-s") || strings.Contains(m.Content, "-stats") {

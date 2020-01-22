@@ -30,6 +30,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(rolea|roleauto|roleautomation)`, " +
 					"`toggle`, " +
 					"`(tr|track)`, " +
+					"`trigger`, " + 
 					"`(tt|trackt|ttoggle|tracktoggle)`",
 			},
 			&discordgo.MessageEmbedField{
@@ -74,6 +75,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(sinfo|serverinfo)`, " +
 					"`(skill|skills)`, " +
 					"`(stats|class)`, " +
+					"`triggers`, " + 
 					"`(twitch|twitchdl)`, " +
 					"`(twitter|twitterdl)`, " +
 					"`vagina`, " +
@@ -139,6 +141,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Toggle(embed)
 		case "tr", "track":
 			embed = helpcommands.Track(embed)
+		case "trigger":
+			embed = helpcommands.Trigger(embed)
 		case "tt", "trackt", "ttoggle", "tracktoggle":
 			embed = helpcommands.TrackToggle(embed)
 
@@ -223,6 +227,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Skills(embed)
 		case "stats", "class":
 			embed = helpcommands.Stats(embed)
+		case "triggers":
+			embed = helpcommands.Triggers(embed)
 		case "twitch", "twitchdl":
 			embed = helpcommands.Twitch(embed)
 		case "twitter", "twitterdl":

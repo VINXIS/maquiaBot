@@ -12,13 +12,8 @@ type ServerData struct {
 	Time             time.Time
 	Server           discordgo.Guild
 	Prefix           string
-	Crab             bool
-	Cheers           bool
 	Daily            bool
-	Late             bool
-	NiceIdea         bool
 	OsuToggle        bool
-	OverIt           bool
 	Vibe             bool
 	Announce         bool
 	Adjectives       []string
@@ -28,6 +23,7 @@ type ServerData struct {
 	Quotes           []discordgo.Message
 	Genital          GenitalRecordData
 	RoleAutomation   []Role
+	Triggers         []Trigger
 }
 
 // Role holds information for role automation
@@ -37,17 +33,19 @@ type Role struct {
 	Roles []discordgo.Role
 }
 
+// Trigger holds information for custom word triggers
+type Trigger struct {
+	ID     int
+	Cause  string
+	Result string
+}
+
 // NewServer creates a new ServerData
 func NewServer(server discordgo.Guild) ServerData {
 	return ServerData{
 		Prefix:    "$",
 		OsuToggle: true,
-		Crab:      true,
-		Cheers:    true,
 		Daily:     true,
-		Late:      true,
-		NiceIdea:  true,
-		OverIt:    true,
 		Announce:  true,
 		Server:    server,
 		Genital: GenitalRecordData{

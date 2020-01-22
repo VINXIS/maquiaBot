@@ -121,7 +121,32 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, strings.TrimSuffix(warningText, ", "))
 	}
 
-	serverData.RoleAutomation = append(serverData.RoleAutomation, roleData)
+	// Check duplicate
+	found := false
+	for i, roleAuto := range serverData.RoleAutomation {
+		if roleAuto.Text == roleData.Text {
+			found = true
+			for _, role := range roleData.Roles {
+				roleFound := false
+				for _, autoRole := range roleAuto.Roles {
+					if role.ID == autoRole.ID {
+						roleFound = true
+						break
+					}
+				}
+				
+				if !roleFound {
+					serverData.RoleAutomation[i].Roles = append(serverData.RoleAutomation[i].Roles, role)
+				}
+			}
+			roleData = serverData.RoleAutomation[i]
+			break
+		} 
+	}
+
+	if !found {
+		serverData.RoleAutomation = append(serverData.RoleAutomation, roleData)
+	}
 	jsonCache, err := json.Marshal(serverData)
 	tools.ErrRead(err)
 
@@ -133,6 +158,6 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 		roleNames += role.Name + ", "
 	}
 
-	s.ChannelMessageSend(m.ChannelID, "Added the role automation: When someone sends "+text+" they will have the following roles applied: "+strings.TrimSuffix(roleNames, ", ")+"\nAll role automations enabled in this server can be seen via `roleinfo`")
+	s.ChannelMessageSend(m.ChannelID, "Added the role automation: When someone sends `"+text+"`, they will have the following roles applied: "+strings.TrimSuffix(roleNames, ", ")+"\nAll role automations enabled in this server can be seen via `roleinfo`")
 	return
 }

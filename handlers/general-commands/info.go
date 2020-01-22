@@ -207,7 +207,7 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 				Name:  strconv.Itoa(roleAuto.ID),
-				Value: "Trigger: " + roleAuto.Text + "\nRoles: " + roleNames,
+				Value: "Trigger: " + roleAuto.Text + "\nRoles: " + strings.TrimSuffix(roleNames, ", "),
 			})
 		}
 		s.ChannelMessageSendEmbed(m.ChannelID, embed)
@@ -310,13 +310,8 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	statsInfo := strconv.Itoa(len(serverData.Nouns)) + " nouns\n" + strconv.Itoa(len(serverData.Adjectives)) + " adjectives\n" + strconv.Itoa(len(serverData.Skills)) + " skills\nAllowAnyoneAdd: " + strconv.FormatBool(serverData.AllowAnyoneStats)
 
 	// Toggle Information
-	toggleInfo := "Cheers: " + strconv.FormatBool(serverData.Cheers) + "\n" +
-		"Crab: " + strconv.FormatBool(serverData.Crab) + "\n" +
-		"Daily: " + strconv.FormatBool(serverData.Daily) + "\n" +
-		"Late: " + strconv.FormatBool(serverData.Late) + "\n" +
-		"Nice Idea: " + strconv.FormatBool(serverData.NiceIdea) + "\n" +
+	toggleInfo := "Daily: " + strconv.FormatBool(serverData.Daily) + "\n" +
 		"osu!: " + strconv.FormatBool(serverData.OsuToggle) + "\n" +
-		"Over it: " + strconv.FormatBool(serverData.OverIt) + "\n" +
 		"Vibe Check: " + strconv.FormatBool(serverData.Vibe) + "\n" +
 		"Announcements: " + strconv.FormatBool(serverData.Announce) + "\n"
 

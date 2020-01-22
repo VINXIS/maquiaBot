@@ -7,21 +7,11 @@ import (
 // Toggle explains the toggle functionality
 func Toggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: toggle"
-	embed.Description = "`toggle <[-a] [-ch] [-cr] [-d] [-i] [-l] [-os] [-ov] [-s] [-v]>` lets admins toggle specific server options."
+	embed.Description = "`toggle <[-a] [-d] [-os] [-s] [-v]>` lets admins toggle specific server options."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[-a]",
 			Value:  "Toggle announces from the bot creator on and off",
-			Inline: true,
-		},
-		&discordgo.MessageEmbedField{
-			Name:   "[-ch]",
-			Value:  "Toggle whether any message containing 🍻, 🍺, 🦐, and / or cheer should trigger a cheers video message.",
-			Inline: true,
-		},
-		&discordgo.MessageEmbedField{
-			Name:   "[-cr]",
-			Value:  "Toggle whether any message containing crab or rave should trigger a crab rave message.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
@@ -30,23 +20,8 @@ func Toggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
-			Name:   "[-i]",
-			Value:  "Toggle whether any message containing nice idea, good idea, or gud idea should send a nice idea video message.",
-			Inline: true,
-		},
-		&discordgo.MessageEmbedField{
-			Name:   "[-l]",
-			Value:  "Toggle whether any message containing late or ancient should send a late video message.",
-			Inline: true,
-		},
-		&discordgo.MessageEmbedField{
 			Name:   "[-os]",
 			Value:  "Toggle whether map links, profile links, and timestamps should be read by the bot.",
-			Inline: true,
-		},
-		&discordgo.MessageEmbedField{
-			Name:   "[-ov]",
-			Value:  "Toggle whether any message containing over it should trigger an over it message.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{

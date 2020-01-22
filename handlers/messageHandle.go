@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"math/big"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -63,43 +64,11 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverData := tools.GetServer(*server)
 	serverPrefix := serverData.Prefix
 
-	// CRAB RAVE
-	if serverData.Crab && (strings.Contains(m.Content, "crab") || strings.Contains(m.Content, "rave")) && !strings.HasPrefix(m.Content, serverPrefix+"crab") {
-		go gencommands.Crab(s, m)
-		go tools.CommandLog(s, m, "crab rave")
-	}
-
-	// LATE
-	if serverData.Late && (strings.Contains(m.Content, "late") || (strings.Contains(m.Content, "old") && !strings.Contains(m.Content, "old.ppy.sh")) || strings.Contains(m.Content, "ancient")) && !strings.HasPrefix(m.Content, serverPrefix+"late") {
-		go gencommands.Late(s, m)
-		go tools.CommandLog(s, m, "late")
-	}
-
-	// CHEERS
-	if serverData.Cheers && (strings.Contains(m.Content, "🍻") || strings.Contains(m.Content, "🍺") || strings.Contains(m.Content, "🦐") || strings.Contains(m.Content, "cheer")) && !strings.HasPrefix(m.Content, serverPrefix+"cheers") {
-		go gencommands.Cheers(s, m)
-		go tools.CommandLog(s, m, "cheers")
-	}
-
 	// Generate regexes for message parsing
 	profileRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(u|users)\/(\S+)`)
 	beatmapRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
 	timestampRegex, _ := regexp.Compile(`(\d+):(\d{2}):(\d{3})\s*(\(((\d\,?)+)\))?`)
-	ideaRegex, _ := regexp.Compile(`(n+i+c+e*|g+o+d+|g+u+d+|c+o+l+)\s*i+d+e+a+`)
-	overRegex, _ := regexp.Compile(`ove*r\s+it+`)
-
-	// NICE IDEA
-	if ideaRegex.MatchString(m.Content) && serverData.NiceIdea && (!strings.HasPrefix(m.Content, serverPrefix+"idea") || !strings.HasPrefix(m.Content, serverPrefix+"niceidea")) {
-		go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
-		go tools.CommandLog(s, m, "nice idea")
-	}
-
-	// OVER IT
-	if overRegex.MatchString(m.Content) && serverData.OverIt && !strings.HasPrefix(m.Content, serverPrefix+"over") {
-		go gencommands.OverIt(s, m)
-		go tools.CommandLog(s, m, "over it")
-	}
 
 	// Timestamp conversions
 	if timestampRegex.MatchString(noEmoji) && serverData.OsuToggle {
@@ -120,6 +89,44 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if strings.Contains(m.Content, roleAuto.Text) {
 			for _, role := range roleAuto.Roles {
 				s.GuildMemberRoleAdd(m.GuildID, m.Author.ID, role.ID)
+			}
+		}
+	}
+
+	// Trigger checks
+	for _, trigger := range serverData.Triggers {
+		reg, err := regexp.Compile(trigger.Cause)
+		send := false
+		if err != nil {
+			if strings.Contains(m.Content, trigger.Cause) {
+				send = true
+			}
+		} else if reg.MatchString(m.Content) {
+			send = true
+		}
+
+		if send {
+			allowedFormats := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".mp4", ".avi", ".mov", ".webm", ".flv"}
+			format := ""
+			for _, format := range allowedFormats {
+				if strings.Contains(trigger.Result, format) {
+					format = format
+				}
+			}
+
+			if format == "" {
+				s.ChannelMessageSend(m.ChannelID, trigger.Result)
+				return
+			}
+
+			response, err := http.Get(trigger.Result)
+			if err == nil {
+				s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+					File: &discordgo.File{
+						Name:   "trigger" + format,
+						Reader: response.Body,
+					},
+				})
 			}
 		}
 	}
@@ -188,6 +195,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go admincommands.Toggle(s, m)
 		case serverPrefix + "tr", serverPrefix + "track":
 			go admincommands.Track(s, m)
+		case serverPrefix + "trigger":
+			go admincommands.Trigger(s, m)
 		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "ttoggle", serverPrefix + "tracktoggle":
 			go admincommands.TrackToggle(s, m)
 
@@ -284,6 +293,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Skills(s, m)
 		case serverPrefix + "stats", serverPrefix + "class":
 			go gencommands.Stats(s, m)
+		case serverPrefix + "triggers":
+			go gencommands.Triggers(s, m)
 		case serverPrefix + "twitch", serverPrefix + "twitchdl":
 			go gencommands.Twitch(s, m)
 		case serverPrefix + "twitter", serverPrefix + "twitterdl":
@@ -307,7 +318,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "vc", serverPrefix + "vcross", serverPrefix + "vectorc", serverPrefix + "vectorcross":
 			go mathcommands.VectorCross(s, m)
 		case serverPrefix + "vd", serverPrefix + "vdiv", serverPrefix + "vdivide", serverPrefix + "vectord", serverPrefix + "vectordiv", serverPrefix + "vectordivide":
-			go mathcommands.VectorDivide(s, m)		
+			go mathcommands.VectorDivide(s, m)
 		case serverPrefix + "vdot", serverPrefix + "vectordot":
 			go mathcommands.VectorDot(s, m)
 		case serverPrefix + "vm", serverPrefix + "vmult", serverPrefix + "vmultiply", serverPrefix + "vectorm", serverPrefix + "vectormult", serverPrefix + "vectormultiply":

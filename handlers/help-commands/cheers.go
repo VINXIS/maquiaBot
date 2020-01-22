@@ -8,11 +8,5 @@ import (
 func Cheers(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: cheers"
 	embed.Description = "`cheers` lets you send a cheers video."
-	embed.Fields = []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
-			Name:  "Related Commands:",
-			Value: "`toggle`",
-		},
-	}
 	return embed
 }
