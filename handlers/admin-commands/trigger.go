@@ -107,18 +107,20 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Create trigger data
 	triggerData := structs.Trigger{
-		ID: len(serverData.Triggers) + 1,
 		Cause: strings.Join(cause, " "),
 		Result: strings.Join(result, " "),
 	}
 	triggerData.Cause = strings.TrimSpace(triggerData.Cause)
 	triggerData.Result = strings.TrimSpace(triggerData.Result)
 
-	// Check duplicate
-	for _, trigger := range serverData.Triggers {
+	// Check duplicate and ID
+	for i, trigger := range serverData.Triggers {
 		if trigger.Cause == triggerData.Cause && trigger.Result == triggerData.Result {
 			s.ChannelMessageSend(m.ChannelID, "This trigger already exists!")
 			return
+		}
+		if i == triggerData.ID {
+			triggerData.ID++
 		} 
 	}
 

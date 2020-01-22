@@ -98,7 +98,6 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	warningText := "WARNING: Could not find the roles associated with the following IDs: "
 	roleData := structs.Role{
-		ID:   len(serverData.RoleAutomation) + 1,
 		Text: text,
 	}
 
@@ -141,7 +140,10 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			roleData = serverData.RoleAutomation[i]
 			break
-		} 
+		}
+		if i == roleData.ID {
+			roleData.ID++
+		}
 	}
 
 	if !found {
