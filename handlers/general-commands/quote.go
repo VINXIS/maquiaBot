@@ -125,6 +125,19 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 	if link != "" {
+		allowedFormats := []string{".jpeg", ".bmp", ".tiff", ".svg", ".mp4", ".avi", ".mov", ".webm", ".flv"}
+		allowed := false
+		for _, format := range allowedFormats {
+			if strings.Contains(link, format) {
+				allowed = true
+			}
+		}
+
+		if !allowed {
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			return
+		}
+
 		response, err := http.Get(link)
 		if err == nil {
 			s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
