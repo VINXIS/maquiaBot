@@ -29,7 +29,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		// Get prev messages
 		messages, err := s.ChannelMessages(m.ChannelID, -1, "", "", "")
 		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "No map to compare to!")
+			s.ChannelMessageSend(m.ChannelID, "No map found!")
 			return
 		}
 
@@ -50,6 +50,10 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		}
 	} else {
 		submatches = regex.FindStringSubmatch(m.Content)
+	}
+	if len(submatches) == 0 {
+		s.ChannelMessageSend(m.ChannelID, "No map found!")
+		return
 	}
 
 	message, err := s.ChannelMessageSend(m.ChannelID, "Processing beatmap...")
