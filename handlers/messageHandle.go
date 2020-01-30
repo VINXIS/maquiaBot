@@ -215,7 +215,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Adjectives(s, m)
 		case serverPrefix + "avatar", serverPrefix + "ava", serverPrefix + "a":
 			go gencommands.Avatar(s, m)
-		case serverPrefix + "cc", serverPrefix + "cp", serverPrefix + "comparec", serverPrefix + "comparep", serverPrefix + "comparecock", serverPrefix + "comparepenis":
+		case serverPrefix + "cp", serverPrefix + "comparep", serverPrefix + "comparepenis":
 			if serverData.Daily {
 				go gencommands.PenisCompare(s, m)
 			}
@@ -265,7 +265,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Percentage(s, m)
 		case serverPrefix + "parse":
 			go gencommands.Parse(s, m)
-		case serverPrefix + "penis", serverPrefix + "cock":
+		case serverPrefix + "penis":
 			if serverData.Daily {
 				go gencommands.Penis(s, m)
 			}
@@ -279,7 +279,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.QuoteRemove(s, m)
 		case serverPrefix + "qs", serverPrefix + "quotes":
 			go gencommands.Quotes(s, m)
-		case serverPrefix + "rc", serverPrefix + "rp", serverPrefix + "rankc", serverPrefix + "rankp", serverPrefix + "rankcock", serverPrefix + "rankpenis":
+		case serverPrefix + "rp", serverPrefix + "rankp", serverPrefix + "rankpenis":
 			if serverData.Daily {
 				go gencommands.PenisRank(s, m)
 			}

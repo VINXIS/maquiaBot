@@ -6,8 +6,8 @@ import (
 
 // Penis explains the penis functionality
 func Penis(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: penis / cock"
-	embed.Description = "`(penis|cock) [username]` calculates your erect length for today."
+	embed.Author.Name = "Command: penis"
+	embed.Description = "`penis [username]` calculates your erect length for today."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:  "[username]",
@@ -40,8 +40,8 @@ func Vagina(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 
 // PenisCompare explains the penis compare functionality
 func PenisCompare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: cc / cp / comparec / comparep / comparecock / comparepenis"
-	embed.Description = "`(cc|cp|comparec|comparep|comparecock|comparepenis) [username]` compares your erect length with someone else's."
+	embed.Author.Name = "Command: cp / comparep / comparepenis"
+	embed.Description = "`(cp|comparep|comparepenis) [username]` compares your erect length with someone else's."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:  "[username]",
@@ -74,8 +74,8 @@ func VaginaCompare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 
 // PenisRank explains the penis rank functionality
 func PenisRank(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: rc / rp / rankc / rankp / rankcock / rankpenis"
-	embed.Description = "`(rc|rp|rankc|rankp|rankcock|rankpenis) [number] [-s]` ranks the largest / smallest penis sizes in the server."
+	embed.Author.Name = "Command: rp / rankp / rankpenis"
+	embed.Description = "`(rp|rankp|rankpenis) [number] [-s]` ranks the largest / smallest penis sizes in the server."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[number]",

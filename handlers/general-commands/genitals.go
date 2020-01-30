@@ -23,7 +23,7 @@ type genitals struct {
 
 // Penis gives u a penis size for the day based off of a normal distribution from data obtained at http://penissizes.org/average-penis-size-ethnicity-race-and-country
 func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
-	userRegex, _ := regexp.Compile(`(penis|cock)\s+(.+)`)
+	userRegex, _ := regexp.Compile(`penis\s+(.+)`)
 
 	users := m.Mentions
 	user := m.Author.ID
@@ -135,8 +135,8 @@ func Vagina(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // PenisCompare compares ur penis size to someone else's
 func PenisCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
-	userRegex, _ := regexp.Compile(`(cc|cp|comparec|comparep|comparecock|comparepenis)\s+(.+)`)
-	penisRegex, _ := regexp.Compile(`(penis|cock|cc|cp|comparec|comparep|comparecock|comparepenis)`)
+	userRegex, _ := regexp.Compile(`(cp|comparep|comparepenis)\s+(.+)`)
+	penisRegex, _ := regexp.Compile(`(penis|cp|comparep|comparepenis)`)
 
 	users := m.Mentions
 	user1 := m.Author.ID
@@ -295,7 +295,7 @@ func VaginaCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // PenisRank displays the largest / smallest penises in the server
 func PenisRank(s *discordgo.Session, m *discordgo.MessageCreate) {
-	rankRegex, _ := regexp.Compile(`(rc|rp|rankc|rankp|rankcock|rankpenis)\s+(\d+)`)
+	rankRegex, _ := regexp.Compile(`(rp|rankp|rankpenis)\s+(\d+)`)
 	smallRegex, _ := regexp.Compile(`-s`)
 	// Get members
 	members, err := s.GuildMembers(m.GuildID, "", 1000)

@@ -30,14 +30,14 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(rolea|roleauto|roleautomation)`, " +
 					"`toggle`, " +
 					"`(tr|track)`, " +
-					"`trigger`, " + 
+					"`trigger`, " +
 					"`(tt|trackt|ttoggle|tracktoggle)`",
 			},
 			&discordgo.MessageEmbedField{
 				Name: "General commands:",
 				Value: "`(adj|adjective|adjectives)`, " +
 					"`(a|ava|avatar)`, " +
-					"`(cc|cp|comparec|comparep|comparecock|comparepenis)`, " +
+					"`(cp|comparep|comparepenis)`, " +
 					"`(cv|comparev|comparevagina)`, " +
 					"`(ch|choose)`, " +
 					"`cheers`, " +
@@ -59,13 +59,13 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`over`, " +
 					"`(p|per|percent|percentage)`, " +
 					"`parse`, " +
-					"`(penis|cock)`, " +
+					"`penis`, " +
 					"`ping`, " +
 					"`(q|quote)`, " +
 					"`(qa|qadd|quotea|quoteadd)`, " +
 					"`(qd|qr|qremove|qdelete|quoter|quoted|quoteremove|quotedelete)`, " +
 					"`(qs|quotes)`, " +
-					"`(rc|rp|rankc|rankp|rankcock|rankpenis)`, " +
+					"`(rp|rankp|rankpenis)`, " +
 					"`(rv|rankv|rankvagina)`, " +
 					"`(remind|reminder)`, " +
 					"`reminders`, " +
@@ -75,7 +75,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(sinfo|serverinfo)`, " +
 					"`(skill|skills)`, " +
 					"`(stats|class)`, " +
-					"`triggers`, " + 
+					"`triggers`, " +
 					"`(twitch|twitchdl)`, " +
 					"`(twitter|twitterdl)`, " +
 					"`vagina`, " +
@@ -153,7 +153,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Adjectives(embed)
 		case "avatar", "ava", "a":
 			embed = helpcommands.Avatar(embed)
-		case "cc", "cp", "comparec", "comparep", "comparecock", "comparepenis":
+		case "cp", "comparep", "comparepenis":
 			embed = helpcommands.PenisCompare(embed)
 		case "cv", "comparev", "comparevagina":
 			embed = helpcommands.VaginaCompare(embed)
@@ -197,7 +197,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Percentage(embed)
 		case "parse":
 			embed = helpcommands.Parse(embed)
-		case "penis", "cock":
+		case "penis":
 			embed = helpcommands.Penis(embed)
 		case "ping":
 			embed = helpcommands.Ping(embed)
@@ -209,7 +209,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.QuoteRemove(embed)
 		case "qs", "quotes":
 			embed = helpcommands.Quotes(embed)
-		case "rc", "rp", "rankc", "rankp", "rankcock", "rankpenis":
+		case "rp", "rankp", "rankpenis":
 			embed = helpcommands.PenisRank(embed)
 		case "rv", "rankv", "rankvagina":
 			embed = helpcommands.VaginaRank(embed)
