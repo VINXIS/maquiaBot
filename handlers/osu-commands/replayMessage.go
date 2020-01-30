@@ -30,8 +30,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	if len(m.Attachments) > 0 {
 		url = m.Attachments[0].URL
 	} else if linkRegex.MatchString(m.Content) {
-		m.Message, _ = s.ChannelMessage(m.ChannelID, m.ID)
-		url = linkRegex.FindStringSubmatch(m.Message.Content)[0]
+		url = linkRegex.FindStringSubmatch(m.Content)[0]
 	} else {
 		return
 	}
