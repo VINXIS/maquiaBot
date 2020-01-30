@@ -83,6 +83,7 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 	bottomText = strings.Replace(bottomText, "\"", "''", -1)
 	bottomText = strings.Replace(bottomText, "_", "__", -1)
 	bottomText = strings.Replace(bottomText, "-", "--", -1)
+	bottomText = strings.TrimSpace(bottomText)
 
 	// Replace special characters for top text
 	topText = strings.Replace(topText, "?", "~q", -1)
@@ -92,6 +93,7 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 	topText = strings.Replace(topText, "\"", "''", -1)
 	topText = strings.Replace(topText, "_", "__", -1)
 	topText = strings.Replace(topText, "-", "--", -1)
+	topText = strings.TrimSpace(topText)
 
 	// Fetch the image data
 	msg, err := s.ChannelMessageSend(m.ChannelID, "Generating meme...")
