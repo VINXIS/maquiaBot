@@ -31,9 +31,6 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 			bottomText = strings.Join(words[len(words)/2:], " ")
 		}
 	}
-	if topText == "" {
-		topText = "%20"
-	}
 
 	if linkRegex.MatchString(m.Content) {
 		url = linkRegex.FindStringSubmatch(m.Content)[0]
@@ -94,6 +91,10 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 	topText = strings.Replace(topText, "_", "__", -1)
 	topText = strings.Replace(topText, "-", "--", -1)
 	topText = strings.TrimSpace(topText)
+
+	if topText == "" {
+		topText = "_"
+	}
 
 	// Fetch the image data
 	msg, err := s.ChannelMessageSend(m.ChannelID, "Generating meme...")
