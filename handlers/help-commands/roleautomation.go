@@ -7,19 +7,16 @@ import (
 // RoleAutomation explains the role automation functionality
 func RoleAutomation(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: rolea / roleauto / roleautomation"
-	embed.Description = "`(rolea|roleauto|roleautomation) <text> <role mentions / IDs>` lets admins create role automations ."
+	embed.Description = "`(rolea|roleauto|roleautomation) (<-d <number>>|<<text> <role mentions / IDs>>` lets admins create role automations ."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
-			Name:  "<text>",
-			Value: "The text to add roles to the person",
+			Name:  "<text> <role mentions / IDs>",
+			Value: "The text / regex to add roles to the person, and then the list of role mentions / IDs to add to the person when they send the text / regex",
 		},
 		&discordgo.MessageEmbedField{
-			Name:  "<role mentions / IDs>",
-			Value: "The roles to add to the person when the text is written.",
-		},
-		&discordgo.MessageEmbedField{
-			Name:  "Related Commands:",
-			Value: "`roleinfo`, `serverinfo`",
+			Name:   "<-d <number>>",
+			Value:  "`-d` followed be the role automation ID found in `roleinfo`",
+			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
 			Name:  "Related Commands:",

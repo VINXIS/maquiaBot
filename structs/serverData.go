@@ -28,14 +28,14 @@ type ServerData struct {
 
 // Role holds information for role automation
 type Role struct {
-	ID    int
+	ID    int64
 	Text  string
 	Roles []discordgo.Role
 }
 
 // Trigger holds information for custom word triggers
 type Trigger struct {
-	ID     int
+	ID     int64
 	Cause  string
 	Result string
 }
@@ -133,4 +133,26 @@ func (s *ServerData) RemoveQuote(ID string) error {
 		}
 	}
 	return errors.New("message is not a quote")
+}
+
+// NewTrigger creates a new trigger with a snowflake ID similar to Discord's
+func NewTrigger(cause, result string) Trigger {
+	ID := time.Now().Unix()*1000 - 1420070400000
+	ID <<= 22
+	return Trigger{
+		ID:     ID,
+		Cause:  cause,
+		Result: result,
+	}
+}
+
+// NewRoleAuto creates a new role automation with a snowflake ID similar to Discord's
+func NewRoleAuto(text string, roles []discordgo.Role) Role {
+	ID := time.Now().Unix()*1000 - 1420070400000
+	ID <<= 22
+	return Role{
+		ID:    ID,
+		Text:  text,
+		Roles: roles,
+	}
 }

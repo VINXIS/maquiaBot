@@ -206,7 +206,7 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 				roleNames += role.Name + ", "
 			}
 			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-				Name:  strconv.Itoa(roleAuto.ID),
+				Name:  strconv.FormatInt(roleAuto.ID, 10),
 				Value: "Trigger: " + roleAuto.Text + "\nRoles: " + strings.TrimSuffix(roleNames, ", "),
 			})
 		}

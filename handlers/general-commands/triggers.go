@@ -44,8 +44,8 @@ func Triggers(s *discordgo.Session, m *discordgo.MessageCreate) {
 			regex = true
 		}
 		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-			Name:  strconv.Itoa(trigger.ID),
-			Value: "Trigger: " + trigger.Cause + "\nResult: " + trigger.Result+"\nRegex compatible: " + strconv.FormatBool(regex),
+			Name:  strconv.FormatInt(trigger.ID, 10),
+			Value: "Trigger: " + trigger.Cause + "\nResult: " + trigger.Result + "\nRegex compatible: " + strconv.FormatBool(regex),
 		})
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)

@@ -85,7 +85,18 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Role checks
 	for _, roleAuto := range serverData.RoleAutomation {
-		if strings.Contains(m.Content, roleAuto.Text) {
+		reg, err := regexp.Compile(roleAuto.Text)
+
+		match := false
+		if err != nil {
+			if strings.Contains(m.Content, roleAuto.Text) {
+				match = true
+			}
+		} else if reg.MatchString(m.Content) {
+			match = true
+		}
+
+		if match {
 			for _, role := range roleAuto.Roles {
 				s.GuildMemberRoleAdd(m.GuildID, m.Author.ID, role.ID)
 			}

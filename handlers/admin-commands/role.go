@@ -43,7 +43,7 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Delete function
 	if deleteRegex.MatchString(m.Content) {
 		text = strings.TrimSpace(deleteRegex.ReplaceAllString(text, ""))
-		if ID, err := strconv.Atoi(text); err == nil {
+		if ID, err := strconv.ParseInt(text, 10, 64); err == nil {
 			for i, roleAuto := range serverData.RoleAutomation {
 				if roleAuto.ID == ID {
 					serverData.RoleAutomation = append(serverData.RoleAutomation[:i], serverData.RoleAutomation[i+1:]...)
@@ -97,18 +97,16 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	warningText := "WARNING: Could not find the roles associated with the following IDs: "
-	roleData := structs.Role{
-		Text: text,
-	}
-
+	var roles []discordgo.Role
 	for _, role := range roleIDs {
 		r, err := s.State.Role(m.GuildID, role)
 		if err != nil {
 			warningText += role + ", "
 			continue
 		}
-		roleData.Roles = append(roleData.Roles, *r)
+		roles = append(roles, *r)
 	}
+	roleData := structs.NewRoleAuto(text, roles)
 
 	// Somehow no roles were obtained with the IDs
 	if len(roleData.Roles) == 0 {
@@ -133,7 +131,7 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 						break
 					}
 				}
-				
+
 				if !roleFound {
 					serverData.RoleAutomation[i].Roles = append(serverData.RoleAutomation[i].Roles, role)
 				}

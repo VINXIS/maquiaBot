@@ -43,7 +43,7 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Delete function
 	if deleteRegex.MatchString(m.Content) {
 		text = strings.TrimSpace(deleteRegex.ReplaceAllString(text, ""))
-		if ID, err := strconv.Atoi(text); err == nil {
+		if ID, err := strconv.ParseInt(text, 10, 64); err == nil {
 			for i, trigger := range serverData.Triggers {
 				if trigger.ID == ID {
 					serverData.Triggers = append(serverData.Triggers[:i], serverData.Triggers[i+1:]...)
@@ -106,10 +106,7 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Create trigger data
-	triggerData := structs.Trigger{
-		Cause: strings.Join(cause, " "),
-		Result: strings.Join(result, " "),
-	}
+	triggerData := structs.NewTrigger(strings.Join(cause, " "), strings.Join(result, " "))
 	triggerData.Cause = strings.TrimSpace(triggerData.Cause)
 	triggerData.Result = strings.TrimSpace(triggerData.Result)
 
@@ -122,7 +119,7 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		if trigger.ID == triggerData.ID {
 			triggerData.ID++
-		} 
+		}
 	}
 
 	serverData.Triggers = append(serverData.Triggers, triggerData)
@@ -132,6 +129,6 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
 	tools.ErrRead(err)
 
-	s.ChannelMessageSend(m.ChannelID, "The trigger `" + triggerData.Cause + "` for `" + triggerData.Result + "` has been created!")
+	s.ChannelMessageSend(m.ChannelID, "The trigger `"+triggerData.Cause+"` for `"+triggerData.Result+"` has been created!")
 
 }
