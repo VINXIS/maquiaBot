@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strconv"
-	"strings"
+	"regexp"
 	"syscall"
 	"time"
 
@@ -117,9 +117,10 @@ func main() {
 		return nil
 	})
 	tools.ErrRead(err)
+	IDregex, _ := regexp.Compile(`(\d+)\.json`)
 	for _, channel := range channels {
-		if strings.HasSuffix(channel, ".json") {
-			chID := strings.Replace(strings.Replace(channel, "data\\channelData\\", "", -1), ".json", "", -1)
+		if IDregex.MatchString(channel) {
+			chID := IDregex.FindStringSubmatch(channel)[1]
 			ch, err := discord.Channel(chID)
 			if err == nil {
 				go osutools.TrackPost(*ch, discord)
