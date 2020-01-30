@@ -71,7 +71,7 @@ func TrackMapper(s *discordgo.Session, m *discordgo.MessageCreate, mapperData []
 			// Check if mapper is already in data
 			mapperExists := false
 			for i := 0; i < len(mapperData); i++ {
-				if strings.ToLower(mapperData[i].Mapper.Username) == arg {
+				if strings.ToLower(mapperData[i].Mapper.Username) == strings.ToLower(arg) {
 					mapperExists = true
 					if remove {
 						mapperData[i].RemoveChannel(*ch)

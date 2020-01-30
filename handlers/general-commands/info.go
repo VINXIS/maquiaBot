@@ -66,7 +66,7 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 				return time1.Unix() < time2.Unix()
 			})
 			for _, member := range members {
-				if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) || strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
+				if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(userTest)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(userTest)) {
 					user, _ = s.User(member.User.ID)
 					nickname = member.Nick
 					joinDate = member.JoinedAt
@@ -218,7 +218,7 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	roleName := roleRegex.FindStringSubmatch(m.Content)[2]
 	role := &discordgo.Role{}
 	for _, servrole := range roles {
-		if strings.HasPrefix(strings.ToLower(servrole.Name), roleName) {
+		if strings.HasPrefix(strings.ToLower(servrole.Name), strings.ToLower(roleName)) {
 			role = servrole
 		}
 	}

@@ -65,7 +65,7 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return time1.Unix() < time2.Unix()
 		})
 		for _, member := range members {
-			if strings.HasPrefix(strings.ToLower(member.User.Username), username) || strings.HasPrefix(strings.ToLower(member.Nick), username) {
+			if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(username)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(username)) {
 				discordUser, _ = s.User(member.User.ID)
 				postAva(s, m, []string{member.Nick}, []string{discordUser.AvatarURL("2048")}, true)
 				return

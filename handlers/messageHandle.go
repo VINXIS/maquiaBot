@@ -30,7 +30,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	m.Content = strings.ToLower(m.Content)
 	if strings.Contains(m.Content, "@everyone") {
 		m.Content = strings.TrimSpace(strings.ReplaceAll(m.Content, "@everyone", ""))
 	}

@@ -56,7 +56,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return time1.Unix() < time2.Unix()
 		})
 		for _, member := range members {
-			if strings.HasPrefix(strings.ToLower(member.User.Username), username) || strings.HasPrefix(strings.ToLower(member.Nick), username) {
+			if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(username)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(username)) {
 				user, _ = s.User(member.User.ID)
 				break
 			}
@@ -281,7 +281,7 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 					msgList := []*discordgo.Message{}
 					if username != "" {
 						for _, msg := range msgs {
-							if strings.HasPrefix(strings.ToLower(msg.Author.Username), username) || (msg.Member != nil && strings.HasPrefix(strings.ToLower(msg.Member.Nick), username)) {
+							if strings.HasPrefix(strings.ToLower(msg.Author.Username), strings.ToLower(username)) || (msg.Member != nil && strings.HasPrefix(strings.ToLower(msg.Member.Nick), strings.ToLower(username))) {
 								msgList = append(msgList, msg)
 							}
 						}
@@ -296,7 +296,7 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 					message = msgList[roll.Int64()]
 				} else {
 					for _, msg := range msgs {
-						if strings.HasPrefix(strings.ToLower(msg.Author.Username), username) || (msg.Member != nil && strings.HasPrefix(strings.ToLower(msg.Member.Nick), username)) {
+						if strings.HasPrefix(strings.ToLower(msg.Author.Username), strings.ToLower(username)) || (msg.Member != nil && strings.HasPrefix(strings.ToLower(msg.Member.Nick), strings.ToLower(username))) {
 							message = msg
 							break
 						}
@@ -420,7 +420,7 @@ func Quotes(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return time1.Unix() < time2.Unix()
 		})
 		for _, member := range members {
-			if strings.HasPrefix(strings.ToLower(member.User.Username), username) || strings.HasPrefix(strings.ToLower(member.Nick), username) {
+			if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(username)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(username)) {
 				user, _ = s.User(member.User.ID)
 				break
 			}

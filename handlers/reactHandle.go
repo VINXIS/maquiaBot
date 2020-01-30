@@ -61,7 +61,7 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 				return time1.Unix() < time2.Unix()
 			})
 			for _, member := range members {
-				if strings.HasPrefix(strings.ToLower(member.User.Username), username) || strings.HasPrefix(strings.ToLower(member.Nick), username) {
+				if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(username)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(username)) {
 					user, _ = s.User(member.User.ID)
 					break
 				}

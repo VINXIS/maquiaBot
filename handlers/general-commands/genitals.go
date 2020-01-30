@@ -49,7 +49,7 @@ func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return time1.Unix() < time2.Unix()
 			})
 			for _, member := range members {
-				if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) || strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
+				if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(userTest)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(userTest)) {
 					user = member.User.ID
 					username = member.User.Username + "'s"
 				}
@@ -105,7 +105,7 @@ func Vagina(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return time1.Unix() < time2.Unix()
 			})
 			for _, member := range members {
-				if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) || strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
+				if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(userTest)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(userTest)) {
 					user = member.User.ID
 					username = member.User.Username + "'s"
 				}
@@ -163,7 +163,7 @@ func PenisCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return time1.Unix() < time2.Unix()
 			})
 			for _, member := range members {
-				if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) || strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
+				if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(userTest)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(userTest)) {
 					user2 = member.User.ID
 					user2name = member.User.Username
 				}
@@ -243,7 +243,7 @@ func VaginaCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return time1.Unix() < time2.Unix()
 			})
 			for _, member := range members {
-				if strings.HasPrefix(strings.ToLower(member.User.Username), userTest) || strings.HasPrefix(strings.ToLower(member.Nick), userTest) {
+				if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(userTest)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(userTest)) {
 					user2 = member.User.ID
 					user2name = member.User.Username
 				}

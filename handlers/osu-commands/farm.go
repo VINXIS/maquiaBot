@@ -51,7 +51,7 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 		}
 	} else {
 		for i, player := range cache {
-			if username == strings.ToLower(player.Osu.Username) {
+			if strings.ToLower(username) == strings.ToLower(player.Osu.Username) {
 				playerIndex = i
 				cached = true
 				user = player
