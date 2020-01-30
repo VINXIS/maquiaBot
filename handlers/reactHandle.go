@@ -21,7 +21,7 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		return
 	}
 
-	if len(msg.Embeds) != 0 && strings.Contains(msg.Embeds[0].Footer.Text, "Page") {
+	if len(msg.Embeds) > 0 && msg.Embeds[0].Footer != nil && strings.Contains(msg.Embeds[0].Footer.Text, "Page") {
 		regex, _ := regexp.Compile(`Page (\d+)`)
 		num, _ := strconv.Atoi(regex.FindStringSubmatch(msg.Embeds[0].Footer.Text)[1])
 		numend := (num + 1) * 25
