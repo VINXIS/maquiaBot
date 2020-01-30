@@ -32,7 +32,7 @@ func Penis(s *discordgo.Session, m *discordgo.MessageCreate) {
 		user = users[0].ID
 		username = users[0].Username + "'s"
 	} else if userRegex.MatchString(m.Content) {
-		userTest := userRegex.FindStringSubmatch(m.Content)[2]
+		userTest := userRegex.FindStringSubmatch(m.Content)[1]
 		discordUser, err := s.User(userTest)
 		if err == nil {
 			user = discordUser.ID
@@ -136,7 +136,7 @@ func Vagina(s *discordgo.Session, m *discordgo.MessageCreate) {
 // PenisCompare compares ur penis size to someone else's
 func PenisCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 	userRegex, _ := regexp.Compile(`(cp|comparep|comparepenis)\s+(.+)`)
-	penisRegex, _ := regexp.Compile(`(penis|cp|comparep|comparepenis)`)
+	penisRegex, _ := regexp.Compile(`(penis|cp|comparep|comparepenis)(\s+(.+))?`)
 
 	users := m.Mentions
 	user1 := m.Author.ID
@@ -173,10 +173,42 @@ func PenisCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Get prev messages
 		messages, _ := s.ChannelMessages(m.ChannelID, -1, "", "", "")
 		for i := 0; i < len(messages)-1; i++ {
-			if messages[i].Author.ID == s.State.User.ID && penisRegex.MatchString(messages[i+1].Content) && messages[i+1].Author.ID != m.Author.ID {
-				user2 = messages[i+1].Author.ID
-				user2name = messages[i+1].Author.Username
-				break
+			if messages[i].Author.ID == s.State.User.ID && penisRegex.MatchString(messages[i+1].Content) {
+				if messages[i+1].Author.ID != m.Author.ID {
+					user2 = messages[i+1].Author.ID
+					user2name = messages[i+1].Author.Username
+					break
+				} else {
+					userTest := penisRegex.FindStringSubmatch(messages[i+1].Content)[3]
+					if userTest == "" {
+						continue
+					}
+					discordUser, err := s.User(userTest)
+					if err == nil { // ID found
+						user2 = discordUser.ID
+						user2name = discordUser.Username
+					} else { // Find member if no ID found
+						members, err := s.GuildMembers(m.GuildID, "", 1000)
+						if err != nil {
+							s.ChannelMessageSend(m.ChannelID, "This is not a server! Use their ID directly instead.")
+							return
+						}
+						sort.Slice(members, func(i, j int) bool {
+							time1, _ := members[i].JoinedAt.Parse()
+							time2, _ := members[j].JoinedAt.Parse()
+							return time1.Unix() < time2.Unix()
+						})
+						for _, member := range members {
+							if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(userTest)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(userTest)) {
+								user2 = member.User.ID
+								user2name = member.User.Username
+							}
+						}
+					}
+					if user2name != "" {
+						break
+					}
+				}
 			}
 		}
 	}
@@ -216,7 +248,7 @@ func PenisCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 // VaginaCompare compares ur vagina depth to someone else's
 func VaginaCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 	userRegex, _ := regexp.Compile(`(cv|comparev|comparevagina)\s+(.+)`)
-	vaginaRegex, _ := regexp.Compile(`(vagina|cv|comparev|comparevagina)`)
+	vaginaRegex, _ := regexp.Compile(`(vagina|cv|comparev|comparevagina)(\s+(.+))?`)
 
 	users := m.Mentions
 	user1 := m.Author.ID
@@ -253,10 +285,42 @@ func VaginaCompare(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Get prev messages
 		messages, _ := s.ChannelMessages(m.ChannelID, -1, "", "", "")
 		for i := 0; i < len(messages)-1; i++ {
-			if messages[i].Author.ID == s.State.User.ID && vaginaRegex.MatchString(messages[i+1].Content) && messages[i+1].Author.ID != m.Author.ID {
-				user2 = messages[i+1].Author.ID
-				user2name = messages[i+1].Author.Username
-				break
+			if messages[i].Author.ID == s.State.User.ID && vaginaRegex.MatchString(messages[i+1].Content) {
+				if messages[i+1].Author.ID != m.Author.ID {
+					user2 = messages[i+1].Author.ID
+					user2name = messages[i+1].Author.Username
+					break
+				} else {
+					userTest := vaginaRegex.FindStringSubmatch(messages[i+1].Content)[3]
+					if userTest == "" {
+						continue
+					}
+					discordUser, err := s.User(userTest)
+					if err == nil { // ID found
+						user2 = discordUser.ID
+						user2name = discordUser.Username
+					} else { // Find member if no ID found
+						members, err := s.GuildMembers(m.GuildID, "", 1000)
+						if err != nil {
+							s.ChannelMessageSend(m.ChannelID, "This is not a server! Use their ID directly instead.")
+							return
+						}
+						sort.Slice(members, func(i, j int) bool {
+							time1, _ := members[i].JoinedAt.Parse()
+							time2, _ := members[j].JoinedAt.Parse()
+							return time1.Unix() < time2.Unix()
+						})
+						for _, member := range members {
+							if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(userTest)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(userTest)) {
+								user2 = member.User.ID
+								user2name = member.User.Username
+							}
+						}
+					}
+					if user2name != "" {
+						break
+					}
+				}
 			}
 		}
 	}
@@ -531,7 +595,7 @@ func History(s *discordgo.Session, m *discordgo.MessageCreate) {
 		} else {
 			vaginaText += "**" + user.Username + "** "
 		}
-		percentile := 100 * 0.5 * math.Erfc((averagePenis-genitalRecord.Vagina.Largest.Size)/(math.Sqrt(2.0)*stddevPenis))
+		percentile := 100 * 0.5 * math.Erfc((averageVagina-genitalRecord.Vagina.Largest.Size)/(math.Sqrt(2.0)*stddevVagina))
 		vaginaText += "on " + strings.Replace(genitalRecord.Vagina.Largest.Date.Format(time.RFC822Z), "+0000", "UTC", -1) + ": " + strconv.FormatFloat(genitalRecord.Vagina.Largest.Size, 'f', 2, 64) + "cm (" + strconv.FormatFloat(genitalRecord.Vagina.Largest.Size/2.54, 'f', 2, 64) + "in) deeper than approximately " + strconv.FormatFloat(percentile, 'f', 2, 64) + "% of vaginas.\n"
 	}
 	if genitalRecord.Vagina.Smallest.Size != 1e308 {
