@@ -10,13 +10,13 @@ import (
 
 // DegreesRadians converts from deg to rad
 func DegreesRadians(s *discordgo.Session, m *discordgo.MessageCreate) {
-	reg, _ := regexp.Compile(`(dr|degrad|degreesradians)\s+((\d|\.)+)`)
+	reg, _ := regexp.Compile(`(dr|degrad|degreesradians)\s+(-?(\d|\.)+)`)
 	if !reg.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "Please send a valid number!")
 		return
 	}
 
-	val, err := strconv.ParseFloat(reg.FindStringSubmatch(m.Content)[1], 10)
+	val, err := strconv.ParseFloat(reg.FindStringSubmatch(m.Content)[2], 10)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Please send a valid number!")
 		return
@@ -29,13 +29,13 @@ func DegreesRadians(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // RadiansDegrees converts from rad to deg
 func RadiansDegrees(s *discordgo.Session, m *discordgo.MessageCreate) {
-	reg, _ := regexp.Compile(`(rd|raddeg|radiansdegrees)\s+((\d|\.)+)`)
+	reg, _ := regexp.Compile(`(rd|raddeg|radiansdegrees)\s+(-?(\d|\.)+)`)
 	if !reg.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "Please send a valid number!")
 		return
 	}
 
-	val, err := strconv.ParseFloat(reg.FindStringSubmatch(m.Content)[1], 10)
+	val, err := strconv.ParseFloat(reg.FindStringSubmatch(m.Content)[2], 10)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Please send a valid number!")
 		return

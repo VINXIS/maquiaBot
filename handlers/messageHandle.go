@@ -305,7 +305,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case serverPrefix + "vibe", serverPrefix + "vibec", serverPrefix + "vibecheck":
 			go gencommands.Vibe(s, m, "notRandom")
 
-		// math commands
+		// Math commands
 		case serverPrefix + "ave", serverPrefix + "average", serverPrefix + "mean":
 			go mathcommands.Average(s, m)
 		case serverPrefix + "d", serverPrefix + "dist", serverPrefix + "distance", serverPrefix + "dir", serverPrefix + "direction":

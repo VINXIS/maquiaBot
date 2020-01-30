@@ -85,6 +85,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 				Name: "math commands:",
 				Value: "`(ave|average|mean)`, " +
 					"`(d|dist|distance|dir|direction)`, " +
+					"`(dr|degrad|degreesradians)`, " +
+					"`(rd|raddeg|radiansdegrees)`, " +
 					"`(stddev|standarddev|stddeviation|standarddeviation)`, " +
 					"`(va|vadd|vectora|vectoradd)`, " +
 					"`(vc|vcross|vectorc|vectorcross)`, " +
@@ -238,10 +240,15 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		case "vibe", "vibec", "vibecheck":
 			embed = helpcommands.Vibe(embed)
 
+		// Math commands
 		case "ave", "average", "mean":
 			embed = helpcommands.Average(embed)
 		case "d", "dist", "distance", "dir", "direction":
 			embed = helpcommands.DistanceDirection(embed)
+		case "dr", "degrad", "degreesradians":
+			embed = helpcommands.DegreesRadians(embed)
+		case "rd", "raddeg", "radiansdegrees":
+			embed = helpcommands.RadiansDegrees(embed)
 		case "stddev", "standarddev", "stddeviation", "standarddeviation":
 			embed = helpcommands.StandardDeviation(embed)
 		case "va", "vadd", "vectora", "vectoradd":
