@@ -106,7 +106,7 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		roles = append(roles, *r)
 	}
-	roleData := structs.NewRoleAuto(text, roles)
+	roleData := structs.NewRoleAuto(strings.ToLower(text), roles)
 
 	// Somehow no roles were obtained with the IDs
 	if len(roleData.Roles) == 0 {

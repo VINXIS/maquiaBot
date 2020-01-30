@@ -89,10 +89,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		match := false
 		if err != nil {
-			if strings.Contains(m.Content, roleAuto.Text) {
+			if strings.Contains(strings.ToLower(m.Content), roleAuto.Text) {
 				match = true
 			}
-		} else if reg.MatchString(m.Content) {
+		} else if reg.MatchString(strings.ToLower(m.Content)) {
 			match = true
 		}
 
@@ -108,10 +108,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		reg, err := regexp.Compile(trigger.Cause)
 		send := false
 		if err != nil {
-			if strings.Contains(m.Content, trigger.Cause) {
+			if strings.Contains(strings.ToLower(m.Content), trigger.Cause) {
 				send = true
 			}
-		} else if reg.MatchString(m.Content) {
+		} else if reg.MatchString(strings.ToLower(m.Content)) {
 			send = true
 		}
 

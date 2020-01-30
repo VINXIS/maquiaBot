@@ -107,7 +107,7 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Create trigger data
 	triggerData := structs.NewTrigger(strings.Join(cause, " "), strings.Join(result, " "))
-	triggerData.Cause = strings.TrimSpace(triggerData.Cause)
+	triggerData.Cause = strings.TrimSpace(strings.ToLower(triggerData.Cause))
 	triggerData.Result = strings.TrimSpace(triggerData.Result)
 
 	// Check duplicate and ID
