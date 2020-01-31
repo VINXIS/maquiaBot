@@ -400,11 +400,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if mention.ID == s.State.User.ID {
 				roll, _ := rand.Int(rand.Reader, big.NewInt(100))
 				number := roll.Int64()
-				if number%11 == 0 {
-					s.ChannelMessageSend(m.ChannelID, "lol dude i bet u havent even watched the Maquia movie stop pinging me .")
-					break
+				if number%17 == 0 {
+					s.ChannelMessageSend(m.ChannelID, "Dude I'm serious. Stop pinging me or there will be consequences.")
+				} else if number%11 == 0 {
+					s.ChannelMessageSend(m.ChannelID, "lol what do u want dude i bet u havent even watched the Maquia movie stop pinging me .")
+				} else if number%5 == 0 {
+					s.ChannelMessageSend(m.ChannelID, "what!!!! what do u want!!!!!")
+				} else {
+					s.ChannelMessageSend(m.ChannelID, "what do u want dude lol")
 				}
-				s.ChannelMessageSend(m.ChannelID, "what do u want dude lol")
 				break
 			}
 		}
