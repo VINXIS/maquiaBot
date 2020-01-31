@@ -37,7 +37,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		m.Content = strings.TrimSpace(strings.ReplaceAll(m.Content, "@here", ""))
 	}
 
-	emojiRegex, _ := regexp.Compile(`<(:.+:)\d+>`)
+	emojiRegex, _ := regexp.Compile(`<a?(:.+:)\d+>`)
 	noEmoji := m.Content
 	if emojiRegex.MatchString(m.Content) {
 		noEmoji = emojiRegex.ReplaceAllString(m.Content, emojiRegex.FindStringSubmatch(m.Content)[1])
@@ -400,7 +400,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if mention.ID == s.State.User.ID {
 				roll, _ := rand.Int(rand.Reader, big.NewInt(100))
 				number := roll.Int64()
-				if number%17 == 0 {
+				if number == 51 {
+					go gencommands.Vibe(s, m, "")
+				} else if number%17 == 0 {
 					s.ChannelMessageSend(m.ChannelID, "Dude I'm serious. Stop pinging me or there will be consequences.")
 				} else if number%11 == 0 {
 					s.ChannelMessageSend(m.ChannelID, "lol what do u want dude i bet u havent even watched the Maquia movie stop pinging me .")
