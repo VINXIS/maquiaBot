@@ -10,6 +10,7 @@ import (
 
 // Meme lets you create a meme
 func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
+	emojiRegex, _ := regexp.Compile(`<(a)?:(.+):(\d+)>`)
 	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
 	memeRegex, _ := regexp.Compile(`meme\s+(https:\/\/(\S+)\s+)?([^|]+)?(\|)?([^|]+)?`)
 
@@ -32,10 +33,21 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
+	// Find URL
 	if linkRegex.MatchString(m.Content) {
 		url = linkRegex.FindStringSubmatch(m.Content)[0]
 		topText = strings.Replace(topText, url, "", -1)
 		bottomText = strings.Replace(bottomText, url, "", -1)
+	} else if emojiRegex.MatchString(m.Content) {
+		emojiID := emojiRegex.FindStringSubmatch(m.Content)[3]
+		animated := emojiRegex.FindStringSubmatch(m.Content)[1] == "a"
+		if animated {
+			url = "https://cdn.discordapp.com/emojis/" + emojiID + ".gif"
+		} else {
+			url = "https://cdn.discordapp.com/emojis/" + emojiID + ".png"
+		}
+		topText = strings.Replace(topText, emojiRegex.FindStringSubmatch(m.Content)[0], "", -1)
+		bottomText = strings.Replace(bottomText, emojiRegex.FindStringSubmatch(m.Content)[0], "", -1)
 	} else if len(m.Attachments) > 0 {
 		url = m.Attachments[0].URL
 	} else if len(m.Embeds) > 0 && m.Embeds[0].Image != nil {
