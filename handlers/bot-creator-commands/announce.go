@@ -30,26 +30,8 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		server := tools.GetServer(*guild)
-		if server.Announce {
-			sent := false
-			for _, channel := range guild.Channels {
-				if channel.ID == guild.ID {
-					sent = true
-					s.ChannelMessageSend(channel.ID, "Admins of the server can always toggle announcements from the bot creator on/off by using `toggle -a`.\n\n**Announcement below:**\n"+announcement)
-					break
-				}
-			}
-
-			if sent {
-				continue
-			}
-
-			for _, channel := range guild.Channels {
-				_, err := s.ChannelMessageSend(channel.ID, "Admins of the server can always toggle announcements from the bot creator on/off by using `toggle -a`.\n\n**Announcement below:**\n"+announcement)
-				if err == nil {
-					break
-				}
-			}
+		if server.AnnounceChannel != "" {
+			s.ChannelMessageSend(server.AnnounceChannel, "Admins of the server can always toggle announcements from the bot creator on/off by using `toggle -a`.\n\n**Announcement below:**\n"+announcement)
 		}
 	}
 	s.ChannelMessageSend(m.ChannelID, "Sent announcement to all servers!")

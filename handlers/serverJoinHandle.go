@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"io/ioutil"
+	"encoding/json"
 	"math"
 	"strconv"
 	"time"
@@ -40,6 +42,6 @@ func ServerJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 	jsonCache, err := json.Marshal(serverData)
 	tools.ErrRead(err)
 
-	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
+	err = ioutil.WriteFile("./data/serverData/"+g.ID+".json", jsonCache, 0644)
 	tools.ErrRead(err)
 }
