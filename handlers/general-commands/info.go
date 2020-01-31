@@ -309,11 +309,12 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverData := tools.GetServer(*server)
 	statsInfo := strconv.Itoa(len(serverData.Nouns)) + " nouns\n" + strconv.Itoa(len(serverData.Adjectives)) + " adjectives\n" + strconv.Itoa(len(serverData.Skills)) + " skills\nAllowAnyoneAdd: " + strconv.FormatBool(serverData.AllowAnyoneStats)
 
-	// Toggle Information
-	toggleInfo := "Daily: " + strconv.FormatBool(serverData.Daily) + "\n" +
+	// Server Options Information
+	announceChannel, _ := s.Channel(serverData.AnnounceChannel)
+	serverOptions := "Daily: " + strconv.FormatBool(serverData.Daily) + "\n" +
 		"osu!: " + strconv.FormatBool(serverData.OsuToggle) + "\n" +
 		"Vibe Check: " + strconv.FormatBool(serverData.Vibe) + "\n" +
-		"Announcements: " + strconv.FormatBool(serverData.Announce) + "\n"
+		"Announcements: #" + announceChannel.Name + "\n"
 
 	// Created at date
 	createdAt, err := discordgo.SnowflakeTimestamp(server.ID)
@@ -491,7 +492,7 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			},
 			&discordgo.MessageEmbedField{
 				Name:   "Server Options",
-				Value:  toggleInfo,
+				Value:  serverOptions,
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{

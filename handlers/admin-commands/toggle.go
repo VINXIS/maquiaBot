@@ -31,8 +31,7 @@ func Toggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverData.Time = time.Now()
 	flagged := false
 	if strings.Contains(m.Content, "-a") || strings.Contains(m.Content, "-announce") {
-		serverData.Announce = !serverData.Announce
-		flagged = true
+		serverData.AnnounceChannel = m.ChannelID
 	}
 	if strings.Contains(m.Content, "-d") || strings.Contains(m.Content, "-daily") {
 		serverData.Daily = !serverData.Daily

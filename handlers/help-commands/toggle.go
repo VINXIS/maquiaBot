@@ -11,7 +11,7 @@ func Toggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "[-a]",
-			Value:  "Toggle announces from the bot creator on and off",
+			Value:  "Toggles announcements for this bot to show in that channel.",
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{

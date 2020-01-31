@@ -15,7 +15,7 @@ type ServerData struct {
 	Daily            bool
 	OsuToggle        bool
 	Vibe             bool
-	Announce         bool
+	AnnounceChannel  string
 	Adjectives       []string
 	Nouns            []string
 	Skills           []string
@@ -46,7 +46,6 @@ func NewServer(server discordgo.Guild) ServerData {
 		Prefix:    "$",
 		OsuToggle: true,
 		Daily:     true,
-		Announce:  true,
 		Server:    server,
 		Genital: GenitalRecordData{
 			Penis: struct {
