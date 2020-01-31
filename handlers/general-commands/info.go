@@ -310,11 +310,20 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	statsInfo := strconv.Itoa(len(serverData.Nouns)) + " nouns\n" + strconv.Itoa(len(serverData.Adjectives)) + " adjectives\n" + strconv.Itoa(len(serverData.Skills)) + " skills\nAllowAnyoneAdd: " + strconv.FormatBool(serverData.AllowAnyoneStats)
 
 	// Server Options Information
-	announceChannel, _ := s.Channel(serverData.AnnounceChannel)
 	serverOptions := "Daily: " + strconv.FormatBool(serverData.Daily) + "\n" +
 		"osu!: " + strconv.FormatBool(serverData.OsuToggle) + "\n" +
-		"Vibe Check: " + strconv.FormatBool(serverData.Vibe) + "\n" +
-		"Announcements: #" + announceChannel.Name + "\n"
+		"Vibe Check: " + strconv.FormatBool(serverData.Vibe) + "\n"
+	if serverData.AnnounceChannel == "" {
+		serverOptions += "Announcements: N/A\n"
+	} else {
+		announceChannel, err := s.Channel(serverData.AnnounceChannel)
+		if err == nil {
+			serverOptions += "Announcements: #" + announceChannel.Name + "\n"
+		} else {
+			serverOptions += "Announcements: N/A\n"
+			serverData.AnnounceChannel = ""
+		}
+	}
 
 	// Created at date
 	createdAt, err := discordgo.SnowflakeTimestamp(server.ID)
