@@ -8,8 +8,11 @@ import (
 
 // CommandLog logs commands inputted
 func CommandLog(s *discordgo.Session, m *discordgo.MessageCreate, command string) {
-	channel, _ := s.Channel(m.ChannelID)
-	logText := m.Author.Username + " has used the " + command + " command in #" + channel.Name
+	channel, err := s.Channel(m.ChannelID)
+	logText := m.Author.Username + " has used the " + command + " command"
+	if err == nil {
+		logText += " in #" + channel.Name
+	}
 
 	// Check if server or not
 	server, err := s.Guild(m.GuildID)
