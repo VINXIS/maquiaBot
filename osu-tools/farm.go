@@ -40,15 +40,18 @@ func UpdateFarmSystem() {
 	log.Println("Fetching data as more than 24 hours have passed...")
 
 	// Obtain data
-	res, err := http.Get("https://raw.githubusercontent.com/grumd/osu-pps/master/data-osu.json")
-	tools.ErrRead(err)
-
-	byteArray, err := ioutil.ReadAll(res.Body)
-	tools.ErrRead(err)
+	var byteArray []byte
+	for {
+		res, err := http.Get("https://raw.githubusercontent.com/grumd/osu-pps/master/data-osu.json")
+		byteArray, err = ioutil.ReadAll(res.Body)
+		if err == nil {
+			break
+		}
+	}
 
 	// Convert to readable data
 	info := []structs.RawData{}
-	err = json.Unmarshal(byteArray, &info)
+	err := json.Unmarshal(byteArray, &info)
 	tools.ErrRead(err)
 
 	log.Println("Obtained data! Now parsing...")
