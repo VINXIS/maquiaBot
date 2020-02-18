@@ -26,10 +26,11 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		num, _ := strconv.Atoi(regex.FindStringSubmatch(msg.Embeds[0].Footer.Text)[1])
 		numend := (num + 1) * 25
 		page := strconv.Itoa(num + 1)
-		if r.Emoji.Name == "⬇️" {
-			numend = num * 25
+		if r.Emoji.Name == "⬇️" && num > 1 {
 			num--
+			numend = num * 25
 			page = strconv.Itoa(num)
+			num--
 		} else if r.Emoji.Name != "⬆️" {
 			return
 		}
@@ -42,12 +43,17 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		}
 		serverData := tools.GetServer(*server)
 
+		// Check if num or numend is Fucked
 		if num < 0 || num >= len(serverData.Quotes)-1 {
 			return
 		}
 		if numend > len(serverData.Quotes) {
 			numend = len(serverData.Quotes)
 		}
+		if num >= numend {
+			return
+		}
+		quoteNum := len(serverData.Quotes)
 		userQuotes := serverData.Quotes[num:numend]
 		if strings.Contains(msg.Content, "Quotes for") {
 			quoteRegex, _ := regexp.Compile(`Quotes for \*\*(.+)\*\*`)
@@ -61,7 +67,7 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 				return time1.Unix() < time2.Unix()
 			})
 			for _, member := range members {
-				if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(username)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(username)) {
+				if strings.Contains(strings.ToLower(member.User.Username), strings.ToLower(username)) || strings.Contains(strings.ToLower(member.Nick), strings.ToLower(username)) {
 					user, _ = s.User(member.User.ID)
 					break
 				}
@@ -80,6 +86,13 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 			if len(userQuotes) == 0 {
 				return
 			}
+			if numend > len(userQuotes) {
+				numend = len(userQuotes)
+			}
+			if num >= numend {
+				return
+			}
+			quoteNum = len(userQuotes)
 			userQuotes = userQuotes[num:numend]
 		}
 
@@ -109,16 +122,17 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 			Text: "Page " + page,
 		}
 
+		s.MessageReactionsRemoveAll(msg.ChannelID, msg.ID)
+
 		msg, err := s.ChannelMessageEditEmbed(r.MessageReaction.ChannelID, r.MessageReaction.MessageID, embed)
 		if err != nil {
 			return
 		}
-		s.MessageReactionsRemoveAll(msg.ChannelID, msg.ID)
 
 		if page != "1" {
 			_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "⬇️")
 		}
-		if numend != len(serverData.Quotes) {
+		if numend != quoteNum {
 			_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "⬆️")
 		}
 	}
