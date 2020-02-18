@@ -324,7 +324,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			UserID:    userP.UserID,
 			Mods:      &score.Mods,
 		})
-		if err == nil && replayScore[0].Replay && replayScore[0].Score.Score == score.Score.Score {
+		if err == nil && len(replayScore) > 0 && replayScore[0].Replay && replayScore[0].Score.Score == score.Score.Score {
 			replay = "| [**Replay**](https://osu.ppy.sh/scores/osu/" + strconv.FormatInt(replayScore[0].ScoreID, 10) + "/download)"
 			reader, _ := OsuAPI.GetReplay(osuapi.GetReplayOpts{
 				Username:  userP.Username,
