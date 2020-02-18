@@ -111,7 +111,7 @@ func Weather(s *discordgo.Session, m *discordgo.MessageCreate) {
 	embed := &discordgo.MessageEmbed{
 		Description: weatherData.Weather.Condition.Text + " | **" + strconv.Itoa(weatherData.Weather.Cloud) + "%** Clouds\nUV Index: **" + strconv.FormatFloat(weatherData.Weather.UV, 'f', 1, 64) + "** | **" + strconv.Itoa(weatherData.Weather.Humidity) + "%** Humidity",
 		Author: &discordgo.MessageEmbedAuthor{
-			IconURL: "https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/flat/64/" + weatherData.Location.Country + ".png",
+			IconURL: "https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/flat/64/" + strings.Replace(weatherData.Location.Country, " ", "-", -1) + ".png",
 			Name:    weatherData.Location.Name + ", " + weatherData.Location.Region + ", " + weatherData.Location.Country,
 		},
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
@@ -136,6 +136,11 @@ func Weather(s *discordgo.Session, m *discordgo.MessageCreate) {
 					"Visibility **" + strconv.FormatFloat(weatherData.Weather.VisibilityKM, 'f', 2, 64) + "km (" + strconv.FormatFloat(weatherData.Weather.VisibilityMI, 'f', 2, 64) + "mi)**",
 			},
 		},
+	}
+
+	// Exceptions
+	if weatherData.Location.Country == "United States of America" {
+		embed.Author.IconURL = "https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/flat/64/United-States.png"
 	}
 	if weatherData.Location.Region == "" {
 		embed.Author.Name = weatherData.Location.Name + ", " + weatherData.Location.Country
