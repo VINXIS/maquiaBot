@@ -79,7 +79,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(twitch|twitchdl)`, " +
 					"`(twitter|twitterdl)`, " +
 					"`vagina`, " +
-					"`(vibe|vibec|vibecheck)`",
+					"`(vibe|vibec|vibecheck)`, " +
+					"`(w|weather)`",
 			},
 			&discordgo.MessageEmbedField{
 				Name: "math commands:",
@@ -239,6 +240,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Vagina(embed)
 		case "vibe", "vibec", "vibecheck":
 			embed = helpcommands.Vibe(embed)
+		case "w", "weather":
+			embed = helpcommands.Weather(embed)
 
 		// Math commands
 		case "ave", "average", "mean":

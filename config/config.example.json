@@ -18,6 +18,7 @@
         "ConsumerToken": "",
         "ConsumerSecret": ""
     },
+    "Weather": "",
     "Server": "",
     "DiscordToken": "",
     "OsuToken": "",

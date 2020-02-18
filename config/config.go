@@ -15,6 +15,7 @@ type Config struct {
 	Database     Database
 	Twitch       Twitch
 	Twitter      Twitter
+	Weather      string
 	Server       string
 	DiscordToken string
 	OsuToken     string
