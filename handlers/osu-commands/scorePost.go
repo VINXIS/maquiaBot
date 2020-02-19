@@ -2,9 +2,9 @@ package osucommands
 
 import (
 	"bytes"
-	"log"
 	"image/png"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -210,37 +210,39 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	var score osuapi.Score
 	var replayData structs.ReplayData
 	if postType == "recent" || postType == "recentBest" {
-		replayScore, _ := OsuAPI.GetScores(osuapi.GetScoresOpts{
+		replayScore, err := OsuAPI.GetScores(osuapi.GetScoresOpts{
 			BeatmapID: beatmap.BeatmapID,
 			UserID:    user.UserID,
 			Mods:      &parsedMods,
 		})
-		score = replayScore[0].Score
-
-		if score.Score != scoreVal {
-			scoreOpts := osuapi.GetUserScoresOpts{
-				UserID: user.UserID,
-				Limit:  50,
-			}
-			scores, err := OsuAPI.GetUserRecent(scoreOpts)
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-				return
-			}
-			if len(scores) == 0 {
-				s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above!")
-				return
-			}
-			for _, recentScore := range scores {
-				if recentScore.Score.Score == scoreVal {
-					score = recentScore.Score
-					break
-				}
-			}
+		if err == nil {
+			score = replayScore[0].Score
 
 			if score.Score != scoreVal {
-				s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above!")
-				return
+				scoreOpts := osuapi.GetUserScoresOpts{
+					UserID: user.UserID,
+					Limit:  50,
+				}
+				scores, err := OsuAPI.GetUserRecent(scoreOpts)
+				if err != nil {
+					s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+					return
+				}
+				if len(scores) == 0 {
+					s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above!")
+					return
+				}
+				for _, recentScore := range scores {
+					if recentScore.Score.Score == scoreVal {
+						score = recentScore.Score
+						break
+					}
+				}
+
+				if score.Score != scoreVal {
+					s.ChannelMessageSend(m.ChannelID, "Could not create a scorepost for the score above!")
+					return
+				}
 			}
 		}
 
