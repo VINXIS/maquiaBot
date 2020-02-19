@@ -31,7 +31,7 @@ func Prefix(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 
 	// Set new information in server data
 	oldPrefix := serverData.Prefix
@@ -45,10 +45,10 @@ func Prefix(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverData.Prefix = prefix
 
 	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	s.ChannelMessageSend(m.ChannelID, "Prefix changed from "+oldPrefix+" to "+serverData.Prefix)
 	return

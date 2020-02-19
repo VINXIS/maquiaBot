@@ -147,9 +147,9 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 			// Sort scores by date and get score
 			sort.Slice(userRecent, func(i, j int) bool {
 				time1, err := time.Parse("2006-01-02 15:04:05", userRecent[i].Date.String())
-				tools.ErrRead(err)
+				tools.ErrRead(s, err)
 				time2, err := time.Parse("2006-01-02 15:04:05", userRecent[j].Date.String())
-				tools.ErrRead(err)
+				tools.ErrRead(s, err)
 
 				return time1.Unix() > time2.Unix()
 			})
@@ -206,7 +206,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 					Username:  user.Username,
 					Mode:      beatmap.Mode,
 					BeatmapID: beatmap.BeatmapID,
-					Mods: &score.Mods,
+					Mods:      &score.Mods,
 				})
 				buf := new(bytes.Buffer)
 				buf.ReadFrom(reader)
@@ -234,10 +234,10 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 				ppValues := make(chan string, 1)
 				go osutools.PPCalc(beatmap, osuapi.Score{
 					MaxCombo: beatmap.MaxCombo,
-					Count50: score.Count50,
+					Count50:  score.Count50,
 					Count100: score.Count100,
-					Count300: totalObjs-score.Count50-score.Count100,
-					Mods: score.Mods,
+					Count300: totalObjs - score.Count50 - score.Count100,
+					Mods:     score.Mods,
 				}, ppValues)
 				pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
 			}
@@ -265,9 +265,9 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 				// Sort scores back to chronological
 				sort.Slice(userRecent, func(i, j int) bool {
 					time1, err := time.Parse("2006-01-02 15:04:05", userRecent[i].Date.String())
-					tools.ErrRead(err)
+					tools.ErrRead(s, err)
 					time2, err := time.Parse("2006-01-02 15:04:05", userRecent[j].Date.String())
-					tools.ErrRead(err)
+					tools.ErrRead(s, err)
 
 					return time1.Unix() > time2.Unix()
 				})

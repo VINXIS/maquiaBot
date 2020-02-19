@@ -30,7 +30,7 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 
 	// Check if params were given
 	if !roleRegex.MatchString(m.Content) {
@@ -51,10 +51,10 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 				}
 			}
 			jsonCache, err := json.Marshal(serverData)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 
 			err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 			s.ChannelMessageSend(m.ChannelID, "Removed role automation ID: "+text)
 		} else {
 			s.ChannelMessageSend(m.ChannelID, text+" is an invalid ID!")
@@ -148,10 +148,10 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 		serverData.RoleAutomation = append(serverData.RoleAutomation, roleData)
 	}
 	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	var roleNames string
 	for _, role := range roleData.Roles {

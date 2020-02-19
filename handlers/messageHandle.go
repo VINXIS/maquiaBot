@@ -46,13 +46,13 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain profile cache data
 	var profileCache []structs.PlayerData
 	f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	_ = json.Unmarshal(f, &profileCache)
 
 	// Obtain mapper data
 	var mapperData []structs.MapperData
 	f, err = ioutil.ReadFile("./data/osuData/mapperData.json")
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	_ = json.Unmarshal(f, &mapperData)
 
 	// Obtain server data
@@ -60,7 +60,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if err != nil {
 		server = &discordgo.Guild{}
 	}
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 	serverPrefix := serverData.Prefix
 
 	// Generate regexes for message parsing

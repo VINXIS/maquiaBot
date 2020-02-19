@@ -25,7 +25,7 @@ func TrackInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain channel data
-	channelData, new := tools.GetChannel(*channel)
+	channelData, new := tools.GetChannel(*channel, s)
 	if new {
 		s.ChannelMessageSend(m.ChannelID, "There is no tracking info for this channel currently!")
 		return

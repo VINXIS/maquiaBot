@@ -187,7 +187,7 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Get role
 	if !roleRegex.MatchString(m.Content) {
-		serverData := tools.GetServer(*server)
+		serverData := tools.GetServer(*server, s)
 		embed := &discordgo.MessageEmbed{
 			Author: &discordgo.MessageEmbedAuthor{
 				Name:    server.Name,
@@ -306,7 +306,7 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Stats info
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 	statsInfo := strconv.Itoa(len(serverData.Nouns)) + " nouns\n" + strconv.Itoa(len(serverData.Adjectives)) + " adjectives\n" + strconv.Itoa(len(serverData.Skills)) + " skills\nAllowAnyoneAdd: " + strconv.FormatBool(serverData.AllowAnyoneStats)
 
 	// Server Options Information
@@ -527,8 +527,8 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Save new server data
 	serverData.Time = time.Now()
 	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 }

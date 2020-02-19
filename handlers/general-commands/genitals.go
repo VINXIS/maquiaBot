@@ -549,7 +549,7 @@ func History(s *discordgo.Session, m *discordgo.MessageCreate) {
 	averageVagina := 9.6
 	stddevVagina := 1.5
 
-	genitalRecord := tools.GetGenitalRecord()
+	genitalRecord := tools.GetGenitalRecord(s)
 	text := "Records for all servers:\n"
 
 	// Check server flag
@@ -560,7 +560,7 @@ func History(s *discordgo.Session, m *discordgo.MessageCreate) {
 			s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 			return
 		}
-		serverData := tools.GetServer(*server)
+		serverData := tools.GetServer(*server, s)
 		genitalRecord.Penis = serverData.Genital.Penis
 		genitalRecord.Vagina = serverData.Genital.Vagina
 	}
@@ -615,7 +615,7 @@ func History(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func records(s *discordgo.Session, m *discordgo.MessageCreate, size float64, userID string, genital string) {
 	// Check full records
-	genitalRecords := tools.GetGenitalRecord()
+	genitalRecords := tools.GetGenitalRecord(s)
 	recordBroken := false
 
 	if genital == "penis" {
@@ -646,10 +646,10 @@ func records(s *discordgo.Session, m *discordgo.MessageCreate, size float64, use
 
 	if recordBroken {
 		jsonCache, err := json.Marshal(genitalRecords)
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 
 		err = ioutil.WriteFile("./data/genitalRecords.json", jsonCache, 0644)
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 	}
 
 	// Check server records
@@ -657,7 +657,7 @@ func records(s *discordgo.Session, m *discordgo.MessageCreate, size float64, use
 	if err != nil {
 		return
 	}
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 	recordBroken = false
 
 	if genital == "penis" {
@@ -688,9 +688,9 @@ func records(s *discordgo.Session, m *discordgo.MessageCreate, size float64, use
 
 	if recordBroken {
 		jsonCache, err := json.Marshal(serverData)
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 
 		err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 	}
 }

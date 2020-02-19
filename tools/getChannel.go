@@ -10,13 +10,13 @@ import (
 )
 
 // GetChannel obtains a channel using its channel ID
-func GetChannel(channel discordgo.Channel) (structs.ChannelData, bool) {
+func GetChannel(channel discordgo.Channel, s *discordgo.Session) (structs.ChannelData, bool) {
 	channelData := structs.NewChannel(channel)
 	new := true
 	_, err := os.Stat("./data/channelData/" + channel.ID + ".json")
 	if err == nil {
 		f, err := ioutil.ReadFile("./data/channelData/" + channel.ID + ".json")
-		ErrRead(err)
+		ErrRead(s, err)
 		_ = json.Unmarshal(f, &channelData)
 		new = false
 	}

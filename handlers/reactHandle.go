@@ -41,7 +41,7 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		if err != nil {
 			return
 		}
-		serverData := tools.GetServer(*server)
+		serverData := tools.GetServer(*server, s)
 
 		// Check if num or numend is Fucked
 		if num < 0 || num >= len(serverData.Quotes)-1 {

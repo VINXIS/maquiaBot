@@ -114,7 +114,7 @@ func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
 	_, err := os.Stat("./data/reminders.json")
 	if err == nil {
 		f, err := ioutil.ReadFile("./data/reminders.json")
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 		_ = json.Unmarshal(f, &reminders)
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "An error occurred obtaining reminder data! Please try later.")
@@ -129,10 +129,10 @@ func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Save reminders
 	jsonCache, err := json.Marshal(reminders)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/reminders.json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	if text != "" {
 		s.ChannelMessageSend(m.ChannelID, "Ok I'll remind you about `"+reminder.Info+"` on "+timeResultString+"\nPlease make sure your DMs are open or else you will not receive the reminder!")
@@ -164,10 +164,10 @@ func RunReminder(s *discordgo.Session, reminderTimer structs.ReminderTimer) {
 	_, err := os.Stat("./data/reminders.json")
 	if err == nil {
 		f, err := ioutil.ReadFile("./data/reminders.json")
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 		_ = json.Unmarshal(f, &reminders)
 	} else {
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 	}
 	for i, reminder := range reminders {
 		if reminder.ID == reminderTimer.Reminder.ID {
@@ -179,10 +179,10 @@ func RunReminder(s *discordgo.Session, reminderTimer structs.ReminderTimer) {
 
 	// Save reminders
 	jsonCache, err := json.Marshal(reminders)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/reminders.json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 }
 
 // Reminders lists the person's reminders
@@ -261,10 +261,10 @@ func RemoveReminder(s *discordgo.Session, m *discordgo.MessageCreate) {
 	_, err := os.Stat("./data/reminders.json")
 	if err == nil {
 		f, err := ioutil.ReadFile("./data/reminders.json")
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 		_ = json.Unmarshal(f, &reminders)
 	} else {
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 	}
 
 	// Mark Active as false for the reminder in both slices
@@ -304,10 +304,10 @@ func RemoveReminder(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Save reminders
 	jsonCache, err := json.Marshal(reminders)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/reminders.json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 }
 
 // ReminderMessage will send the user their reminder

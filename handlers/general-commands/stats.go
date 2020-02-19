@@ -67,7 +67,7 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 
 	// Check if the minimum amount of skills, nouns, and adjectives are there
 	if len(serverData.Skills) < skillCount {
@@ -134,7 +134,7 @@ func Adjectives(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 
 	if !serverData.AllowAnyoneStats && !tools.AdminCheck(s, m, *server) {
 		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
@@ -179,10 +179,10 @@ func Adjectives(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverData.Time = time.Now()
 
 	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	if mode == "add" {
 		s.ChannelMessageSend(m.ChannelID, "`"+word+"` is now added to the server's adjective list!")
 	} else if mode == "remove" {
@@ -202,7 +202,7 @@ func Nouns(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 
 	if !serverData.AllowAnyoneStats && !tools.AdminCheck(s, m, *server) {
 		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
@@ -247,10 +247,10 @@ func Nouns(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverData.Time = time.Now()
 
 	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	if mode == "add" {
 		s.ChannelMessageSend(m.ChannelID, "`"+word+"` is now added to the server's noun list!")
 	} else if mode == "remove" {
@@ -270,7 +270,7 @@ func Skills(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 
 	if !serverData.AllowAnyoneStats && !tools.AdminCheck(s, m, *server) {
 		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
@@ -315,10 +315,10 @@ func Skills(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverData.Time = time.Now()
 
 	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	if mode == "add" {
 		s.ChannelMessageSend(m.ChannelID, "`"+word+"` is now added to the server's skill list!")
 	} else if mode == "remove" {

@@ -76,11 +76,11 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 
 	// Create the file to write in
 	file, err := os.Create("./" + name + ".png")
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	// Dump the image data into the file
 	png.Encode(file, newImg)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	// Close file and res
 	response.Body.Close()
@@ -88,11 +88,11 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 
 	// Run tesseract to parse the image
 	_, err = exec.Command("tesseract", "./"+name+".png", name, "--dpi", "96").Output()
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	// Read result and parse it
 	text, err := ioutil.ReadFile(name + ".txt")
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	// Parse result
 	raw := string(text)

@@ -12,17 +12,18 @@ import (
 
 	structs "../structs"
 	tools "../tools"
+	"github.com/bwmarrin/discordgo"
 )
 
 // FarmUpdate gets the new data from grumd's site: https://grumd.github.io/osu-pps
-func FarmUpdate() {
+func FarmUpdate(s *discordgo.Session) {
 	// Obtain farm data
 	farmData := structs.FarmData{}
 	f, err := ioutil.ReadFile("./data/osuData/mapFarm.json")
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	_ = json.Unmarshal(f, &farmData)
 	if time.Since(farmData.Time) > 24*time.Hour {
-		UpdateFarmSystem()
+		UpdateFarmSystem(s)
 	}
 
 	// Loop everyday
@@ -30,13 +31,13 @@ func FarmUpdate() {
 	for {
 		select {
 		case <-ticker.C:
-			UpdateFarmSystem()
+			UpdateFarmSystem(s)
 		}
 	}
 }
 
 // UpdateFarmSystem updates the whole farm data
-func UpdateFarmSystem() {
+func UpdateFarmSystem(s *discordgo.Session) {
 	log.Println("Fetching data as more than 24 hours have passed...")
 
 	// Obtain data
@@ -52,7 +53,7 @@ func UpdateFarmSystem() {
 	// Convert to readable data
 	info := []structs.RawData{}
 	err := json.Unmarshal(byteArray, &info)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	log.Println("Obtained data! Now parsing...")
 
@@ -85,16 +86,16 @@ func UpdateFarmSystem() {
 		Maps: data,
 	}
 	jsonCache, err := json.Marshal(farmData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	// Save map farm data
 	err = ioutil.WriteFile("./data/osuData/mapFarm.json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	// Obtain profile cache data
 	profileCache := []structs.PlayerData{}
 	f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	_ = json.Unmarshal(f, &profileCache)
 
 	log.Println("Saved data! Updating all " + strconv.Itoa(len(profileCache)) + " players...")
@@ -108,9 +109,9 @@ func UpdateFarmSystem() {
 	}
 
 	jsonCache, err = json.Marshal(profileCache)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	log.Println("Updated all players!")
 }

@@ -31,10 +31,10 @@ func Clean(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Pla
 	}
 
 	jsonCache, err := json.Marshal(newPlayerCache)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	s.ChannelMessageSend(m.ChannelID, "Cleaned player cache!")
 }
 
@@ -48,7 +48,7 @@ func CleanFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	// Farm Data
 	farmData := structs.FarmData{}
 	f, err := ioutil.ReadFile("./data/osuData/mapFarm.json")
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	_ = json.Unmarshal(f, &farmData)
 
 	// Update
@@ -63,13 +63,13 @@ func CleanFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	jsonCache, err := json.Marshal(cache)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Error with wiping data!")
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 		return
 	}
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "Error with wiping data!")
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 		return
 	}
 
@@ -91,9 +91,9 @@ func CleanEmpty(s *discordgo.Session, m *discordgo.MessageCreate, cache []struct
 	}
 
 	jsonCache, err := json.Marshal(cache)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	s.ChannelMessageSend(m.ChannelID, "Removed empty users!")
 }

@@ -136,7 +136,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 
 	// Get time since play
 	timeParse, err := time.Parse("2006-01-02 15:04:05", score.Date.String())
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	time := tools.TimeSince(timeParse)
 
 	// Assign timing variables for map specs
@@ -184,7 +184,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		Username: user.Username,
 		Limit:    100,
 	})
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	for i, orderedScore := range orderedScores {
 		if score.Score.Score == orderedScore.Score.Score {
 			mapCompletion += "**#" + strconv.Itoa(i+1) + "** in top performances! \n"
@@ -195,7 +195,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		BeatmapID: beatmap.BeatmapID,
 		Limit:     100,
 	})
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	for i, mapScore := range mapScores {
 		if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
 			mapCompletion += "**#" + strconv.Itoa(i+1) + "** on leaderboard! \n"

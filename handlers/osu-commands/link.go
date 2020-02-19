@@ -22,7 +22,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache
 
 	farmData := structs.FarmData{}
 	f, err := ioutil.ReadFile("./data/osuData/mapFarm.json")
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	_ = json.Unmarshal(f, &farmData)
 
 	// Obtain server and check admin permissions for linking with mentions involved
@@ -71,10 +71,10 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache
 			}
 
 			jsonCache, err := json.Marshal(cache)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 
 			err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 
 			if len(m.Mentions) >= 1 {
 				s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to "+discordUser.Username+"'s account!")
@@ -93,10 +93,10 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache
 			cache[i] = player
 
 			jsonCache, err := json.Marshal(cache)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 
 			err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 
 			if len(m.Mentions) >= 1 {
 				s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to "+discordUser.Username+"'s account!")
@@ -127,10 +127,10 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache
 	// Save player
 	cache = append(cache, player)
 	jsonCache, err := json.Marshal(cache)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	if len(m.Mentions) >= 1 {
 		s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** has been linked to "+discordUser.Username+"'s account!")

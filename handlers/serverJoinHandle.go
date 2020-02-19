@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"io/ioutil"
 	"encoding/json"
+	"io/ioutil"
 	"math"
 	"strconv"
 	"time"
@@ -18,7 +18,7 @@ func ServerJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 
 	// Obtain server data
 	server, _ := s.Guild(g.ID)
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 
 	// Check if bot was already in server or if server is unavailable
 	joinTime, _ := g.JoinedAt.Parse()
@@ -40,8 +40,8 @@ func ServerJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 	}
 
 	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/serverData/"+g.ID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 }

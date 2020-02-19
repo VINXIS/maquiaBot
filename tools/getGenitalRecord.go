@@ -6,10 +6,11 @@ import (
 	"os"
 
 	structs "../structs"
+	"github.com/bwmarrin/discordgo"
 )
 
 // GetGenitalRecord obtains the penis records
-func GetGenitalRecord() structs.GenitalRecordData {
+func GetGenitalRecord(s *discordgo.Session) structs.GenitalRecordData {
 	genitalRecords := structs.GenitalRecordData{
 		Penis: struct {
 			Largest  structs.GenitalData
@@ -31,7 +32,7 @@ func GetGenitalRecord() structs.GenitalRecordData {
 	_, err := os.Stat("./data/genitalRecords.json")
 	if err == nil {
 		f, err := ioutil.ReadFile("./data/genitalRecords.json")
-		ErrRead(err)
+		ErrRead(s, err)
 		_ = json.Unmarshal(f, &genitalRecords)
 	}
 	return genitalRecords

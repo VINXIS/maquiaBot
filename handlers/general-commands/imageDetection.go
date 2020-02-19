@@ -125,7 +125,7 @@ func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Create the file to write in
 	file, err := os.Create("./" + name + ".png")
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	// Dump the image data into the file
 	png.Encode(file, newImg)
@@ -145,7 +145,7 @@ func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Read result and parse it
 	text, err := ioutil.ReadFile(name + ".txt")
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	// Parse result
 	str := string(text)

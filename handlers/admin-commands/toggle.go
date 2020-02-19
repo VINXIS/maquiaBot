@@ -25,7 +25,7 @@ func Toggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 
 	// Set new information in server data
 	serverData.Time = time.Now()
@@ -60,10 +60,10 @@ func Toggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	go gencommands.ServerInfo(s, m)
 }

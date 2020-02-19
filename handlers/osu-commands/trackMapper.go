@@ -117,10 +117,10 @@ func TrackMapper(s *discordgo.Session, m *discordgo.MessageCreate, mapperData []
 
 	// Save mapper data
 	jsonCache, err := json.Marshal(mapperData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/osuData/mapperData.json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	if remove && len(args) == 0 {
 		s.ChannelMessageSend(m.ChannelID, "Removed tracking for all mappers for this channel!")

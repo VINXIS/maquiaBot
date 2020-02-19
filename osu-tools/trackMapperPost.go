@@ -27,7 +27,7 @@ func TrackMapperPost(s *discordgo.Session) {
 			// Obtain mapper data
 			var mapperData []structs.MapperData
 			f, err := ioutil.ReadFile("./data/osuData/mapperData.json")
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 			_ = json.Unmarshal(f, &mapperData)
 
 			for i := 0; i < len(mapperData); i++ {
@@ -172,10 +172,10 @@ func TrackMapperPost(s *discordgo.Session) {
 
 			// Save mapper data
 			jsonCache, err := json.Marshal(mapperData)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 
 			err = ioutil.WriteFile("./data/osuData/mapperData.json", jsonCache, 0644)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 
 			startTime = time.Now()
 		}

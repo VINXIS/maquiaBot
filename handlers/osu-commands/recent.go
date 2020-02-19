@@ -104,7 +104,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			Username: username,
 			Limit:    50,
 		})
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 		if len(scoreList) == 0 {
 			s.ChannelMessageSend(m.ChannelID, username+" has not played recently!")
 			return
@@ -114,7 +114,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			Username: username,
 			Limit:    100,
 		})
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 		if len(scoreList) == 0 {
 			s.ChannelMessageSend(m.ChannelID, username+" has no top scores!")
 			return
@@ -124,9 +124,9 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 	// Sort scores by date and get score
 	sort.Slice(scoreList, func(i, j int) bool {
 		time1, err := time.Parse("2006-01-02 15:04:05", scoreList[i].Date.String())
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 		time2, err := time.Parse("2006-01-02 15:04:05", scoreList[j].Date.String())
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 
 		return time1.Unix() > time2.Unix()
 	})
@@ -224,7 +224,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			Username: userP.Username,
 			Limit:    100,
 		})
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 		for i, orderedScore := range orderedScores {
 			if score.Score.Score == orderedScore.Score.Score {
 				mapCompletion += "**#" + strconv.Itoa(i+1) + "** in top performances! \n"
@@ -235,7 +235,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			BeatmapID: beatmap.BeatmapID,
 			Limit:     100,
 		})
-		tools.ErrRead(err)
+		tools.ErrRead(s, err)
 		for i, mapScore := range mapScores {
 			if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
 				mapCompletion += "**#" + strconv.Itoa(i+1) + "** on leaderboard! \n"
@@ -252,10 +252,10 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		var ppValueArray [2]string
 		go osutools.PPCalc(beatmap, osuapi.Score{
 			MaxCombo: beatmap.MaxCombo,
-			Count50: score.Count50,
+			Count50:  score.Count50,
 			Count100: score.Count100,
-			Count300: totalObjs-score.Count50-score.Count100,
-			Mods: score.Mods,
+			Count300: totalObjs - score.Count50 - score.Count100,
+			Mods:     score.Mods,
 		}, ppValues)
 		go osutools.PPCalc(beatmap, score.Score, ppValues)
 		for v := 0; v < 2; v++ {
@@ -277,10 +277,10 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		ppValues := make(chan string, 1)
 		go osutools.PPCalc(beatmap, osuapi.Score{
 			MaxCombo: beatmap.MaxCombo,
-			Count50: score.Count50,
+			Count50:  score.Count50,
 			Count100: score.Count100,
-			Count300: totalObjs-score.Count50-score.Count100,
-			Mods: score.Mods,
+			Count300: totalObjs - score.Count50 - score.Count100,
+			Mods:     score.Mods,
 		}, ppValues)
 		pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
 	}

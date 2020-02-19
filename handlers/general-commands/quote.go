@@ -28,7 +28,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 	if len(serverData.Quotes) == 0 {
 		s.ChannelMessageSend(m.ChannelID, "No quotes saved for this server! Please see `help quoteadd` to see how to add quotes!")
 		return
@@ -167,7 +167,7 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 
 	// Get message
 	message := &discordgo.Message{}
@@ -327,10 +327,10 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverData.Time = time.Now()
 
 	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	if message.Content != "" {
 		s.ChannelMessageSend(m.ChannelID, "Quote: `"+message.Content+"` added for **"+message.Author.Username+"**!")
@@ -351,7 +351,7 @@ func QuoteRemove(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 
 	mID := ""
 	if quoteRemoveRegex.MatchString(m.Content) {
@@ -372,10 +372,10 @@ func QuoteRemove(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverData.Time = time.Now()
 
 	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	s.ChannelMessageSend(m.ChannelID, "Quote removed!")
 	return
@@ -391,7 +391,7 @@ func Quotes(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 	serverImg := "https://cdn.discordapp.com/icons/" + server.ID + "/" + server.Icon
 	if strings.Contains(server.Icon, "a_") {
 		serverImg += ".gif"

@@ -24,7 +24,7 @@ func Triggers(s *discordgo.Session, m *discordgo.MessageCreate) {
 		serverImg += ".png"
 	}
 
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 	embed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
 			Name:    server.Name,

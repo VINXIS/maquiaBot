@@ -34,7 +34,7 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain channel data
-	channelData, new := tools.GetChannel(*channel)
+	channelData, new := tools.GetChannel(*channel, s)
 
 	// Get params
 	args := strings.Split(m.Content, " ")[1:]
@@ -163,10 +163,10 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Write data to JSON
 	jsonCache, err := json.Marshal(channelData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/channelData/"+m.ChannelID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	// Call trackpost if new, otherwise just post track information
 	if new {
@@ -196,7 +196,7 @@ func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain channel data
-	channelData, new := tools.GetChannel(*channel)
+	channelData, new := tools.GetChannel(*channel, s)
 	if new {
 		s.ChannelMessageSend(m.ChannelID, "There is no tracking info for this channel currently!")
 		return
@@ -207,10 +207,10 @@ func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Write data to JSON
 	jsonCache, err := json.Marshal(channelData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/channelData/"+m.ChannelID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	if channelData.Tracking {
 		go osutools.TrackPost(*channel, s)

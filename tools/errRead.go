@@ -5,6 +5,7 @@ import (
 	"log"
 	"runtime"
 
+	config "../config"
 	"github.com/bwmarrin/discordgo"
 )
 

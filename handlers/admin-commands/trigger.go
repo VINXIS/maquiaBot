@@ -30,7 +30,7 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server)
+	serverData := tools.GetServer(*server, s)
 
 	// Check if params were given
 	if !triggerRegex.MatchString(m.Content) {
@@ -51,10 +51,10 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 				}
 			}
 			jsonCache, err := json.Marshal(serverData)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 
 			err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 			s.ChannelMessageSend(m.ChannelID, "Removed trigger ID: "+text)
 		} else {
 			s.ChannelMessageSend(m.ChannelID, text+" is an invalid ID!")
@@ -124,10 +124,10 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	serverData.Triggers = append(serverData.Triggers, triggerData)
 	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	s.ChannelMessageSend(m.ChannelID, "The trigger `"+triggerData.Cause+"` for `"+triggerData.Result+"` has been created!")
 

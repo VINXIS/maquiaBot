@@ -31,7 +31,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 		case <-ticker.C:
 
 			// Get channel data
-			ch, newCh := tools.GetChannel(channel)
+			ch, newCh := tools.GetChannel(channel, s)
 
 			if !ch.Tracking || len(ch.Users) == 0 || newCh {
 				return
@@ -110,7 +110,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 							UserID: user.UserID,
 							Limit:  100,
 						})
-						tools.ErrRead(err)
+						tools.ErrRead(s, err)
 						for i, orderedScore := range orderedScores {
 							if score.Score.Score == orderedScore.Score.Score {
 								topNum = i + 1
@@ -122,7 +122,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 							BeatmapID: beatmap.BeatmapID,
 							Limit:     100,
 						})
-						tools.ErrRead(err)
+						tools.ErrRead(s, err)
 						for i, mapScore := range mapScores {
 							if score.UserID == mapScore.UserID && score.Score.Score == mapScore.Score.Score {
 								topNum = i + 1
@@ -278,7 +278,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 							recentUser, err := OsuAPI.GetUser(osuapi.GetUserOpts{
 								UserID: user.UserID,
 							})
-							tools.ErrRead(err)
+							tools.ErrRead(s, err)
 
 							if recentUser.PP != user.PP {
 								embed.Author.Name = user.Username + " " + strconv.FormatFloat(user.PP, 'f', 2, 64) + " -> " + strconv.FormatFloat(recentUser.PP, 'f', 2, 64)
@@ -308,10 +308,10 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 
 			// Write data to JSON
 			jsonCache, err := json.Marshal(ch)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 
 			err = ioutil.WriteFile("./data/channelData/"+ch.Channel.ID+".json", jsonCache, 0644)
-			tools.ErrRead(err)
+			tools.ErrRead(s, err)
 
 			startTime = time.Now()
 		}

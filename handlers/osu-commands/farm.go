@@ -78,7 +78,7 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 	// Obtain farm data
 	farmData := structs.FarmData{}
 	f, err := ioutil.ReadFile("./data/osuData/mapFarm.json")
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 	_ = json.Unmarshal(f, &farmData)
 
 	// Add the new information to the full data
@@ -92,10 +92,10 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 
 	// Save info
 	jsonCache, err := json.Marshal(cache)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	err = ioutil.WriteFile("./data/osuData/profileCache.json", jsonCache, 0644)
-	tools.ErrRead(err)
+	tools.ErrRead(s, err)
 
 	// Get the list of scores
 	sort.Slice(user.Farm.List, func(i, j int) bool { return user.Farm.List[i].FarmScore > user.Farm.List[j].FarmScore })
