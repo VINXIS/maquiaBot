@@ -253,6 +253,10 @@ func (r *ReplayData) GetPlayData(isAPI bool) []PlayData {
 	timeElapsed := int64(0)
 	for _, hit := range hits {
 		parts := strings.Split(hit, "|")
+		
+		if len(parts) < 3 {
+			break
+		}
 
 		if parts[0] == "-12345" && parts[1] == "0" && parts[2] == "0" {
 			r.Seed, _ = strconv.ParseFloat(parts[3], 64)
