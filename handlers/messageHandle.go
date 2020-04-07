@@ -227,6 +227,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Choose(s, m)
 		case serverPrefix + "cheers":
 			go gencommands.Cheers(s, m)
+		case serverPrefix + "col", serverPrefix + "color", serverPrefix + "colour":
+			go gencommands.Colour(s, m)
 		case serverPrefix + "crab":
 			go gencommands.Crab(s, m)
 		case serverPrefix + "decrypt":

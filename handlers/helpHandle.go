@@ -41,6 +41,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`(cv|comparev|comparevagina)`, " +
 					"`(ch|choose)`, " +
 					"`cheers`, " +
+					"`(col|color|colour)`, " +
 					"`crab`, " +
 					"`decrypt`, " +
 					"`(e|emoji|emote)`, " +
@@ -162,6 +163,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Choose(embed)
 		case "cheers":
 			embed = helpcommands.Cheers(embed)
+		case "col", "color", "colour":
+			embed = helpcommands.Colour(embed)
 		case "crab":
 			embed = helpcommands.Crab(embed)
 		case "decrypt":
