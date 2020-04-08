@@ -25,6 +25,11 @@ func Colour(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		&discordgo.MessageEmbedField{
+			Name:   "<h> <s> <v> [a] -hsva",
+			Value:  "To use hsv values, provide the hsv values, the alpha value is optional. Add `-hsva` to the end.",
+			Inline: true,
+		},
+		&discordgo.MessageEmbedField{
 			Name:   "<c> <m> <y> <k> -cmyk",
 			Value:  "To use cmyk values, provide the cmyk values, and add `-cmyk` to the end.",
 			Inline: true,

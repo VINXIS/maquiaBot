@@ -2,6 +2,7 @@ package gencommands
 
 import (
 	"bytes"
+	"fmt"
 	"image/color"
 	"image/png"
 	"math/rand"
@@ -10,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"../../tools"
+	colourtools "../../colour-tools"
 	"github.com/bwmarrin/discordgo"
 	"github.com/fogleman/gg"
 )
@@ -21,10 +22,11 @@ func Colour(s *discordgo.Session, m *discordgo.MessageCreate) {
 	ctx := gg.NewContext(512, 512)
 	ctx.DrawRectangle(0, 0, 512, 512)
 	var col color.Color
-	
+	var text string
+
 	regex, err := regexp.Compile(`col(ou?r)?\s(.+)`)
 	params := ""
-	if !regex.MatchString(m.Content) {
+	if !regex.MatchString(m.Content) { // No values given, generate random colour
 		authorid, _ := strconv.Atoi(m.Author.ID)
 		random := rand.New(rand.NewSource(int64(authorid) + time.Now().UnixNano()))
 		col = color.NRGBA{
@@ -42,7 +44,7 @@ func Colour(s *discordgo.Session, m *discordgo.MessageCreate) {
 		params = strings.TrimSpace(strings.Replace(params, "-hex", "", -1))
 		params = strings.TrimSpace(strings.Replace(params, "#", "", -1))
 
-		col, err = tools.HexToRGB(params)
+		col, err = colourtools.HexToRGB(params)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Invalid hex! Make sure the hex value for the colour is either 3, 6, or 8 characters long, and has no illegal characters!")
 			return
@@ -67,9 +69,34 @@ func Colour(s *discordgo.Session, m *discordgo.MessageCreate) {
 			hslavals = append(hslavals, valNum)
 		}
 
-		col, err = tools.HSLtoRGB(hslavals)
+		col, err = colourtools.HSLtoRGB(hslavals)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "Invalid HSL(A) values! `"+err.Error()+"`")
+			return
+		}
+	} else if strings.Contains(params, "-hsva") || strings.Contains(params, "-hsv") { // HSV(A)
+		params = strings.TrimSpace(strings.Replace(params, "-hsva", "", -1))
+		params = strings.TrimSpace(strings.Replace(params, "-hsv", "", -1))
+
+		vals := strings.Split(params, " ")
+		if len(vals) < 3 || len(vals) > 4 {
+			s.ChannelMessageSend(m.ChannelID, "You may only send 3 to 4 values for hsv(a)! Separate the values by spaces.")
+			return
+		}
+
+		hsvavals := []float64{}
+		for _, val := range vals {
+			valNum, err := strconv.ParseFloat(val, 64)
+			if err != nil || valNum < 0 || valNum > 255 {
+				s.ChannelMessageSend(m.ChannelID, "Invalid HSV(A) value! Value must be between 0 and 255")
+				return
+			}
+			hsvavals = append(hsvavals, valNum)
+		}
+
+		col, err = colourtools.HSVtoRGB(hsvavals)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "Invalid HSV(A) values! `"+err.Error()+"`")
 			return
 		}
 	} else if strings.Contains(params, "-cmyk") { // CMYK
@@ -164,10 +191,47 @@ func Colour(s *discordgo.Session, m *discordgo.MessageCreate) {
 	ctx.Fill()
 	img := ctx.Image()
 
+	// Generate text
+	r, g, b, a := col.RGBA()
+	r >>= 8
+	g >>= 8
+	b >>= 8
+	a >>= 8
+	vals := []uint8{uint8(r), uint8(g), uint8(b)}
+	if a != 255 {
+		vals = append(vals, uint8(a))
+	}
+	hex, err := colourtools.RGBToHex(vals)
+	hsl, err := colourtools.RGBToHSL(vals)
+	fmt.Println(hsl)
+	hsv, err := colourtools.RGBToHSV(vals)
+	cmyk, err := colourtools.RGBToCMYK(vals)
+	ycbcr, err := colourtools.RGBToYCBCR(vals)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Error converting values! "+err.Error())
+		return
+	}
+	if a != 255 {
+		text += "RGBA: " + strconv.Itoa(int(r)) + " " + strconv.Itoa(int(g)) + " " + strconv.Itoa(int(b)) + " " + strconv.Itoa(int(a)) + "\n" +
+			"Hex: " + hex + "\n" +
+			"HSLA: " + strconv.Itoa(hsl[0]) + " " + strconv.Itoa(hsl[1]) + " " + strconv.Itoa(hsl[2]) + " " + strconv.Itoa(hsl[3]) + "\n" +
+			"HSVA: " + strconv.Itoa(hsv[0]) + " " + strconv.Itoa(hsv[1]) + " " + strconv.Itoa(hsv[2]) + " " + strconv.Itoa(hsv[3]) + "\n" +
+			"CMYK: " + strconv.Itoa(int(float64(cmyk.C)/255*100)) + " " + strconv.Itoa(int(float64(cmyk.M)/255*100)) + " " + strconv.Itoa(int(float64(cmyk.Y)/255*100)) + " " + strconv.Itoa(int(float64(cmyk.K)/255*100)) + "\n" +
+			"YCbCrA: " + strconv.Itoa(int(ycbcr.Y)) + " " + strconv.Itoa(int(ycbcr.Cb)) + " " + strconv.Itoa(int(ycbcr.Cr)) + " " + strconv.Itoa(int(ycbcr.A))
+	} else {
+		text += "RGB: " + strconv.Itoa(int(r)) + " " + strconv.Itoa(int(g)) + " " + strconv.Itoa(int(b)) + "\n" +
+			"Hex: " + hex + "\n" +
+			"HSL: " + strconv.Itoa(hsl[0]) + " " + strconv.Itoa(hsl[1]) + " " + strconv.Itoa(hsl[2]) + "\n" +
+			"HSV: " + strconv.Itoa(hsv[0]) + " " + strconv.Itoa(hsv[1]) + " " + strconv.Itoa(hsv[2]) + "\n" +
+			"CMYK: " + strconv.Itoa(int(float64(cmyk.C)/255*100)) + " " + strconv.Itoa(int(float64(cmyk.M)/255*100)) + " " + strconv.Itoa(int(float64(cmyk.Y)/255*100)) + " " + strconv.Itoa(int(float64(cmyk.K)/255*100)) + "\n" +
+			"YCbCr: " + strconv.Itoa(int(ycbcr.Y)) + " " + strconv.Itoa(int(ycbcr.Cb)) + " " + strconv.Itoa(int(ycbcr.Cr))
+	}
+
 	// Send image
 	imgBytes := new(bytes.Buffer)
 	_ = png.Encode(imgBytes, img)
 	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+		Content: text,
 		Files: []*discordgo.File{
 			&discordgo.File{
 				Name:   "image.png",
