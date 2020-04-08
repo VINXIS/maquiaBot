@@ -7,7 +7,7 @@ import (
 // Colour explains the colour functionality
 func Colour(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: col / color / colour"
-	embed.Description = "`(col|color|colour) <vals> -<hex|hsla|cmyk|ycbcr>` has the bot generate an image of the colour given. See below for different options."
+	embed.Description = "`(col|color|colour) <vals> -<hex|hsla|cmyk|ycbcr>` has the bot generate an image of the colour given. See below for different options. No colour being given will generate an image of a random colour."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		&discordgo.MessageEmbedField{
 			Name:   "<r> <g> <b> [a]",

@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"image/color"
 	"image/png"
-	"log"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"../../tools"
 	"github.com/bwmarrin/discordgo"
@@ -16,19 +17,25 @@ import (
 
 // Colour generates a 256x256 image of that colour
 func Colour(s *discordgo.Session, m *discordgo.MessageCreate) {
-	regex, err := regexp.Compile(`col(ou?r)?\s(.+)`)
-	if !regex.MatchString(m.Content) || err != nil {
-		s.ChannelMessageSend(m.ChannelID, "Please give options to choose from!")
-		return
-	}
-
-	params := regex.FindStringSubmatch(m.Content)[2]
-	log.Println(params)
-
 	// Initiate image generator
 	ctx := gg.NewContext(512, 512)
 	ctx.DrawRectangle(0, 0, 512, 512)
 	var col color.Color
+	
+	regex, err := regexp.Compile(`col(ou?r)?\s(.+)`)
+	params := ""
+	if !regex.MatchString(m.Content) {
+		authorid, _ := strconv.Atoi(m.Author.ID)
+		random := rand.New(rand.NewSource(int64(authorid) + time.Now().UnixNano()))
+		col = color.NRGBA{
+			uint8(random.Intn(256)),
+			uint8(random.Intn(256)),
+			uint8(random.Intn(256)),
+			255,
+		}
+	} else {
+		params = regex.FindStringSubmatch(m.Content)[2]
+	}
 
 	// Set colour
 	if strings.Contains(params, "-hex") { // HEX
@@ -114,7 +121,7 @@ func Colour(s *discordgo.Session, m *discordgo.MessageCreate) {
 			ycbcrvals[1],
 			ycbcrvals[2],
 		}
-	} else { // RGB(A)
+	} else if params != "" { // RGB(A)
 		// In case they tried to use this tag not knowing the default is rgb anyway
 		params = strings.TrimSpace(strings.Replace(params, "-rgba", "", -1))
 		params = strings.TrimSpace(strings.Replace(params, "-rgb", "", -1))
