@@ -126,17 +126,16 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 			if format == "" {
 				s.ChannelMessageSend(m.ChannelID, trigger.Result)
-				return
-			}
-
-			response, err := http.Get(trigger.Result)
-			if err == nil {
-				s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-					File: &discordgo.File{
-						Name:   "trigger" + format,
-						Reader: response.Body,
-					},
-				})
+			} else {
+				response, err := http.Get(trigger.Result)
+				if err == nil {
+					s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+						File: &discordgo.File{
+							Name:   "trigger" + format,
+							Reader: response.Body,
+						},
+					})
+				}
 			}
 		}
 	}
@@ -154,7 +153,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	} else if strings.HasPrefix(m.Content, serverPrefix) {
 		args := strings.Split(strings.Split(m.Content, "\n")[0], " ")
-		switch args[0] {
+		switch strings.ToLower(args[0]) {
 		// Commands without functions
 		case serverPrefix + "complain":
 			go s.ChannelMessageSend(m.ChannelID, "Shut up hoe")
