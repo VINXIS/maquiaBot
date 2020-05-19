@@ -2,7 +2,6 @@ package gencommands
 
 import (
 	"bytes"
-	"fmt"
 	"image/color"
 	"image/png"
 	"math/rand"
@@ -203,7 +202,6 @@ func Colour(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	hex, err := colourtools.RGBToHex(vals)
 	hsl, err := colourtools.RGBToHSL(vals)
-	fmt.Println(hsl)
 	hsv, err := colourtools.RGBToHSV(vals)
 	cmyk, err := colourtools.RGBToCMYK(vals)
 	ycbcr, err := colourtools.RGBToYCBCR(vals)
