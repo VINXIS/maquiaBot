@@ -9,22 +9,22 @@ func Remind(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: remind / reminder"
 	embed.Description = "`(remind|reminder) [text] [in time]` reminds you in some amount of time."
 	embed.Fields = []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
+		{
 			Name:   "[text]",
 			Value:  "The text to remind you about. Not required.",
 			Inline: true,
 		},
-		&discordgo.MessageEmbedField{
+		{
 			Name:   "[in time]",
 			Value:  "The time until you want to be reminded.",
 			Inline: true,
 		},
-		&discordgo.MessageEmbedField{
+		{
 			Name:   "Example format:",
 			Value:  "`$remind play osu! in 5 hours` Will remind you about `play osu!` in 5 hours.",
 			Inline: true,
 		},
-		&discordgo.MessageEmbedField{
+		{
 			Name:  "Related Commands:",
 			Value: "`reminders`, `remindremove`",
 		},
@@ -37,7 +37,7 @@ func Reminders(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: reminders"
 	embed.Description = "`reminders` shows you all of your currently running reminders."
 	embed.Fields = []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
+		{
 			Name:  "Related Commands:",
 			Value: "`remind`, `remindremove`",
 		},
@@ -50,11 +50,11 @@ func RemindRemove(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: remindremove / rremove"
 	embed.Description = "`(remindremove|rremove) <reminder id|all>` removes a reminder / all of your reminders."
 	embed.Fields = []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
+		{
 			Name:  "<reminder id|all>",
 			Value: "The ID of the reminder you want to remove which is obtainable from `reminders`. You can also state `all` instead of an ID to remove all of your currently running reminders.",
 		},
-		&discordgo.MessageEmbedField{
+		{
 			Name:  "Related Commands:",
 			Value: "`remind`, `reminders`",
 		},

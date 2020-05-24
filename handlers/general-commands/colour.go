@@ -231,7 +231,7 @@ func Colour(s *discordgo.Session, m *discordgo.MessageCreate) {
 	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 		Content: text,
 		Files: []*discordgo.File{
-			&discordgo.File{
+			{
 				Name:   "image.png",
 				Reader: imgBytes,
 			},

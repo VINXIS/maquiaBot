@@ -153,238 +153,246 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	} else if strings.HasPrefix(m.Content, serverPrefix) {
 		args := strings.Split(strings.Split(m.Content, "\n")[0], " ")
-		switch strings.ToLower(args[0]) {
+		switch strings.ToLower(strings.Replace(args[0], serverPrefix, "", 1)) {
 		// Commands without functions
-		case serverPrefix + "complain":
+		case "complain":
 			go s.ChannelMessageSend(m.ChannelID, "Shut up hoe")
-		case serverPrefix + "dubs", serverPrefix + "doubles", serverPrefix + "trips", serverPrefix + "triples", serverPrefix + "quads", serverPrefix + "quadruples", serverPrefix + "quints", serverPrefix + "quintuples", serverPrefix + "sexts", serverPrefix + "sextuples", serverPrefix + "septs", serverPrefix + "septuples", serverPrefix + "octs", serverPrefix + "octuples", serverPrefix + "nons", serverPrefix + "nontuples":
+		case "dubs", "doubles", "trips", "triples", "quads", "quadruples", "quints", "quintuples", "sexts", "sextuples", "septs", "septuples", "octs", "octuples", "nons", "nontuples":
 			go s.ChannelMessageSend(m.ChannelID, "Ur retarded")
-		case serverPrefix + "k", serverPrefix + "key":
+		case "k", "key":
 			go s.ChannelMessageSend(m.ChannelID, "``` Default AES encryption key: Nxb]^NSc;L*qn3K(/tN{6N7%4n32fF#@```\n This key is given out publicly and I use it for all of my encryption tools, so please do not use me for sensitive data.\n To use your own key, make sure you add a `-k` flag!")
-		case serverPrefix + "noncesize", serverPrefix + "nsize":
+		case "noncesize", "nsize":
 			key := []byte("Nxb]^NSc;L*qn3K(/tN{6N7%4n32fF#@")
 			block, _ := aes.NewCipher(key)
 			gcm, _ := cipher.NewGCM(block)
 			go s.ChannelMessageSend(m.ChannelID, "The nonce size using the default AES encryption key is "+strconv.Itoa(gcm.NonceSize()))
-		case serverPrefix + "src", serverPrefix + "source":
+		case "src", "source":
 			go s.ChannelMessageSend(m.ChannelID, "https://github.com/VINXIS/maquiaBot")
 
 		// Bot owner commands
-		case serverPrefix + "announce":
+		case "announce":
 			go botcreatorcommands.Announce(s, m)
-		case serverPrefix + "clean":
+		case "clean":
 			go botcreatorcommands.Clean(s, m, profileCache)
-		case serverPrefix + "cleane", serverPrefix + "cleanempty":
+		case "cleane", "cleanempty":
 			go botcreatorcommands.CleanEmpty(s, m, profileCache)
-		case serverPrefix + "cleanf", serverPrefix + "cleanfarm":
+		case "cleanf", "cleanfarm":
 			go botcreatorcommands.CleanFarm(s, m, profileCache)
-		case serverPrefix + "up", serverPrefix + "update":
+		case "up", "update":
 			go botcreatorcommands.Update(s, m)
-		case serverPrefix + "servers":
+		case "servers":
 			go botcreatorcommands.Servers(s, m)
 
 		// Sub-handles for pokemon and osu!
-		case serverPrefix + "h", serverPrefix + "help":
+		case "h", "help":
 			go HelpHandle(s, m, serverPrefix)
-		case serverPrefix + "o", serverPrefix + "osu":
+		case "o", "osu":
 			go OsuHandle(s, m, args, profileCache, mapperData)
-		case serverPrefix + "pokemon":
+		case "pokemon":
 			go PokemonHandle(s, m, args, serverPrefix)
-		case serverPrefix + "math":
+		case "math":
 			go MathHandle(s, m, args)
 
 		// Admin commands'
-		case serverPrefix + "prefix", serverPrefix + "newprefix":
+		case "prefix", "newprefix":
 			go admincommands.Prefix(s, m)
-		case serverPrefix + "purge":
+		case "purge":
 			go admincommands.Purge(s, m)
-		case serverPrefix + "rolea", serverPrefix + "roleauto", serverPrefix + "roleautomation":
+		case "rolea", "roleauto", "roleautomation":
 			go admincommands.RoleAutomation(s, m)
-		case serverPrefix + "toggle":
+		case "toggle":
 			go admincommands.Toggle(s, m)
-		case serverPrefix + "tr", serverPrefix + "track":
+		case "tr", "track":
 			go admincommands.Track(s, m)
-		case serverPrefix + "trigger":
+		case "trigger":
 			go admincommands.Trigger(s, m)
-		case serverPrefix + "tt", serverPrefix + "trackt", serverPrefix + "ttoggle", serverPrefix + "tracktoggle":
+		case "tt", "trackt", "ttoggle", "tracktoggle":
 			go admincommands.TrackToggle(s, m)
 
 		// General commands
-		case serverPrefix + "adj", serverPrefix + "adjective", serverPrefix + "adjectives":
+		case "adj", "adjective", "adjectives":
 			go gencommands.Adjectives(s, m)
-		case serverPrefix + "avatar", serverPrefix + "ava", serverPrefix + "a":
+		case "avatar", "ava", "a":
 			go gencommands.Avatar(s, m)
-		case serverPrefix + "cp", serverPrefix + "comparep", serverPrefix + "comparepenis":
+		case "cap", "caps", "upper":
+			go gencommands.Capitalization(s, m, "allCaps")
+		case "cp", "comparep", "comparepenis":
 			if serverData.Daily {
 				go gencommands.PenisCompare(s, m)
 			}
-		case serverPrefix + "cv", serverPrefix + "comparev", serverPrefix + "comparevagina":
+		case "cv", "comparev", "comparevagina":
 			if serverData.Daily {
 				go gencommands.VaginaCompare(s, m)
 			}
-		case serverPrefix + "ch", serverPrefix + "choose":
+		case "ch", "choose":
 			go gencommands.Choose(s, m)
-		case serverPrefix + "cheers":
+		case "cheers":
 			go gencommands.Cheers(s, m)
-		case serverPrefix + "col", serverPrefix + "color", serverPrefix + "colour":
+		case "col", "color", "colour":
 			go gencommands.Colour(s, m)
-		case serverPrefix + "crab":
+		case "crab":
 			go gencommands.Crab(s, m)
-		case serverPrefix + "decrypt":
+		case "decrypt":
 			go gencommands.Decrypt(s, m)
-		case serverPrefix + "e", serverPrefix + "emoji", serverPrefix + "emote":
+		case "e", "emoji", "emote":
 			go gencommands.Emoji(s, m)
-		case serverPrefix + "encrypt":
+		case "encrypt":
 			go gencommands.Encrypt(s, m)
-		case serverPrefix + "face":
+		case "face":
 			go gencommands.Face(s, m)
-		case serverPrefix + "history":
+		case "history":
 			if serverData.Daily {
 				go gencommands.History(s, m)
 			}
-		case serverPrefix + "idea", serverPrefix + "niceidea":
+		case "idea", "niceidea":
 			go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
-		case serverPrefix + "info":
+		case "info":
 			go gencommands.Info(s, m, profileCache)
-		case serverPrefix + "kanye":
+		case "kanye":
 			go gencommands.Kanye(s, m)
-		case serverPrefix + "late", serverPrefix + "old", serverPrefix + "ancient":
+		case "late", "old", "ancient":
 			go gencommands.Late(s, m)
-		case serverPrefix + "leven", serverPrefix + "levenshtein":
+		case "leven", "levenshtein":
 			go gencommands.Levenshtein(s, m)
-		case serverPrefix + "list":
+		case "list":
 			go gencommands.List(s, m)
-		case serverPrefix + "meme":
+		case "lower":
+			go gencommands.Capitalization(s, m, "allLower")
+		case "meme":
 			go gencommands.Meme(s, m)
-		case serverPrefix + "noun", serverPrefix + "nouns":
+		case "noun", "nouns":
 			go gencommands.Nouns(s, m)
-		case serverPrefix + "ocr":
+		case "ocr":
 			go gencommands.OCR(s, m)
-		case serverPrefix + "over":
+		case "over":
 			go gencommands.OverIt(s, m)
-		case serverPrefix + "p", serverPrefix + "per", serverPrefix + "percent", serverPrefix + "percentage":
+		case "p", "per", "percent", "percentage":
 			go gencommands.Percentage(s, m)
-		case serverPrefix + "parse":
+		case "parse":
 			go gencommands.Parse(s, m)
-		case serverPrefix + "penis":
+		case "penis":
 			if serverData.Daily {
 				go gencommands.Penis(s, m)
 			}
-		case serverPrefix + "ping":
+		case "ping":
 			go gencommands.Ping(s, m)
-		case serverPrefix + "q", serverPrefix + "quote":
+		case "q", "quote":
 			go gencommands.Quote(s, m)
-		case serverPrefix + "qa", serverPrefix + "qadd", serverPrefix + "quotea", serverPrefix + "quoteadd":
+		case "qa", "qadd", "quotea", "quoteadd":
 			go gencommands.QuoteAdd(s, m)
-		case serverPrefix + "qd", serverPrefix + "qr", serverPrefix + "qdelete", serverPrefix + "qremove", serverPrefix + "quotedelete", serverPrefix + "quoteremove":
+		case "qd", "qr", "qdelete", "qremove", "quotedelete", "quoteremove":
 			go gencommands.QuoteRemove(s, m)
-		case serverPrefix + "qs", serverPrefix + "quotes":
+		case "qs", "quotes":
 			go gencommands.Quotes(s, m)
-		case serverPrefix + "rp", serverPrefix + "rankp", serverPrefix + "rankpenis":
+		case "rcap", "rcaps", "rupper", "rlower", "randomcap", "randomcaps", "randomupper", "randomlower":
+			go gencommands.Capitalization(s, m, "random")
+		case "rp", "rankp", "rankpenis":
 			if serverData.Daily {
 				go gencommands.PenisRank(s, m)
 			}
-		case serverPrefix + "remind", serverPrefix + "reminder":
+		case "remind", "reminder":
 			go gencommands.Remind(s, m)
-		case serverPrefix + "reminders":
+		case "reminders":
 			go gencommands.Reminders(s, m)
-		case serverPrefix + "remindremove", serverPrefix + "rremove":
+		case "remindremove", "rremove":
 			go gencommands.RemoveReminder(s, m)
-		case serverPrefix + "rinfo", serverPrefix + "roleinfo":
+		case "rinfo", "roleinfo":
 			go gencommands.RoleInfo(s, m)
-		case serverPrefix + "roll":
+		case "roll":
 			go gencommands.Roll(s, m)
-		case serverPrefix + "rv", serverPrefix + "rankv", serverPrefix + "rankvagina":
+		case "rv", "rankv", "rankvagina":
 			if serverData.Daily {
 				go gencommands.VaginaRank(s, m)
 			}
-		case serverPrefix + "sinfo", serverPrefix + "serverinfo":
+		case "sinfo", "serverinfo":
 			go gencommands.ServerInfo(s, m)
-		case serverPrefix + "skill", serverPrefix + "skills":
+		case "skill", "skills":
 			go gencommands.Skills(s, m)
-		case serverPrefix + "stats", serverPrefix + "class":
+		case "stats", "class":
 			go gencommands.Stats(s, m)
-		case serverPrefix + "triggers":
+		case "title":
+			go gencommands.Capitalization(s, m, "title")
+		case "triggers":
 			go gencommands.Triggers(s, m)
-		case serverPrefix + "twitch", serverPrefix + "twitchdl":
+		case "twitch", "twitchdl":
 			go gencommands.Twitch(s, m)
-		case serverPrefix + "twitter", serverPrefix + "twitterdl":
+		case "twitter", "twitterdl":
 			go gencommands.Twitter(s, m)
-		case serverPrefix + "vagina":
+		case "vagina":
 			if serverData.Daily {
 				go gencommands.Vagina(s, m)
 			}
-		case serverPrefix + "vibe", serverPrefix + "vibec", serverPrefix + "vibecheck":
+		case "vibe", "vibec", "vibecheck":
 			go gencommands.Vibe(s, m, "notRandom")
-		case serverPrefix + "w", serverPrefix + "weather":
+		case "w", "weather":
 			go gencommands.Weather(s, m)
 
 		// Math commands
-		case serverPrefix + "ave", serverPrefix + "average", serverPrefix + "mean":
+		case "ave", "average", "mean":
 			go mathcommands.Average(s, m)
-		case serverPrefix + "d", serverPrefix + "dist", serverPrefix + "distance", serverPrefix + "dir", serverPrefix + "direction":
+		case "d", "dist", "distance", "dir", "direction":
 			go mathcommands.DistanceDirection(s, m)
-		case serverPrefix + "dr", serverPrefix + "degrad", serverPrefix + "degreesradians":
+		case "dr", "degrad", "degreesradians":
 			go mathcommands.DegreesRadians(s, m)
-		case serverPrefix + "rd", serverPrefix + "raddeg", serverPrefix + "radiansdegrees":
+		case "rd", "raddeg", "radiansdegrees":
 			go mathcommands.RadiansDegrees(s, m)
-		case serverPrefix + "stddev", serverPrefix + "standarddev", serverPrefix + "stddeviation", serverPrefix + "standarddeviation":
+		case "stddev", "standarddev", "stddeviation", "standarddeviation":
 			go mathcommands.StandardDeviation(s, m)
-		case serverPrefix + "va", serverPrefix + "vadd", serverPrefix + "vectora", serverPrefix + "vectoradd":
+		case "va", "vadd", "vectora", "vectoradd":
 			go mathcommands.VectorAdd(s, m)
-		case serverPrefix + "vc", serverPrefix + "vcross", serverPrefix + "vectorc", serverPrefix + "vectorcross":
+		case "vc", "vcross", "vectorc", "vectorcross":
 			go mathcommands.VectorCross(s, m)
-		case serverPrefix + "vd", serverPrefix + "vdiv", serverPrefix + "vdivide", serverPrefix + "vectord", serverPrefix + "vectordiv", serverPrefix + "vectordivide":
+		case "vd", "vdiv", "vdivide", "vectord", "vectordiv", "vectordivide":
 			go mathcommands.VectorDivide(s, m)
-		case serverPrefix + "vdot", serverPrefix + "vectordot":
+		case "vdot", "vectordot":
 			go mathcommands.VectorDot(s, m)
-		case serverPrefix + "vm", serverPrefix + "vmult", serverPrefix + "vmultiply", serverPrefix + "vectorm", serverPrefix + "vectormult", serverPrefix + "vectormultiply":
+		case "vm", "vmult", "vmultiply", "vectorm", "vectormult", "vectormultiply":
 			go mathcommands.VectorMultiply(s, m)
-		case serverPrefix + "vs", serverPrefix + "vsub", serverPrefix + "vsubtract", serverPrefix + "vectors", serverPrefix + "vectorsub", serverPrefix + "vectorsubtract":
+		case "vs", "vsub", "vsubtract", "vectors", "vectorsub", "vectorsubtract":
 			go mathcommands.VectorSubtract(s, m)
 
 		// osu! commands
-		case serverPrefix + "bfarm", serverPrefix + "bottomfarm":
+		case "bfarm", "bottomfarm":
 			go osucommands.BottomFarm(s, m, profileCache)
-		case serverPrefix + "bpm":
+		case "bpm":
 			if serverData.Daily {
 				go osucommands.BPM(s, m, profileCache)
 			}
-		case serverPrefix + "c", serverPrefix + "compare":
+		case "c", "compare":
 			go osucommands.Compare(s, m, profileCache)
-		case serverPrefix + "farm":
+		case "farm":
 			go osucommands.Farm(s, m, profileCache)
-		case serverPrefix + "l", serverPrefix + "leader", serverPrefix + "leaderboard":
+		case "l", "leader", "leaderboard":
 			go osucommands.Leaderboard(s, m, beatmapRegex, profileCache)
-		case serverPrefix + "link", serverPrefix + "set":
+		case "link", "set":
 			go osucommands.Link(s, m, args, profileCache)
-		case serverPrefix + "m", serverPrefix + "map":
+		case "m", "map":
 			go osucommands.BeatmapMessage(s, m, beatmapRegex)
-		case serverPrefix + "mt", serverPrefix + "mtrack", serverPrefix + "maptrack", serverPrefix + "mappertrack":
+		case "mt", "mtrack", "maptrack", "mappertrack":
 			go osucommands.TrackMapper(s, m, mapperData)
-		case serverPrefix + "mti", serverPrefix + "mtinfo", serverPrefix + "mtrackinfo", serverPrefix + "maptracking", serverPrefix + "mappertracking", serverPrefix + "mappertrackinfo":
+		case "mti", "mtinfo", "mtrackinfo", "maptracking", "mappertracking", "mappertrackinfo":
 			go osucommands.TrackMapperInfo(s, m, mapperData)
-		case serverPrefix + "osutop", serverPrefix + "osudetail":
+		case "osutop", "osudetail":
 			go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
-		case serverPrefix + "ppadd":
+		case "ppadd":
 			go osucommands.PPAdd(s, m, profileCache)
-		case serverPrefix + "profile":
+		case "profile":
 			go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
-		case serverPrefix + "r", serverPrefix + "rs", serverPrefix + "recent":
+		case "r", "rs", "recent":
 			go osucommands.Recent(s, m, "recent", profileCache)
-		case serverPrefix + "rb", serverPrefix + "recentb", serverPrefix + "recentbest":
+		case "rb", "recentb", "recentbest":
 			go osucommands.Recent(s, m, "best", profileCache)
-		case serverPrefix + "s", serverPrefix + "sc", serverPrefix + "scorepost":
+		case "s", "sc", "scorepost":
 			go osucommands.ScorePost(s, m, profileCache, "scorePost")
-		case serverPrefix + "t", serverPrefix + "top":
+		case "t", "top":
 			go osucommands.Top(s, m, profileCache)
-		case serverPrefix + "tfarm", serverPrefix + "topfarm":
+		case "tfarm", "topfarm":
 			go osucommands.TopFarm(s, m, profileCache)
-		case serverPrefix + "ti", serverPrefix + "tinfo", serverPrefix + "tracking", serverPrefix + "trackinfo":
+		case "ti", "tinfo", "tracking", "trackinfo":
 			go osucommands.TrackInfo(s, m)
 
 		// Pokemon commands
-		case serverPrefix + "b", serverPrefix + "berry":
+		case "b", "berry":
 			go pokemoncommands.Berry(s, m)
 		}
 		go tools.CommandLog(s, m, args[0])

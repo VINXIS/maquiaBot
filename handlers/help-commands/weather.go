@@ -9,7 +9,7 @@ func Weather(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: w / weather"
 	embed.Description = "`(w|weather) <location> [-l lang]` provides current weather information for a location."
 	embed.Fields = []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
+		{
 			Name: "<location>",
 			Value: "A location. This can be the following:\n" +
 				"Latitude and Longitude (e.g 48.8567,2.3508)\n" +
@@ -21,7 +21,7 @@ func Weather(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 				"IP Address (e.g 127.0.0.1)",
 			Inline: true,
 		},
-		&discordgo.MessageEmbedField{
+		{
 			Name:   "[-l lang]",
 			Value:  "Give information in a different language if you want. Although it only changes the \"sunny, partly cloudy, e.t.c\" text.",
 			Inline: true,

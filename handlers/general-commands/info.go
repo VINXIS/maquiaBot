@@ -130,37 +130,37 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 			URL: user.AvatarURL("2048"),
 		},
 		Fields: []*discordgo.MessageEmbedField{
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "ID",
 				Value:  user.ID,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Nickname",
 				Value:  nickname,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Account Created",
 				Value:  createdAt.UTC().Format(time.RFC822Z),
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Date Joined",
 				Value:  joinDateString,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Status",
 				Value:  status,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Linked on osu! as",
 				Value:  osuUsername,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:  "Roles",
 				Value: roles,
 			},
@@ -258,37 +258,37 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			URL: serverImg,
 		},
 		Fields: []*discordgo.MessageEmbedField{
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "ID",
 				Value:  role.ID,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Role Created",
 				Value:  createdAt.UTC().Format(time.RFC822Z),
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Position",
 				Value:  strconv.Itoa(role.Position),
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Managed Externally",
 				Value:  strconv.FormatBool(role.Managed),
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Mentionable",
 				Value:  strconv.FormatBool(role.Mentionable),
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Shown Separately",
 				Value:  strconv.FormatBool(role.Hoist),
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:  "Members (" + strconv.Itoa(memberCount) + ")",
 				Value: memberList,
 			},
@@ -456,67 +456,67 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			URL: serverImg,
 		},
 		Fields: []*discordgo.MessageEmbedField{
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "ID",
 				Value:  server.ID,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Region",
 				Value:  server.Region,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Server Created",
 				Value:  createdAt.UTC().Format(time.RFC822Z),
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Server Owner",
 				Value:  owner.String(),
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "AFK Timeout",
 				Value:  timeoutString,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "AFK Channel",
 				Value:  afkChName,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Emoji Count",
 				Value:  strconv.Itoa(len(server.Emojis)),
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Member Count",
 				Value:  strconv.Itoa(len(server.Members)),
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Role Count",
 				Value:  strconv.Itoa(len(server.Roles)),
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Channels (" + strconv.Itoa(len(server.Channels)) + ")",
 				Value:  channelInfo,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "`" + serverData.Prefix + "stats` Information:",
 				Value:  statsInfo,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Server Options",
 				Value:  serverOptions,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:   "Quotes (" + quoteCount + ")",
 				Value:  quoteInfo,
 				Inline: true,

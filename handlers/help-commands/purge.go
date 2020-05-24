@@ -9,14 +9,14 @@ func Purge(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: purge"
 	embed.Description = "`purge [users] [num]` lets admins delete previous messages."
 	embed.Fields = []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
-			Name:  "[users]",
-			Value: "A list of mentions / users / nicknames to remove separated by spaces. In the case where users have spaces in both their nick and actual username, use mentions instead. No user given will remove the latest num for all users.",
+		{
+			Name:   "[users]",
+			Value:  "A list of mentions / users / nicknames to remove separated by spaces. In the case where users have spaces in both their nick and actual username, use mentions instead. No user given will remove the latest num for all users.",
 			Inline: true,
 		},
-		&discordgo.MessageEmbedField{
-			Name:  "[num]",
-			Value: "The number of previous messages to delete. (Default: 3)",
+		{
+			Name:   "[num]",
+			Value:  "The number of previous messages to delete. (Default: 3)",
 			Inline: true,
 		},
 	}

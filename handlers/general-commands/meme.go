@@ -121,7 +121,7 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 		Files: []*discordgo.File{
-			&discordgo.File{
+			{
 				Name:   "image.png",
 				Reader: response.Body,
 			},

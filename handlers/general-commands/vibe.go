@@ -84,7 +84,7 @@ func Vibe(s *discordgo.Session, m *discordgo.MessageCreate, checkType string) {
 		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Content: target.Mention() + " you had a " + strconv.Itoa(Requirement) + "% chance in passing the vibe check.... tough luck.",
 			Files: []*discordgo.File{
-				&discordgo.File{
+				{
 					Name:   "image.png",
 					Reader: imgBytes,
 				},
@@ -99,7 +99,7 @@ func Vibe(s *discordgo.Session, m *discordgo.MessageCreate, checkType string) {
 		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Content: "You have passed the vibe check (" + strconv.Itoa(Requirement) + "% chance). Carry on " + target.Mention(),
 			Files: []*discordgo.File{
-				&discordgo.File{
+				{
 					Name:   "image.gif",
 					Reader: response.Body,
 				},

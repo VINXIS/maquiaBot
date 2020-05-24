@@ -28,7 +28,7 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Content: "Here is the server avatar:",
 			Files: []*discordgo.File{
-				&discordgo.File{
+				{
 					Name:   "image.png",
 					Reader: imgBytes,
 				},

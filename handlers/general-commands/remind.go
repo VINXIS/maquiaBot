@@ -335,7 +335,7 @@ func ReminderMessage(s *discordgo.Session, reminderTimer structs.ReminderTimer) 
 		_, err = s.ChannelMessageSendComplex(dm.ID, &discordgo.MessageSend{
 			Content: "Reminder about this",
 			Files: []*discordgo.File{
-				&discordgo.File{
+				{
 					Name:   "image.png",
 					Reader: imgBytes,
 				},

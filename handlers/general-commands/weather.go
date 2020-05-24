@@ -118,18 +118,18 @@ func Weather(s *discordgo.Session, m *discordgo.MessageCreate) {
 			URL: "http:" + weatherData.Weather.Condition.Icon,
 		},
 		Fields: []*discordgo.MessageEmbedField{
-			&discordgo.MessageEmbedField{ // Temperature
+			{ // Temperature
 				Name: "Temperature",
 				Value: "**" + strconv.FormatFloat(weatherData.Weather.Celsius, 'f', 1, 64) + "C (" + strconv.FormatFloat(weatherData.Weather.Fahrenheit, 'f', 1, 64) + "F)**\n" +
 					"Feels like: **" + strconv.FormatFloat(weatherData.Weather.FeelsLikeC, 'f', 1, 64) + "C (" + strconv.FormatFloat(weatherData.Weather.FeelsLikeF, 'f', 1, 64) + "F)**",
 			},
-			&discordgo.MessageEmbedField{ // Wind
+			{ // Wind
 				Name: "Wind",
 				Value: "**" + strconv.FormatFloat(weatherData.Weather.WindKPH, 'f', 1, 64) + "KPH (" + strconv.FormatFloat(weatherData.Weather.WindMPH, 'f', 1, 64) + "MPH)**\n" +
 					"Direction: **" + weatherData.Weather.WindDir + " (" + strconv.FormatFloat(weatherData.Weather.WindDeg, 'f', 0, 64) + ")**\n" +
 					"Gust speed: **" + strconv.FormatFloat(weatherData.Weather.GustKPH, 'f', 1, 64) + "KPH (" + strconv.FormatFloat(weatherData.Weather.GustMPH, 'f', 1, 64) + "MPH)**",
 			},
-			&discordgo.MessageEmbedField{ // Other
+			{ // Other
 				Name: "Other",
 				Value: "Pressure **" + strconv.FormatFloat(weatherData.Weather.PressureMB/1000, 'f', 2, 64) + "Bar (" + strconv.FormatFloat(weatherData.Weather.PressurePSI, 'f', 2, 64) + "psi)**\n" +
 					"Precipitation: **" + strconv.FormatFloat(weatherData.Weather.PrecipitationMM/10, 'f', 2, 64) + "cm (" + strconv.FormatFloat(weatherData.Weather.PrecipitationIN, 'f', 2, 64) + "in)**\n" +

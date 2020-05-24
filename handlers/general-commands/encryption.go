@@ -101,7 +101,7 @@ func Decrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		_, err = s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Files: []*discordgo.File{
-				&discordgo.File{
+				{
 					Name:   "image.png",
 					Reader: response.Body,
 				},

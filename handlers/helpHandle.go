@@ -25,101 +25,105 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
 				Name: "Admin commands:",
-				Value: "`(prefix|maquiaprefix|newprefix)`, " +
+				Value: "`maquiaprefix`, " +
 					"`purge`, " +
-					"`(rolea|roleauto|roleautomation)`, " +
+					"`roleautomation`, " +
 					"`toggle`, " +
-					"`(tr|track)`, " +
+					"`track`, " +
 					"`trigger`, " +
-					"`(tt|trackt|ttoggle|tracktoggle)`",
+					"`tracktoggle`",
 			},
 			&discordgo.MessageEmbedField{
 				Name: "General commands:",
-				Value: "`(adj|adjective|adjectives)`, " +
-					"`(a|ava|avatar)`, " +
-					"`(cp|comparep|comparepenis)`, " +
-					"`(cv|comparev|comparevagina)`, " +
-					"`(ch|choose)`, " +
+				Value: "`adjectives`, " +
+					"`avatar`, " +
+					"`caps`, " +
+					"`comparepenis`, " +
+					"`comparevagina`, " +
+					"`choose`, " +
 					"`cheers`, " +
-					"`(col|color|colour)`, " +
+					"`colour`, " +
 					"`crab`, " +
 					"`decrypt`, " +
-					"`(e|emoji|emote)`, " +
+					"`emote`, " +
 					"`encrypt`, " +
 					"`face`, " +
 					"`history`, " +
-					"`(idea|niceidea)`, " +
+					"`idea`, " +
 					"`info`, " +
 					"`kanye`, " +
-					"`(late|old|ancient)`, " +
-					"`(leven|levenshtein)`, " +
+					"`late`, " +
+					"`levenshtein`, " +
 					"`list`, " +
+					"`lower`, " +
 					"`meme`, " +
-					"`(noun|nouns)`, " +
+					"`nouns`, " +
 					"`ocr`, " +
 					"`over`, " +
-					"`(p|per|percent|percentage)`, " +
+					"`percentage`, " +
 					"`parse`, " +
 					"`penis`, " +
 					"`ping`, " +
-					"`(q|quote)`, " +
-					"`(qa|qadd|quotea|quoteadd)`, " +
-					"`(qd|qr|qremove|qdelete|quoter|quoted|quoteremove|quotedelete)`, " +
-					"`(qs|quotes)`, " +
-					"`(rp|rankp|rankpenis)`, " +
-					"`(rv|rankv|rankvagina)`, " +
-					"`(remind|reminder)`, " +
+					"`quote`, " +
+					"`quoteadd`, " +
+					"`quotedelete`, " +
+					"`quotes`, " +
+					"`randomcaps`, " +
+					"`rankpenis`, " +
+					"`rankvagina`, " +
+					"`reminder`, " +
 					"`reminders`, " +
-					"`(remindremove|rremove)`, " +
-					"`(rinfo|roleinfo)`, " +
+					"`remindremove`, " +
+					"`roleinfo`, " +
 					"`roll`, " +
-					"`(sinfo|serverinfo)`, " +
-					"`(skill|skills)`, " +
-					"`(stats|class)`, " +
+					"`serverinfo`, " +
+					"`skills`, " +
+					"`stats`, " +
+					"`title`, " +
 					"`triggers`, " +
-					"`(twitch|twitchdl)`, " +
-					"`(twitter|twitterdl)`, " +
+					"`twitchdl`, " +
+					"`twitterdl`, " +
 					"`vagina`, " +
-					"`(vibe|vibec|vibecheck)`, " +
-					"`(w|weather)`",
+					"`vibecheck`, " +
+					"`weather`",
 			},
 			&discordgo.MessageEmbedField{
 				Name: "math commands:",
-				Value: "`(ave|average|mean)`, " +
-					"`(d|dist|distance|dir|direction)`, " +
-					"`(dr|degrad|degreesradians)`, " +
-					"`(rd|raddeg|radiansdegrees)`, " +
-					"`(stddev|standarddev|stddeviation|standarddeviation)`, " +
-					"`(va|vadd|vectora|vectoradd)`, " +
-					"`(vc|vcross|vectorc|vectorcross)`, " +
-					"`(vd|vdiv|vdivide|vectord|vectordiv|vectordivide)`, " +
-					"`(vdot|vectordot)`, " +
-					"`(vm|vmult|vmultiply|vectorm|vectormult|vectormultiply)`, " +
-					"`(vs|vsub|vsubtract|vectors|vectorsub|vectorsubtract)`",
+				Value: "`average`, " +
+					"`distance`, " +
+					"`degreesradians`, " +
+					"`radiansdegrees`, " +
+					"`standarddeviation`, " +
+					"`vectoradd`, " +
+					"`vectorcross`, " +
+					"`vectordivide`, " +
+					"`vectordot`, " +
+					"`vectormultiply`, " +
+					"`vectorsubtract`",
 			},
 			&discordgo.MessageEmbedField{
 				Name: "osu! commands:",
-				Value: "`(bfarm|bottomfarm)`, " +
+				Value: "`bottomfarm`, " +
 					"`bpm`, " +
-					"`(c|compare)`, " +
+					"`compare`, " +
 					"`farm`, " +
-					"`(l|leader|leaderboard)`, " +
-					"`(link|set)`, " +
-					"`(m|map)`, " +
-					"`(osu|profile)`, " +
+					"`leaderboard`, " +
+					"`link`, " +
+					"`map`, " +
+					"`osu`, " +
 					"`osudetail`, " +
 					"`osutop`, " +
 					"`ppadd`, " +
-					"`(r|rs|recent)`, " +
-					"`(rb|recentb|recentbest)`, " +
-					"`(s|sc|scorepost)`, " +
-					"`(t|top)`, " +
-					"`(tfarm|topfarm)`, " +
-					"`(ti|tinfo|tracking|trackinfo)`",
+					"`recent`, " +
+					"`recentbest`, " +
+					"`scorepost`, " +
+					"`top`, " +
+					"`topfarm`, " +
+					"`trackinfo`",
 			},
 			&discordgo.MessageEmbedField{
 				Name: "Pokemon commands:",
-				Value: "`(b|berry)`, " +
+				Value: "`berry`, " +
 					"`pokemon`",
 			},
 		},
@@ -155,6 +159,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Adjectives(embed)
 		case "avatar", "ava", "a":
 			embed = helpcommands.Avatar(embed)
+		case "cap", "caps", "upper":
+			embed = helpcommands.AllCaps(embed)
 		case "cp", "comparep", "comparepenis":
 			embed = helpcommands.PenisCompare(embed)
 		case "cv", "comparev", "comparevagina":
@@ -189,6 +195,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Levenshtein(embed)
 		case "list":
 			embed = helpcommands.List(embed)
+		case "lower":
+			embed = helpcommands.AllLower(embed)
 		case "meme":
 			embed = helpcommands.Meme(embed)
 		case "noun", "nouns":
@@ -213,6 +221,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.QuoteRemove(embed)
 		case "qs", "quotes":
 			embed = helpcommands.Quotes(embed)
+		case "rcap", "rcaps", "rupper", "rlower", "randomcap", "randomcaps", "randomupper", "randomlower":
+			embed = helpcommands.RandomCaps(embed)
 		case "rp", "rankp", "rankpenis":
 			embed = helpcommands.PenisRank(embed)
 		case "rv", "rankv", "rankvagina":
@@ -233,6 +243,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Skills(embed)
 		case "stats", "class":
 			embed = helpcommands.Stats(embed)
+		case "title":
+			embed = helpcommands.Title(embed)
 		case "triggers":
 			embed = helpcommands.Triggers(embed)
 		case "twitch", "twitchdl":
