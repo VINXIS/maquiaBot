@@ -215,7 +215,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 			UserID:    user.UserID,
 			Mods:      &parsedMods,
 		})
-		if err == nil {
+		if err == nil && len(replayScore) > 0 {
 			score = replayScore[0].Score
 
 			if score.Score != scoreVal {
