@@ -160,7 +160,17 @@ func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "No text found...")
 		return
 	}
-	s.ChannelMessageSend(m.ChannelID, "```"+str+"```")
+	_, err = s.ChannelMessageSend(m.ChannelID, "```"+str+"```")
+	if err != nil {
+		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+			Files: []*discordgo.File{
+				{
+					Name:   "ocr.txt",
+					Reader: strings.NewReader(str),
+				},
+			},
+		})
+	}
 	return
 }
 
