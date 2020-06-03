@@ -143,7 +143,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Command checks
 	if strings.HasPrefix(m.Content, "maquiaprefix") {
 		go admincommands.Prefix(s, m)
-		go tools.CommandLog(s, m, "maquiaprefix")
 		return
 	} else if strings.HasPrefix(m.Content, "maquiacleanf") || strings.Contains(m.Content, "maquiacleanfarm") {
 		go botcreatorcommands.CleanFarm(s, m, profileCache)
@@ -395,7 +394,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "b", "berry":
 			go pokemoncommands.Berry(s, m)
 		}
-		go tools.CommandLog(s, m, args[0])
 		return
 	} else if beatmapRegex.MatchString(m.Content) && serverData.OsuToggle { // If a beatmap was linked
 		go osucommands.BeatmapMessage(s, m, beatmapRegex)
