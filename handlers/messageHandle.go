@@ -214,7 +214,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "avatar", "ava", "a":
 			go gencommands.Avatar(s, m)
 		case "cap", "caps", "upper":
-			go gencommands.Capitalization(s, m, "allCaps")
+			go gencommands.TextManipulation(s, m, "allCaps")
 		case "cp", "comparep", "comparepenis":
 			if serverData.Daily {
 				go gencommands.PenisCompare(s, m)
@@ -256,7 +256,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "list":
 			go gencommands.List(s, m)
 		case "lower":
-			go gencommands.Capitalization(s, m, "allLower")
+			go gencommands.TextManipulation(s, m, "allLower")
 		case "meme":
 			go gencommands.Meme(s, m)
 		case "noun", "nouns":
@@ -284,7 +284,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "qs", "quotes":
 			go gencommands.Quotes(s, m)
 		case "rcap", "rcaps", "rupper", "rlower", "randomcap", "randomcaps", "randomupper", "randomlower":
-			go gencommands.Capitalization(s, m, "random")
+			go gencommands.TextManipulation(s, m, "random")
 		case "rp", "rankp", "rankpenis":
 			if serverData.Daily {
 				go gencommands.PenisRank(s, m)
@@ -309,8 +309,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Skills(s, m)
 		case "stats", "class":
 			go gencommands.Stats(s, m)
+		case "swap":
+			go gencommands.TextManipulation(s, m, "swap")
 		case "title":
-			go gencommands.Capitalization(s, m, "title")
+			go gencommands.TextManipulation(s, m, "title")
 		case "triggers":
 			go gencommands.Triggers(s, m)
 		case "twitch", "twitchdl":

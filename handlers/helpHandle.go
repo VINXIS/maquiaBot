@@ -79,6 +79,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`serverinfo`, " +
 					"`skills`, " +
 					"`stats`, " +
+					"`swap`, " +
 					"`title`, " +
 					"`triggers`, " +
 					"`twitchdl`, " +
@@ -243,6 +244,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Skills(embed)
 		case "stats", "class":
 			embed = helpcommands.Stats(embed)
+		case "swap":
+			embed = helpcommands.Swap(embed)
 		case "title":
 			embed = helpcommands.Title(embed)
 		case "triggers":

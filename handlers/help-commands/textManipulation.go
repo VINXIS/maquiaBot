@@ -16,7 +16,7 @@ func AllCaps(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:  "Related commands:",
-			Value: "`lower`, `randomcaps`, `title`",
+			Value: "`lower`, `randomcaps`, `swap`, `title`",
 		},
 	}
 	return embed
@@ -34,7 +34,7 @@ func AllLower(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:  "Related commands:",
-			Value: "`caps`, `randomcaps`, `title`",
+			Value: "`caps`, `randomcaps`, `swap`, `title`",
 		},
 	}
 	return embed
@@ -52,7 +52,25 @@ func RandomCaps(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:  "Related commands:",
-			Value: "`caps`, `lower`, `title`",
+			Value: "`caps`, `lower`, `swap`, `title`",
+		},
+	}
+	return embed
+}
+
+// Swap explains the swap formatting
+func Swap(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
+	embed.Author.Name = "Command: swap"
+	embed.Description = "`swap <text>` will swap letters in the text given."
+	embed.Fields = []*discordgo.MessageEmbedField{
+		{
+			Name:   "<text>",
+			Value:  "The text to swap letters in",
+			Inline: true,
+		},
+		{
+			Name:  "Related commands:",
+			Value: "`caps`, `lower`, `randomcaps`, `title`",
 		},
 	}
 	return embed
@@ -70,7 +88,7 @@ func Title(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:  "Related commands:",
-			Value: "`caps`, `lower`, `randomcaps`",
+			Value: "`caps`, `lower`, `randomcaps`, `swap`",
 		},
 	}
 	return embed
