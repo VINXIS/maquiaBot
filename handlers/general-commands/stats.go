@@ -18,15 +18,14 @@ import (
 // Stats creates and outputs randomized stats for the user in question
 func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	statsRegex, _ := regexp.Compile(`(stats|class)(\s+(.+))?`)
-	prefixRegex, _ := regexp.Compile(`(.+)(stats|class)`)
 
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
-
-	prefix := prefixRegex.FindStringSubmatch(m.Content)[1]
+	serverData := tools.GetServer(*server, s)
+	prefix := serverData.Prefix
 
 	// Parse emssage to see if a skill count was given/object of reference
 	text := "You have"
@@ -65,9 +64,6 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 	}
-
-	// Obtain server data
-	serverData := tools.GetServer(*server, s)
 
 	// Check if the minimum amount of skills, nouns, and adjectives are there
 	if len(serverData.Skills) < skillCount {
