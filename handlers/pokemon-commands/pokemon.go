@@ -78,7 +78,8 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	pokemonRegex, _ := regexp.Compile(`pokemon\s+(\S+)`)
 	if !pokemonRegex.MatchString(m.Content) {
-		s.ChannelMessageSend(m.ChannelID, "No berry given!")
+		s.ChannelMessageSend(m.ChannelID, "No pokemon given!")
+		return
 	}
 
 	pokemonString := pokemonRegex.FindStringSubmatch(m.Content)[1]
