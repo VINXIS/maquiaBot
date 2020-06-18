@@ -10,7 +10,7 @@ import (
 
 // Parse parses the discord snowflake ID given
 func Parse(s *discordgo.Session, m *discordgo.MessageCreate) {
-	parseRegex, _ := regexp.Compile(`parse\s+(\d+)`)
+	parseRegex, _ := regexp.Compile(`(?i)parse\s+(\d+)`)
 
 	// Get snowflake value to test
 	snowflake := m.Author.ID

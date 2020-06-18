@@ -20,12 +20,12 @@ import (
 
 // ProfileMessage gets the information for the specified profile linked
 func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileRegex *regexp.Regexp, cache []structs.PlayerData) {
-	profileCmd1Regex, _ := regexp.Compile(`osu(top|detail)?\s+(.+)`)
-	profileCmd2Regex, _ := regexp.Compile(`profile\s+(.+)`)
-	profileCmd3Regex, _ := regexp.Compile(`osutop`)
-	profileCmd4Regex, _ := regexp.Compile(`osudetail`)
-	modeRegex, _ := regexp.Compile(`-m\s+(.+)`)
-	recentRegex, _ := regexp.Compile(`-r(ecent)?`)
+	profileCmd1Regex, _ := regexp.Compile(`(?i)osu(top|detail)?\s+(.+)`)
+	profileCmd2Regex, _ := regexp.Compile(`(?i)profile\s+(.+)`)
+	profileCmd3Regex, _ := regexp.Compile(`(?i)osutop`)
+	profileCmd4Regex, _ := regexp.Compile(`(?i)osudetail`)
+	modeRegex, _ := regexp.Compile(`(?i)-m\s+(.+)`)
+	recentRegex, _ := regexp.Compile(`(?i)-r(ecent)?`)
 	mode := osuapi.ModeOsu
 
 	mValue := ""

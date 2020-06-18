@@ -6,8 +6,8 @@ import (
 
 // PPAdd explains the ppadd functionality
 func PPAdd(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: ppadd"
-	embed.Description = "`ppadd [osu! username] <pp amount>` shows how much more pp you would have if you obtained a score with this amount of pp."
+	embed.Author.Name = "Command: ppadd / addpp"
+	embed.Description = "`(ppadd|addpp) [osu! username] <pp amount>` shows how much more pp you would have if you obtained a score with this amount of pp."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[osu! username]",

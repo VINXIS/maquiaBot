@@ -20,9 +20,9 @@ import (
 
 // Leaderboard gives you the leaderboard for a map
 func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp, cache []structs.PlayerData) {
-	mapRegex, _ := regexp.Compile(`(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
-	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
-	showRegex, _ := regexp.Compile(`-n\s*(\d+)`)
+	mapRegex, _ := regexp.Compile(`(?i)(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
+	modRegex, _ := regexp.Compile(`(?i)-m\s*(\S+)`)
+	showRegex, _ := regexp.Compile(`(?i)-n\s*(\d+)`)
 	var beatmap osuapi.Beatmap
 	var err error
 
@@ -250,10 +250,10 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 				ppValues := make(chan string, 1)
 				go osutools.PPCalc(beatmap, osuapi.Score{
 					MaxCombo: beatmap.MaxCombo,
-					Count50: score.Count50,
+					Count50:  score.Count50,
 					Count100: score.Count100,
-					Count300: totalObjs-score.Count50-score.Count100,
-					Mods: score.Mods,
+					Count300: totalObjs - score.Count50 - score.Count100,
+					Mods:     score.Mods,
 				}, ppValues)
 				pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
 			}

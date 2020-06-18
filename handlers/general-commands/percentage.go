@@ -13,7 +13,7 @@ import (
 
 // Percentage gives a random percentage alongside bars
 func Percentage(s *discordgo.Session, m *discordgo.MessageCreate) {
-	percentRegex, _ := regexp.Compile(`(p|percentage|per|percent)\s+(.+)?`)
+	percentRegex, _ := regexp.Compile(`(?i)(p|percentage|per|percent)\s+(.+)?`)
 
 	var text string
 	textLength := 0

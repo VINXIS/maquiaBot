@@ -22,15 +22,15 @@ import (
 
 // Compare compares finds a score from the current user on the previous map linked by the bot
 func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
-	mapRegex, _ := regexp.Compile(`(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
-	modRegex, _ := regexp.Compile(`-m\s+(\S+)`)
-	compareRegex, _ := regexp.Compile(`(c|compare)\s*(.+)?`)
-	strictRegex, _ := regexp.Compile(`-nostrict`)
-	allRegex, _ := regexp.Compile(`-all`)
-	scorePostRegex, _ := regexp.Compile(`-sp`)
-	mapperRegex, _ := regexp.Compile(`-mapper`)
-	starRegex, _ := regexp.Compile(`-sr`)
-	genOSR, _ := regexp.Compile(`-osr`)
+	mapRegex, _ := regexp.Compile(`(?i)(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
+	modRegex, _ := regexp.Compile(`(?i)-m\s+(\S+)`)
+	compareRegex, _ := regexp.Compile(`(?i)(c|compare)\s*(.+)?`)
+	strictRegex, _ := regexp.Compile(`(?i)-nostrict`)
+	allRegex, _ := regexp.Compile(`(?i)-all`)
+	scorePostRegex, _ := regexp.Compile(`(?i)-sp`)
+	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
+	starRegex, _ := regexp.Compile(`(?i)-sr`)
+	genOSR, _ := regexp.Compile(`(?i)-osr`)
 
 	// Obtain username and mods
 	username := ""
@@ -363,10 +363,10 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 			ppValues := make(chan string, 1)
 			go osutools.PPCalc(beatmap, osuapi.Score{
 				MaxCombo: beatmap.MaxCombo,
-				Count50: score.Count50,
+				Count50:  score.Count50,
 				Count100: score.Count100,
-				Count300: totalObjs-score.Count50-score.Count100,
-				Mods: score.Mods,
+				Count300: totalObjs - score.Count50 - score.Count100,
+				Mods:     score.Mods,
 			}, ppValues)
 			pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + <-ppValues + "pp "
 		}

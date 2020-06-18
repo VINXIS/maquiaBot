@@ -14,8 +14,8 @@ import (
 
 // RoleAutomation adds / removes role automation options
 func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
-	roleRegex, _ := regexp.Compile(`role(a|auto|automation)?\s+(.+)`)
-	deleteRegex, _ := regexp.Compile(`-d`)
+	roleRegex, _ := regexp.Compile(`(?i)role(a|auto|automation)?\s+(.+)`)
+	deleteRegex, _ := regexp.Compile(`(?i)-d`)
 
 	// Check if server exists
 	server, err := s.Guild(m.GuildID)

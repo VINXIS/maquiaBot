@@ -14,8 +14,8 @@ import (
 
 // Trigger adds / removes triggers
 func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
-	triggerRegex, _ := regexp.Compile(`trigger\s+(.+)`)
-	deleteRegex, _ := regexp.Compile(`-d`)
+	triggerRegex, _ := regexp.Compile(`(?i)trigger\s+(.+)`)
+	deleteRegex, _ := regexp.Compile(`(?i)-d`)
 
 	// Check if server exists
 	server, err := s.Guild(m.GuildID)

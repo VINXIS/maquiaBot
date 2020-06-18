@@ -20,12 +20,12 @@ import (
 
 // Top gets the nth top pp score
 func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
-	topRegex, _ := regexp.Compile(`t(op)?\s+(.+)`)
-	modRegex, _ := regexp.Compile(`-m\s+(\S+)`)
-	strictRegex, _ := regexp.Compile(`-nostrict`)
-	scorePostRegex, _ := regexp.Compile(`-sp`)
-	mapperRegex, _ := regexp.Compile(`-mapper`)
-	starRegex, _ := regexp.Compile(`-sr`)
+	topRegex, _ := regexp.Compile(`(?i)t(op)?\s+(.+)`)
+	modRegex, _ := regexp.Compile(`(?i)-m\s+(\S+)`)
+	strictRegex, _ := regexp.Compile(`(?i)-nostrict`)
+	scorePostRegex, _ := regexp.Compile(`(?i)-sp`)
+	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
+	starRegex, _ := regexp.Compile(`(?i)-sr`)
 
 	username := ""
 	mods := ""

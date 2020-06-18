@@ -17,8 +17,8 @@ import (
 
 // Stats creates and outputs randomized stats for the user in question
 func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
-	statsRegex, _ := regexp.Compile(`(stats|class)(\s+(.+))?`)
-	prefixRegex, _ := regexp.Compile(`(.+)(stats|class)`)
+	statsRegex, _ := regexp.Compile(`(?i)(stats|class)(\s+(.+))?`)
+	prefixRegex, _ := regexp.Compile(`(?i)(.+)(stats|class)`)
 
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
@@ -125,7 +125,7 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // Adjectives allows users to add/change/see their custom adjectives
 func Adjectives(s *discordgo.Session, m *discordgo.MessageCreate) {
-	adjectivesRegex, _ := regexp.Compile(`(adj|adjectives?)\s*(add|remove)?\s+(.+)`)
+	adjectivesRegex, _ := regexp.Compile(`(?i)(adj|adjectives?)\s*(add|remove)?\s+(.+)`)
 
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
@@ -193,7 +193,7 @@ func Adjectives(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // Nouns allows users to add/change/see their custom nouns
 func Nouns(s *discordgo.Session, m *discordgo.MessageCreate) {
-	nounsRegex, _ := regexp.Compile(`(nouns?)\s*(add|remove)?\s+(.+)`)
+	nounsRegex, _ := regexp.Compile(`(?i)(nouns?)\s*(add|remove)?\s+(.+)`)
 
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
@@ -261,7 +261,7 @@ func Nouns(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // Skills allows users to add/change/see their custom skills
 func Skills(s *discordgo.Session, m *discordgo.MessageCreate) {
-	skillsRegex, _ := regexp.Compile(`(skills?)\s*(add|remove)?\s+(.+)`)
+	skillsRegex, _ := regexp.Compile(`(?i)(skills?)\s*(add|remove)?\s+(.+)`)
 
 	server, err := s.Guild(m.GuildID)
 	if err != nil {

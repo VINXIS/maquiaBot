@@ -11,7 +11,7 @@ import (
 
 // Choose chooses from options for you
 func Choose(s *discordgo.Session, m *discordgo.MessageCreate) {
-	regex, _ := regexp.Compile(`(ch(oose)?)\s(.+)`)
+	regex, _ := regexp.Compile(`(?i)(ch(oose)?)\s(.+)`)
 	if !regex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "Please give options to choose from!")
 		return

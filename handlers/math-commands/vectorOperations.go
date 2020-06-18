@@ -145,7 +145,7 @@ func VectorCross(s *discordgo.Session, m *discordgo.MessageCreate) {
 // second parses 2 vectors
 
 func parseVectorScalar(m *discordgo.MessageCreate) (V1 mathtools.Vector, s float64, parseError error) {
-	vectorRegex, _ := regexp.Compile(`\((-?(\d|\.)+),\s*(-?(\d|\.)+)(,\s*(-?(\d|\.)+))?\)\s*(-?(\d|\.)+)`)
+	vectorRegex, _ := regexp.Compile(`(?i)\((-?(\d|\.)+),\s*(-?(\d|\.)+)(,\s*(-?(\d|\.)+))?\)\s*(-?(\d|\.)+)`)
 
 	if !vectorRegex.MatchString(m.Content) {
 		return nil, 0, errors.New("please give 2 points with x and y (and z if 3 dimensions) coordinates in parentheses; refer to `help distance` for more info")
@@ -184,7 +184,7 @@ func parseVectorScalar(m *discordgo.MessageCreate) (V1 mathtools.Vector, s float
 }
 
 func parseVectors(m *discordgo.MessageCreate) ([]mathtools.Vector, error) {
-	vectorRegex, _ := regexp.Compile(`\((-?(\d|\.)+)\s*,\s*(-?(\d|\.)+)(\s*,\s*(-?(\d|\.)+))?\)\s*\((-?(\d|\.)+)\s*,\s*(-?(\d|\.)+)(\s*,\s*(-?(\d|\.)+))?\)`)
+	vectorRegex, _ := regexp.Compile(`(?i)\((-?(\d|\.)+)\s*,\s*(-?(\d|\.)+)(\s*,\s*(-?(\d|\.)+))?\)\s*\((-?(\d|\.)+)\s*,\s*(-?(\d|\.)+)(\s*,\s*(-?(\d|\.)+))?\)`)
 
 	if !vectorRegex.MatchString(m.Content) {
 		return nil, errors.New("please give 2 points with x and y (and z if 3 dimensions) coordinates in parentheses; refer to `help distance` for more info")

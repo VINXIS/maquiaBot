@@ -14,7 +14,7 @@ func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
 		return
 	}
-	updateRegex, _ := regexp.Compile(`updatestatus\s+(.+)`)
+	updateRegex, _ := regexp.Compile(`(?i)updatestatus\s+(.+)`)
 	if !updateRegex.MatchString(m.Content) {
 		s.UpdateStatus(0, strconv.Itoa(len(s.State.Guilds))+" servers")
 		return

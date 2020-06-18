@@ -14,7 +14,7 @@ import (
 
 // PPAdd calculates final pp after obtaining given pp score
 func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
-	ppRegex, _ := regexp.Compile(`ppadd\s+(.+)`)
+	ppRegex, _ := regexp.Compile(`(?i)(ppadd|addpp)\s+(.+)`)
 
 	if !ppRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "No pp given!")
@@ -92,9 +92,9 @@ func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Pla
 	// The result
 	ppChange := newPP - originalPP
 	totalPP := user.PP + ppChange
-	text := "**"+user.Username+"**: "+strconv.FormatFloat(user.PP, 'f', 2, 64)+" -> "+strconv.FormatFloat(totalPP, 'f', 2, 64)+" (+"+strconv.FormatFloat(ppChange, 'f', 2, 64)+"pp)"
+	text := "**" + user.Username + "**: " + strconv.FormatFloat(user.PP, 'f', 2, 64) + " -> " + strconv.FormatFloat(totalPP, 'f', 2, 64) + " (+" + strconv.FormatFloat(ppChange, 'f', 2, 64) + "pp)"
 	if placement <= 100 {
-		text += " | **#"+strconv.Itoa(placement)+"** in top performances!"
+		text += " | **#" + strconv.Itoa(placement) + "** in top performances!"
 	}
 	s.ChannelMessageSend(m.ChannelID, text)
 }

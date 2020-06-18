@@ -11,8 +11,8 @@ import (
 
 // OsuHandle handles commands that are regarding osu!
 func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, playerCache []structs.PlayerData, mapperData []structs.MapperData) {
-	profileRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(u|users)\/(\S+)`)
-	beatmapRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
+	profileRegex, _ := regexp.Compile(`(?i)(osu|old)\.ppy\.sh\/(u|users)\/(\S+)`)
+	beatmapRegex, _ := regexp.Compile(`(?i)(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	// Check if any args were even given
 	if len(args) == 1 {
 		go osucommands.ProfileMessage(s, m, profileRegex, playerCache)
@@ -44,7 +44,7 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 			go osucommands.TrackMapper(s, m, mapperData)
 		case "mti", "mtinfo", "mtrackinfo", "maptracking", "mappertracking", "mappertrackinfo":
 			go osucommands.TrackMapperInfo(s, m, mapperData)
-		case "ppadd":
+		case "ppadd", "addpp":
 			go osucommands.PPAdd(s, m, playerCache)
 		case "r", "rs", "recent":
 			go osucommands.Recent(s, m, "recent", playerCache)

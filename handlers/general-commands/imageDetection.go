@@ -25,10 +25,10 @@ import (
 
 // OCR lets people use the tesseract-OCR utility on their images
 func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
-	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
-	saturationRegex, _ := regexp.Compile(`-s\s+(-?\d+)`)
-	contrastRegex, _ := regexp.Compile(`-c\s+(-?\d+)`)
-	langRegex, _ := regexp.Compile(`-l\s+(\S+)`)
+	linkRegex, _ := regexp.Compile(`(?i)https?:\/\/\S*`)
+	saturationRegex, _ := regexp.Compile(`(?i)-s\s+(-?\d+)`)
+	contrastRegex, _ := regexp.Compile(`(?i)-c\s+(-?\d+)`)
+	langRegex, _ := regexp.Compile(`(?i)-l\s+(\S+)`)
 
 	var url string
 	if len(m.Attachments) > 0 {
@@ -176,7 +176,7 @@ func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // Face lets you detect faces
 func Face(s *discordgo.Session, m *discordgo.MessageCreate) {
-	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
+	linkRegex, _ := regexp.Compile(`(?i)https?:\/\/\S*`)
 
 	var url string
 	if len(m.Attachments) > 0 {

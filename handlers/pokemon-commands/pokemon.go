@@ -76,7 +76,7 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	pokemonRegex, _ := regexp.Compile(`pokemon\s+(\S+)`)
+	pokemonRegex, _ := regexp.Compile(`(?i)pokemon\s+(\S+)`)
 	if !pokemonRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "No berry given!")
 	}
@@ -179,7 +179,7 @@ func Pokemon(s *discordgo.Session, m *discordgo.MessageCreate) {
 			URL: "https://www.smogon.com/dex/media/sprites/xy/" + pokemonData.Name + ".gif",
 		},
 	}
-	formRegex, _ := regexp.Compile(`(.+)-.+`)
+	formRegex, _ := regexp.Compile(`(?i)(.+)-.+`)
 	if formRegex.MatchString(pokemonData.Name) {
 		embed.URL = "https://bulbapedia.bulbagarden.net/wiki/" + strings.Title(formRegex.FindStringSubmatch(pokemonData.Name)[1]) + "_(Pok%C3%A9mon)"
 	} else {

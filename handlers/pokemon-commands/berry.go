@@ -44,7 +44,7 @@ func Berry(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	berryRegex, _ := regexp.Compile(`b(erry)?\s+(\S+)`)
+	berryRegex, _ := regexp.Compile(`(?i)b(erry)?\s+(\S+)`)
 	if !berryRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "No berry given!")
 		return

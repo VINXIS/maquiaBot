@@ -41,7 +41,7 @@ const (
 
 // Calc lets you calculate an expression
 func Calc(s *discordgo.Session, m *discordgo.MessageCreate) {
-	mathRegex, _ := regexp.Compile(`calc\s+(.+)`)
+	mathRegex, _ := regexp.Compile(`(?i)calc\s+(.+)`)
 	if !mathRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "No expression given!")
 		return

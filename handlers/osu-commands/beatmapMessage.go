@@ -16,12 +16,12 @@ import (
 
 // BeatmapMessage is a handler executed when a message contains a beatmap link
 func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp) {
-	modRegex, _ := regexp.Compile(`-m\s*(\S+)`)
-	accRegex, _ := regexp.Compile(`-acc\s*(\S+)`)
-	comboRegex, _ := regexp.Compile(`-c\s*(\S+)`)
-	missRegex, _ := regexp.Compile(`-x\s*(\S+)`)
-	mapRegex, _ := regexp.Compile(`[^-]m`)
-	scoreRegex, _ := regexp.Compile(`-s\s*(\S+)`)
+	modRegex, _ := regexp.Compile(`(?i)-m\s*(\S+)`)
+	accRegex, _ := regexp.Compile(`(?i)-acc\s*(\S+)`)
+	comboRegex, _ := regexp.Compile(`(?i)-c\s*(\S+)`)
+	missRegex, _ := regexp.Compile(`(?i)-x\s*(\S+)`)
+	mapRegex, _ := regexp.Compile(`(?i)[^-]m`)
+	scoreRegex, _ := regexp.Compile(`(?i)-s\s*(\S+)`)
 
 	// See if map was linked or if the map command was used
 	var submatches []string

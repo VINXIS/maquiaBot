@@ -25,7 +25,7 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Get username(s) and number of messages
-	userRegex, _ := regexp.Compile(`purge\s+(.+)`)
+	userRegex, _ := regexp.Compile(`(?i)purge\s+(.+)`)
 
 	userText := ""
 	num := 4

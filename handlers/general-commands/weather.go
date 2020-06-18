@@ -57,9 +57,9 @@ type WeatherData struct {
 
 // Weather details the weather of the location given
 func Weather(s *discordgo.Session, m *discordgo.MessageCreate) {
-	weatherRegex, _ := regexp.Compile(`w(eather)?\s+(.+)`)
-	paramRegex, _ := regexp.Compile(`&(.+)=(\S+)`)
-	languageRegex, _ := regexp.Compile(`-l\s+(.+)`)
+	weatherRegex, _ := regexp.Compile(`(?i)w(eather)?\s+(.+)`)
+	paramRegex, _ := regexp.Compile(`(?i)&(.+)=(\S+)`)
+	languageRegex, _ := regexp.Compile(`(?i)-l\s+(.+)`)
 
 	// Get location
 	if !weatherRegex.MatchString(m.Content) {

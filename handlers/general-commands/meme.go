@@ -10,9 +10,9 @@ import (
 
 // Meme lets you create a meme
 func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
-	emojiRegex, _ := regexp.Compile(`<(a)?:(.+):(\d+)>`)
-	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
-	memeRegex, _ := regexp.Compile(`meme\s+(https:\/\/(\S+)\s+)?([^|]+)?(\|)?([^|]+)?`)
+	emojiRegex, _ := regexp.Compile(`(?i)<(a)?:(.+):(\d+)>`)
+	linkRegex, _ := regexp.Compile(`(?i)https?:\/\/\S*`)
+	memeRegex, _ := regexp.Compile(`(?i)meme\s+(https:\/\/(\S+)\s+)?([^|]+)?(\|)?([^|]+)?`)
 
 	if !memeRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "Please give text to add and maybe an image as well!")

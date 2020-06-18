@@ -24,9 +24,9 @@ var ReminderTimers []structs.ReminderTimer
 
 // Remind reminds the person after an x amount of specified time
 func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
-	remindRegex, _ := regexp.Compile(`remind(er)?\s+(.+)`)
-	timeRegex, _ := regexp.Compile(`\s(\d+) (month|week|day|hour|minute|second)s?`)
-	dateRegex, _ := regexp.Compile(`at\s+(.+)`)
+	remindRegex, _ := regexp.Compile(`(?i)remind(er)?\s+(.+)`)
+	timeRegex, _ := regexp.Compile(`(?i)\s(\d+) (month|week|day|hour|minute|second)s?`)
+	dateRegex, _ := regexp.Compile(`(?i)at\s+(.+)`)
 	reminderTime := time.Duration(0)
 	text := ""
 	timeResultString := ""
@@ -250,7 +250,7 @@ func Reminders(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // RemoveReminder removes a reminder (kind of)
 func RemoveReminder(s *discordgo.Session, m *discordgo.MessageCreate) {
-	remindRegex, _ := regexp.Compile(`r(emind)?remove\s+(\d+|all)`)
+	remindRegex, _ := regexp.Compile(`(?i)r(emind)?remove\s+(\d+|all)`)
 	if !remindRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "Please give a reminder's snowflake ID to remove! You can see all of your reminds with `reminders`. If you want to remove all reminders, please state `remindremove all`")
 		return
@@ -312,7 +312,7 @@ func RemoveReminder(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // ReminderMessage will send the user their reminder
 func ReminderMessage(s *discordgo.Session, reminderTimer structs.ReminderTimer) {
-	linkRegex, _ := regexp.Compile(`https?:\/\/\S+`)
+	linkRegex, _ := regexp.Compile(`(?i)https?:\/\/\S+`)
 	dm, _ := s.UserChannelCreate(reminderTimer.Reminder.User.ID)
 	if reminderTimer.Reminder.Info == "" {
 		s.ChannelMessageSend(dm.ID, "Reminder!")

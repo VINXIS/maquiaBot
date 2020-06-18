@@ -22,7 +22,7 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 	}
 
 	if len(msg.Embeds) > 0 && msg.Embeds[0].Footer != nil && strings.Contains(msg.Embeds[0].Footer.Text, "Page") {
-		regex, _ := regexp.Compile(`Page (\d+)`)
+		regex, _ := regexp.Compile(`(?i)Page (\d+)`)
 		num, _ := strconv.Atoi(regex.FindStringSubmatch(msg.Embeds[0].Footer.Text)[1])
 		numend := (num + 1) * 25
 		page := strconv.Itoa(num + 1)
@@ -56,7 +56,7 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		quoteNum := len(serverData.Quotes)
 		userQuotes := serverData.Quotes[num:numend]
 		if strings.Contains(msg.Content, "Quotes for") {
-			quoteRegex, _ := regexp.Compile(`Quotes for \*\*(.+)\*\*`)
+			quoteRegex, _ := regexp.Compile(`(?i)Quotes for \*\*(.+)\*\*`)
 			username := quoteRegex.FindStringSubmatch(msg.Content)[1]
 
 			user := &discordgo.User{}

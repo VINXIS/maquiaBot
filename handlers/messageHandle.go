@@ -37,7 +37,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		m.Content = strings.TrimSpace(strings.ReplaceAll(m.Content, "@here", ""))
 	}
 
-	emojiRegex, _ := regexp.Compile(`<a?(:.+:)\d+>`)
+	emojiRegex, _ := regexp.Compile(`(?i)<a?(:.+:)\d+>`)
 	noEmoji := m.Content
 	if emojiRegex.MatchString(m.Content) {
 		noEmoji = emojiRegex.ReplaceAllString(m.Content, emojiRegex.FindStringSubmatch(m.Content)[1])
@@ -64,10 +64,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverPrefix := serverData.Prefix
 
 	// Generate regexes for message parsing
-	profileRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(u|users)\/(\S+)`)
-	beatmapRegex, _ := regexp.Compile(`(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
-	linkRegex, _ := regexp.Compile(`https?:\/\/\S*`)
-	timestampRegex, _ := regexp.Compile(`(\d+):(\d{2}):(\d{3})\s*(\(((\d\,?)+)\))?`)
+	profileRegex, _ := regexp.Compile(`(?i)(osu|old)\.ppy\.sh\/(u|users)\/(\S+)`)
+	beatmapRegex, _ := regexp.Compile(`(?i)(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
+	linkRegex, _ := regexp.Compile(`(?i)https?:\/\/\S*`)
+	timestampRegex, _ := regexp.Compile(`(?i)(\d+):(\d{2}):(\d{3})\s*(\(((\d\,?)+)\))?`)
 
 	// Timestamp conversions
 	if timestampRegex.MatchString(noEmoji) && serverData.OsuToggle {
@@ -85,6 +85,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Role checks
 	for _, roleAuto := range serverData.RoleAutomation {
+		roleAuto.Text = `(?i)` + roleAuto.Text
 		reg, err := regexp.Compile(roleAuto.Text)
 
 		match := false
@@ -105,6 +106,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Trigger checks
 	for _, trigger := range serverData.Triggers {
+		trigger.Cause = `(?i)` + trigger.Cause
 		reg, err := regexp.Compile(trigger.Cause)
 		send := false
 		if err != nil {
@@ -375,7 +377,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go osucommands.TrackMapperInfo(s, m, mapperData)
 		case "osutop", "osudetail":
 			go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
-		case "ppadd":
+		case "ppadd", "addpp":
 			go osucommands.PPAdd(s, m, profileCache)
 		case "profile":
 			go osucommands.ProfileMessage(s, m, profileRegex, profileCache)

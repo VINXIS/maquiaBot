@@ -10,7 +10,7 @@ import (
 
 // Levenshtein gives the Levenshtein distance of 2 messages
 func Levenshtein(s *discordgo.Session, m *discordgo.MessageCreate) {
-	messageRegex, _ := regexp.Compile(`l(even(shtein)?)?\s+(.+)\s+(.+)`)
+	messageRegex, _ := regexp.Compile(`(?i)l(even(shtein)?)?\s+(.+)\s+(.+)`)
 
 	if !messageRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "Please give 2 words to compare!")

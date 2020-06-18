@@ -17,7 +17,7 @@ import (
 
 // Info gives information about the user
 func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
-	userRegex, _ := regexp.Compile(`info\s+(.+)`)
+	userRegex, _ := regexp.Compile(`(?i)info\s+(.+)`)
 
 	userTest := ""
 	user := m.Author
@@ -170,7 +170,7 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 
 // RoleInfo gives information about a role
 func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
-	roleRegex, _ := regexp.Compile(`r(ole)?info\s+(.+)`)
+	roleRegex, _ := regexp.Compile(`(?i)r(ole)?info\s+(.+)`)
 
 	// Get server
 	server, err := s.Guild(m.GuildID)

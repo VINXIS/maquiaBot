@@ -9,7 +9,7 @@ import (
 
 // Emoji gives the image to an emoji
 func Emoji(s *discordgo.Session, m *discordgo.MessageCreate) {
-	emojiRegex, _ := regexp.Compile(`<(a)?:(.+):(\d+)>`)
+	emojiRegex, _ := regexp.Compile(`(?i)<(a)?:(.+):(\d+)>`)
 	if !emojiRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "No emoji given!")
 		return

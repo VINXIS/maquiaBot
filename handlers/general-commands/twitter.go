@@ -17,7 +17,7 @@ func Twitter(s *discordgo.Session, m *discordgo.MessageCreate) {
 		linkType string
 		ID       int64
 	)
-	twitterRegex, _ := regexp.Compile(`twitter.com\/(\S+)\/status\/(\d+)`)
+	twitterRegex, _ := regexp.Compile(`(?i)twitter.com\/(\S+)\/status\/(\d+)`)
 
 	// Get ID / link
 	if twitterRegex.MatchString(m.Content) {

@@ -117,7 +117,7 @@ func main() {
 		return nil
 	})
 	readErr(err)
-	IDregex, _ := regexp.Compile(`(\d+)\.json`)
+	IDregex, _ := regexp.Compile(`(?i)(\d+)\.json`)
 	for _, channel := range channels {
 		if IDregex.MatchString(channel) {
 			chID := IDregex.FindStringSubmatch(channel)[1]

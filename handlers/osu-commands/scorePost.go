@@ -18,14 +18,14 @@ import (
 
 // ScorePost posts your score in a single line format
 func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData, postType string, params ...string) {
-	mapRegex, _ := regexp.Compile(`(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
-	scorePostRegex, _ := regexp.Compile(`sc?(orepost)?\s+(\S+)`)
-	modRegex, _ := regexp.Compile(`-m\s+(\S+)`)
-	mod2Regex, _ := regexp.Compile(`\+(\S+)`)
-	scoreRegex, _ := regexp.Compile(`\*\*(([0-9]|,)+)\*\* `)
-	leaderboardRegex, _ := regexp.Compile(`\*\*(#\d+)\*\* on leaderboard!`)
-	mapperRegex, _ := regexp.Compile(`-mapper`)
-	starRegex, _ := regexp.Compile(`-sr`)
+	mapRegex, _ := regexp.Compile(`(?i)(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
+	scorePostRegex, _ := regexp.Compile(`(?i)sc?(orepost)?\s+(\S+)`)
+	modRegex, _ := regexp.Compile(`(?i)-m\s+(\S+)`)
+	mod2Regex, _ := regexp.Compile(`(?i)\+(\S+)`)
+	scoreRegex, _ := regexp.Compile(`(?i)\*\*(([0-9]|,)+)\*\* `)
+	leaderboardRegex, _ := regexp.Compile(`(?i)\*\*(#\d+)\*\* on leaderboard!`)
+	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
+	starRegex, _ := regexp.Compile(`(?i)-sr`)
 
 	var beatmap osuapi.Beatmap
 	var username string

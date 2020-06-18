@@ -18,9 +18,9 @@ import (
 
 // Quote lets you get a quote from someone
 func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
-	quoteRegex, _ := regexp.Compile(`q(uote)?\s+(.+)`)
-	linkRegex, _ := regexp.Compile(`https?:\/\/\S+`)
-	extensionRegex, _ := regexp.Compile(`\.(\S{3,4})`)
+	quoteRegex, _ := regexp.Compile(`(?i)q(uote)?\s+(.+)`)
+	linkRegex, _ := regexp.Compile(`(?i)https?:\/\/\S+`)
+	extensionRegex, _ := regexp.Compile(`(?i)\.(\S{3,4})`)
 
 	// Get server
 	server, err := s.Guild(m.GuildID)
@@ -157,9 +157,9 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // QuoteAdd lets you add quotes
 func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
-	quoteAddRegex, _ := regexp.Compile(`q(uote)?a(dd)?\s*(.+)`)
-	randomRegex, _ := regexp.Compile(`-r`)
-	channelRegex, _ := regexp.Compile(`https://discordapp.com/channels\/(\d+)\/(\d+)\/(\d+)`)
+	quoteAddRegex, _ := regexp.Compile(`(?i)q(uote)?a(dd)?\s*(.+)`)
+	randomRegex, _ := regexp.Compile(`(?i)-r`)
+	channelRegex, _ := regexp.Compile(`(?i)https://discordapp.com/channels\/(\d+)\/(\d+)\/(\d+)`)
 
 	// Get server
 	server, err := s.Guild(m.GuildID)
@@ -342,8 +342,8 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // QuoteRemove lets you remove quotes
 func QuoteRemove(s *discordgo.Session, m *discordgo.MessageCreate) {
-	quoteRemoveRegex, _ := regexp.Compile(`q(uote)?(r(emove)?|d(elete)?)\s+(\d+)`)
-	channelRegex, _ := regexp.Compile(`https://discordapp.com/channels\/\d+\/(\d+)\/(\d+)`)
+	quoteRemoveRegex, _ := regexp.Compile(`(?i)q(uote)?(r(emove)?|d(elete)?)\s+(\d+)`)
+	channelRegex, _ := regexp.Compile(`(?i)https://discordapp.com/channels\/\d+\/(\d+)\/(\d+)`)
 
 	// Get server
 	server, err := s.Guild(m.GuildID)
@@ -383,7 +383,7 @@ func QuoteRemove(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // Quotes lets you see all the quotes of a user
 func Quotes(s *discordgo.Session, m *discordgo.MessageCreate) {
-	quotesRegex, _ := regexp.Compile(`q(uote)?s\s+(.+)`)
+	quotesRegex, _ := regexp.Compile(`(?i)q(uote)?s\s+(.+)`)
 
 	// Get server
 	server, err := s.Guild(m.GuildID)

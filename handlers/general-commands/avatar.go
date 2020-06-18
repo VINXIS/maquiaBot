@@ -12,8 +12,8 @@ import (
 
 // Avatar gets the avatar of the user/referenced user
 func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
-	userRegex, _ := regexp.Compile(`(a|ava|avatar)\s+(.+)`)
-	serverRegex, _ := regexp.Compile(`(-s\s|-s$)`)
+	userRegex, _ := regexp.Compile(`(?i)(a|ava|avatar)\s+(.+)`)
+	serverRegex, _ := regexp.Compile(`(?i)(-s\s|-s$)`)
 
 	users := m.Mentions
 	if serverRegex.MatchString(m.Content) {
@@ -67,7 +67,7 @@ func Avatar(s *discordgo.Session, m *discordgo.MessageCreate) {
 		for _, member := range members {
 			if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(username)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(username)) {
 				discordUser, _ = s.User(member.User.ID)
-				postAva(s, m, []string{member.Nick}, []string{discordUser.AvatarURL("2048")}, true)
+				postAva(s, m, []string{member.User.Username}, []string{discordUser.AvatarURL("2048")}, true)
 				return
 			}
 		}

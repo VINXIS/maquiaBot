@@ -11,7 +11,7 @@ import (
 
 // Roll gives a number between 1 to n
 func Roll(s *discordgo.Session, m *discordgo.MessageCreate) {
-	rollRegex, _ := regexp.Compile(`roll\s*(\S+)`)
+	rollRegex, _ := regexp.Compile(`(?i)roll\s*(\S+)`)
 	number := 100
 	var err error
 	if rollRegex.MatchString(m.Content) {

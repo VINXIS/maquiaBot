@@ -14,7 +14,7 @@ import (
 
 // BPM gives a player's BPM of the day
 func BPM(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
-	bpmregex, _ := regexp.Compile(`bpm\s+(.+)`)
+	bpmregex, _ := regexp.Compile(`(?i)bpm\s+(.+)`)
 	username := ""
 	if bpmregex.MatchString(m.Content) {
 		username = bpmregex.FindStringSubmatch(m.Content)[1]

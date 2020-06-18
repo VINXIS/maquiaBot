@@ -23,7 +23,7 @@ func Colour(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var col color.Color
 	var text string
 
-	regex, err := regexp.Compile(`col(ou?r)?\s(.+)`)
+	regex, err := regexp.Compile(`(?i)col(ou?r)?\s(.+)`)
 	params := ""
 	if !regex.MatchString(m.Content) { // No values given, generate random colour
 		authorid, _ := strconv.Atoi(m.Author.ID)

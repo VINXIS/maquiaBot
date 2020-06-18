@@ -25,8 +25,8 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 	amount := 5
 
 	// Obtain user if any user was stated
-	userRegex, _ := regexp.Compile(`(.+)farm\s*(.+)?`)
-	amountRegex, _ := regexp.Compile(`-n\s*(\d*)`)
+	userRegex, _ := regexp.Compile(`(?i)(.+)farm\s*(.+)?`)
+	amountRegex, _ := regexp.Compile(`(?i)-n\s*(\d*)`)
 	prefix := userRegex.FindStringSubmatch(m.Content)[1]
 	username = userRegex.FindStringSubmatch(m.Content)[2]
 	if amountRegex.MatchString(m.Content) {
@@ -115,7 +115,7 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 
 // TopFarm gives the top farmerdogs in the game based on who's been run
 func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
-	farmCountRegex, _ := regexp.Compile(`.+(tfarm|topfarm)\s*(-s)?\s*(\d+)?`)
+	farmCountRegex, _ := regexp.Compile(`(?i).+(tfarm|topfarm)\s*(-s)?\s*(\d+)?`)
 
 	farmAmount := 1
 
@@ -196,7 +196,7 @@ func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 
 // BottomFarm gives the top farmerdogs in the game based on who's been run
 func BottomFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
-	farmCountRegex, _ := regexp.Compile(`.+(bfarm|bottomfarm)\s*(-s)?\s*(\d+)?`)
+	farmCountRegex, _ := regexp.Compile(`(?i).+(bfarm|bottomfarm)\s*(-s)?\s*(\d+)?`)
 
 	farmAmount := 1
 

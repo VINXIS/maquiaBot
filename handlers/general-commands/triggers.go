@@ -38,6 +38,7 @@ func Triggers(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	for _, trigger := range serverData.Triggers {
+		trigger.Cause = `(?i)` + trigger.Cause
 		regex := false
 		_, err := regexp.Compile(trigger.Cause)
 		if err == nil {

@@ -131,7 +131,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		Color: osutools.ModeColour(osuapi.ModeOsu),
 	}
 
-	argRegex, _ := regexp.Compile(`help\s+(.+)`)
+	argRegex, _ := regexp.Compile(`(?i)help\s+(.+)`)
 	if argRegex.MatchString(m.Content) {
 		arg := argRegex.FindStringSubmatch(m.Content)[1]
 		args := strings.Split(arg, " ")

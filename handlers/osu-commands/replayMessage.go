@@ -21,9 +21,9 @@ import (
 
 // ReplayMessage posts replay information fopr a given replay
 func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp, cache []structs.PlayerData) {
-	scorePostRegex, _ := regexp.Compile(`-sp`)
-	mapperRegex, _ := regexp.Compile(`-mapper`)
-	starRegex, _ := regexp.Compile(`-sr`)
+	scorePostRegex, _ := regexp.Compile(`(?i)-sp`)
+	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
+	starRegex, _ := regexp.Compile(`(?i)-sr`)
 
 	// Get URL
 	url := ""

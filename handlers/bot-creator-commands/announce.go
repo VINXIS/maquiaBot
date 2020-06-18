@@ -16,7 +16,7 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	announceRegex, _ := regexp.Compile(`announce\s+(.+)`)
+	announceRegex, _ := regexp.Compile(`(?i)announce\s+(.+)`)
 	if !announceRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "ur dumb as hell")
 		return

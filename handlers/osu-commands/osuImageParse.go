@@ -27,10 +27,10 @@ import (
 func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp) {
 
 	// Create regexps for checks
-	mapperRegex, _ := regexp.Compile(`(?i)b?e?a?t?mapp?e?d? by (\S*)`)
-	titleRegex, _ := regexp.Compile(`\- (.*) \[`)
-	diffRegex, _ := regexp.Compile(`\[(.*)\]`)
-	diagnosisRegex, _ := regexp.Compile(` -v`)
+	mapperRegex, _ := regexp.Compile(`(?i)(?i)b?e?a?t?mapp?e?d? by (\S*)`)
+	titleRegex, _ := regexp.Compile(`(?i)\- (.*) \[`)
+	diffRegex, _ := regexp.Compile(`(?i)\[(.*)\]`)
+	diagnosisRegex, _ := regexp.Compile(`(?i) -v`)
 
 	url := ""
 	if len(m.Attachments) > 0 {

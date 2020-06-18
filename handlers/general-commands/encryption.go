@@ -13,8 +13,8 @@ import (
 
 // Encrypt gives a hash of a string
 func Encrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
-	encryptRegex, _ := regexp.Compile(`encrypt\s+(.+)`)
-	keyRegex, _ := regexp.Compile(`-k\s+(.+)`)
+	encryptRegex, _ := regexp.Compile(`(?i)encrypt\s+(.+)`)
+	keyRegex, _ := regexp.Compile(`(?i)-k\s+(.+)`)
 
 	text := []byte{}
 	if !encryptRegex.MatchString(m.Content) {
@@ -49,9 +49,9 @@ func Encrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // Decrypt gives a string of a hash
 func Decrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
-	decryptRegex, _ := regexp.Compile(`decrypt\s+(.+)`)
-	linkRegex, _ := regexp.Compile(`https?:\/\/\S+`)
-	keyRegex, _ := regexp.Compile(`-k\s+(.+)`)
+	decryptRegex, _ := regexp.Compile(`(?i)decrypt\s+(.+)`)
+	linkRegex, _ := regexp.Compile(`(?i)https?:\/\/\S+`)
+	keyRegex, _ := regexp.Compile(`(?i)-k\s+(.+)`)
 
 	if !decryptRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "Nothing to decrypt!")
