@@ -126,7 +126,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 	if link != "" {
-		allowedFormats := []string{".jpeg", ".bmp", ".tiff", ".svg", ".mp4", ".avi", ".mov", ".webm", ".flv"}
+		allowedFormats := []string{".jpeg", ".bmp", ".tiff", ".svg"}
 		allowed := false
 		for _, format := range allowedFormats {
 			if strings.Contains(link, format) {
@@ -135,7 +135,15 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		if !allowed {
-			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			if strings.TrimSpace(linkRegex.ReplaceAllString(quote.Content, "")) == "" {
+				embed.Description = ""
+				s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+					Content: quote.Content,
+					Embed:   embed,
+				})
+			} else {
+				s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			}
 			return
 		}
 
