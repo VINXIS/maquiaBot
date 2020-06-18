@@ -53,7 +53,6 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		if num >= numend {
 			return
 		}
-		quoteNum := len(serverData.Quotes)
 		userQuotes := serverData.Quotes[num:numend]
 		if strings.Contains(msg.Content, "Quotes for") {
 			quoteRegex, _ := regexp.Compile(`(?i)Quotes for \*\*(.+)\*\*`)
@@ -92,7 +91,6 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 			if num >= numend {
 				return
 			}
-			quoteNum = len(userQuotes)
 			userQuotes = userQuotes[num:numend]
 		}
 
@@ -129,11 +127,7 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 			return
 		}
 
-		if page != "1" {
-			_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "⬇️")
-		}
-		if numend != quoteNum {
-			_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "⬆️")
-		}
+		_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "⬇️")
+		_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "⬆️")
 	}
 }
