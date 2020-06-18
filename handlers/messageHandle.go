@@ -213,8 +213,11 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// General commands
 		case "adj", "adjective", "adjectives":
 			go gencommands.Adjectives(s, m)
-		case "avatar", "ava", "a":
+		case "a", "ava", "avatar":
 			go gencommands.Avatar(s, m)
+		case "aq", "avaquote", "avatarquote", "quoteava", "quoteavatar":
+			go gencommands.Avatar(s, m)
+			go gencommands.Quote(s, m)
 		case "cap", "caps", "upper":
 			go gencommands.TextManipulation(s, m, "allCaps")
 		case "cp", "comparep", "comparepenis":
@@ -261,6 +264,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.TextManipulation(s, m, "allLower")
 		case "meme":
 			go gencommands.Meme(s, m)
+		case "merge":
+			go gencommands.Merge(s, m)
 		case "noun", "nouns":
 			go gencommands.Nouns(s, m)
 		case "ocr":

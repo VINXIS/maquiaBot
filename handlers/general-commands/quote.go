@@ -18,7 +18,7 @@ import (
 
 // Quote lets you get a quote from someone
 func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
-	quoteRegex, _ := regexp.Compile(`(?i)q(uote)?\s+(.+)`)
+	quoteRegex, _ := regexp.Compile(`(?i)(a|ava|avatar)?(q|quote)(ava|avatar)?\s+(.+)`)
 	linkRegex, _ := regexp.Compile(`(?i)https?:\/\/\S+`)
 	extensionRegex, _ := regexp.Compile(`(?i)\.(\S{3,4})`)
 
@@ -40,7 +40,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 	userQuotes := serverData.Quotes
 	number := 0
 	if quoteRegex.MatchString(m.Content) {
-		username = quoteRegex.FindStringSubmatch(m.Content)[2]
+		username = quoteRegex.FindStringSubmatch(m.Content)[4]
 		if len(strings.Split(username, " ")) > 1 {
 			if number, err = strconv.Atoi(strings.Split(username, " ")[1]); err == nil {
 				username = strings.Split(username, " ")[0]
