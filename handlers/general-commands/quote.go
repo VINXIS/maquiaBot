@@ -142,7 +142,10 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 					Embed:   embed,
 				})
 			} else {
-				s.ChannelMessageSendEmbed(m.ChannelID, embed)
+				s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+					Content: link,
+					Embed:   embed,
+				})
 			}
 			return
 		}
