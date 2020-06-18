@@ -216,8 +216,11 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "a", "ava", "avatar":
 			go gencommands.Avatar(s, m)
 		case "aq", "avaquote", "avatarquote", "quoteava", "quoteavatar":
-			go gencommands.Avatar(s, m)
-			go gencommands.Quote(s, m)
+			if len(strings.Split(m.Content, " ")) < 2 {
+				m.Content += " " + m.Author.Username
+			}
+				gencommands.Avatar(s, m)
+				gencommands.Quote(s, m)
 		case "cap", "caps", "upper":
 			go gencommands.TextManipulation(s, m, "allCaps")
 		case "cp", "comparep", "comparepenis":
