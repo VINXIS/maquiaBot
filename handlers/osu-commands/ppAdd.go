@@ -23,7 +23,7 @@ func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Pla
 
 	var pp float64
 	var err error
-	username := ppRegex.FindStringSubmatch(m.Content)[1]
+	username := ppRegex.FindStringSubmatch(m.Content)[2]
 
 	// Check if only pp was given, or if a user was also given as well
 	ppSplit := strings.Split(username, " ")
