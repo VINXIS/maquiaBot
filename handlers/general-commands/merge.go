@@ -45,6 +45,11 @@ func Merge(s *discordgo.Session, m *discordgo.MessageCreate) {
 		response.Body.Close()
 	}
 
+	if len(images) < 2 {
+		s.ChannelMessageSend(m.ChannelID, "Please provide at least 2 image links!")
+		return
+	}
+
 	size := image.Rectangle{image.Point{0, 0}, image.Point{length, height}}
 	finalImage := image.NewRGBA(size)
 
