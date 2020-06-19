@@ -43,6 +43,8 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		username = quoteRegex.FindStringSubmatch(m.Content)[4]
 		if discordUser, err := s.User(username); err == nil {
 			username = discordUser.Username
+		} else if len(m.Mentions) > 0 {
+			username = m.Mentions[0].Username
 		}
 		if len(strings.Split(username, " ")) > 1 {
 			if number, err = strconv.Atoi(strings.Split(username, " ")[1]); err == nil {
