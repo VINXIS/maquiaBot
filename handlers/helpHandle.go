@@ -37,6 +37,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 				Name: "General commands:",
 				Value: "`adjectives`, " +
 					"`avatar`, " +
+					"`avatarquote`, " +
 					"`caps`, " +
 					"`comparepenis`, " +
 					"`comparevagina`, " +
@@ -57,6 +58,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`list`, " +
 					"`lower`, " +
 					"`meme`, " +
+					"`merge`, " +
 					"`nouns`, " +
 					"`ocr`, " +
 					"`over`, " +
@@ -158,8 +160,10 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		// General commands
 		case "adj", "adjective", "adjectives":
 			embed = helpcommands.Adjectives(embed)
-		case "avatar", "ava", "a":
+		case "a", "ava", "avatar":
 			embed = helpcommands.Avatar(embed)
+		case "aq", "avaquote", "avatarquote", "quoteava", "quoteavatar":
+			embed = helpcommands.AvatarQuote(embed)
 		case "cap", "caps", "upper":
 			embed = helpcommands.AllCaps(embed)
 		case "cp", "comparep", "comparepenis":
@@ -200,6 +204,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.AllLower(embed)
 		case "meme":
 			embed = helpcommands.Meme(embed)
+		case "merge":
+			embed = helpcommands.Merge(embed)
 		case "noun", "nouns":
 			embed = helpcommands.Nouns(embed)
 		case "ocr":
@@ -327,42 +333,44 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		case "pokemon":
 			embed = helpcommands.Pokemon(embed)
 		}
+
+		// Add image if specific command
+		switch rand.Intn(11) {
+		case 0:
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: "https://cdn.discordapp.com/attachments/555493588465877012/555994312760885248/epicAnimeScene.gif",
+			}
+		case 1:
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: "https://cdn.discordapp.com/attachments/555493588465877012/555996915884490752/epicAnimeGifTWO.gif",
+			}
+		case 2:
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: "https://cdn.discordapp.com/attachments/555493588465877012/556000178406948875/epicAnimeGif5.gif",
+			}
+		case 3, 4:
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998627940532237/tumblr_phjkel3lgn1xlyyvto1_1280.png",
+			}
+		case 5, 6:
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998640142024704/tumblr_phjkel3lgn1xlyyvto2_1280.png",
+			}
+		case 7, 8:
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998669761937418/tumblr_phjkel3lgn1xlyyvto3_1280.png",
+			}
+		case 9, 10:
+			embed.Image = &discordgo.MessageEmbedImage{
+				URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998681375965194/tumblr_phjkel3lgn1xlyyvto5_1280.png",
+			}
+		}
 	}
 
 	if !strings.HasPrefix(embed.Description, "**Most") && embed.Fields[0].Name == "Admin commands:" {
 		embed.Fields = []*discordgo.MessageEmbedField{}
 	}
 
-	switch rand.Intn(11) {
-	case 0:
-		embed.Image = &discordgo.MessageEmbedImage{
-			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555994312760885248/epicAnimeScene.gif",
-		}
-	case 1:
-		embed.Image = &discordgo.MessageEmbedImage{
-			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555996915884490752/epicAnimeGifTWO.gif",
-		}
-	case 2:
-		embed.Image = &discordgo.MessageEmbedImage{
-			URL: "https://cdn.discordapp.com/attachments/555493588465877012/556000178406948875/epicAnimeGif5.gif",
-		}
-	case 3, 4:
-		embed.Image = &discordgo.MessageEmbedImage{
-			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998627940532237/tumblr_phjkel3lgn1xlyyvto1_1280.png",
-		}
-	case 5, 6:
-		embed.Image = &discordgo.MessageEmbedImage{
-			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998640142024704/tumblr_phjkel3lgn1xlyyvto2_1280.png",
-		}
-	case 7, 8:
-		embed.Image = &discordgo.MessageEmbedImage{
-			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998669761937418/tumblr_phjkel3lgn1xlyyvto3_1280.png",
-		}
-	case 9, 10:
-		embed.Image = &discordgo.MessageEmbedImage{
-			URL: "https://cdn.discordapp.com/attachments/555493588465877012/555998681375965194/tumblr_phjkel3lgn1xlyyvto5_1280.png",
-		}
-	}
 	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 		Content: "All commands in PM will use the bot's default prefix `$` instead!",
 		Embed:   embed,

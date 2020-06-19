@@ -7,7 +7,7 @@ import (
 // Quote explains the quote functionality
 func Quote(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: q / quote"
-	embed.Description = "`(q|quote) [<username> [num]]` gives a quote."
+	embed.Description = "`(q|quote) [(@mentions|username) [num]]` gives a quote."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[username]",
@@ -21,7 +21,7 @@ func Quote(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:  "Related Commands:",
-			Value: "`quoteadd`, `quoteremove`, `quotes`",
+			Value: "`quoteadd`, `quoteremove`, `quotes`, `avatarquote",
 		},
 	}
 	return embed
