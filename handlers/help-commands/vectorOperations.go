@@ -122,11 +122,11 @@ func VectorDot(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 
 // VectorMultiply explains the vector multiplication functionality
 func VectorMultiply(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
-	embed.Author.Name = "Command: va / vadd / vectora / vectoradd"
-	embed.Description = "`[math] (va|vadd|vectora|vectoradd) <vector1> <number>` will add the 2 vectors together."
+	embed.Author.Name = "Command: vm / vmult / vmultiply / vectorm / vectormult / vectormultiply"
+	embed.Description = "`[math] (vm|vmult|vmultiply|vectorm|vectormult|vectormultiply) <vector> <number>` will multiply each of the components of the vector by the number."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
-			Name:   "<vector1> <vector2>",
+			Name:   "<vector1>",
 			Value:  "The vector to multiply.",
 			Inline: true,
 		},
