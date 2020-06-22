@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	config "../../config"
-	osuapi "../../osu-api"
-	structs "../../structs"
-	tools "../../tools"
-	osucommands "../osu-commands"
+	config "maquiaBot/config"
+	osuapi "maquiaBot/osu-api"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
+	osucommands "maquiaBot/handlers/osu-commands"
 	"github.com/bwmarrin/discordgo"
 )
 

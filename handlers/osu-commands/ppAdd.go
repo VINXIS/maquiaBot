@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	osuapi "../../osu-api"
-	structs "../../structs"
+	osuapi "maquiaBot/osu-api"
+	structs "maquiaBot/structs"
 	"github.com/bwmarrin/discordgo"
 )
 

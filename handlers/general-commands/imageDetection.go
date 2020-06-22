@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"strings"
 
-	tools "../../tools"
+	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
 	"github.com/disintegration/imaging"
 	pigo "github.com/esimov/pigo/core"

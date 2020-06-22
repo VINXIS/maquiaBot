@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	config "../../config"
-	structs "../../structs"
-	tools "../../tools"
+	config "maquiaBot/config"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
 )
 

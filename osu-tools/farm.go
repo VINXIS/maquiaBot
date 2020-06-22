@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"time"
 
-	structs "../structs"
-	tools "../tools"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
 )
 

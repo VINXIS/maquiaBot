@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strconv"
 
-	mathtools "../../math-tools"
+	mathtools "maquiaBot/math-tools"
 	"github.com/bwmarrin/discordgo"
 )
 

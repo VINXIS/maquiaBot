@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"strings"
 
-	config "../../config"
-	tools "../../tools"
+	config "maquiaBot/config"
+	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
 )
 

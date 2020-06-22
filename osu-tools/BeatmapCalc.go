@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strconv"
 
-	osuapi "../osu-api"
+	osuapi "maquiaBot/osu-api"
 )
 
 // BeatmapCalc calculates PP for the map

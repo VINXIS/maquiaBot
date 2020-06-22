@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	structs "../structs"
+	structs "maquiaBot/structs"
 	"github.com/bwmarrin/discordgo"
 )
 

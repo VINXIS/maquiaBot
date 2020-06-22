@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	structs "../../structs"
-	tools "../../tools"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
 )
 

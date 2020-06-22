@@ -5,7 +5,7 @@ import (
 	"log"
 	"runtime"
 
-	config "../config"
+	config "maquiaBot/config"
 	"github.com/bwmarrin/discordgo"
 )
 

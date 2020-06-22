@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strconv"
 
-	tools "../../tools"
+	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
 )
 

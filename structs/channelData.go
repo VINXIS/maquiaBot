@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	osuapi "../osu-api"
+	osuapi "maquiaBot/osu-api"
 	"github.com/bwmarrin/discordgo"
 )
 

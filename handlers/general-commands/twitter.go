@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strconv"
 
-	config "../../config"
+	config "maquiaBot/config"
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/bwmarrin/discordgo"
 )

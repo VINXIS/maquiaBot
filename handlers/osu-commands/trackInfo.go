@@ -4,9 +4,9 @@ import (
 	"strconv"
 	"strings"
 
-	osutools "../../osu-tools"
-	structs "../../structs"
-	tools "../../tools"
+	osutools "maquiaBot/osu-tools"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
 )
 

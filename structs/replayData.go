@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	osuapi "../osu-api"
+	osuapi "maquiaBot/osu-api"
 	parser "github.com/natsukagami/go-osu-parser"
 	"github.com/ulikunitz/xz/lzma"
 )

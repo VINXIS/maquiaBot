@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	config "../config"
-	osuapi "../osu-api"
-	structs "../structs"
-	tools "../tools"
+	config "maquiaBot/config"
+	osuapi "maquiaBot/osu-api"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
 )
 

@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	osuapi "../../osu-api"
-	osutools "../../osu-tools"
-	tools "../../tools"
-	osucommands "../osu-commands"
+	osuapi "maquiaBot/osu-api"
+	osutools "maquiaBot/osu-tools"
+	tools "maquiaBot/tools"
+	osucommands "maquiaBot/handlers/osu-commands"
 	"github.com/bwmarrin/discordgo"
 )
 

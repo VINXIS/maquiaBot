@@ -3,9 +3,9 @@ package handlers
 import (
 	"regexp"
 
-	structs "../structs"
-	admincommands "./admin-commands"
-	osucommands "./osu-commands"
+	structs "maquiaBot/structs"
+	admincommands "maquiaBot/handlers/admin-commands"
+	osucommands "maquiaBot/handlers/osu-commands"
 	"github.com/bwmarrin/discordgo"
 )
 

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	tools "../../tools"
-	gencommands "../general-commands"
+	tools "maquiaBot/tools"
+	gencommands "maquiaBot/handlers/general-commands"
 	"github.com/bwmarrin/discordgo"
 )
 

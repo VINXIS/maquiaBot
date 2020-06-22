@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"regexp"
 
-	config "../../config"
+	config "maquiaBot/config"
 	"github.com/bwmarrin/discordgo"
 )
 

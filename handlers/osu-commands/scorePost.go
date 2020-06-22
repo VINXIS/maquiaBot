@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	osuapi "../../osu-api"
-	osutools "../../osu-tools"
-	structs "../../structs"
+	osuapi "maquiaBot/osu-api"
+	osutools "maquiaBot/osu-tools"
+	structs "maquiaBot/structs"
 	"github.com/bwmarrin/discordgo"
 )
 

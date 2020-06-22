@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	pokemoncommands "./pokemon-commands"
+	pokemoncommands "maquiaBot/handlers/pokemon-commands"
 	"github.com/bwmarrin/discordgo"
 )
 

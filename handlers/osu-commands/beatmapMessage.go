@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	osuapi "../../osu-api"
-	osutools "../../osu-tools"
+	osuapi "maquiaBot/osu-api"
+	osutools "maquiaBot/osu-tools"
 
 	"github.com/bwmarrin/discordgo"
 )

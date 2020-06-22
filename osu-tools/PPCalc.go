@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	osuapi "../osu-api"
+	osuapi "maquiaBot/osu-api"
 )
 
 // PPCalc calculates the pp given by the beatmap with specified acc and mods based off of https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Difficulty/OsuPerformanceCalculator.cs

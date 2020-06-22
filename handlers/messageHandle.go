@@ -12,14 +12,14 @@ import (
 	"strconv"
 	"strings"
 
-	structs "../structs"
-	tools "../tools"
-	admincommands "./admin-commands"
-	botcreatorcommands "./bot-creator-commands"
-	gencommands "./general-commands"
-	mathcommands "./math-commands"
-	osucommands "./osu-commands"
-	pokemoncommands "./pokemon-commands"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
+	admincommands "maquiaBot/handlers/admin-commands"
+	botcreatorcommands "maquiaBot/handlers/bot-creator-commands"
+	gencommands "maquiaBot/handlers/general-commands"
+	mathcommands "maquiaBot/handlers/math-commands"
+	osucommands "maquiaBot/handlers/osu-commands"
+	pokemoncommands "maquiaBot/handlers/pokemon-commands"
 	"github.com/bwmarrin/discordgo"
 )
 

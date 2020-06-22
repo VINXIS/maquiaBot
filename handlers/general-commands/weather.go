@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	config "../../config"
+	config "maquiaBot/config"
 	"github.com/bwmarrin/discordgo"
 )
 

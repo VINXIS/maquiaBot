@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	pokemontools "../../pokemon-tools"
+	pokemontools "maquiaBot/pokemon-tools"
 	"github.com/bwmarrin/discordgo"
 )
 

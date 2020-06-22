@@ -1,7 +1,7 @@
 package osutools
 
 import (
-	osuapi "../osu-api"
+	osuapi "maquiaBot/osu-api"
 )
 
 // ModeColour assigns a colour based on the beatmap's mode

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	colourtools "../../colour-tools"
+	colourtools "maquiaBot/colour-tools"
 	"github.com/bwmarrin/discordgo"
 	"github.com/fogleman/gg"
 )
