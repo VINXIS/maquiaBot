@@ -4,7 +4,7 @@ maquiaBot:
 	go build -v
 
 test:
-	go test -v
+	go test -v ./...
 
 clean:
 	rm -f maquiaBot

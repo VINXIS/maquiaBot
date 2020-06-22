@@ -18,7 +18,7 @@ func TestGenreOOB(t *testing.T) {
 }
 
 func TestApprovedStatus(t *testing.T) {
-	if StatusGraveyard.String() != "graveyard" {
+	if StatusGraveyard.String() != "Graveyard" {
 		t.Fatal("expected StatusGraveyard.String() to return 'graveyard', got", StatusGraveyard.String(), "instead")
 	}
 }
