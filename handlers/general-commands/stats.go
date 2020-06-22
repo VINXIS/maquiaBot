@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
+	tools "maquiaBot/tools"
 )
 
 // Stats creates and outputs randomized stats for the user in question

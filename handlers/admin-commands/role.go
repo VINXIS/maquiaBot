@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/bwmarrin/discordgo"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
-	"github.com/bwmarrin/discordgo"
 )
 
 // RoleAutomation adds / removes role automation options

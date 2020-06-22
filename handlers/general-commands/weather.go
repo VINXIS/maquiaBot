@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	config "maquiaBot/config"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
 )
 
 // WeatherData holds information for the weather data given

@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	pokemontools "maquiaBot/pokemon-tools"
 	"github.com/bwmarrin/discordgo"
+	pokemontools "maquiaBot/pokemon-tools"
 )
 
 // PokemonStruct is the Pokemon structure

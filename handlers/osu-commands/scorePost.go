@@ -10,10 +10,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
-	"github.com/bwmarrin/discordgo"
 )
 
 // ScorePost posts your score in a single line format

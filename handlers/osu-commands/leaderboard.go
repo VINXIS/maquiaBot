@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
 	config "maquiaBot/config"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
-	"github.com/bwmarrin/discordgo"
 )
 
 // Leaderboard gives you the leaderboard for a map

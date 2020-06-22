@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"strconv"
 
-	config "maquiaBot/config"
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
 )
 
 // Twitter uploads a twitter gif / image / video onto discord directly

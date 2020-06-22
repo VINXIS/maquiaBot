@@ -4,10 +4,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/bwmarrin/discordgo"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
-	"github.com/bwmarrin/discordgo"
 )
 
 // TrackInfo gives info about what's being tracked in the channel currently

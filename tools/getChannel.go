@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	structs "maquiaBot/structs"
 	"github.com/bwmarrin/discordgo"
+	structs "maquiaBot/structs"
 )
 
 // GetChannel obtains a channel using its channel ID

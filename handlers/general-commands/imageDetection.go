@@ -16,11 +16,11 @@ import (
 	"strconv"
 	"strings"
 
-	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
 	"github.com/disintegration/imaging"
 	pigo "github.com/esimov/pigo/core"
 	"github.com/fogleman/gg"
+	tools "maquiaBot/tools"
 )
 
 // OCR lets people use the tesseract-OCR utility on their images

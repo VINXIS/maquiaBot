@@ -3,8 +3,8 @@ package gencommands
 import (
 	"net/http"
 
-	config "maquiaBot/config"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
 )
 
 // Late sends a video related to someone saying late.

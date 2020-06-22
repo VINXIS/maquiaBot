@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strconv"
 
-	mathtools "maquiaBot/math-tools"
 	"github.com/bwmarrin/discordgo"
+	mathtools "maquiaBot/math-tools"
 )
 
 // DistanceDirection gives the distance and direction between 2 points

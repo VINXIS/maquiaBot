@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
+	tools "maquiaBot/tools"
 )
 
 // ReactAdd is to deal with reacts added

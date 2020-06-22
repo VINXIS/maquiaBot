@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	tools "maquiaBot/tools"
-	gencommands "maquiaBot/handlers/general-commands"
 	"github.com/bwmarrin/discordgo"
+	gencommands "maquiaBot/handlers/general-commands"
+	tools "maquiaBot/tools"
 )
 
 // Toggle toggles server options on/off

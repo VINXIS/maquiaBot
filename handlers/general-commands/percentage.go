@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
+	tools "maquiaBot/tools"
 )
 
 // Percentage gives a random percentage alongside bars

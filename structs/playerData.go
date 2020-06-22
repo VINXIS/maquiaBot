@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	osuapi "maquiaBot/osu-api"
 	"github.com/bwmarrin/discordgo"
+	osuapi "maquiaBot/osu-api"
 )
 
 // PlayerData stores information regarding the discord user, and the osu user

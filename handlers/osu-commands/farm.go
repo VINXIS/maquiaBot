@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
-	"github.com/bwmarrin/discordgo"
 )
 
 // Farm gives a player's farmerdog rating

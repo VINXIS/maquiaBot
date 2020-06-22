@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
-	"github.com/bwmarrin/discordgo"
 )
 
 // Link links an osu! account with the discord user

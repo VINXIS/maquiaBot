@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"time"
 
-	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
+	tools "maquiaBot/tools"
 )
 
 // Vibe checks for their vibe.

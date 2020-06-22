@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	osuapi "maquiaBot/osu-api"
 	parser "github.com/natsukagami/go-osu-parser"
 	"github.com/ulikunitz/xz/lzma"
+	osuapi "maquiaBot/osu-api"
 )
 
 // ReplayData stores the replay information of a play
@@ -253,7 +253,7 @@ func (r *ReplayData) GetPlayData(isAPI bool) []PlayData {
 	timeElapsed := int64(0)
 	for _, hit := range hits {
 		parts := strings.Split(hit, "|")
-		
+
 		if len(parts) < 3 {
 			break
 		}

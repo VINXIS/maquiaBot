@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	tools "maquiaBot/tools"
 	"github.com/bwmarrin/discordgo"
+	tools "maquiaBot/tools"
 )
 
 // Quote lets you get a quote from someone

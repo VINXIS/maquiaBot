@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/bwmarrin/discordgo"
+	osucommands "maquiaBot/handlers/osu-commands"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	tools "maquiaBot/tools"
-	osucommands "maquiaBot/handlers/osu-commands"
-	"github.com/bwmarrin/discordgo"
 )
 
 // Track executes the track command, used for when people want to track/untrack users/pp/etc

@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
 	config "maquiaBot/config"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
-	"github.com/bwmarrin/discordgo"
 )
 
 // Compare compares finds a score from the current user on the previous map linked by the bot

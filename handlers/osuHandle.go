@@ -3,10 +3,10 @@ package handlers
 import (
 	"regexp"
 
-	structs "maquiaBot/structs"
+	"github.com/bwmarrin/discordgo"
 	admincommands "maquiaBot/handlers/admin-commands"
 	osucommands "maquiaBot/handlers/osu-commands"
-	"github.com/bwmarrin/discordgo"
+	structs "maquiaBot/structs"
 )
 
 // OsuHandle handles commands that are regarding osu!

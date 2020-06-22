@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
-	"github.com/bwmarrin/discordgo"
 )
 
 // TrackMapperPost tracks mappers and posts their new maps into the channels
