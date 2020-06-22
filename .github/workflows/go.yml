@@ -25,6 +25,9 @@ jobs:
     - name: Build
       run: make
 
+    - name: Check formatting
+      run: checkfmt
+
     - name: Test
       run: make test
 
