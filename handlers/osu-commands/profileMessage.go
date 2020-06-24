@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
-	config "../../config"
-	osuapi "../../osu-api"
-	osutools "../../osu-tools"
-	structs "../../structs"
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
 	"github.com/wcharczuk/go-chart"
+	config "maquiaBot/config"
+	osuapi "maquiaBot/osu-api"
+	osutools "maquiaBot/osu-tools"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 )
 
 // ProfileMessage gets the information for the specified profile linked

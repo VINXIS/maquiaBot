@@ -1,8 +1,8 @@
 package structs
 
 import (
-	osuapi "../osu-api"
 	"github.com/bwmarrin/discordgo"
+	osuapi "maquiaBot/osu-api"
 )
 
 // MapperData holds information about a mapper for tracking

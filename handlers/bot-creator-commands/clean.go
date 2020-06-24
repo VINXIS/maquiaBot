@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	config "../../config"
-	osuapi "../../osu-api"
-	structs "../../structs"
-	tools "../../tools"
-	osucommands "../osu-commands"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
+	osucommands "maquiaBot/handlers/osu-commands"
+	osuapi "maquiaBot/osu-api"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 )
 
 // Clean cleans the caches

@@ -11,12 +11,12 @@ import (
 	"strconv"
 	"strings"
 
-	config "../../config"
-	osuapi "../../osu-api"
-	osutools "../../osu-tools"
-	structs "../../structs"
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
+	osuapi "maquiaBot/osu-api"
+	osutools "maquiaBot/osu-tools"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 )
 
 // ReplayMessage posts replay information fopr a given replay

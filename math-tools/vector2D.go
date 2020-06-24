@@ -51,7 +51,7 @@ func (v Vector2D) Divide(s float64) Vector {
 // Dot gives the dot product
 func (v Vector2D) Dot(v1 Vector) float64 {
 	v2 := v1.(Vector2D)
-	return v.X * v2.X + v.Y * v2.Y
+	return v.X*v2.X + v.Y*v2.Y
 }
 
 // Cross gives the cross product (the value is in the Z coordinate)

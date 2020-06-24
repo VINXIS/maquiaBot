@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	config "../../config"
-	osuapi "../../osu-api"
-	osutools "../../osu-tools"
-	structs "../../structs"
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
+	osuapi "maquiaBot/osu-api"
+	osutools "maquiaBot/osu-tools"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 )
 
 // Recent gets the most recent score done/nth score done

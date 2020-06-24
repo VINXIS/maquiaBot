@@ -5,10 +5,10 @@ import (
 	"io/ioutil"
 	"strings"
 
-	osuapi "../../osu-api"
-	structs "../../structs"
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	osuapi "maquiaBot/osu-api"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 )
 
 // TrackMapper lets people track mappers

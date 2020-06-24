@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	structs "../structs"
 	"github.com/bwmarrin/discordgo"
+	structs "maquiaBot/structs"
 )
 
 // GetGenitalRecord obtains the penis records

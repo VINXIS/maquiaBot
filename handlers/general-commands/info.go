@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	structs "../../structs"
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 )
 
 // Info gives information about the user

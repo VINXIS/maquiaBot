@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	mathtools "../../math-tools"
 	"github.com/bwmarrin/discordgo"
+	mathtools "maquiaBot/math-tools"
 )
 
 // StandardDeviation gives the apopulation and sample standard deviation of a list of values

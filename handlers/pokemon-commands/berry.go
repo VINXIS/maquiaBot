@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	pokemontools "../../pokemon-tools"
 	"github.com/bwmarrin/discordgo"
+	pokemontools "maquiaBot/pokemon-tools"
 )
 
 // BerryStruct is the Berry structure

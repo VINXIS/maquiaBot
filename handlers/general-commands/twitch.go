@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"regexp"
 
-	config "../../config"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
 )
 
 // TwitchClip holds twitch API information for clips

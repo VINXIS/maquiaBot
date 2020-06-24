@@ -13,11 +13,11 @@ import (
 	"strings"
 	"time"
 
-	config "../config"
-	osuapi "../osu-api"
-	structs "../structs"
-	tools "../tools"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
+	osuapi "maquiaBot/osu-api"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 )
 
 // TrackPost posts scores for users tracked for that channel

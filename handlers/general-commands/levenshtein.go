@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"strconv"
 
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	tools "maquiaBot/tools"
 )
 
 // Levenshtein gives the Levenshtein distance of 2 messages

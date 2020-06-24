@@ -12,15 +12,15 @@ import (
 	"strconv"
 	"strings"
 
-	structs "../structs"
-	tools "../tools"
-	admincommands "./admin-commands"
-	botcreatorcommands "./bot-creator-commands"
-	gencommands "./general-commands"
-	mathcommands "./math-commands"
-	osucommands "./osu-commands"
-	pokemoncommands "./pokemon-commands"
 	"github.com/bwmarrin/discordgo"
+	admincommands "maquiaBot/handlers/admin-commands"
+	botcreatorcommands "maquiaBot/handlers/bot-creator-commands"
+	gencommands "maquiaBot/handlers/general-commands"
+	mathcommands "maquiaBot/handlers/math-commands"
+	osucommands "maquiaBot/handlers/osu-commands"
+	pokemoncommands "maquiaBot/handlers/pokemon-commands"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 )
 
 // MessageHandler handles any incoming messages
@@ -219,8 +219,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if len(strings.Split(m.Content, " ")) < 2 {
 				m.Content += " " + m.Author.Username
 			}
-				gencommands.Avatar(s, m)
-				gencommands.Quote(s, m)
+			gencommands.Avatar(s, m)
+			gencommands.Quote(s, m)
 		case "cap", "caps", "upper":
 			go gencommands.TextManipulation(s, m, "allCaps")
 		case "cp", "comparep", "comparepenis":

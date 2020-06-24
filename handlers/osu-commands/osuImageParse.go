@@ -17,10 +17,10 @@ import (
 
 	"github.com/disintegration/imaging"
 
-	osuapi "../../osu-api"
-	osutools "../../osu-tools"
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	osuapi "maquiaBot/osu-api"
+	osutools "maquiaBot/osu-tools"
+	tools "maquiaBot/tools"
 )
 
 // OsuImageParse detects for an osu image

@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strconv"
 
-	osuapi "../osu-api"
+	osuapi "maquiaBot/osu-api"
 )
 
 // BeatmapParse parses beatmap and obtains the .osu file

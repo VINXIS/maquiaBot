@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"strconv"
 
-	config "../../config"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
 )
 
 // Update updates the bot discord status

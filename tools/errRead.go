@@ -5,8 +5,8 @@ import (
 	"log"
 	"runtime"
 
-	config "../config"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
 )
 
 // ErrRead will check to see if there is an error; it will print the error and kill the bot if there is any

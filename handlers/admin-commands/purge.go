@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	tools "maquiaBot/tools"
 )
 
 // Purge lets admins purge messages including their purge command
