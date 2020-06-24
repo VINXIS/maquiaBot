@@ -394,18 +394,23 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		text += "| "
 	}
 
-	ppValues := make(chan string, 1)
-	go osutools.PPCalc(beatmap, score, ppValues)
-	ppVal, _ := strconv.ParseFloat(<-ppValues, 64)
-	text += strconv.FormatFloat(ppVal, 'f', 0, 64)
+	if score.PP > 0 {
+		text += strconv.FormatFloat(score.PP, 'f', 0, 64)
+	} else {
+		ppValues := make(chan string, 1)
+		go osutools.PPCalc(beatmap, score, ppValues)
+		ppVal, _ := strconv.ParseFloat(<-ppValues, 64)
+		text += strconv.FormatFloat(ppVal, 'f', 0, 64)
+	}
 	if beatmap.Approved != osuapi.StatusRanked && beatmap.Approved != osuapi.StatusApproved {
 		text += "pp if ranked"
 	} else {
 		text += "pp"
 	}
 
-	if fcRegex.MatchString(m.Content) || fc {
+	if !score.FullCombo && (fcRegex.MatchString(m.Content) || fc) {
 		totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
+		ppValues := make(chan string, 1)
 		go osutools.PPCalc(beatmap, osuapi.Score{
 			MaxCombo: beatmap.MaxCombo,
 			Count50:  score.Count50,
@@ -413,7 +418,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 			Count300: totalObjs - score.Count50 - score.Count100,
 			Mods:     score.Mods,
 		}, ppValues)
-		ppVal, _ = strconv.ParseFloat(<-ppValues, 64)
+		ppVal, _ := strconv.ParseFloat(<-ppValues, 64)
 		text += ", " + strconv.FormatFloat(ppVal, 'f', 0, 64) + "pp if FC"
 	}
 
