@@ -26,7 +26,7 @@ jobs:
       run: make
 
     - name: Check formatting
-      run: checkfmt
+      run: make checkFmt
 
     - name: Test
       run: make test
