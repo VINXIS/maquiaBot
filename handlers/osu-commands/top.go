@@ -26,6 +26,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 	scorePostRegex, _ := regexp.Compile(`(?i)-sp`)
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
+	fcRegex, _ := regexp.Compile(`(?i)-fc`)
 
 	username := ""
 	mods := ""
@@ -55,6 +56,9 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		}
 		if starRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, starRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if fcRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, fcRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 
 		usernameSplit := strings.Split(username, " ")
@@ -299,6 +303,9 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		}
 		if starRegex.MatchString(m.Content) {
 			params = append(params, "sr")
+		}
+		if fcRegex.MatchString(m.Content) {
+			params = append(params, "fc")
 		}
 		ScorePost(s, &discordgo.MessageCreate{message}, cache, "", params...)
 	}

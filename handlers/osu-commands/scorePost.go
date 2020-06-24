@@ -26,6 +26,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	leaderboardRegex, _ := regexp.Compile(`(?i)\*\*(#\d+)\*\* on leaderboard!`)
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
+	fcRegex, _ := regexp.Compile(`(?i)-fc`)
 
 	var beatmap osuapi.Beatmap
 	var username string
@@ -331,11 +332,14 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 
 	mapper := true
 	sr := true
+	fc := false
 	for _, param := range params {
 		if param == "mapper" {
 			mapper = false
 		} else if param == "sr" {
 			sr = false
+		} else if param == "fc" {
+			fc = true
 		}
 	}
 
@@ -382,9 +386,6 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		text += leaderboard
 	}
 
-	ppValues := make(chan string, 1)
-	go osutools.PPCalc(beatmap, score, ppValues)
-	ppVal, _ := strconv.ParseFloat(<-ppValues, 64)
 	if beatmap.Approved == osuapi.StatusLoved {
 		text += "LOVED | "
 	} else if beatmap.Approved == osuapi.StatusQualified {
@@ -393,13 +394,30 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		text += "| "
 	}
 
+	ppValues := make(chan string, 1)
+	go osutools.PPCalc(beatmap, score, ppValues)
+	ppVal, _ := strconv.ParseFloat(<-ppValues, 64)
 	text += strconv.FormatFloat(ppVal, 'f', 0, 64)
-
 	if beatmap.Approved != osuapi.StatusRanked && beatmap.Approved != osuapi.StatusApproved {
-		text += "pp if ranked | "
+		text += "pp if ranked"
 	} else {
-		text += "pp | "
+		text += "pp"
 	}
+
+	if fcRegex.MatchString(m.Content) || fc {
+		totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
+		go osutools.PPCalc(beatmap, osuapi.Score{
+			MaxCombo: beatmap.MaxCombo,
+			Count50:  score.Count50,
+			Count100: score.Count100,
+			Count300: totalObjs - score.Count50 - score.Count100,
+			Mods:     score.Mods,
+		}, ppValues)
+		ppVal, _ = strconv.ParseFloat(<-ppValues, 64)
+		text += ", " + strconv.FormatFloat(ppVal, 'f', 0, 64) + "pp if FC"
+	}
+
+	text += " | "
 
 	if replayData.UnstableRate != 0 {
 		text += strconv.FormatFloat(replayData.UnstableRate, 'f', 2, 64)

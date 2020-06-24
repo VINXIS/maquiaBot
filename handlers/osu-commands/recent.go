@@ -28,6 +28,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 	scorePostRegex, _ := regexp.Compile(`(?i)-sp`)
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
+	fcRegex, _ := regexp.Compile(`(?i)-fc`)
 	genOSR, _ := regexp.Compile(`(?i)-osr`)
 
 	username := ""
@@ -58,6 +59,9 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		}
 		if starRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, starRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if fcRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, fcRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 		if genOSR.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, genOSR.FindStringSubmatch(m.Content)[0], "", 1))
@@ -407,6 +411,9 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		}
 		if starRegex.MatchString(m.Content) {
 			params = append(params, "sr")
+		}
+		if fcRegex.MatchString(m.Content) {
+			params = append(params, "fc")
 		}
 		if option == "best" {
 			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recentBest", params...)

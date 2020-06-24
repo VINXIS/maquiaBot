@@ -40,6 +40,11 @@ func Recent(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
+			Name:   "[-fc]",
+			Value:  "Adds pp for if the score was an FC for the scoprepost generation.",
+			Inline: true,
+		},
+		{
 			Name:  "Related Commands:",
 			Value: "`recentbest`",
 		},

@@ -39,6 +39,11 @@ func Top(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Value:  "Remove the star rating from the scorepost generation.",
 			Inline: true,
 		},
+		{
+			Name:   "[-fc]",
+			Value:  "Adds pp for if the score was an FC for the scoprepost generation.",
+			Inline: true,
+		},
 	}
 	return embed
 }

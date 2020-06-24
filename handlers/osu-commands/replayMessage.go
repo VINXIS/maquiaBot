@@ -24,6 +24,7 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	scorePostRegex, _ := regexp.Compile(`(?i)-sp`)
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
+	fcRegex, _ := regexp.Compile(`(?i)-fc`)
 
 	// Get URL
 	url := ""
@@ -253,6 +254,9 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		}
 		if starRegex.MatchString(m.Content) {
 			params = append(params, "sr")
+		}
+		if fcRegex.MatchString(m.Content) {
+			params = append(params, "fc")
 		}
 		ScorePost(s, &discordgo.MessageCreate{message}, cache, url, params...)
 	}
