@@ -11,12 +11,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	config "maquiaBot/config"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // ReplayMessage posts replay information fopr a given replay
@@ -25,6 +26,13 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
 	fcRegex, _ := regexp.Compile(`(?i)-fc`)
+	addRegex, _ := regexp.Compile(`(?i)-add\s+(.+)`)
+
+	addition := ""
+	if addRegex.MatchString(m.Content) {
+		addition = addRegex.FindStringSubmatch(m.Content)[1]
+		m.Content = strings.TrimSpace(strings.Replace(m.Content, addRegex.FindStringSubmatch(m.Content)[0], "", 1))
+	}
 
 	// Get URL
 	url := ""
@@ -258,6 +266,6 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		if fcRegex.MatchString(m.Content) {
 			params = append(params, "fc")
 		}
-		ScorePost(s, &discordgo.MessageCreate{message}, cache, url, params...)
+		ScorePost(s, &discordgo.MessageCreate{message}, cache, url, addition, params...)
 	}
 }

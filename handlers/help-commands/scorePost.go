@@ -7,7 +7,7 @@ import (
 // ScorePost explains the score post functionality
 func ScorePost(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: s / sc / scorepost"
-	embed.Description = "`[osu] (s|sc|scorepost) [link] [osu! username] [-m <mod>] [-mapper] [-sr]` prints out a scorepost."
+	embed.Description = "`[osu] (s|sc|scorepost) [link] [osu! username] [-m <mod>] [-mapper] [-sr] [-fc] [-add <text>]` prints out a scorepost."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[link]",
@@ -37,6 +37,11 @@ func ScorePost(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		{
 			Name:   "[-fc]",
 			Value:  "Adds pp for if the score was an FC for the scoprepost generation.",
+			Inline: true,
+		},
+		{
+			Name:   "[-add <text>]",
+			Value:  "Any text to append to the end for the scoprepost generation.",
 			Inline: true,
 		},
 	}

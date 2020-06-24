@@ -10,14 +10,15 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // ScorePost posts your score in a single line format
-func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData, postType string, params ...string) {
+func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData, postType string, addition string, params ...string) {
 	mapRegex, _ := regexp.Compile(`(?i)(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	scorePostRegex, _ := regexp.Compile(`(?i)sc?(orepost)?\s+(\S+)`)
 	modRegex, _ := regexp.Compile(`(?i)-m\s+(\S+)`)
@@ -27,6 +28,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
 	fcRegex, _ := regexp.Compile(`(?i)-fc`)
+	addRegex, _ := regexp.Compile(`(?i)-add\s+(.+)`)
 
 	var beatmap osuapi.Beatmap
 	var username string
@@ -53,6 +55,12 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		}
 		if starRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, starRegex.FindStringSubmatch(username)[0], "", 1))
+		}
+		if fcRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, fcRegex.FindStringSubmatch(username)[0], "", 1))
+		}
+		if addRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, addRegex.FindStringSubmatch(username)[0], "", 1))
 		}
 
 		// Get the map
@@ -408,7 +416,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		text += "pp"
 	}
 
-	if !score.FullCombo && (fcRegex.MatchString(m.Content) || fc) {
+	if !bool(score.FullCombo) && (fcRegex.MatchString(m.Content) || fc) {
 		totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
 		ppValues := make(chan string, 1)
 		go osutools.PPCalc(beatmap, osuapi.Score{
@@ -422,10 +430,8 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		text += ", " + strconv.FormatFloat(ppVal, 'f', 0, 64) + "pp if FC"
 	}
 
-	text += " | "
-
 	if replayData.UnstableRate != 0 {
-		text += strconv.FormatFloat(replayData.UnstableRate, 'f', 2, 64)
+		text += " | " + strconv.FormatFloat(replayData.UnstableRate, 'f', 2, 64)
 		score.Replay = true
 		if score.Mods&256 != 0 || score.Mods&64 != 0 {
 			text += " cv. UR"
@@ -449,7 +455,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 		}
 		replayData.PlayData = replayData.GetPlayData(true)
 		UR := replayData.GetUnstableRate()
-		text += strconv.FormatFloat(UR, 'f', 2, 64)
+		text += " | " + strconv.FormatFloat(UR, 'f', 2, 64)
 		score.Replay = true
 		if score.Mods&256 != 0 || score.Mods&64 != 0 {
 			text += " cv. UR"
@@ -457,6 +463,12 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 			text += " UR"
 		}
 		replayData.UnstableRate = UR
+	}
+
+	if addition != "" {
+		text += " | " + addition
+	} else if addRegex.MatchString(m.Content) {
+		text += " | " + addRegex.FindStringSubmatch(m.Content)[1]
 	}
 
 	s.ChannelMessageSend(m.ChannelID, text)

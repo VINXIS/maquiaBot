@@ -12,12 +12,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	config "maquiaBot/config"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Recent gets the most recent score done/nth score done
@@ -29,9 +30,11 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
 	fcRegex, _ := regexp.Compile(`(?i)-fc`)
+	addRegex, _ := regexp.Compile(`(?i)-add\s+(.+)`)
 	genOSR, _ := regexp.Compile(`(?i)-osr`)
 
 	username := ""
+	addition := ""
 	mods := ""
 	index := 1
 	strict := true
@@ -62,6 +65,10 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 		}
 		if fcRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, fcRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if addRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, addRegex.FindStringSubmatch(m.Content)[0], "", 1))
+			addition = addRegex.FindStringSubmatch(m.Content)[1]
 		}
 		if genOSR.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, genOSR.FindStringSubmatch(m.Content)[0], "", 1))
@@ -416,9 +423,9 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			params = append(params, "fc")
 		}
 		if option == "best" {
-			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recentBest", params...)
+			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recentBest", addition, params...)
 		} else if option == "recent" {
-			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recent", params...)
+			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recent", addition, params...)
 		}
 	}
 }

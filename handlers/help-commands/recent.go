@@ -7,7 +7,7 @@ import (
 // Recent explains the recent functionality
 func Recent(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: r / rs / recent"
-	embed.Description = "`[osu] (r|rs|recent) [osu! username] [num] [-m mod] [-sp [-mapper] [-sr]]` shows the player's recent score."
+	embed.Description = "`[osu] (r|rs|recent) [osu! username] [num] [-m mod] [-sp [-mapper] [-sr] [-fc] [-add <text>]]` shows the player's recent score."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[osu! username]",
@@ -45,6 +45,11 @@ func Recent(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
+			Name:   "[-add <text>]",
+			Value:  "Any text to append to the end for the scoprepost generation.",
+			Inline: true,
+		},
+		{
 			Name:  "Related Commands:",
 			Value: "`recentbest`",
 		},
@@ -55,7 +60,7 @@ func Recent(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // RecentBest explains the recentbest functionality
 func RecentBest(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: rb / recentb / recentbest"
-	embed.Description = "`[osu] (rb|recentb|recentbest) [osu! username] [num] [-m mod] [-sp [-mapper] [-sr]]` shows the player's recent top 100 pp score."
+	embed.Description = "`[osu] (rb|recentb|recentbest) [osu! username] [num] [-m mod] [-sp [-mapper] [-sr] [-fc] [-add <text>]]` shows the player's recent top 100 pp score."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[osu! username]",
@@ -85,6 +90,16 @@ func RecentBest(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		{
 			Name:   "[-sr]",
 			Value:  "Remove the star rating from the scorepost generation.",
+			Inline: true,
+		},
+		{
+			Name:   "[-fc]",
+			Value:  "Adds pp for if the score was an FC for the scoprepost generation.",
+			Inline: true,
+		},
+		{
+			Name:   "[-add <text>]",
+			Value:  "Any text to append to the end for the scoprepost generation.",
 			Inline: true,
 		},
 		{

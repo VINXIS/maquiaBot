@@ -12,12 +12,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	config "maquiaBot/config"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Compare compares finds a score from the current user on the previous map linked by the bot
@@ -31,10 +32,12 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
 	fcRegex, _ := regexp.Compile(`(?i)-fc`)
+	addRegex, _ := regexp.Compile(`(?i)-add\s+(.+)`)
 	genOSR, _ := regexp.Compile(`(?i)-osr`)
 
 	// Obtain username and mods
 	username := ""
+	addition := ""
 	mods := "NM"
 	parsedMods := osuapi.Mods(0)
 	strict := true
@@ -67,6 +70,10 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 		}
 		if fcRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, fcRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if addRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, addRegex.FindStringSubmatch(m.Content)[0], "", 1))
+			addition = addRegex.FindStringSubmatch(m.Content)[1]
 		}
 		if genOSR.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, genOSR.FindStringSubmatch(m.Content)[0], "", 1))
@@ -404,7 +411,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 				if fcRegex.MatchString(m.Content) {
 					params = append(params, "fc")
 				}
-				ScorePost(s, &discordgo.MessageCreate{message}, cache, "", params...)
+				ScorePost(s, &discordgo.MessageCreate{message}, cache, "", addition, params...)
 			}
 			return
 		}

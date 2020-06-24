@@ -3,10 +3,11 @@ package handlers
 import (
 	"regexp"
 
-	"github.com/bwmarrin/discordgo"
 	admincommands "maquiaBot/handlers/admin-commands"
 	osucommands "maquiaBot/handlers/osu-commands"
 	structs "maquiaBot/structs"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // OsuHandle handles commands that are regarding osu!
@@ -51,7 +52,7 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 		case "rb", "recentb", "recentbest":
 			go osucommands.Recent(s, m, "best", playerCache)
 		case "s", "sc", "scorepost":
-			go osucommands.ScorePost(s, m, playerCache, "scorePost")
+			go osucommands.ScorePost(s, m, playerCache, "scorePost", "")
 		case "t", "top":
 			go osucommands.Top(s, m, playerCache)
 		case "tfarm", "topfarm":

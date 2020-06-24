@@ -7,7 +7,7 @@ import (
 // Top explains the top functionality
 func Top(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: t / top"
-	embed.Description = "`[osu] (t|top) [osu! username] [num] [-m mod] [-sp [-mapper] [-sr]]` shows the player's top 100 pp score."
+	embed.Description = "`[osu] (t|top) [osu! username] [num] [-m mod] [-sp [-mapper] [-sr] [-fc] [-add <text>]]` shows the player's top 100 pp score."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[osu! username]",
@@ -42,6 +42,11 @@ func Top(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		{
 			Name:   "[-fc]",
 			Value:  "Adds pp for if the score was an FC for the scoprepost generation.",
+			Inline: true,
+		},
+		{
+			Name:   "[-add <text>]",
+			Value:  "Any text to append to the end for the scoprepost generation.",
 			Inline: true,
 		},
 	}

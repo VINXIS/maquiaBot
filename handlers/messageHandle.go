@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	admincommands "maquiaBot/handlers/admin-commands"
 	botcreatorcommands "maquiaBot/handlers/bot-creator-commands"
 	gencommands "maquiaBot/handlers/general-commands"
@@ -21,6 +20,8 @@ import (
 	pokemoncommands "maquiaBot/handlers/pokemon-commands"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // MessageHandler handles any incoming messages
@@ -120,9 +121,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if send {
 			allowedFormats := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".mp4", ".avi", ".mov", ".webm", ".flv"}
 			format := ""
-			for _, format := range allowedFormats {
+			for _, allowedFormat := range allowedFormats {
 				if strings.Contains(trigger.Result, format) {
-					format = format
+					format = allowedFormat
 				}
 			}
 
@@ -394,7 +395,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "rb", "recentb", "recentbest":
 			go osucommands.Recent(s, m, "best", profileCache)
 		case "s", "sc", "scorepost":
-			go osucommands.ScorePost(s, m, profileCache, "scorePost")
+			go osucommands.ScorePost(s, m, profileCache, "scorePost", "")
 		case "t", "top":
 			go osucommands.Top(s, m, profileCache)
 		case "tfarm", "topfarm":

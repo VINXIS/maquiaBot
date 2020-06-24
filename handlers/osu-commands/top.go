@@ -10,12 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	config "maquiaBot/config"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Top gets the nth top pp score
@@ -27,8 +28,10 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
 	fcRegex, _ := regexp.Compile(`(?i)-fc`)
+	addRegex, _ := regexp.Compile(`(?i)-add\s+(.+)`)
 
 	username := ""
+	addition := ""
 	mods := ""
 	index := 1
 	strict := true
@@ -59,6 +62,10 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		}
 		if fcRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, fcRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if addRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, addRegex.FindStringSubmatch(m.Content)[0], "", 1))
+			addition = addRegex.FindStringSubmatch(m.Content)[1]
 		}
 
 		usernameSplit := strings.Split(username, " ")
@@ -307,6 +314,6 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		if fcRegex.MatchString(m.Content) {
 			params = append(params, "fc")
 		}
-		ScorePost(s, &discordgo.MessageCreate{message}, cache, "", params...)
+		ScorePost(s, &discordgo.MessageCreate{message}, cache, "", addition, params...)
 	}
 }
