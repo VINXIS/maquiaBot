@@ -7,18 +7,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Link links an osu! account with the discord user
 func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache []structs.PlayerData) {
-	usernameRegex, _ := regexp.Compile(`(?i)(.+)(link|set)(\s+<@\S+)?(\s+.+)?`)
+	usernameRegex, _ := regexp.Compile(`(?i)(link|set)(\s+<@\S+)?(\s+.+)?`)
 
 	discordUser := m.Author
-	osuUsername := strings.TrimSpace(usernameRegex.FindStringSubmatch(m.Content)[4])
+	osuUsername := strings.TrimSpace(usernameRegex.FindStringSubmatch(m.Content)[3])
 
 	farmData := structs.FarmData{}
 	f, err := ioutil.ReadFile("./data/osuData/mapFarm.json")
