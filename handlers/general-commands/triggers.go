@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	tools "maquiaBot/tools"
 )
 
 // Triggers list out the triggers enabled in the server

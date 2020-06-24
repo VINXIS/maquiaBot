@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strconv"
 
-	osuapi "../osu-api"
+	osuapi "maquiaBot/osu-api"
 )
 
 // BeatmapCalc calculates PP for the map
@@ -23,27 +23,27 @@ func BeatmapCalc(mods, accScore, combo, misses string, beatmap osuapi.Beatmap) (
 
 			go PPCalc(beatmap, osuapi.Score{
 				MaxCombo: beatmap.MaxCombo,
-				Score: 1000000,
+				Score:    1000000,
 				Mods:     osuapi.ParseMods(mods),
 			}, ppValues)
 			go PPCalc(beatmap, osuapi.Score{
 				MaxCombo: beatmap.MaxCombo,
-				Score: 980000,
+				Score:    980000,
 				Mods:     osuapi.ParseMods(mods),
 			}, ppValues)
 			go PPCalc(beatmap, osuapi.Score{
 				MaxCombo: beatmap.MaxCombo,
-				Score: 950000,
+				Score:    950000,
 				Mods:     osuapi.ParseMods(mods),
 			}, ppValues)
 			go PPCalc(beatmap, osuapi.Score{
 				MaxCombo: beatmap.MaxCombo,
-				Score: 900000,
+				Score:    900000,
 				Mods:     osuapi.ParseMods(mods),
 			}, ppValues)
 			go PPCalc(beatmap, osuapi.Score{
 				MaxCombo: beatmap.MaxCombo,
-				Score: 800000,
+				Score:    800000,
 				Mods:     osuapi.ParseMods(mods),
 			}, ppValues)
 
@@ -64,7 +64,7 @@ func BeatmapCalc(mods, accScore, combo, misses string, beatmap osuapi.Beatmap) (
 
 			go PPCalc(beatmap, osuapi.Score{
 				MaxCombo: beatmap.MaxCombo,
-				Score: scoreVal,
+				Score:    scoreVal,
 				Mods:     osuapi.ParseMods(mods),
 			}, ppValues)
 

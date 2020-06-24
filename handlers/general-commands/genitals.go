@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	tools "maquiaBot/tools"
 )
 
 type genitals struct {

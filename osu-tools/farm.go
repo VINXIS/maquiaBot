@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"time"
 
-	structs "../structs"
-	tools "../tools"
 	"github.com/bwmarrin/discordgo"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 )
 
 // FarmUpdate gets the new data from grumd's site: https://grumd.github.io/osu-pps

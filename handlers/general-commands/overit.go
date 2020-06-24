@@ -3,8 +3,8 @@ package gencommands
 import (
 	"net/http"
 
-	config "../../config"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
 )
 
 // OverIt sends an over it image

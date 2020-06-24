@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	osuapi "../../osu-api"
-	structs "../../structs"
 	"github.com/bwmarrin/discordgo"
+	osuapi "maquiaBot/osu-api"
+	structs "maquiaBot/structs"
 )
 
 // PPAdd calculates final pp after obtaining given pp score

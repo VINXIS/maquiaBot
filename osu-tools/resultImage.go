@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"strings"
 
-	osuapi "../osu-api"
-	structs "../structs"
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
+	osuapi "maquiaBot/osu-api"
+	structs "maquiaBot/structs"
 )
 
 // ResultImage creates a result image for a score

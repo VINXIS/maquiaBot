@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	structs "../../structs"
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 )
 
 // Trigger adds / removes triggers

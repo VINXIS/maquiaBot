@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
-	mathtools "../../math-tools"
 	"github.com/bwmarrin/discordgo"
+	mathtools "maquiaBot/math-tools"
 )
 
 // Average gives the average of a list of numbers

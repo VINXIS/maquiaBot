@@ -50,15 +50,15 @@ func (v Vector3D) Divide(s float64) Vector {
 // Dot gives the dot product
 func (v Vector3D) Dot(v1 Vector) float64 {
 	v2 := v1.(Vector3D)
-	return v.X * v2.X + v.Y * v2.Y + v.Z * v2.Z
+	return v.X*v2.X + v.Y*v2.Y + v.Z*v2.Z
 }
 
 // Cross gives the cross product
 func (v Vector3D) Cross(v1 Vector) Vector {
 	v2 := v1.(Vector3D)
-	x := v.Y*v2.Z-v.Z*v2.Y
-	y := v.Z*v2.X-v.X*v2.Z
-	z := v.X*v2.Y-v.Y*v2.X
+	x := v.Y*v2.Z - v.Z*v2.Y
+	y := v.Z*v2.X - v.X*v2.Z
+	z := v.X*v2.Y - v.Y*v2.X
 	return Vector3D{Vector2D{x, y}, z}
 }
 

@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	config "../../config"
-	structs "../../structs"
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
+	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 )
 
 // ReminderTimers is the list of all reminders running

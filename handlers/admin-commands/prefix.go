@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	tools "../../tools"
+	tools "maquiaBot/tools"
 
 	"github.com/bwmarrin/discordgo"
 )

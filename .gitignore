@@ -3,3 +3,5 @@ config/config.json
 *.exe
 bot
 nohup.out
+
+/maquiaBot

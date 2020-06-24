@@ -1,8 +1,8 @@
 package botcreatorcommands
 
 import (
-	config "../../config"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
 )
 
 // Servers gives the list of servers

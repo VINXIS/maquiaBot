@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	colourtools "../../colour-tools"
 	"github.com/bwmarrin/discordgo"
 	"github.com/fogleman/gg"
+	colourtools "maquiaBot/colour-tools"
 )
 
 // Colour generates a 256x256 image of that colour

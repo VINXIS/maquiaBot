@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	osuapi "../../osu-api"
-	structs "../../structs"
 	"github.com/bwmarrin/discordgo"
+	osuapi "maquiaBot/osu-api"
+	structs "maquiaBot/structs"
 )
 
 // BPM gives a player's BPM of the day

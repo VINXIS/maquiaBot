@@ -4,9 +4,9 @@ import (
 	"regexp"
 	"strings"
 
-	config "../../config"
-	tools "../../tools"
 	"github.com/bwmarrin/discordgo"
+	config "maquiaBot/config"
+	tools "maquiaBot/tools"
 )
 
 // Announce announces new stuff
