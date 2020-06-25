@@ -7,9 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	gencommands "maquiaBot/handlers/general-commands"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Toggle toggles server options on/off
@@ -36,12 +37,13 @@ func Toggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.Contains(m.Content, "-a") || strings.Contains(m.Content, "-announce") {
 		if serverData.AnnounceChannel == m.ChannelID {
 			serverData.AnnounceChannel = ""
+			status = "N/A"
 		} else {
 			serverData.AnnounceChannel = m.ChannelID
+			status = "this channel"
 		}
 		flagged = true
 		target = "The announcement channel"
-		status = "this channel"
 	}
 	if strings.Contains(m.Content, "-d") || strings.Contains(m.Content, "-daily") {
 		serverData.Daily = !serverData.Daily
