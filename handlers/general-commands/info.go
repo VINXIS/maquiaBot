@@ -10,9 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Info gives information about the user
@@ -365,6 +366,9 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	if other != 0 {
 		channelInfo += strconv.Itoa(other) + " other\n"
+	}
+	if channelInfo == "" {
+		channelInfo = "Currently unavailable."
 	}
 
 	// Quote info
