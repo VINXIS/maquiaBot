@@ -389,28 +389,15 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 		if !included {
-			user, err := s.User(quote.Author.ID)
-			if err != nil {
-				quoteData = append(quoteData, struct {
-					Name  string
-					ID    string
-					Count int
-				}{
-					Name:  "ERROR OBATINING USER",
-					ID:    quote.Author.ID,
-					Count: 1,
-				})
-			} else {
-				quoteData = append(quoteData, struct {
-					Name  string
-					ID    string
-					Count int
-				}{
-					Name:  user.Username,
-					ID:    quote.Author.ID,
-					Count: 1,
-				})
-			}
+			quoteData = append(quoteData, struct {
+				Name  string
+				ID    string
+				Count int
+			}{
+				Name:  quote.Author.Username,
+				ID:    quote.Author.ID,
+				Count: 1,
+			})
 		}
 	}
 	sort.Slice(quoteData, func(i, j int) bool { return quoteData[i].Count > quoteData[j].Count })
