@@ -122,7 +122,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			allowedFormats := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".mp4", ".avi", ".mov", ".webm", ".flv"}
 			format := ""
 			for _, allowedFormat := range allowedFormats {
-				if strings.Contains(trigger.Result, format) {
+				if strings.Contains(trigger.Result, allowedFormat) {
 					format = allowedFormat
 				}
 			}
