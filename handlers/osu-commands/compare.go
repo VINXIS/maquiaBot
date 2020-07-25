@@ -386,9 +386,11 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 		score.Rank = strings.Replace(score.Rank, "X", "SS", -1)
 		g, _ := s.Guild(config.Conf.Server)
 		scoreRank := ""
-		for _, emoji := range g.Emojis {
-			if emoji.Name == score.Rank+"_" {
-				scoreRank = emoji.MessageFormat()
+		if len(g.Emojis) > 0 {
+			for _, emoji := range g.Emojis {
+				if emoji.Name == score.Rank+"_" {
+					scoreRank = emoji.MessageFormat()
+				}
 			}
 		}
 
