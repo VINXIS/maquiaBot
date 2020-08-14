@@ -364,11 +364,13 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 	}
 
 	score.Rank = strings.Replace(score.Rank, "X", "SS", -1)
-	g, _ := s.Guild(config.Conf.Server)
+	g, err := s.Guild(config.Conf.Server)
 	scoreRank := ""
-	for _, emoji := range g.Emojis {
-		if emoji.Name == score.Rank+"_" {
-			scoreRank = emoji.MessageFormat()
+	if err == nil {
+		for _, emoji := range g.Emojis {
+			if emoji.Name == score.Rank+"_" {
+				scoreRank = emoji.MessageFormat()
+			}
 		}
 	}
 
