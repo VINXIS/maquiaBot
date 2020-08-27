@@ -5,8 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Triggers list out the triggers enabled in the server
@@ -44,9 +45,13 @@ func Triggers(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if err == nil {
 			regex = true
 		}
+		valueText := "Trigger: " + trigger.Cause + "\nResult: " + trigger.Result + "\nRegex compatible: " + strconv.FormatBool(regex)
+		if len(valueText) > 1024 {
+			valueText = valueText[:1021] + "..."
+		}
 		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 			Name:  strconv.FormatInt(trigger.ID, 10),
-			Value: "Trigger: " + trigger.Cause + "\nResult: " + trigger.Result + "\nRegex compatible: " + strconv.FormatBool(regex),
+			Value: valueText,
 		})
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
