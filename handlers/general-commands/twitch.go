@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/bwmarrin/discordgo"
 	config "maquiaBot/config"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // TwitchClip holds twitch API information for clips
@@ -32,8 +33,8 @@ type TwitchClip struct {
 
 // Twitch uploads a twitch clip onto discord directly
 func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
-	twitchRegex, _ := regexp.Compile(`(?i)https://clips.twitch.tv/(\S+)`)
-	largeTwitchRegex, _ := regexp.Compile(`(?i)https://www.twitch.tv/osulive/clip/(\S+)`)
+	twitchRegex, _ := regexp.Compile(`(?i)clips\.twitch\.tv/(\S+)`)
+	largeTwitchRegex, _ := regexp.Compile(`(?i)twitch\.tv/(\S+)/clip/([^?]+)`)
 	thumbnailRegex, _ := regexp.Compile(`(?i)-preview-\d+x\d+\.jpg`)
 
 	// Get ID
@@ -41,7 +42,7 @@ func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if twitchRegex.MatchString(m.Content) {
 		ID = twitchRegex.FindStringSubmatch(m.Content)[1]
 	} else if largeTwitchRegex.MatchString(m.Content) {
-		ID = largeTwitchRegex.FindStringSubmatch(m.Content)[1]
+		ID = largeTwitchRegex.FindStringSubmatch(m.Content)[2]
 	} else {
 		msgs, _ := s.ChannelMessages(m.ChannelID, -1, m.ID, "", "")
 		for _, msg := range msgs {
@@ -49,7 +50,7 @@ func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
 				ID = twitchRegex.FindStringSubmatch(msg.Content)[1]
 				break
 			} else if largeTwitchRegex.MatchString(msg.Content) {
-				ID = largeTwitchRegex.FindStringSubmatch(msg.Content)[1]
+				ID = largeTwitchRegex.FindStringSubmatch(msg.Content)[2]
 				break
 			}
 		}
@@ -57,7 +58,7 @@ func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Check if ID was found
 	if ID == "" {
-		s.ChannelMessageSend(m.ChannelID, "No twitch clip found!")
+		s.ChannelMessageSend(m.ChannelID, "No clip ID found!")
 		return
 	}
 
@@ -85,16 +86,22 @@ func Twitch(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	if len(clipData.Data) == 0 {
-		s.ChannelMessageSend(m.ChannelID, "No twitch clip found!")
+		s.ChannelMessageSend(m.ChannelID, "No twitch clip data found from API response!")
 		return
 	}
 
 	// Find URL
-	if !thumbnailRegex.MatchString(clipData.Data[0].ThumbnailURL) {
-		s.ChannelMessageSend(m.ChannelID, "No twitch clip found!")
+	video := ""
+	for _, clip := range clipData.Data {
+		if !thumbnailRegex.MatchString(clip.ThumbnailURL) {
+			continue
+		}
+		video = thumbnailRegex.ReplaceAllString(clip.ThumbnailURL, ".mp4")
+	}
+	if video == "" {
+		s.ChannelMessageSend(m.ChannelID, "No twitch video link found from API response!")
 		return
 	}
-	video := thumbnailRegex.ReplaceAllString(clipData.Data[0].ThumbnailURL, ".mp4")
 
 	msg, err := s.ChannelMessageSend(m.ChannelID, "Obtaining twitch clip...")
 	if err != nil {
