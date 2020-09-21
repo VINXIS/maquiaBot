@@ -13,11 +13,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	config "maquiaBot/config"
 	osuapi "maquiaBot/osu-api"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // TrackPost posts scores for users tracked for that channel
@@ -243,11 +244,13 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 							}
 
 							score.Rank = strings.Replace(score.Rank, "X", "SS", -1)
-							g, _ := s.Guild(config.Conf.Server)
+							g, err := s.Guild(config.Conf.Server)
 							scoreRank := ""
-							for _, emoji := range g.Emojis {
-								if emoji.Name == score.Rank+"_" {
-									scoreRank = emoji.MessageFormat()
+							if err == nil {
+								for _, emoji := range g.Emojis {
+									if emoji.Name == score.Rank+"_" {
+										scoreRank = emoji.MessageFormat()
+									}
 								}
 							}
 
