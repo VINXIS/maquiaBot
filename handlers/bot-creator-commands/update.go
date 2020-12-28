@@ -4,8 +4,9 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/bwmarrin/discordgo"
 	config "maquiaBot/config"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Update updates the bot discord status
@@ -14,12 +15,12 @@ func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
 		return
 	}
-	updateRegex, _ := regexp.Compile(`(?i)updatestatus\s+(.+)`)
+	updateRegex, _ := regexp.Compile(`(?i)up(date)?\s+(.+)`)
 	if !updateRegex.MatchString(m.Content) {
 		s.UpdateStatus(0, strconv.Itoa(len(s.State.Guilds))+" servers")
 		return
 	}
 
-	text := updateRegex.FindStringSubmatch(m.Content)[1]
+	text := updateRegex.FindStringSubmatch(m.Content)[2]
 	s.UpdateStatus(0, text)
 }
