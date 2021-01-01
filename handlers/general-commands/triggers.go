@@ -53,7 +53,26 @@ func Triggers(s *discordgo.Session, m *discordgo.MessageCreate) {
 			Name:  strconv.FormatInt(trigger.ID, 10),
 			Value: valueText,
 		})
+
+		if len(embed.Fields) == 25 {
+			if len(serverData.Triggers) > 25 {
+				embed.Footer = &discordgo.MessageEmbedFooter{
+					Text: "Page 1",
+				}
+			}
+			break
+		}
 	}
-	s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	msg, err := s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+		Content: "Admins can use `trigger -d` to delete a trigger! If there are more than 25 triggers, please use the reactions to go through pages!",
+		Embed:   embed,
+	})
+	if err != nil {
+		return
+	}
+	if len(embed.Fields) == 25 && len(serverData.Triggers) > 25 {
+		_ = s.MessageReactionAdd(m.ChannelID, msg.ID, "⬅️")
+		_ = s.MessageReactionAdd(m.ChannelID, msg.ID, "➡️")
+	}
 	return
 }
