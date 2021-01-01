@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -93,12 +94,16 @@ func Decrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	resultText := string(result)
 	if linkRegex.MatchString(resultText) {
-		response, err := http.Get(linkRegex.FindStringSubmatch(resultText)[0])
+		client := http.Client{
+			Timeout: 10 * time.Second,
+		}
+		response, err := client.Get(linkRegex.FindStringSubmatch(resultText)[0])
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
 			response.Body.Close()
 			return
 		}
+		defer response.Body.Close()
 		_, err = s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Files: []*discordgo.File{
 				{
@@ -110,7 +115,6 @@ func Decrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
 		}
-		response.Body.Close()
 		return
 	}
 	s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
