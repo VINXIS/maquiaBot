@@ -1,4 +1,4 @@
-package pagination
+package paginationcommands
 
 import (
 	"maquiaBot/structs"
@@ -11,9 +11,10 @@ import (
 )
 
 // Quotes handles the pagination of a list of quotes
-func Quotes(s *discordgo.Session, r *discordgo.MessageReactionAdd, msg *discordgo.Message, serverData structs.ServerData, num, numend int) *discordgo.MessageEmbed {
+func Quotes(s *discordgo.Session, r *discordgo.MessageReactionAdd, msg *discordgo.Message, serverData structs.ServerData, num, numend int) (*discordgo.MessageEmbed, bool) {
 	username := ""
 	embed := &discordgo.MessageEmbed{}
+	end := false
 
 	userQuotes := serverData.Quotes[num:numend]
 	if strings.Contains(msg.Content, "Quotes for") {
@@ -35,7 +36,7 @@ func Quotes(s *discordgo.Session, r *discordgo.MessageReactionAdd, msg *discordg
 		}
 
 		if user.ID == "" {
-			return embed
+			return embed, true
 		}
 
 		userQuotes = []discordgo.Message{}
@@ -45,13 +46,14 @@ func Quotes(s *discordgo.Session, r *discordgo.MessageReactionAdd, msg *discordg
 			}
 		}
 		if len(userQuotes) == 0 {
-			return embed
+			return embed, true
 		}
 		if numend > len(userQuotes) {
 			numend = len(userQuotes)
+			end = true
 		}
 		if num >= numend {
-			return embed
+			return embed, true
 		}
 		userQuotes = userQuotes[num:numend]
 	}
@@ -81,5 +83,5 @@ func Quotes(s *discordgo.Session, r *discordgo.MessageReactionAdd, msg *discordg
 		}
 	}
 
-	return embed
+	return embed, len(embed.Fields) < 25 || end
 }

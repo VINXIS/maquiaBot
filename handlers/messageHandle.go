@@ -18,8 +18,8 @@ import (
 	mathcommands "maquiaBot/handlers/math-commands"
 	osucommands "maquiaBot/handlers/osu-commands"
 	pokemoncommands "maquiaBot/handlers/pokemon-commands"
-	structs "maquiaBot/structs"
-	tools "maquiaBot/tools"
+	"maquiaBot/structs"
+	"maquiaBot/tools"
 
 	"github.com/bwmarrin/discordgo"
 )

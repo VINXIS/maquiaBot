@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/bwmarrin/discordgo"
 	mathcommands "maquiaBot/handlers/math-commands"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // MathHandle handles commands that are regarding math

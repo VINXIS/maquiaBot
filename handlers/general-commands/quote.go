@@ -514,7 +514,6 @@ func Quotes(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	if len(embed.Fields) == 25 && len(userQuotes) > 25 {
-		_ = s.MessageReactionAdd(m.ChannelID, msg.ID, "⬅️")
 		_ = s.MessageReactionAdd(m.ChannelID, msg.ID, "➡️")
 	}
 }

@@ -5,10 +5,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	helpcommands "maquiaBot/handlers/help-commands"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // HelpHandle lets you know the commands available

@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"maquiaBot/pagination"
+	paginationcommands "maquiaBot/handlers/pagination-commands"
 	"maquiaBot/tools"
 	"regexp"
 	"strconv"
@@ -54,12 +54,17 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 	}
 
 	embed := &discordgo.MessageEmbed{}
+	lastPage := true
 
 	// Check which pagination this is for
 	if strings.Contains(msg.Content, "quote") {
-		embed = pagination.Quotes(s, r, msg, serverData, num, numend)
+		embed, lastPage = paginationcommands.Quotes(s, r, msg, serverData, num, numend)
 	} else if strings.Contains(msg.Content, "trigger") {
-		embed = pagination.Triggers(s, r, msg, serverData, num, numend)
+		embed, lastPage = paginationcommands.Triggers(s, r, msg, serverData, num, numend)
+	}
+
+	if len(embed.Fields) == 0 {
+		return
 	}
 
 	embed.Footer = &discordgo.MessageEmbedFooter{
@@ -73,6 +78,10 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		return
 	}
 
-	_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "⬅️")
-	_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "➡️")
+	if num/25 != 0 {
+		_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "⬅️")
+	}
+	if !lastPage {
+		_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "➡️")
+	}
 }
