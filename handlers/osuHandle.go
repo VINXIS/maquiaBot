@@ -41,8 +41,6 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string, 
 			go osucommands.Link(s, m, args, playerCache)
 		case "m", "map":
 			go osucommands.BeatmapMessage(s, m, beatmapRegex)
-		case "mt", "mtrack", "maptrack", "mappertrack":
-			go osucommands.TrackMapper(s, m, mapperData)
 		case "mti", "mtinfo", "mtrackinfo", "maptracking", "mappertracking", "mappertrackinfo":
 			go osucommands.TrackMapperInfo(s, m, mapperData)
 		case "ppadd", "addpp":

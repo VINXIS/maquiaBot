@@ -71,7 +71,6 @@ func Triggers(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	if len(embed.Fields) == 25 && len(serverData.Triggers) > 25 {
-		_ = s.MessageReactionAdd(m.ChannelID, msg.ID, "⬅️")
 		_ = s.MessageReactionAdd(m.ChannelID, msg.ID, "➡️")
 	}
 	return

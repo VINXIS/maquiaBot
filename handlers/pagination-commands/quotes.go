@@ -16,6 +16,10 @@ func Quotes(s *discordgo.Session, r *discordgo.MessageReactionAdd, msg *discordg
 	embed := &discordgo.MessageEmbed{}
 	end := false
 
+	if numend > len(serverData.Quotes) {
+		numend = len(serverData.Quotes)
+		end = true
+	}
 	userQuotes := serverData.Quotes[num:numend]
 	if strings.Contains(msg.Content, "Quotes for") {
 		quoteRegex, _ := regexp.Compile(`(?i)Quotes for \*\*(.+)\*\*`)
