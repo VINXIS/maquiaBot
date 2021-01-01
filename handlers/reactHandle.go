@@ -6,8 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // ReactAdd is to deal with reacts added
@@ -26,12 +27,13 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		num, _ := strconv.Atoi(regex.FindStringSubmatch(msg.Embeds[0].Footer.Text)[1])
 		numend := (num + 1) * 25
 		page := strconv.Itoa(num + 1)
-		if r.Emoji.Name == "⬇️" && num > 1 {
+		username := ""
+		if r.Emoji.Name == "⬅️" && num > 1 {
 			num--
 			numend = num * 25
 			page = strconv.Itoa(num)
 			num--
-		} else if r.Emoji.Name != "⬆️" {
+		} else if r.Emoji.Name != "➡️" {
 			return
 		}
 		num *= 25
@@ -56,7 +58,7 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		userQuotes := serverData.Quotes[num:numend]
 		if strings.Contains(msg.Content, "Quotes for") {
 			quoteRegex, _ := regexp.Compile(`(?i)Quotes for \*\*(.+)\*\*`)
-			username := quoteRegex.FindStringSubmatch(msg.Content)[1]
+			username = quoteRegex.FindStringSubmatch(msg.Content)[1]
 
 			user := &discordgo.User{}
 			members, _ := s.GuildMembers(r.MessageReaction.GuildID, "", 1000)
@@ -95,23 +97,26 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		}
 
 		embed := &discordgo.MessageEmbed{}
-		for _, quote := range userQuotes {
+		for i, quote := range userQuotes {
 			if len(quote.Content) > 1024 {
 				quote.Content = quote.Content[:1024]
 			}
-			if quote.Content != "" {
-				embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-					Name:   quote.ID + " - " + quote.Author.Username,
-					Value:  quote.Content,
-					Inline: true,
-				})
-			} else {
-				embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-					Name:   quote.ID + " - " + quote.Author.Username,
-					Value:  "**IMAGE/VIDEO QUOTE**",
-					Inline: true,
-				})
+
+			quoteEmbed := &discordgo.MessageEmbedField{
+				Name:   quote.ID + " - " + quote.Author.Username,
+				Value:  quote.Content,
+				Inline: true,
 			}
+
+			if username != "" {
+				quoteEmbed.Name += " (" + strconv.Itoa(i+1) + ")"
+			}
+			if quote.Content == "" {
+				quoteEmbed.Value = "**IMAGE/VIDEO QUOTE**"
+			}
+
+			embed.Fields = append(embed.Fields, quoteEmbed)
+
 			if len(embed.Fields) == 25 {
 				break
 			}
@@ -127,7 +132,7 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 			return
 		}
 
-		_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "⬇️")
-		_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "⬆️")
+		_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "⬅️")
+		_ = s.MessageReactionAdd(msg.ChannelID, msg.ID, "➡️")
 	}
 }

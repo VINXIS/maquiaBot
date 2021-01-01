@@ -12,8 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Quote lets you get a quote from someone
@@ -139,33 +140,33 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 
-		if !allowed {
-			if strings.TrimSpace(linkRegex.ReplaceAllString(quote.Content, "")) == "" {
-				embed.Description = ""
-				s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-					Content: quote.Content,
-					Embed:   embed,
-				})
-			} else {
-				s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-					Content: link,
-					Embed:   embed,
-				})
-			}
-			return
+		var complex *discordgo.MessageSend = &discordgo.MessageSend{
+			Content: quote.Content,
+			Embed:   embed,
 		}
 
-		response, err := http.Get(link)
-		if err == nil {
-			s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-				Embed: embed,
-				File: &discordgo.File{
-					Name:   name,
-					Reader: response.Body,
-				},
-			})
-			return
+		if !allowed {
+			if strings.TrimSpace(linkRegex.ReplaceAllString(quote.Content, "")) == "" {
+				complex.Embed.Description = ""
+			} else {
+				complex.Content = link
+			}
 		}
+
+		client := http.Client{
+			Timeout: 10 * time.Second,
+		}
+		response, err := client.Get(link)
+		if err == nil {
+			defer response.Body.Close()
+			complex.File = &discordgo.File{
+				Name:   name,
+				Reader: response.Body,
+			}
+		}
+
+		s.ChannelMessageSendComplex(m.ChannelID, complex)
+		return
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	return
@@ -175,7 +176,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 	quoteAddRegex, _ := regexp.Compile(`(?i)q(uote)?a(dd)?\s*(.+)`)
 	randomRegex, _ := regexp.Compile(`(?i)-r`)
-	channelRegex, _ := regexp.Compile(`(?i)https://discordapp.com/channels\/(\d+)\/(\d+)\/(\d+)`)
+	channelRegex, _ := regexp.Compile(`(?i)https://discord(app)?.com/channels\/(\d+)\/(\d+)\/(\d+)`)
 
 	// Get server
 	server, err := s.Guild(m.GuildID)
@@ -195,7 +196,7 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	if channelRegex.MatchString(m.Content) { // If the message has one or more message links
 		// Check server ID
-		if channelRegex.FindStringSubmatch(m.Content)[1] != server.ID {
+		if channelRegex.FindStringSubmatch(m.Content)[2] != server.ID {
 			s.ChannelMessageSend(m.ChannelID, "Please do not quote from other servers!")
 			return
 		}
@@ -205,7 +206,7 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if len(IDs) > 1 {
 			for i, ID := range IDs {
 				if channelRegex.MatchString(ID) {
-					msg, _ := s.ChannelMessage(channelRegex.FindStringSubmatch(ID)[2], channelRegex.FindStringSubmatch(ID)[3])
+					msg, _ := s.ChannelMessage(channelRegex.FindStringSubmatch(ID)[3], channelRegex.FindStringSubmatch(ID)[4])
 					if message.ID == "" {
 						message = msg
 					} else {
@@ -220,8 +221,8 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 				} else if n, err := strconv.Atoi(ID); err == nil && i != 0 {
 					// Get messages
 					if channelRegex.MatchString(IDs[i-1]) {
-						message, _ = s.ChannelMessage(channelRegex.FindStringSubmatch(IDs[i-1])[2], channelRegex.FindStringSubmatch(IDs[i-1])[3])
-						msgs, _ = s.ChannelMessages(channelRegex.FindStringSubmatch(IDs[i-1])[2], -1, "", channelRegex.FindStringSubmatch(IDs[i-1])[3], "")
+						message, _ = s.ChannelMessage(channelRegex.FindStringSubmatch(IDs[i-1])[3], channelRegex.FindStringSubmatch(IDs[i-1])[4])
+						msgs, _ = s.ChannelMessages(channelRegex.FindStringSubmatch(IDs[i-1])[3], -1, "", channelRegex.FindStringSubmatch(IDs[i-1])[4], "")
 					} else {
 						message, _ = s.ChannelMessage(m.ChannelID, IDs[i-1])
 						msgs, _ = s.ChannelMessages(m.ChannelID, -1, "", IDs[i-1], "")
@@ -246,7 +247,7 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 				}
 			}
 		} else {
-			message, _ = s.ChannelMessage(channelRegex.FindStringSubmatch(m.Content)[2], channelRegex.FindStringSubmatch(m.Content)[3])
+			message, _ = s.ChannelMessage(channelRegex.FindStringSubmatch(m.Content)[3], channelRegex.FindStringSubmatch(m.Content)[4])
 		}
 	} else if quoteAddRegex.MatchString(m.Content) { // If the message has only the message ID, or a username
 		username = quoteAddRegex.FindStringSubmatch(m.Content)[3]
@@ -359,7 +360,7 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 // QuoteRemove lets you remove quotes
 func QuoteRemove(s *discordgo.Session, m *discordgo.MessageCreate) {
 	quoteRemoveRegex, _ := regexp.Compile(`(?i)q(uote)?(r(emove)?|d(elete)?)\s+(\d+)`)
-	channelRegex, _ := regexp.Compile(`(?i)https://discordapp.com/channels\/\d+\/(\d+)\/(\d+)`)
+	channelRegex, _ := regexp.Compile(`(?i)https://discord(app)?.com/channels\/\d+\/(\d+)\/(\d+)`)
 
 	// Get server
 	server, err := s.Guild(m.GuildID)
@@ -373,7 +374,7 @@ func QuoteRemove(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if quoteRemoveRegex.MatchString(m.Content) {
 		mID = quoteRemoveRegex.FindStringSubmatch(m.Content)[5]
 	} else if channelRegex.MatchString(m.Content) {
-		mID = channelRegex.FindStringSubmatch(m.Content)[2]
+		mID = channelRegex.FindStringSubmatch(m.Content)[3]
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "Please link a message / give a message ID to remove!")
 		return
@@ -459,23 +460,25 @@ func Quotes(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
-	for _, quote := range userQuotes {
+	for i, quote := range userQuotes {
 		if len(quote.Content) > 1024 {
 			quote.Content = quote.Content[:1024]
 		}
-		if quote.Content != "" {
-			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-				Name:   quote.ID + " - " + quote.Author.Username,
-				Value:  quote.Content,
-				Inline: true,
-			})
-		} else {
-			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-				Name:   quote.ID + " - " + quote.Author.Username,
-				Value:  "**IMAGE/VIDEO QUOTE**",
-				Inline: true,
-			})
+		quoteEmbed := &discordgo.MessageEmbedField{
+			Name:   quote.ID + " - " + quote.Author.Username,
+			Value:  quote.Content,
+			Inline: true,
 		}
+
+		if username != "" {
+			quoteEmbed.Name += " (" + strconv.Itoa(i+1) + ")"
+		}
+		if quote.Content == "" {
+			quoteEmbed.Value = "**IMAGE/VIDEO QUOTE**"
+		}
+
+		embed.Fields = append(embed.Fields, quoteEmbed)
+
 		if len(embed.Fields) == 25 {
 			if len(userQuotes) > 25 {
 				embed.Footer = &discordgo.MessageEmbedFooter{
@@ -499,7 +502,7 @@ func Quotes(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	if len(embed.Fields) == 25 && len(userQuotes) > 25 {
-		_ = s.MessageReactionAdd(m.ChannelID, msg.ID, "⬇️")
-		_ = s.MessageReactionAdd(m.ChannelID, msg.ID, "⬆️")
+		_ = s.MessageReactionAdd(m.ChannelID, msg.ID, "⬅️")
+		_ = s.MessageReactionAdd(m.ChannelID, msg.ID, "➡️")
 	}
 }
