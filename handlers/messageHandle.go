@@ -235,11 +235,11 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "ch", "choose":
 			go gencommands.Choose(s, m)
 		case "cheers":
-			go gencommands.Cheers(s, m)
+			go gencommands.FunnyMedia(s, m, "cheers")
 		case "col", "color", "colour":
 			go gencommands.Colour(s, m)
 		case "crab":
-			go gencommands.Crab(s, m)
+			go gencommands.FunnyMedia(s, m, "crab")
 		case "decrypt":
 			go gencommands.Decrypt(s, m)
 		case "e", "emoji", "emote":
@@ -253,13 +253,13 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				go gencommands.History(s, m)
 			}
 		case "idea", "niceidea":
-			go s.ChannelMessageSend(m.ChannelID, "https://www.youtube.com/watch?v=aAxjVu3iZps")
+			go gencommands.FunnyMedia(s, m, "idea")
 		case "info":
 			go gencommands.Info(s, m, profileCache)
 		case "kanye":
 			go gencommands.Kanye(s, m)
 		case "late", "old", "ancient":
-			go gencommands.Late(s, m)
+			go gencommands.FunnyMedia(s, m, "late")
 		case "leven", "levenshtein":
 			go gencommands.Levenshtein(s, m)
 		case "list":
@@ -275,7 +275,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "ocr":
 			go gencommands.OCR(s, m)
 		case "over":
-			go gencommands.OverIt(s, m)
+			go gencommands.FunnyMedia(s, m, "over")
 		case "p", "per", "percent", "percentage":
 			go gencommands.Percentage(s, m)
 		case "parse":
