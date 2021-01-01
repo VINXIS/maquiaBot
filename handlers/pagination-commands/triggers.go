@@ -11,7 +11,10 @@ import (
 // Triggers handles the pagination of a list of triggers
 func Triggers(s *discordgo.Session, r *discordgo.MessageReactionAdd, msg *discordgo.Message, serverData structs.ServerData, num, numend int) (*discordgo.MessageEmbed, bool) {
 	embed := &discordgo.MessageEmbed{}
-
+	
+	if numend > len(serverData.Triggers) {
+		numend = len(serverData.Triggers)
+	}
 	triggers := serverData.Triggers[num:numend]
 	for _, trigger := range triggers {
 		trigger.Cause = `(?i)` + trigger.Cause
