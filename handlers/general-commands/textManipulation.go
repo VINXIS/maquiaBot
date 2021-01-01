@@ -48,14 +48,9 @@ func TextManipulation(s *discordgo.Session, m *discordgo.MessageCreate, effectTy
 		}, message)
 	case "swap":
 		rand.Seed(time.Now().UTC().UnixNano())
-		messageSlice := strings.Split(message, "")
-		messageTemp := messageSlice
-
-		pos := rand.Perm(len(message))
-		for i, f := range pos {
-			messageTemp[f] = messageSlice[i]
-		}
-		message = strings.Join(messageTemp, "")
+		chars := strings.Split(message, "")
+		rand.Shuffle(len(message), func(i, j int) { chars[i], chars[j] = chars[j], chars[i] })
+		message = strings.Join(chars, "")
 	}
 
 	s.ChannelMessageSend(m.ChannelID, message)
