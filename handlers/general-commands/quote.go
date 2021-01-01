@@ -3,6 +3,7 @@ package gencommands
 import (
 	"crypto/rand"
 	"encoding/json"
+	"image"
 	"io/ioutil"
 	"math/big"
 	"net/http"
@@ -124,7 +125,11 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if !(strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "png") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "jpg") || strings.HasSuffix(linkRegex.FindStringSubmatch(quote.Content)[0], "gif")) {
 			link = linkRegex.FindStringSubmatch(quote.Content)[0]
 			res := extensionRegex.FindAllStringSubmatch(quote.Content, -1)
-			name = "video." + res[len(res)-1][0]
+			if strings.Contains(res[len(res)-1][0], "com") {
+				name = "img.gif"
+			} else {
+				name = "video." + res[len(res)-1][0]
+			}
 		} else {
 			embed.Image = &discordgo.MessageEmbedImage{
 				URL: linkRegex.FindStringSubmatch(quote.Content)[0],
@@ -159,9 +164,16 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		response, err := client.Get(link)
 		if err == nil {
 			defer response.Body.Close()
-			complex.File = &discordgo.File{
-				Name:   name,
-				Reader: response.Body,
+			if name != "img.gif" {
+				complex.File = &discordgo.File{
+					Name:   name,
+					Reader: response.Body,
+				}
+			} else if _, _, err := image.Decode(response.Body); err == nil {
+				complex.File = &discordgo.File{
+					Name:   name,
+					Reader: response.Body,
+				}
 			}
 		}
 
