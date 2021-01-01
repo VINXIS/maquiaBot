@@ -110,11 +110,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		trigger.Cause = `(?i)` + trigger.Cause
 		reg, err := regexp.Compile(trigger.Cause)
 		send := false
-		if err != nil {
-			if strings.Contains(strings.ToLower(m.Content), trigger.Cause) {
-				send = true
-			}
-		} else if reg.MatchString(strings.ToLower(m.Content)) {
+		if (err != nil && strings.Contains(strings.ToLower(m.Content), trigger.Cause)) || reg.MatchString(strings.ToLower(m.Content)) {
 			send = true
 		}
 
@@ -142,6 +138,40 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 	}
+
+	// Counter checks
+	for i, counter := range serverData.Counters {
+		counter.Text = `(?i)` + counter.Text
+		reg, err := regexp.Compile(counter.Text)
+		count := false
+		if (err != nil && strings.Contains(strings.ToLower(m.Content), counter.Text)) || reg.MatchString(strings.ToLower(m.Content)) {
+			count = true
+		}
+
+		if count {
+			exists := false
+			for j, countUser := range counter.Users {
+				if countUser.User.ID == m.Author.ID {
+					serverData.Counters[i].Users[j].Count++
+					exists = true
+					break
+				}
+			}
+
+			if !exists {
+				serverData.Counters[i].Users = append(serverData.Counters[i].Users, structs.CounterTrack{
+					User:  *m.Author,
+					Count: 1,
+				})
+			}
+		}
+	}
+
+	jsonCache, err := json.Marshal(serverData)
+	tools.ErrRead(s, err)
+
+	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
+	tools.ErrRead(s, err)
 
 	// Command checks
 	if strings.HasPrefix(m.Content, "maquiaprefix") {
@@ -195,7 +225,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "math":
 			go MathHandle(s, m, args)
 
-		// Admin commands'
+		// Admin commands
+		case "counter":
+			go admincommands.Counter(s, m)
 		case "prefix", "newprefix":
 			go admincommands.Prefix(s, m)
 		case "purge":
@@ -238,6 +270,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.FunnyMedia(s, m, "cheers")
 		case "col", "color", "colour":
 			go gencommands.Colour(s, m)
+		case "cr", "crank", "countr", "countrank":
+			go gencommands.CountRank(s, m)
+		case "cs", "counters":
+			go gencommands.Counters(s, m)
 		case "crab":
 			go gencommands.FunnyMedia(s, m, "crab")
 		case "decrypt":

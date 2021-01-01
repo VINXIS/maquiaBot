@@ -24,6 +24,7 @@ type ServerData struct {
 	Genital          GenitalRecordData
 	RoleAutomation   []Role
 	Triggers         []Trigger
+	Counters         []Counter
 }
 
 // Role holds information for role automation
@@ -38,6 +39,19 @@ type Trigger struct {
 	ID     int64
 	Cause  string
 	Result string
+}
+
+// Counter holds information for word/regex trackers
+type Counter struct {
+	ID    int64
+	Text  string
+	Users []CounterTrack
+}
+
+// CounterTrack holds the amount of times a user has said a certain word/regex
+type CounterTrack struct {
+	User  discordgo.User
+	Count int
 }
 
 // NewServer creates a new ServerData
@@ -142,6 +156,16 @@ func NewTrigger(cause, result string) Trigger {
 		ID:     ID,
 		Cause:  cause,
 		Result: result,
+	}
+}
+
+// NewCounter creates a new counter with a snowflake ID similar to Discord's
+func NewCounter(text string) Counter {
+	ID := time.Now().Unix()*1000 - 1420070400000
+	ID <<= 22
+	return Counter{
+		ID:   ID,
+		Text: text,
 	}
 }
 

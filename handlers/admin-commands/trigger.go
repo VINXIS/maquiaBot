@@ -7,15 +7,22 @@ import (
 	"strconv"
 	"strings"
 
+	"maquiaBot/structs"
+	"maquiaBot/tools"
+
 	"github.com/bwmarrin/discordgo"
-	structs "maquiaBot/structs"
-	tools "maquiaBot/tools"
 )
 
 // Trigger adds / removes triggers
 func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 	triggerRegex, _ := regexp.Compile(`(?i)trigger\s+(.+)`)
 	deleteRegex, _ := regexp.Compile(`(?i)-d`)
+
+	// Check if params were given
+	if !triggerRegex.MatchString(m.Content) {
+		s.ChannelMessageSend(m.ChannelID, "No params given!")
+		return
+	}
 
 	// Check if server exists
 	server, err := s.Guild(m.GuildID)
@@ -32,33 +39,29 @@ func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain server data
 	serverData := tools.GetServer(*server, s)
 
-	// Check if params were given
-	if !triggerRegex.MatchString(m.Content) {
-		s.ChannelMessageSend(m.ChannelID, "No params given!")
-		return
-	}
-
 	text := triggerRegex.FindStringSubmatch(m.Content)[1]
 
 	// Delete function
 	if deleteRegex.MatchString(m.Content) {
 		text = strings.TrimSpace(deleteRegex.ReplaceAllString(text, ""))
-		if ID, err := strconv.ParseInt(text, 10, 64); err == nil {
-			for i, trigger := range serverData.Triggers {
-				if trigger.ID == ID {
-					serverData.Triggers = append(serverData.Triggers[:i], serverData.Triggers[i+1:]...)
-					break
-				}
-			}
-			jsonCache, err := json.Marshal(serverData)
-			tools.ErrRead(s, err)
-
-			err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-			tools.ErrRead(s, err)
-			s.ChannelMessageSend(m.ChannelID, "Removed trigger ID: "+text)
-		} else {
+		ID, err := strconv.ParseInt(text, 10, 64)
+		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, text+" is an invalid ID!")
+			return
 		}
+
+		for i, trigger := range serverData.Triggers {
+			if trigger.ID == ID {
+				serverData.Triggers = append(serverData.Triggers[:i], serverData.Triggers[i+1:]...)
+				break
+			}
+		}
+		jsonCache, err := json.Marshal(serverData)
+		tools.ErrRead(s, err)
+
+		err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
+		tools.ErrRead(s, err)
+		s.ChannelMessageSend(m.ChannelID, "Removed trigger ID: "+text)
 		return
 	}
 

@@ -26,7 +26,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
 				Name: "Admin commands:",
-				Value: "`maquiaprefix`, " +
+				Value: "`counter`, " +
+					"`maquiaprefix`, " +
 					"`purge`, " +
 					"`roleautomation`, " +
 					"`toggle`, " +
@@ -45,6 +46,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`choose`, " +
 					"`cheers`, " +
 					"`colour`, " +
+					"`countrank`, " +
+					"`counters`, " +
 					"`crab`, " +
 					"`decrypt`, " +
 					"`emote`, " +
@@ -143,6 +146,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		}
 		switch arg {
 		// Admin commands
+		case "counter":
+			embed = helpcommands.Counter(embed)
 		case "prefix", "maquiaprefix", "newprefix":
 			embed = helpcommands.Prefix(embed)
 		case "purge":
@@ -177,6 +182,10 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Cheers(embed)
 		case "col", "color", "colour":
 			embed = helpcommands.Colour(embed)
+		case "cr", "crank", "countr", "countrank":
+			embed = helpcommands.CountRank(embed)
+		case "cs", "counters":
+			embed = helpcommands.Counters(embed)
 		case "crab":
 			embed = helpcommands.Crab(embed)
 		case "decrypt":

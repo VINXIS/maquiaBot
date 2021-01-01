@@ -61,6 +61,8 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 		embed, lastPage = paginationcommands.Quotes(s, r, msg, serverData, num, numend)
 	} else if strings.Contains(msg.Content, "trigger") {
 		embed, lastPage = paginationcommands.Triggers(s, r, msg, serverData, num, numend)
+	} else if strings.Contains(msg.Content, "counter") {
+		embed, lastPage = paginationcommands.Counters(s, r, msg, serverData, num, numend)
 	}
 
 	if len(embed.Fields) == 0 {
