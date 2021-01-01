@@ -39,7 +39,7 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 			user = m.Author
 		}
 	}
-	members, err := s.GuildMembers(m.GuildID, "", 1000)
+	members, err := s.GuildMembers(m.GuildID, "", -1)
 	if err == nil {
 		if userTest == "" {
 			for _, member := range members {
@@ -300,8 +300,14 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 // ServerInfo gives information about the server
 func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	server, err := s.Guild(m.GuildID)
-	if err != nil {
+	var server *discordgo.Guild
+	for _, stateServer := range s.State.Guilds {
+		if m.GuildID == stateServer.ID {
+			server = stateServer
+			break
+		}
+	}
+	if server.ID == "" {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
@@ -333,7 +339,7 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	owner, _ := s.User(server.OwnerID)
 
 	// Channel info
-	channels := server.Channels
+	channels, _ := s.GuildChannels(m.GuildID)
 	text := 0
 	voice := 0
 	category := 0
@@ -484,7 +490,7 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			},
 			{
 				Name:   "Member Count",
-				Value:  strconv.Itoa(len(server.Members)),
+				Value:  strconv.Itoa(server.MemberCount),
 				Inline: true,
 			},
 			{
@@ -493,7 +499,7 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 				Inline: true,
 			},
 			{
-				Name:   "Channels (" + strconv.Itoa(len(server.Channels)) + ")",
+				Name:   "Channels (" + strconv.Itoa(len(channels)) + ")",
 				Value:  channelInfo,
 				Inline: true,
 			},
