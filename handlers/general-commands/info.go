@@ -474,13 +474,13 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 				Inline: true,
 			},
 			{
-				Name:   "AFK Timeout",
-				Value:  timeoutString,
+				Name:   "AFK Channel",
+				Value:  afkChName + " **After " + timeoutString + "**",
 				Inline: true,
 			},
 			{
-				Name:   "AFK Channel",
-				Value:  afkChName,
+				Name:   "Trigger Count",
+				Value:  strconv.Itoa(len(serverData.Triggers)),
 				Inline: true,
 			},
 			{

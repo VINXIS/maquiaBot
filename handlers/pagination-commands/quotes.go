@@ -56,6 +56,8 @@ func Quotes(s *discordgo.Session, r *discordgo.MessageReactionAdd, msg *discordg
 			return embed, true
 		}
 		userQuotes = userQuotes[num:numend]
+	} else if numend == len(userQuotes) {
+		end = true
 	}
 
 	for i, quote := range userQuotes {
