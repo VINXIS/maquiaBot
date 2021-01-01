@@ -109,7 +109,7 @@ func ReactAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 			}
 
 			if username != "" {
-				quoteEmbed.Name += " (" + strconv.Itoa(i+1) + ")"
+				quoteEmbed.Name += " (" + strconv.Itoa(i+1+num) + ")"
 			}
 			if quote.Content == "" {
 				quoteEmbed.Value = "**IMAGE/VIDEO QUOTE**"
