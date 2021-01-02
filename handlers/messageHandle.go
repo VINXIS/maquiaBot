@@ -50,12 +50,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	tools.ErrRead(s, err)
 	_ = json.Unmarshal(f, &profileCache)
 
-	// Obtain mapper data
-	var mapperData []structs.MapperData
-	f, err = ioutil.ReadFile("./data/osuData/mapperData.json")
-	tools.ErrRead(s, err)
-	_ = json.Unmarshal(f, &mapperData)
-
 	// Obtain server data
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
@@ -219,7 +213,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "h", "help":
 			go HelpHandle(s, m, serverPrefix)
 		case "o", "osu":
-			go OsuHandle(s, m, args, profileCache, mapperData)
+			go OsuHandle(s, m, args, profileCache)
 		case "pokemon":
 			go PokemonHandle(s, m, args, serverPrefix)
 		case "math":
@@ -416,8 +410,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go osucommands.Link(s, m, args, profileCache)
 		case "m", "map":
 			go osucommands.BeatmapMessage(s, m, beatmapRegex)
-		case "mti", "mtinfo", "mtrackinfo", "maptracking", "mappertracking", "mappertrackinfo":
-			go osucommands.TrackMapperInfo(s, m, mapperData)
 		case "osutop", "osudetail":
 			go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
 		case "ppadd", "addpp":
