@@ -26,7 +26,7 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 	roles := "N/A"
 	var joinDate discordgo.Timestamp
 	var err error
-	if len(m.Mentions) == 1 {
+	if len(m.Mentions) >= 1 {
 		user = m.Mentions[0]
 	} else {
 		if userRegex.MatchString(m.Content) {
@@ -39,52 +39,33 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 			user = m.Author
 		}
 	}
-	members, err := s.GuildMembers(m.GuildID, "", -1)
-	if err == nil {
-		if userTest == "" {
-			for _, member := range members {
-				if member.User.ID == m.Author.ID {
-					user, _ = s.User(member.User.ID)
-					nickname = member.Nick
-					joinDate = member.JoinedAt
-					roles = ""
-					for _, role := range member.Roles {
-						discordRole, err := s.State.Role(m.GuildID, role)
-						if err != nil {
-							continue
-						}
-						roles = roles + discordRole.Name + ", "
-					}
-					if roles != "" {
-						roles = roles[:len(roles)-2]
-					}
-				}
-			}
-		} else {
-			sort.Slice(members, func(i, j int) bool {
-				time1, _ := members[i].JoinedAt.Parse()
-				time2, _ := members[j].JoinedAt.Parse()
-				return time1.Unix() < time2.Unix()
-			})
-			for _, member := range members {
-				if strings.HasPrefix(strings.ToLower(member.User.Username), strings.ToLower(userTest)) || strings.HasPrefix(strings.ToLower(member.Nick), strings.ToLower(userTest)) {
-					user, _ = s.User(member.User.ID)
-					nickname = member.Nick
-					joinDate = member.JoinedAt
-					roles = ""
-					for _, role := range member.Roles {
-						discordRole, err := s.State.Role(m.GuildID, role)
-						if err != nil {
-							continue
-						}
-						roles = roles + discordRole.Name + ", "
-					}
-					if roles != "" {
-						roles = roles[:len(roles)-2]
-					}
+	member, err := s.GuildMember(m.GuildID, user.ID)
+	if userTest != "" {
+		members, membersError := s.GuildMembers(m.GuildID, "", 1000)
+		if membersError == nil {
+			for _, mem := range members {
+				if strings.HasPrefix(strings.ToLower(mem.User.Username), strings.ToLower(userTest)) || strings.HasPrefix(strings.ToLower(mem.Nick), strings.ToLower(userTest)) {
+					member = mem
+					user = mem.User
+					err = nil
 					break
 				}
 			}
+		}
+	}
+	if err == nil {
+		nickname = member.Nick
+		joinDate = member.JoinedAt
+		roles = ""
+		for _, role := range member.Roles {
+			discordRole, err := s.State.Role(m.GuildID, role)
+			if err != nil {
+				continue
+			}
+			roles = roles + discordRole.Name + ", "
+		}
+		if roles != "" {
+			roles = roles[:len(roles)-2]
 		}
 	}
 
