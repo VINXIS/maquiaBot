@@ -21,11 +21,12 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	url := memeRegex.FindStringSubmatch(m.Content)[1]
 	topText := strings.TrimSpace(memeRegex.FindStringSubmatch(m.Content)[3])
+	split := strings.TrimSpace(memeRegex.FindStringSubmatch(m.Content)[4]) != ""
 	bottomText := strings.TrimSpace(memeRegex.FindStringSubmatch(m.Content)[5])
 	if topText == "" && bottomText == "" {
 		s.ChannelMessageSend(m.ChannelID, "Please give text to add onto the image!")
 		return
-	} else if topText != "" && bottomText == "" {
+	} else if topText != "" && !split && bottomText == "" {
 		words := strings.Split(topText, " ")
 		if len(words) > 1 {
 			topText = strings.Join(words[:len(words)/2], " ")
