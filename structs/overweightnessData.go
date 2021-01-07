@@ -14,9 +14,9 @@ type RawData struct {
 	X            float64         `json:"x"`
 	PP99         float64         `json:"pp99"`
 	Adj          float64         `json:"adj"`
-	Artist       json.Number     `json:"art"`
-	Title        json.Number     `json:"t"`
-	DiffName     json.Number     `json:"v"`
+	Artist       json.RawMessage `json:"art"`
+	Title        json.RawMessage `json:"t"`
+	DiffName     json.RawMessage `json:"v"`
 	HitLength    int             `json:"l"`
 	BPM          float64         `json:"bpm"`
 	SR           float64         `json:"d"`
