@@ -94,7 +94,20 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		if match {
 			for _, role := range roleAuto.Roles {
-				s.GuildMemberRoleAdd(m.GuildID, m.Author.ID, role.ID)
+				hasRole := false
+				if m.Member != nil {
+					for _, memberRole := range m.Member.Roles {
+						if memberRole == role.ID {
+							hasRole = true
+							break
+						}
+					}
+				}
+				if hasRole {
+					s.GuildMemberRoleRemove(m.GuildID, m.Author.ID, role.ID)
+				} else {
+					s.GuildMemberRoleAdd(m.GuildID, m.Author.ID, role.ID)
+				}
 			}
 		}
 	}
