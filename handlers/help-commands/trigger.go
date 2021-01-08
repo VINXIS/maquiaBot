@@ -20,8 +20,8 @@ func Trigger(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "<-d <number>>",
-			Value:  "`-d` followed be the trigger ID found in `triggers`",
+			Name:   "<-d number>",
+			Value:  "`-d` followed by the trigger ID found in `triggers`",
 			Inline: true,
 		},
 		{

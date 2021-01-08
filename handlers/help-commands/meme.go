@@ -15,7 +15,7 @@ func Meme(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "<[top text] | [bottom text]>",
+			Name:   "<top text | bottom text>",
 			Value:  "The text you want to add, separated by a `|`. You do not need both. If you only want the bottom text for example, simply only do `| [bottom text]`.",
 			Inline: true,
 		},

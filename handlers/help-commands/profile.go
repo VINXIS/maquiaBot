@@ -20,7 +20,7 @@ func Profile(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "[-m <mode>]",
+			Name:   "[-m mode]",
 			Value:  "The mode to show user information for (Default: osu!standard).",
 			Inline: true,
 		},
@@ -43,7 +43,7 @@ func ProfileDetail(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "[-m <mode>]",
+			Name:   "[-m mode]",
 			Value:  "The mode to show user information for (Default: osu!standard).",
 			Inline: true,
 		},
@@ -66,7 +66,7 @@ func ProfileTop(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "[-m <mode>]",
+			Name:   "[-m mode]",
 			Value:  "The mode to show user information for (Default: osu!standard).",
 			Inline: true,
 		},

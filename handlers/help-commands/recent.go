@@ -7,7 +7,7 @@ import (
 // Recent explains the recent functionality
 func Recent(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: r / rs / recent"
-	embed.Description = "`[osu] (r|rs|recent) [osu! username] [num] [-m mod] [-sp [-mapper] [-sr] [-fc] [-add <text>]]` shows the player's recent score."
+	embed.Description = "`[osu] (r|rs|recent) [osu! username] [num] [-m <mod>] [-sp] [-mapper] [-sr] [-fc] [-add <text>]` shows the player's recent score."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[osu! username]",
@@ -45,7 +45,7 @@ func Recent(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "[-add <text>]",
+			Name:   "[-add text]",
 			Value:  "Any text to append to the end for the scoprepost generation.",
 			Inline: true,
 		},

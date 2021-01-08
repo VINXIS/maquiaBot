@@ -20,7 +20,7 @@ func Compare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "[-m <mod>]",
+			Name:   "[-m mod]",
 			Value:  "The score's mod combination to look for.",
 			Inline: true,
 		},
@@ -55,7 +55,7 @@ func Compare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "[-add <text>]",
+			Name:   "[-add text]",
 			Value:  "Any text to append to the end for the scoprepost generation.",
 			Inline: true,
 		},

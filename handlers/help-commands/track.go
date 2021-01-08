@@ -5,7 +5,7 @@ import "github.com/bwmarrin/discordgo"
 // Track explains the track functionality
 func Track(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: track / tr"
-	embed.Description = "`[osu] (track|tr) [remove] <-u users> [-pp ppreq] [-l leaderboardreq] [-t topreq] [-s mapstatuses] [-m mode]` lets admins track plays for osu! users. If you want to change parts of the tracker, simply just use those flags. You do not need to restate all previous changes again."
+	embed.Description = "`[osu] (track|tr) [remove] <-u users> [-pp <ppreq>] [-l <leaderboardreq>] [-t <topreq>] [-s <mapstatuses>] [-m <mode>]` lets admins track plays for osu! users. If you want to change parts of the tracker, simply just use those flags. You do not need to restate all previous changes again."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:  "[remove]",

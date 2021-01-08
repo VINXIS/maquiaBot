@@ -7,7 +7,7 @@ import (
 // Remind explains the remind functionality
 func Remind(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: remind / reminder"
-	embed.Description = "`(remind|reminder) [text] [in time]` reminds you in some amount of time."
+	embed.Description = "`(remind|reminder) [text] [in] <time>` reminds you in some amount of time."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[text]",
@@ -15,7 +15,7 @@ func Remind(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "[in time]",
+			Name:   "[in] <time>",
 			Value:  "The time until you want to be reminded.",
 			Inline: true,
 		},

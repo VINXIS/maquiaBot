@@ -7,7 +7,7 @@ import (
 // OCR explains the OCR functionality
 func OCR(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: ocr"
-	embed.Description = "`ocr [link] [-l lang]` detects for text in an image."
+	embed.Description = "`ocr [link] [-l <lang>]` detects for text in an image."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[link]",
@@ -21,7 +21,7 @@ func OCR(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:   "What is OCR?",
-			Value:  "Short for Optical Character Recognition, it converts text from an image into text that can be manipulated by people.\nhttps://en.wikipedia.org/wiki/Optical_character_recognition",
+			Value:  "Short for Optical Character Recognition, it attempts to convert an image into text.\nhttps://en.wikipedia.org/wiki/Optical_character_recognition",
 			Inline: true,
 		},
 		{

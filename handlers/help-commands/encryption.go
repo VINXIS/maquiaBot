@@ -15,7 +15,7 @@ func Encrypt(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "[-k <key>]",
+			Name:   "[-k key]",
 			Value:  "The key to use to encrypt (Default: use `key` to see the default key).",
 			Inline: true,
 		},
@@ -38,7 +38,7 @@ func Decrypt(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "[-k <key>]",
+			Name:   "[-k key]",
 			Value:  "The key to use to decrypt (Default: use `key` to see the default key).",
 			Inline: true,
 		},

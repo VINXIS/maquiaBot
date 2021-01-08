@@ -7,7 +7,7 @@ import (
 // Counter explains the counter functionality
 func Counter(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: counter"
-	embed.Description = "`counter (<text>|<-d <number>>)` let's you create trackers for phrases to see how often people say it.\nYou may also use regex for counters! Test your regex here to create a valid regex: https://regex101.com/"
+	embed.Description = "`counter (<text>|<-d <number>>)` let's you create counters for phrases to see how often people say it.\nYou may also use regex for counters! Test your regex here to create a valid regex: https://regex101.com/"
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "<text>",
@@ -15,8 +15,8 @@ func Counter(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "<-d <number>>",
-			Value:  "`-d` followed be the trigger ID found in `triggers`",
+			Name:   "<-d number>",
+			Value:  "`-d` followed by the counter's ID found in `counters`",
 			Inline: true,
 		},
 		{

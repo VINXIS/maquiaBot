@@ -7,7 +7,7 @@ import (
 // TTS explains the tts functionality
 func TTS(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: tts"
-	embed.Description = "`tts [text] [-v <voice>]` will create a tts audio file from https://15.ai/."
+	embed.Description = "`tts [text] [-v voice]` will create a tts audio file from https://15.ai/."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[text]",
@@ -15,7 +15,7 @@ func TTS(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:  "[-v <voice]",
+			Name:  "[-v voice]",
 			Value: "The voice to use. The default used voice is The Stanley Parable's The Narrator.\nThe list of voices allowed can be seen on the website https://15.ai/.",
 		},
 	}

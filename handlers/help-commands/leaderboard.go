@@ -15,12 +15,12 @@ func Leaderboard(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 			Inline: true,
 		},
 		{
-			Name:   "[-n <number>]",
+			Name:   "[-n number]",
 			Value:  "Numbers of scores to show (Default: 5).",
 			Inline: true,
 		},
 		{
-			Name:   "[-m <mods>]",
+			Name:   "[-m mods]",
 			Value:  "The mods to get pp information for (Default: NM)",
 			Inline: true,
 		},

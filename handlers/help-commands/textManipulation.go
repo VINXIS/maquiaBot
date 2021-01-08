@@ -11,7 +11,7 @@ func AllCaps(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "<text>",
-			Value:  "The text to capitalize.",
+			Value:  "The text to completely upper case.",
 			Inline: true,
 		},
 		{
@@ -47,7 +47,7 @@ func RandomCaps(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "<text>",
-			Value:  "The text to randomly capitalize / lower case.",
+			Value:  "The text to randomly upper / lower case.",
 			Inline: true,
 		},
 		{
@@ -79,7 +79,7 @@ func Swap(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 // Title explains the title formatting
 func Title(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: title"
-	embed.Description = "`title <text>` will create the text given into title form."
+	embed.Description = "`title <text>` will create the text into title form."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "<text>",
