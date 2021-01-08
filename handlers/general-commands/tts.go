@@ -79,9 +79,12 @@ func TTS(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
+	text = strings.Replace(text, "\"", "", -1)
+
 	// Can't send more than 300 characters of text
 	if len(text) > 300 {
 		s.ChannelMessageSend(m.ChannelID, "Please keep the text under 300 characters!")
+		return
 	}
 
 	// Name checks for ones that aren't just title cases
