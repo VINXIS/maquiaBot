@@ -1,6 +1,8 @@
 # maquiaBot
 Discord bot that does a bunch of osu! stuff PROPERLY (sooner or later)
 
+[![buddy pipeline](https://app.buddy.works/nyquillppysh/maquiabot/pipelines/pipeline/300684/badge.svg?token=82ffef6998b4d03ae05429bee692027ed1bf6c628ea54cbf1838ecd5e8b3a7a4 "buddy pipeline")](https://app.buddy.works/nyquillppysh/maquiabot/pipelines/pipeline/300684)
+
 ## Installation
  1. [Install golang](https://golang.org/doc/install) and [Tesseract](https://github.com/UB-Mannheim/tesseract/wiki). Ideally you have Go version 1.13 or newer. 
  2. Clone the repository using `git clone https://github.com/VINXIS/maquiaBot.git` to wherever you want.
@@ -13,3 +15,4 @@ Duplicate `config.example.json` in the config folder and call it `config.json` f
 7. Run the program by running `go build -o bot core.go` and then `./bot` in your instance / computer.
 
 Inspiration from [owo](https://github.com/AznStevy/owo) and [BoatBot](https://github.com/0xg0ldpk3rx0/SupportBot)
+
