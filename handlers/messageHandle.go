@@ -369,6 +369,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.TextManipulation(s, m, "title")
 		case "triggers":
 			go gencommands.Triggers(s, m)
+		case "tts":
+			go gencommands.TTS(s, m)
 		case "twitch", "twitchdl":
 			go gencommands.Twitch(s, m)
 		case "twitter", "twitterdl":

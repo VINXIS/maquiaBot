@@ -88,6 +88,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`swap`, " +
 					"`title`, " +
 					"`triggers`, " +
+					"`tts`, " +
 					"`twitchdl`, " +
 					"`twitterdl`, " +
 					"`vagina`, " +
@@ -270,6 +271,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Twitch(embed)
 		case "twitter", "twitterdl":
 			embed = helpcommands.Twitter(embed)
+		case "tts":
+			embed = helpcommands.TTS(embed)
 		case "vagina":
 			embed = helpcommands.Vagina(embed)
 		case "vibe", "vibec", "vibecheck":
