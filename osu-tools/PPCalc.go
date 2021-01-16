@@ -22,10 +22,10 @@ func PPCalc(beatmap osuapi.Beatmap, score osuapi.Score, store chan<- string) {
 	case osuapi.ModeOsu:
 		multiplier := 1.12
 		if score.Mods&osuapi.ModNoFail != 0 {
-			multiplier *= 0.9
+			multiplier *= math.Max(0.9, 1.0-0.02*float64(score.CountMiss))
 		}
 		if score.Mods&osuapi.ModSpunOut != 0 {
-			multiplier *= 0.95
+			multiplier *= 1.0 - math.Pow(float64(beatmap.Spinners)/float64(beatmap.Circles+beatmap.Sliders+beatmap.Spinners), 0.85)
 		}
 
 		aimPP := aimPP(beatmap, score)
@@ -88,19 +88,21 @@ func aimPP(beatmap osuapi.Beatmap, score osuapi.Score) float64 {
 	}
 	aimValue *= lengthBonus
 
-	aimValue *= math.Pow(0.97, float64(score.CountMiss))
+	if score.CountMiss > 0 {
+		aimValue *= 0.97 * math.Pow(1.0-math.Pow(float64(score.CountMiss)/totalHits, 0.775), float64(score.CountMiss))
+	}
 
 	if beatmap.MaxCombo > 0 {
 		aimValue *= math.Min(math.Pow(float64(score.MaxCombo), 0.8)/math.Pow(float64(beatmap.MaxCombo), 0.8), 1.0)
 	}
 
-	ARBonus := 1.0
+	ARBonus := 0.0
 	if beatmap.ApproachRate > 10.33 {
-		ARBonus += 0.3 * (beatmap.ApproachRate - 10.33)
+		ARBonus += 0.4 * (beatmap.ApproachRate - 10.33)
 	} else if beatmap.ApproachRate < 8.0 {
 		ARBonus += 0.01 * (8.0 - beatmap.ApproachRate)
 	}
-	aimValue *= ARBonus
+	aimValue *= 1.0 + math.Min(ARBonus, ARBonus*(totalHits/1000.0))
 
 	if score.Mods&osuapi.ModHidden != 0 {
 		aimValue *= 1.0 + 0.04*(12.0-beatmap.ApproachRate)
@@ -134,24 +136,31 @@ func speedPP(beatmap osuapi.Beatmap, score osuapi.Score) float64 {
 	}
 	speedValue *= lengthBonus
 
-	speedValue *= math.Pow(0.97, float64(score.CountMiss))
+	if score.CountMiss > 0 {
+		speedValue *= 0.97 * math.Pow(1.0-math.Pow(float64(score.CountMiss)/totalHits, 0.775), math.Pow(float64(score.CountMiss), 0.875))
+	}
 
 	if beatmap.MaxCombo > 0 {
 		speedValue *= math.Min(math.Pow(float64(score.MaxCombo), 0.8)/math.Pow(float64(beatmap.MaxCombo), 0.8), 1.0)
 	}
 
-	ARBonus := 1.0
+	ARBonus := 0.0
 	if beatmap.ApproachRate > 10.33 {
-		ARBonus += 0.3 * (beatmap.ApproachRate - 10.33)
+		ARBonus += 0.4 * (beatmap.ApproachRate - 10.33)
 	}
-	speedValue *= ARBonus
+	speedValue *= 1.0 + math.Min(ARBonus, ARBonus*(totalHits/1000.0))
 
 	if score.Mods&osuapi.ModHidden != 0 {
 		speedValue *= 1.0 + 0.04*(12.0-beatmap.ApproachRate)
 	}
 
-	speedValue *= 0.02 + accuracy
-	speedValue *= 0.96 + math.Pow(beatmap.OverallDifficulty, 2.0)/1600
+	speedValue *= (0.95 + math.Pow(beatmap.OverallDifficulty, 2.0)/750) * math.Pow(accuracy, (14.5-math.Max(beatmap.OverallDifficulty, 8))/2)
+
+	mehPunisher := float64(score.Count50) - totalHits/500.0
+	if float64(score.Count50) < totalHits/500.0 {
+		mehPunisher = 0
+	}
+	speedValue *= math.Pow(0.98, mehPunisher)
 
 	return speedValue
 }

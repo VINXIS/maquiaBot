@@ -7,7 +7,7 @@ import (
 // Map explains the map functionality
 func Map(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: m / map"
-	embed.Description = "`(m|map|<beatmap link>) [-m <mods>] [-acc <accuracy>] [-c <combo>] [-x <misses>] [-s <score>]` lets you obtain beatmap information."
+	embed.Description = "`(m|map|<beatmap link>) [-m <mods>] (-acc <accuracy>| -100 <goods> -50 <mehs>) [-c <combo>] [-x <misses>] [-s <score>]` lets you obtain beatmap information."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "<beatmap link>",
@@ -21,12 +21,17 @@ func Map(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:   "[-acc accuracy]",
-			Value:  "The accuracy to get pp information for. No `-acc` will give pp information for 95, 97, 98, 99, SS acc.",
+			Value:  "The accuracy to get pp information for. No `-acc` or `-100` or `-50` will give pp information for 95, 97, 98, 99, SS acc.",
 			Inline: true,
 		},
 		{
-			Name:   "[-c combo]",
-			Value:  "The combo to get pp information for (Default: Max Combo).",
+			Name:   "[-100 goods]",
+			Value:  "The amount of 100s in the score, overwrites `-acc`.",
+			Inline: true,
+		},
+		{
+			Name:   "[-50 mehs]",
+			Value:  "The amount of 50s in the score, overwrites `-acc`.",
 			Inline: true,
 		},
 		{

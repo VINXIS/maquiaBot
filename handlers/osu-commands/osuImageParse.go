@@ -17,10 +17,11 @@ import (
 
 	"github.com/disintegration/imaging"
 
-	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // OsuImageParse detects for an osu image
@@ -235,7 +236,7 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	}
 
 	// Calculate PP
-	values := osutools.BeatmapCalc("NM", "", "", "", beatmap)
+	values := osutools.BeatmapCalc("NM", "", "", "", 0, 0, 0, beatmap)
 	ppText := ""
 	if len(values) != 0 {
 		ppText = values[0] + values[1] + values[2] + values[3] + values[4]

@@ -19,6 +19,8 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	modRegex, _ := regexp.Compile(`(?i)-m\s*(\S+)`)
 	accRegex, _ := regexp.Compile(`(?i)-acc\s*(\S+)`)
 	comboRegex, _ := regexp.Compile(`(?i)-c\s*(\S+)`)
+	goodRegex, _ := regexp.Compile(`(?i)-100\s*(\d+)`)
+	mehRegex, _ := regexp.Compile(`(?i)-50\s*(\d+)`)
 	missRegex, _ := regexp.Compile(`(?i)-x\s*(\S+)`)
 	mapRegex, _ := regexp.Compile(`(?i)[^-]m`)
 	scoreRegex, _ := regexp.Compile(`(?i)-s\s*(\S+)`)
@@ -145,6 +147,19 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		diffs = "**" + strconv.Itoa(len(beatmaps)) + "** difficulties <:ahFuck:550808614202245131>"
 	}
 
+	totalHits := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
+
+	// Get miss value
+	missVal := ""
+	missNum := 0
+	if missRegex.MatchString(m.Content) {
+		missVal = missRegex.FindStringSubmatch(m.Content)[1]
+		missNum, err = strconv.Atoi(missVal)
+		if err != nil || missNum <= 0 || missNum > totalHits {
+			missVal = ""
+		}
+	}
+
 	// Get acc value
 	accVal := ""
 	if accRegex.MatchString(m.Content) {
@@ -155,6 +170,37 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		}
 	}
 
+	// Manual acc calc instead of auto decision on 100s and 50s if given
+	greats := totalHits
+	goods := 0
+	mehs := 0
+	if goodRegex.MatchString(m.Content) {
+		goods, _ = strconv.Atoi(goodRegex.FindStringSubmatch(m.Content)[1])
+		if goods > greats || goods < 0 {
+			goods = 0
+		}
+	}
+
+	if mehRegex.MatchString(m.Content) {
+		mehs, _ = strconv.Atoi(mehRegex.FindStringSubmatch(m.Content)[1])
+		if mehs > greats || mehs < 0 {
+			mehs = 0
+		}
+	}
+	if mehs+goods+missNum > greats { // Reset if bad values are given
+		greats = 0
+		mehs = 0
+		goods = 0
+	} else if mehs+goods+missNum == 0 { // Reset greats if no manual calculation is wanted
+		greats = 0
+	} else {
+		greats -= goods
+		greats -= mehs
+		greats -= missNum
+		acc := 100.0 * float64(mehs+2*goods+6*greats) / float64(6*(missNum+mehs+goods+greats))
+		accVal = strconv.FormatFloat(acc, 'f', 2, 64)
+	}
+
 	// Get combo value
 	comboVal := ""
 	if comboRegex.MatchString(m.Content) {
@@ -163,15 +209,16 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		if err != nil || comboNum <= 0 || comboNum > beatmap.MaxCombo {
 			comboVal = ""
 		}
-	}
 
-	// Get miss value
-	missVal := ""
-	if missRegex.MatchString(m.Content) {
-		missVal = missRegex.FindStringSubmatch(m.Content)[1]
-		missNum, err := strconv.Atoi(missVal)
-		if err != nil || missNum <= 0 || missNum > beatmap.Circles+beatmap.Sliders+beatmap.Spinners {
-			missVal = ""
+		if comboNum != beatmap.MaxCombo && accVal == "" && missVal == "" && greats == 0 {
+			if beatmap.Sliders > 0 {
+				greats = totalHits - 1
+				goods = 1
+			} else {
+				greats = totalHits - 1
+				missNum = 1
+				missVal = "1"
+			}
 		}
 	}
 
@@ -185,7 +232,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	}
 
 	// Calculate SR and PP
-	values := osutools.BeatmapCalc(mods, accVal, comboVal, missVal, beatmap)
+	values := osutools.BeatmapCalc(mods, accVal, comboVal, missVal, greats, goods, mehs, beatmap)
 	ppText := ""
 	if len(values) == 1 {
 		ppText = values[0]

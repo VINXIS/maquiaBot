@@ -9,7 +9,7 @@ import (
 
 // BeatmapCalc calculates PP for the map
 // 300 100 and 50 calculations are based off of https://github.com/ppy/osu-tools/blob/master/PerformanceCalculator/Simulate/OsuSimulateCommand.cs#L76
-func BeatmapCalc(mods, accScore, combo, misses string, beatmap osuapi.Beatmap) (values []string) {
+func BeatmapCalc(mods, accScore, combo, misses string, greats, goods, mehs int, beatmap osuapi.Beatmap) (values []string) {
 	if accScore == "N/A" {
 		return
 	}
@@ -77,7 +77,7 @@ func BeatmapCalc(mods, accScore, combo, misses string, beatmap osuapi.Beatmap) (
 		missCount, _ := strconv.Atoi(misses)
 		accVal, err := strconv.ParseFloat(accScore, 64)
 
-		if err != nil || accVal <= 0 || accVal >= 100 {
+		if greats+goods+mehs+missCount != totalHits && (err != nil || accVal <= 0 || accVal >= 100) {
 			ppValues := make(chan string, 5)
 			var ppValueArray [5]float64
 
@@ -115,7 +115,7 @@ func BeatmapCalc(mods, accScore, combo, misses string, beatmap osuapi.Beatmap) (
 				Mods:     osuapi.ParseMods(mods),
 			}, ppValues)
 
-			for v := 0; v < 5; v++ {
+			for v := 0; v < len(ppValueArray); v++ {
 				ppValueArray[v], _ = strconv.ParseFloat(<-ppValues, 64)
 			}
 			sort.Slice(ppValueArray[:], func(i, j int) bool {
@@ -128,16 +128,28 @@ func BeatmapCalc(mods, accScore, combo, misses string, beatmap osuapi.Beatmap) (
 			pp95 := "**95%:** " + strconv.FormatFloat(ppValueArray[4], 'f', 0, 64) + "pp"
 			values = []string{ppSS, pp99, pp98, pp97, pp95}
 		} else {
-			accVal /= 100.0
+			if err == nil {
+				accVal /= 100.0
+			} else {
+				accVal = 1.0
+			}
 			ppValues := make(chan string, 1)
 
-			go PPCalc(beatmap, osuapi.Score{
+			score := osuapi.Score{
 				MaxCombo: beatmap.MaxCombo,
 				Count300: (int(accVal*float64(totalHits)*6) - totalHits + missCount) / 5,
 				Count100: (int(accVal*float64(totalHits)*6) - totalHits + missCount) % 5,
 				Count50:  totalHits - (int(accVal*float64(totalHits)*6)-totalHits+missCount)/5 - (int(accVal*float64(totalHits)*6)-totalHits+missCount)%5 - missCount,
 				Mods:     osuapi.ParseMods(mods),
-			}, ppValues)
+			}
+
+			if greats+goods+mehs+missCount == beatmap.Circles+beatmap.Sliders+beatmap.Spinners {
+				score.Count300 = greats
+				score.Count100 = goods
+				score.Count50 = mehs
+			}
+
+			go PPCalc(beatmap, score, ppValues)
 
 			ppNum, _ := strconv.ParseFloat(<-ppValues, 64)
 			ppVal := "**" + accScore + "%:** " + strconv.FormatFloat(ppNum, 'f', 0, 64) + "pp"
