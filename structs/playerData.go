@@ -5,16 +5,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 )
 
 // PlayerData stores information regarding the discord user, and the osu user
 type PlayerData struct {
-	Time    time.Time
-	Discord discordgo.User
-	Osu     osuapi.User
-	Farm    FarmerdogData
+	Time     time.Time
+	Discord  string
+	Osu      osuapi.User
+	Farm     FarmerdogData
+	Currency CurrencyData
 }
 
 // FarmerdogData is how much of a farmerdog the player is
@@ -29,6 +29,12 @@ type PlayerScore struct {
 	PP         float64
 	FarmScore  float64
 	Name       string
+}
+
+// CurrencyData is the amount of in-bot currency the user has
+type CurrencyData struct {
+	Amount    float64
+	LastDaily time.Time
 }
 
 // FarmCalc does the actual calculations of the farm values and everything for the player

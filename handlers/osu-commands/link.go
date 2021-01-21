@@ -15,7 +15,7 @@ import (
 )
 
 // Link links an osu! account with the discord user
-func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache []structs.PlayerData) {
+func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 	usernameRegex, _ := regexp.Compile(`(?i)(link|set)(\s+<@\S+)?(\s+.+)?`)
 
 	discordUser := m.Author
@@ -30,7 +30,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache
 	server, err := s.Guild(m.GuildID)
 	if err == nil {
 		if !tools.AdminCheck(s, m, *server) && len(m.Mentions) > 0 {
-			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
+			s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner to link users to osu! accounts for this bot!")
 			return
 		}
 
@@ -40,8 +40,12 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache
 	}
 
 	// Run through the player cache to find the user using discord ID.
+	var cache []structs.PlayerData
+	f, err = ioutil.ReadFile("./data/osuData/profileCache.json")
+	tools.ErrRead(s, err)
+	_ = json.Unmarshal(f, &cache)
 	for i, player := range cache {
-		if player.Discord.ID == discordUser.ID {
+		if player.Discord == discordUser.ID {
 			if strings.ToLower(player.Osu.Username) == strings.ToLower(osuUsername) {
 				if len(m.Mentions) >= 1 {
 					s.ChannelMessageSend(m.ChannelID, "osu! account **"+osuUsername+"** already been linked to "+discordUser.Username+"'s account!")
@@ -65,7 +69,7 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache
 
 			// Remove any accounts of the same user or empty osu! user and with no discord linked
 			for j := 0; j < len(cache); j++ {
-				if player.Discord.ID == "" && (cache[j].Osu.Username == "" || strings.ToLower(cache[j].Osu.Username) == strings.ToLower(osuUsername)) {
+				if player.Discord == "" && (cache[j].Osu.Username == "" || strings.ToLower(cache[j].Osu.Username) == strings.ToLower(osuUsername)) {
 					cache = append(cache[:j], cache[j+1:]...)
 					j--
 				}
@@ -88,8 +92,9 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache
 
 	// Run through the player cache to find the user using the osu! username if no discord ID exists.
 	for i, player := range cache {
-		if strings.ToLower(player.Osu.Username) == strings.ToLower(osuUsername) && player.Discord.ID == "" {
-			player.Discord = *discordUser
+		if strings.ToLower(player.Osu.Username) == strings.ToLower(osuUsername) && player.Discord == "" {
+			player.Discord = discordUser.ID
+			player.Currency = structs.CurrencyData{10, time.Now()}
 			player.FarmCalc(OsuAPI, farmData)
 			cache[i] = player
 
@@ -117,9 +122,10 @@ func Link(s *discordgo.Session, m *discordgo.MessageCreate, args []string, cache
 		return
 	}
 	player := structs.PlayerData{
-		Time:    time.Now(),
-		Osu:     *user,
-		Discord: *discordUser,
+		Time:     time.Now(),
+		Osu:      *user,
+		Discord:  discordUser.ID,
+		Currency: structs.CurrencyData{10, time.Now()},
 	}
 
 	// Farm calc

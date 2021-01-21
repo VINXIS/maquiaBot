@@ -44,12 +44,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		noEmoji = emojiRegex.ReplaceAllString(m.Content, emojiRegex.FindStringSubmatch(m.Content)[1])
 	}
 
-	// Obtain profile cache data
-	var profileCache []structs.PlayerData
-	f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
-	tools.ErrRead(s, err)
-	_ = json.Unmarshal(f, &profileCache)
-
 	// Obtain server data
 	server, err := s.Guild(m.GuildID)
 	if err != nil {
@@ -97,16 +91,16 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				hasRole := false
 				if m.Member != nil {
 					for _, memberRole := range m.Member.Roles {
-						if memberRole == role.ID {
+						if memberRole == role {
 							hasRole = true
 							break
 						}
 					}
 				}
 				if hasRole {
-					s.GuildMemberRoleRemove(m.GuildID, m.Author.ID, role.ID)
+					s.GuildMemberRoleRemove(m.GuildID, m.Author.ID, role)
 				} else {
-					s.GuildMemberRoleAdd(m.GuildID, m.Author.ID, role.ID)
+					s.GuildMemberRoleAdd(m.GuildID, m.Author.ID, role)
 				}
 			}
 		}
@@ -158,7 +152,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if count {
 			exists := false
 			for j, countUser := range counter.Users {
-				if countUser.User.ID == m.Author.ID {
+				if countUser.UserID == m.Author.ID {
 					serverData.Counters[i].Users[j].Count++
 					exists = true
 					break
@@ -167,8 +161,9 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 			if !exists {
 				serverData.Counters[i].Users = append(serverData.Counters[i].Users, structs.CounterTrack{
-					User:  *m.Author,
-					Count: 1,
+					Username: m.Author.Username,
+					UserID:   m.Author.ID,
+					Count:    1,
 				})
 			}
 		}
@@ -185,10 +180,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go admincommands.Prefix(s, m)
 		return
 	} else if strings.HasPrefix(m.Content, "maquiacleanf") || strings.Contains(m.Content, "maquiacleanfarm") {
-		go botcreatorcommands.CleanFarm(s, m, profileCache)
+		go botcreatorcommands.CleanFarm(s, m)
 		return
 	} else if strings.HasPrefix(m.Content, "maquiaclean") {
-		go botcreatorcommands.Clean(s, m, profileCache)
+		go botcreatorcommands.Clean(s, m)
 		return
 	} else if strings.HasPrefix(m.Content, serverPrefix) {
 		args := strings.Split(strings.Split(m.Content, "\n")[0], " ")
@@ -212,11 +207,11 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "announce":
 			go botcreatorcommands.Announce(s, m)
 		case "clean":
-			go botcreatorcommands.Clean(s, m, profileCache)
+			go botcreatorcommands.Clean(s, m)
 		case "cleane", "cleanempty":
-			go botcreatorcommands.CleanEmpty(s, m, profileCache)
+			go botcreatorcommands.CleanEmpty(s, m)
 		case "cleanf", "cleanfarm":
-			go botcreatorcommands.CleanFarm(s, m, profileCache)
+			go botcreatorcommands.CleanFarm(s, m)
 		case "up", "update":
 			go botcreatorcommands.Update(s, m)
 		case "servers":
@@ -226,7 +221,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "h", "help":
 			go HelpHandle(s, m, serverPrefix)
 		case "o", "osu":
-			go OsuHandle(s, m, args, profileCache)
+			go OsuHandle(s, m, args)
 		case "pokemon":
 			go PokemonHandle(s, m, args, serverPrefix)
 		case "math":
@@ -283,6 +278,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Counters(s, m)
 		case "crab":
 			go gencommands.FunnyMedia(s, m, "crab")
+		case "daily":
+			go gencommands.Daily(s, m)
 		case "decrypt":
 			go gencommands.Decrypt(s, m)
 		case "e", "emoji", "emote":
@@ -298,7 +295,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "idea", "niceidea":
 			go gencommands.FunnyMedia(s, m, "idea")
 		case "info":
-			go gencommands.Info(s, m, profileCache)
+			go gencommands.Info(s, m)
 		case "kanye":
 			go gencommands.Kanye(s, m)
 		case "late", "old", "ancient":
@@ -315,6 +312,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Merge(s, m)
 		case "noun", "nouns":
 			go gencommands.Nouns(s, m)
+		case "ntw", "numtw", "ntow", "ntword", "numtow", "numtword", "ntoword", "numtoword", "numbertoword":
+			go gencommands.Ntow(s, m)
 		case "ocr":
 			go gencommands.OCR(s, m)
 		case "over":
@@ -367,6 +366,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.TextManipulation(s, m, "swap")
 		case "title":
 			go gencommands.TextManipulation(s, m, "title")
+		case "transfer":
+			go gencommands.Transfer(s, m)
 		case "triggers":
 			go gencommands.Triggers(s, m)
 		case "tts":
@@ -383,6 +384,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Vibe(s, m, "notRandom")
 		case "w", "weather":
 			go gencommands.Weather(s, m)
+		case "wtn", "wtnum", "wton", "wordtn", "wtonum", "wordtnum", "wordton", "wordtonum", "wordtonumber":
+			go gencommands.Wton(s, m)
 
 		// Math commands
 		case "ave", "average", "mean":
@@ -410,37 +413,37 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// osu! commands
 		case "bfarm", "bottomfarm":
-			go osucommands.BottomFarm(s, m, profileCache)
+			go osucommands.BottomFarm(s, m)
 		case "bpm":
 			if serverData.Daily {
-				go osucommands.BPM(s, m, profileCache)
+				go osucommands.BPM(s, m)
 			}
 		case "c", "compare":
-			go osucommands.Compare(s, m, profileCache)
+			go osucommands.Compare(s, m)
 		case "farm":
-			go osucommands.Farm(s, m, profileCache)
+			go osucommands.Farm(s, m)
 		case "l", "leader", "leaderboard":
-			go osucommands.Leaderboard(s, m, beatmapRegex, profileCache)
+			go osucommands.Leaderboard(s, m, beatmapRegex)
 		case "link", "set":
-			go osucommands.Link(s, m, args, profileCache)
+			go osucommands.Link(s, m, args)
 		case "m", "map":
 			go osucommands.BeatmapMessage(s, m, beatmapRegex)
 		case "osutop", "osudetail":
-			go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
+			go osucommands.ProfileMessage(s, m, profileRegex)
 		case "ppadd", "addpp":
-			go osucommands.PPAdd(s, m, profileCache)
+			go osucommands.PPAdd(s, m)
 		case "profile":
-			go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
+			go osucommands.ProfileMessage(s, m, profileRegex)
 		case "r", "rs", "recent":
-			go osucommands.Recent(s, m, "recent", profileCache)
+			go osucommands.Recent(s, m, "recent")
 		case "rb", "recentb", "recentbest":
-			go osucommands.Recent(s, m, "best", profileCache)
+			go osucommands.Recent(s, m, "best")
 		case "s", "sc", "scorepost":
-			go osucommands.ScorePost(s, m, profileCache, "scorePost", "")
+			go osucommands.ScorePost(s, m, "scorePost", "")
 		case "t", "top":
-			go osucommands.Top(s, m, profileCache)
+			go osucommands.Top(s, m)
 		case "tfarm", "topfarm":
-			go osucommands.TopFarm(s, m, profileCache)
+			go osucommands.TopFarm(s, m)
 		case "ti", "tinfo", "tracking", "trackinfo":
 			go osucommands.TrackInfo(s, m)
 
@@ -453,7 +456,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go osucommands.BeatmapMessage(s, m, beatmapRegex)
 		return
 	} else if profileRegex.MatchString(m.Content) && serverData.OsuToggle { // If a profile was linked
-		go osucommands.ProfileMessage(s, m, profileRegex, profileCache)
+		go osucommands.ProfileMessage(s, m, profileRegex)
 		return
 	}
 
@@ -484,6 +487,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if serverData.OsuToggle {
 			go osucommands.OsuImageParse(s, m, linkRegex)
 		}
-		go osucommands.ReplayMessage(s, m, linkRegex, profileCache)
+		go osucommands.ReplayMessage(s, m, linkRegex)
 	}
 }

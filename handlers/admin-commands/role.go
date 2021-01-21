@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // RoleAutomation adds / removes role automation options
@@ -97,14 +98,14 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	warningText := "WARNING: Could not find the roles associated with the following IDs: "
-	var roles []discordgo.Role
+	var roles []string
 	for _, role := range roleIDs {
-		r, err := s.State.Role(m.GuildID, role)
+		_, err := s.State.Role(m.GuildID, role)
 		if err != nil {
 			warningText += role + ", "
 			continue
 		}
-		roles = append(roles, *r)
+		roles = append(roles, role)
 	}
 	roleData := structs.NewRoleAuto(strings.ToLower(text), roles)
 
@@ -126,7 +127,7 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 			for _, role := range roleData.Roles {
 				roleFound := false
 				for _, autoRole := range roleAuto.Roles {
-					if role.ID == autoRole.ID {
+					if role == autoRole {
 						roleFound = true
 						break
 					}
@@ -155,7 +156,7 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	var roleNames string
 	for _, role := range roleData.Roles {
-		roleNames += role.Name + ", "
+		roleNames += "<@&" + role + ">, "
 	}
 
 	s.ChannelMessageSend(m.ChannelID, "Added the role automation: When someone sends `"+text+"`, they will have the following roles applied: "+strings.TrimSuffix(roleNames, ", ")+"\nAll role automations enabled in this server can be seen via `roleinfo`")

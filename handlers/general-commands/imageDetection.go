@@ -16,11 +16,12 @@ import (
 	"strconv"
 	"strings"
 
+	tools "maquiaBot/tools"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/disintegration/imaging"
 	pigo "github.com/esimov/pigo/core"
 	"github.com/fogleman/gg"
-	tools "maquiaBot/tools"
 )
 
 // OCR lets people use the tesseract-OCR utility on their images
@@ -151,10 +152,8 @@ func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
 	str := string(text)
 
 	// Delete files
-	if !(m.Author.ID == "92502458588205056" && strings.Contains(m.Content, "-t")) {
-		tools.DeleteFile("./" + name + ".png")
-		tools.DeleteFile("./" + name + ".txt")
-	}
+	tools.DeleteFile("./" + name + ".png")
+	tools.DeleteFile("./" + name + ".txt")
 
 	if len(strings.TrimSpace(str)) <= 1 {
 		s.ChannelMessageSend(m.ChannelID, "No text found...")

@@ -143,7 +143,7 @@ func CountRank(s *discordgo.Session, m *discordgo.MessageCreate) {
 	text := "Amount of times the top " + strconv.Itoa(num) + " users said `" + counter.Text + "`:\n"
 	counter.Users = counter.Users[:num]
 	for i, user := range counter.Users {
-		text += "#" + strconv.Itoa(i+1) + ": " + user.User.Username + " - " + strconv.Itoa(user.Count) + " times\n"
+		text += "#" + strconv.Itoa(i+1) + ": " + user.Username + " - " + strconv.Itoa(user.Count) + " times\n"
 	}
 	s.ChannelMessageSend(m.ChannelID, text)
 	return

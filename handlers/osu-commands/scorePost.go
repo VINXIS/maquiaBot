@@ -2,6 +2,7 @@ package osucommands
 
 import (
 	"bytes"
+	"encoding/json"
 	"image/png"
 	"io/ioutil"
 	"log"
@@ -13,12 +14,13 @@ import (
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 // ScorePost posts your score in a single line format
-func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData, postType string, addition string, params ...string) {
+func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string, addition string, params ...string) {
 	mapRegex, _ := regexp.Compile(`(?i)(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	scorePostRegex, _ := regexp.Compile(`(?i)sc?(orepost)?\s+(\S+)`)
 	modRegex, _ := regexp.Compile(`(?i)-m\s+(\S+)`)
@@ -156,13 +158,17 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs
 			username = strings.TrimSpace(strings.Replace(username, submatches[0], "", -1))
 
 			// Get user
+			var cache []structs.PlayerData
+			f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+			tools.ErrRead(s, err)
+			_ = json.Unmarshal(f, &cache)
 			for _, player := range cache {
 				if username != "" {
 					if username == player.Osu.Username {
 						user = player.Osu
 						break
 					}
-				} else if m.Author.ID == player.Discord.ID && player.Osu.Username != "" {
+				} else if m.Author.ID == player.Discord && player.Osu.Username != "" {
 					user = player.Osu
 					break
 				}

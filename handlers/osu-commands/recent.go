@@ -2,6 +2,7 @@ package osucommands
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -22,7 +23,7 @@ import (
 )
 
 // Recent gets the most recent score done/nth score done
-func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cache []structs.PlayerData) {
+func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string) {
 	recentRegex, _ := regexp.Compile(`(?i)(r|recent|rs|rb|recentb|recentbest)\s+(.+)`)
 	modRegex, _ := regexp.Compile(`(?i)-m\s+(\S+)`)
 	strictRegex, _ := regexp.Compile(`(?i)-nostrict`)
@@ -86,8 +87,13 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 
 	// Get message author's osu! user if no user was specified
 	if username == "" {
+		// Obtain profile cache data
+		var cache []structs.PlayerData
+		f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+		tools.ErrRead(s, err)
+		_ = json.Unmarshal(f, &cache)
 		for _, player := range cache {
-			if m.Author.ID == player.Discord.ID && player.Osu.Username != "" {
+			if m.Author.ID == player.Discord && player.Osu.Username != "" {
 				username = player.Osu.Username
 				break
 			}
@@ -425,9 +431,9 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string, cac
 			params = append(params, "fc")
 		}
 		if option == "best" {
-			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recentBest", addition, params...)
+			ScorePost(s, &discordgo.MessageCreate{message}, "recentBest", addition, params...)
 		} else if option == "recent" {
-			ScorePost(s, &discordgo.MessageCreate{message}, cache, "recent", addition, params...)
+			ScorePost(s, &discordgo.MessageCreate{message}, "recent", addition, params...)
 		}
 	}
 }

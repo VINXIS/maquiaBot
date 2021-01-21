@@ -10,7 +10,6 @@ import (
 // ServerData stores information regarding the discord server, so that server specific customizations may be used.
 type ServerData struct {
 	Time             time.Time
-	Server           discordgo.Guild
 	Prefix           string
 	Daily            bool
 	OsuToggle        bool
@@ -31,7 +30,7 @@ type ServerData struct {
 type Role struct {
 	ID    int64
 	Text  string
-	Roles []discordgo.Role
+	Roles []string
 }
 
 // Trigger holds information for custom word triggers
@@ -50,17 +49,17 @@ type Counter struct {
 
 // CounterTrack holds the amount of times a user has said a certain word/regex
 type CounterTrack struct {
-	User  discordgo.User
-	Count int
+	Username string
+	UserID   string
+	Count    int
 }
 
 // NewServer creates a new ServerData
-func NewServer(server discordgo.Guild) ServerData {
+func NewServer() ServerData {
 	return ServerData{
 		Prefix:    "$",
 		OsuToggle: true,
 		Daily:     true,
-		Server:    server,
 		Genital: GenitalRecordData{
 			Penis: struct {
 				Largest  GenitalData
@@ -170,7 +169,7 @@ func NewCounter(text string) Counter {
 }
 
 // NewRoleAuto creates a new role automation with a snowflake ID similar to Discord's
-func NewRoleAuto(text string, roles []discordgo.Role) Role {
+func NewRoleAuto(text string, roles []string) Role {
 	ID := time.Now().Unix()*1000 - 1420070400000
 	ID <<= 22
 	return Role{

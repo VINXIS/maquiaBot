@@ -1,7 +1,9 @@
 package osucommands
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"math/rand"
 	"regexp"
@@ -10,16 +12,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	config "maquiaBot/config"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Leaderboard gives you the leaderboard for a map
-func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp, cache []structs.PlayerData) {
+func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp) {
 	mapRegex, _ := regexp.Compile(`(?i)(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	modRegex, _ := regexp.Compile(`(?i)-m\s*(\S+)`)
 	showRegex, _ := regexp.Compile(`(?i)-n\s*(\d+)`)
@@ -126,9 +129,15 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 		}
 		trueCache := []structs.PlayerData{}
 
+		// Obtain profile cache data
+		var cache []structs.PlayerData
+		f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+		tools.ErrRead(s, err)
+		_ = json.Unmarshal(f, &cache)
+
 		for _, player := range cache {
 			for _, member := range members {
-				if player.Discord.ID == member.User.ID && player.Osu.Username != "" {
+				if player.Discord == member.User.ID && player.Osu.Username != "" {
 					scoreOpts.UserID = player.Osu.UserID
 					userScores, err := OsuAPI.GetScores(scoreOpts)
 					if err == nil {

@@ -64,6 +64,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`meme`, " +
 					"`merge`, " +
 					"`nouns`, " +
+					"`ntw`, " +
 					"`ocr`, " +
 					"`over`, " +
 					"`percentage`, " +
@@ -84,6 +85,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`roll`, " +
 					"`serverinfo`, " +
 					"`skills`, " +
+					"`source`" +
 					"`stats`, " +
 					"`swap`, " +
 					"`title`, " +
@@ -219,6 +221,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Merge(embed)
 		case "noun", "nouns":
 			embed = helpcommands.Nouns(embed)
+		case "ntw", "numtw", "ntow", "ntword", "numtow", "numtword", "ntoword", "numtoword", "numbertoword":
+			embed = helpcommands.Ntow(embed)
 		case "ocr":
 			embed = helpcommands.OCR(embed)
 		case "over":
@@ -259,6 +263,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.ServerInfo(embed)
 		case "skill", "skills":
 			embed = helpcommands.Skills(embed)
+		case "src", "source":
+			embed = helpcommands.Source(embed)
 		case "stats", "class":
 			embed = helpcommands.Stats(embed)
 		case "swap":
@@ -385,7 +391,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 	}
 
 	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-		Content: "All commands in PM will use the bot's default prefix `$` instead!",
+		Content: "All commands in PM will use the bot's default prefix `$` instead!\nFor any questions or concerns about this bot, please contact @vinxis1 on twitter, or VINXIS#1000 on discord.",
 		Embed:   embed,
 	})
 }

@@ -2,7 +2,9 @@ package osucommands
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"math/rand"
 	"regexp"
@@ -20,7 +22,7 @@ import (
 )
 
 // Top gets the nth top pp score
-func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
+func Top(s *discordgo.Session, m *discordgo.MessageCreate) {
 	topRegex, _ := regexp.Compile(`(?i)t(op)?\s+(.+)`)
 	modRegex, _ := regexp.Compile(`(?i)-m\s+(\S+)`)
 	strictRegex, _ := regexp.Compile(`(?i)-nostrict`)
@@ -80,8 +82,13 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 
 	// Get message author's osu! user if no user was specified
 	if username == "" {
+		// Obtain profile cache data
+		var cache []structs.PlayerData
+		f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+		tools.ErrRead(s, err)
+		_ = json.Unmarshal(f, &cache)
 		for _, player := range cache {
-			if m.Author.ID == player.Discord.ID && player.Osu.Username != "" {
+			if m.Author.ID == player.Discord && player.Osu.Username != "" {
 				username = player.Osu.Username
 				break
 			}
@@ -314,6 +321,6 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 		if fcRegex.MatchString(m.Content) {
 			params = append(params, "fc")
 		}
-		ScorePost(s, &discordgo.MessageCreate{message}, cache, "", addition, params...)
+		ScorePost(s, &discordgo.MessageCreate{message}, "", addition, params...)
 	}
 }

@@ -7,11 +7,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	osucommands "maquiaBot/handlers/osu-commands"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Track executes the track command, used for when people want to track/untrack users/pp/etc
@@ -203,7 +204,7 @@ func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// The Main Event
-	channelData.Tracking = !channelData.Tracking
+	channelData.OsuTracking = !channelData.OsuTracking
 
 	// Write data to JSON
 	jsonCache, err := json.Marshal(channelData)
@@ -212,7 +213,7 @@ func TrackToggle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	err = ioutil.WriteFile("./data/channelData/"+m.ChannelID+".json", jsonCache, 0644)
 	tools.ErrRead(s, err)
 
-	if channelData.Tracking {
+	if channelData.OsuTracking {
 		go osutools.TrackPost(*channel, s)
 		s.ChannelMessageSend(m.ChannelID, "Started tracking for this channel!")
 	} else {

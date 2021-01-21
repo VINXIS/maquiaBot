@@ -1,6 +1,10 @@
 package tools
 
-import "math"
+import (
+	"log"
+	"math"
+	"strings"
+)
 
 var base = []string{
 	"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen",
@@ -78,10 +82,14 @@ func Ntow(n int64) (w string) {
 		}
 	}
 
-	return w
+	return
 }
 
 // Wton changes words to numbers
 func Wton(w string) (n int64, err error) {
-	return -1, nil
+	words := strings.FieldsFunc(w, func(r rune) bool {
+		return r == '	' || r == '-'
+	})
+	log.Println(words)
+	return
 }

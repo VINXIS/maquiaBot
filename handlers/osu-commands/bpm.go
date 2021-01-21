@@ -1,19 +1,23 @@
 package osucommands
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"math"
 	"math/rand"
 	"regexp"
 	"strconv"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // BPM gives a player's BPM of the day
-func BPM(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
+func BPM(s *discordgo.Session, m *discordgo.MessageCreate) {
 	bpmregex, _ := regexp.Compile(`(?i)bpm\s+(.+)`)
 	username := ""
 	if bpmregex.MatchString(m.Content) {
@@ -22,8 +26,13 @@ func BPM(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Playe
 
 	// Check for user
 	if username == "" {
+		// Obtain profile cache data
+		var cache []structs.PlayerData
+		f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+		tools.ErrRead(s, err)
+		_ = json.Unmarshal(f, &cache)
 		for _, cachePlayer := range cache {
-			if m.Author.ID == cachePlayer.Discord.ID {
+			if m.Author.ID == cachePlayer.Discord {
 				if cachePlayer.Osu.Username == "" {
 					s.ChannelMessageSend(m.ChannelID, "No user linked to your discord account! Use `link` or `set` to link your account!")
 					return

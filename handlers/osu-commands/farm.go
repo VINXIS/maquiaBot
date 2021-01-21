@@ -10,14 +10,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Farm gives a player's farmerdog rating
-func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
+func Farm(s *discordgo.Session, m *discordgo.MessageCreate) {
 	username := ""
 	user := structs.PlayerData{}
 	cached := false
@@ -35,9 +36,13 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 	}
 
 	// Check for user
+	var cache []structs.PlayerData
+	f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+	tools.ErrRead(s, err)
+	_ = json.Unmarshal(f, &cache)
 	if username == "" {
 		for i, player := range cache {
-			if m.Author.ID == player.Discord.ID {
+			if m.Author.ID == player.Discord {
 				if player.Osu.Username == "" {
 					s.ChannelMessageSend(m.ChannelID, "No user linked to your discord account! Use "+prefix+"link to link your account!")
 					return
@@ -77,7 +82,7 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 
 	// Obtain farm data
 	farmData := structs.FarmData{}
-	f, err := ioutil.ReadFile("./data/osuData/mapFarm.json")
+	f, err = ioutil.ReadFile("./data/osuData/mapFarm.json")
 	tools.ErrRead(s, err)
 	_ = json.Unmarshal(f, &farmData)
 
@@ -114,10 +119,16 @@ func Farm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 }
 
 // TopFarm gives the top farmerdogs in the game based on who's been run
-func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
+func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate) {
 	farmCountRegex, _ := regexp.Compile(`(?i).+(tfarm|topfarm)\s*(-s)?\s*(\d+)?`)
 
 	farmAmount := 1
+
+	// Obtain profile cache data
+	var cache []structs.PlayerData
+	f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+	tools.ErrRead(s, err)
+	_ = json.Unmarshal(f, &cache)
 
 	if strings.Contains(m.Content, "-s") {
 		members, err := s.GuildMembers(m.GuildID, "", 1000)
@@ -125,18 +136,18 @@ func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 			s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 			return
 		}
-		trueCache := []structs.PlayerData{}
+		targetCache := []structs.PlayerData{}
 
 		for _, player := range cache {
 			for _, member := range members {
-				if player.Discord.ID == member.User.ID && math.Round(player.Farm.Rating*100)/100 != 0.00 {
-					trueCache = append(trueCache, player)
+				if player.Discord == member.User.ID && math.Round(player.Farm.Rating*100)/100 != 0.00 {
+					targetCache = append(targetCache, player)
 					break
 				}
 			}
 		}
 
-		cache = trueCache
+		cache = targetCache
 	}
 
 	sort.Slice(cache, func(i, j int) bool {
@@ -195,10 +206,16 @@ func TopFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 }
 
 // BottomFarm gives the top farmerdogs in the game based on who's been run
-func BottomFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
+func BottomFarm(s *discordgo.Session, m *discordgo.MessageCreate) {
 	farmCountRegex, _ := regexp.Compile(`(?i).+(bfarm|bottomfarm)\s*(-s)?\s*(\d+)?`)
 
 	farmAmount := 1
+
+	// Obtain profile cache data
+	var cache []structs.PlayerData
+	f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+	tools.ErrRead(s, err)
+	_ = json.Unmarshal(f, &cache)
 
 	if strings.Contains(m.Content, "-s") {
 		members, err := s.GuildMembers(m.GuildID, "", 1000)
@@ -210,7 +227,7 @@ func BottomFarm(s *discordgo.Session, m *discordgo.MessageCreate, cache []struct
 
 		for _, player := range cache {
 			for _, member := range members {
-				if player.Discord.ID == member.User.ID && player.Farm.Rating != 0.00 {
+				if player.Discord == member.User.ID && player.Farm.Rating != 0.00 {
 					trueCache = append(trueCache, player)
 					break
 				}

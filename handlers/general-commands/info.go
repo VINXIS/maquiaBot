@@ -17,7 +17,7 @@ import (
 )
 
 // Info gives information about the user
-func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
+func Info(s *discordgo.Session, m *discordgo.MessageCreate) {
 	userRegex, _ := regexp.Compile(`(?i)info\s+(.+)`)
 
 	userTest := ""
@@ -80,18 +80,19 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 	// Created at date
 	createdAt, _ := discordgo.SnowflakeTimestamp(user.ID)
 
-	// Status
-	presence, err := s.State.Presence(m.GuildID, user.ID)
-	status := "Offline"
-	if err == nil {
-		status = strings.Title(string(presence.Status))
-	}
+	// Obtain profile cache data
+	var cache []structs.PlayerData
+	f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+	tools.ErrRead(s, err)
+	_ = json.Unmarshal(f, &cache)
 
-	// Obtain osu! info
+	// Obtain player data info
 	osuUsername := "N/A"
+	points := 0.00
 	for _, player := range cache {
-		if player.Discord.ID == user.ID && player.Osu.Username != "" {
+		if player.Discord == user.ID && player.Osu.Username != "" {
 			osuUsername = player.Osu.Username
+			points = player.Currency.Amount
 			break
 		}
 	}
@@ -133,8 +134,8 @@ func Info(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Play
 				Inline: true,
 			},
 			{
-				Name:   "Status",
-				Value:  status,
+				Name:   "Points",
+				Value:  strconv.FormatFloat(points, 'f', 2, 64),
 				Inline: true,
 			},
 			{
@@ -167,6 +168,8 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 		serverImg += ".png"
 	}
 
+	roles, _ := s.GuildRoles(m.GuildID)
+
 	// Get role
 	if !roleRegex.MatchString(m.Content) {
 		serverData := tools.GetServer(*server, s)
@@ -185,7 +188,12 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 		for _, roleAuto := range serverData.RoleAutomation {
 			var roleNames string
 			for _, role := range roleAuto.Roles {
-				roleNames += role.Name + ", "
+				for _, discordRole := range roles {
+					if discordRole.ID == role {
+						roleNames += discordRole.Name + ", "
+						break
+					}
+				}
 			}
 			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 				Name:  strconv.FormatInt(roleAuto.ID, 10),
@@ -196,7 +204,6 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	roles, _ := s.GuildRoles(m.GuildID)
 	roleName := roleRegex.FindStringSubmatch(m.Content)[2]
 	role := &discordgo.Role{}
 	for _, servrole := range roles {

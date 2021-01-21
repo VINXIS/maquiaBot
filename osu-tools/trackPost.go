@@ -34,7 +34,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 			// Get channel data
 			ch, newCh := tools.GetChannel(channel, s)
 
-			if !ch.Tracking || len(ch.Users) == 0 || newCh {
+			if !ch.OsuTracking || len(ch.Users) == 0 || newCh {
 				return
 			}
 
@@ -298,7 +298,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 									URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
 								}
 							}
-							_, err = s.ChannelMessageSendEmbed(ch.Channel.ID, embed)
+							_, err = s.ChannelMessageSendEmbed(channel.ID, embed)
 							if err != nil {
 								log.Println("TrackPost err: " + err.Error())
 								log.Println(ch)
@@ -313,7 +313,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 			jsonCache, err := json.Marshal(ch)
 			tools.ErrRead(s, err)
 
-			err = ioutil.WriteFile("./data/channelData/"+ch.Channel.ID+".json", jsonCache, 0644)
+			err = ioutil.WriteFile("./data/channelData/"+channel.ID+".json", jsonCache, 0644)
 			tools.ErrRead(s, err)
 
 			startTime = time.Now()

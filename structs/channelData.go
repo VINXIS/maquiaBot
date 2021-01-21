@@ -4,14 +4,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 )
 
 // ChannelData stores information regarding the discord channel so that tracking for osu! plays may occur in that channel
 type ChannelData struct {
 	Time           time.Time
-	Channel        discordgo.Channel
 	PPReq          float64
 	LeaderboardReq int
 	TopReq         int
@@ -20,35 +18,42 @@ type ChannelData struct {
 	Qualified      bool
 	Users          []osuapi.User
 	Mode           osuapi.Mode
-	Tracking       bool
+	Pixiv          PixivData
+	OsuTracking    bool
+	PixivTracking  bool
+}
+
+// PixivData stores pixiv tracking
+type PixivData struct {
+	Rankings []string
+	Users    []string
 }
 
 // NewChannel creates a new ChannelData
-func NewChannel(Channel discordgo.Channel) ChannelData {
+func NewChannel() ChannelData {
 	return ChannelData{
 		Time:           time.Now(),
-		Channel:        Channel,
 		PPReq:          -1,
 		LeaderboardReq: 101,
 		TopReq:         101,
 		Mode:           osuapi.ModeOsu,
-		Tracking:       true,
+		OsuTracking:    true,
 	}
 }
 
 // ClearList clears the user list and turns off tracking
 func (c *ChannelData) ClearList() {
 	c.Users = []osuapi.User{}
-	c.Tracking = false
+	c.OsuTracking = false
 }
 
 // TrackToggle toggles the tracking on and off
 func (c *ChannelData) TrackToggle() {
 	if len(c.Users) == 0 {
-		c.Tracking = false
+		c.OsuTracking = false
 		return
 	}
-	c.Tracking = !c.Tracking
+	c.OsuTracking = !c.OsuTracking
 }
 
 // AddUser adds a user to the list of people to track

@@ -130,6 +130,8 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 
 	message, err := s.ChannelMessageSend(m.ChannelID, "Processing image...")
 	if err != nil {
+		tools.DeleteFile("./" + name + ".png")
+		tools.DeleteFile("./" + name + ".txt")
 		return
 	}
 	var beatmap osuapi.Beatmap
@@ -200,6 +202,8 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	})
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
+		tools.DeleteFile("./" + name + ".png")
+		tools.DeleteFile("./" + name + ".txt")
 		return
 	}
 

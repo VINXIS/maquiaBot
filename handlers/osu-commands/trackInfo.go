@@ -41,7 +41,7 @@ func TrackInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Create embed
 	embed := discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			Name:    channelData.Channel.Name,
+			Name:    channel.Name,
 			IconURL: serverImg,
 		},
 		Description: "Any admin, server moderator, or server owner can update this using `track` again! \n**You do not need to readd everything again to update parts of the tracker.** Toggle tracking on or off using `tt`, `trackt`, `ttoggle`, or `tracktoggle`",
@@ -56,7 +56,7 @@ func TrackInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if channelData.LeaderboardReq == 101 && channelData.TopReq == 101 && channelData.PPReq == -1 {
 		warning += "\n**WARNING:** You do not have any leader/top/pp requirement for scores! Any score submitted by the users listed on eligible maps will be posted as a result!"
 	}
-	if !channelData.Tracking {
+	if !channelData.OsuTracking {
 		warning += "\n**WARNING:** Tracking is currently turned off!"
 	}
 
@@ -129,7 +129,7 @@ func TrackInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Misc.
 	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Mode: ", channelData.Mode.String(), true})
-	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Tracking: ", strconv.FormatBool(channelData.Tracking), true})
+	embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{"Tracking: ", strconv.FormatBool(channelData.OsuTracking), true})
 
 	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 		Content: warning,

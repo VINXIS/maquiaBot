@@ -2,6 +2,7 @@ package osucommands
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -22,7 +23,7 @@ import (
 )
 
 // Compare compares finds a score from the current user on the previous map linked by the bot
-func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
+func Compare(s *discordgo.Session, m *discordgo.MessageCreate) {
 	mapRegex, _ := regexp.Compile(`(?i)(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	modRegex, _ := regexp.Compile(`(?i)-m\s+(\S+)`)
 	compareRegex, _ := regexp.Compile(`(?i)(c|compare)\s*(.+)?`)
@@ -143,13 +144,18 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 
 	// Get user
 	var user osuapi.User
+	// Check in profile cache data
+	var cache []structs.PlayerData
+	f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+	tools.ErrRead(s, err)
+	_ = json.Unmarshal(f, &cache)
 	for _, player := range cache {
 		if username != "" {
 			if username == player.Osu.Username {
 				user = player.Osu
 				break
 			}
-		} else if m.Author.ID == player.Discord.ID && player.Osu.Username != "" {
+		} else if m.Author.ID == player.Discord && player.Osu.Username != "" {
 			user = player.Osu
 			break
 		}
@@ -413,7 +419,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.P
 				if fcRegex.MatchString(m.Content) {
 					params = append(params, "fc")
 				}
-				ScorePost(s, &discordgo.MessageCreate{message}, cache, "", addition, params...)
+				ScorePost(s, &discordgo.MessageCreate{message}, "", addition, params...)
 			}
 			return
 		}

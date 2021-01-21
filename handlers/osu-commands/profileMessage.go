@@ -2,6 +2,8 @@ package osucommands
 
 import (
 	"bytes"
+	"encoding/json"
+	"io/ioutil"
 	"math/rand"
 	"regexp"
 	"sort"
@@ -9,17 +11,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
-	"github.com/wcharczuk/go-chart"
 	config "maquiaBot/config"
 	osuapi "maquiaBot/osu-api"
 	osutools "maquiaBot/osu-tools"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/wcharczuk/go-chart"
 )
 
 // ProfileMessage gets the information for the specified profile linked
-func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileRegex *regexp.Regexp, cache []structs.PlayerData) {
+func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileRegex *regexp.Regexp) {
 	profileCmd1Regex, _ := regexp.Compile(`(?i)osu(top|detail)?\s+(.+)`)
 	profileCmd2Regex, _ := regexp.Compile(`(?i)profile\s+(.+)`)
 	profileCmd3Regex, _ := regexp.Compile(`(?i)osutop`)
@@ -60,8 +63,13 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 	value = strings.TrimSpace(strings.Replace(value, mValue, "", -1))
 
 	if value == "" {
+		// Obtain profile cache data
+		var cache []structs.PlayerData
+		f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+		tools.ErrRead(s, err)
+		_ = json.Unmarshal(f, &cache)
 		for _, player := range cache {
-			if m.Author.ID == player.Discord.ID && player.Osu.Username != "" {
+			if m.Author.ID == player.Discord && player.Osu.Username != "" {
 				value = player.Osu.Username
 				break
 			}

@@ -2,8 +2,6 @@ package structs
 
 import (
 	"time"
-
-	"github.com/bwmarrin/discordgo"
 )
 
 // ReminderTimer stores the reminder alongside the timer
@@ -17,18 +15,18 @@ type Reminder struct {
 	ID     int64
 	Target time.Time
 	Info   string
-	User   discordgo.User
+	User   string
 	Active bool
 }
 
 // NewReminder creates a new Reminder with a snowflake ID similar to Discord's
-func NewReminder(target time.Time, user discordgo.User, info string) Reminder {
+func NewReminder(target time.Time, id string, info string) Reminder {
 	ID := time.Now().Unix()*1000 - 1420070400000
 	ID <<= 22
 	return Reminder{
 		ID:     ID,
 		Target: target,
-		User:   user,
+		User:   id,
 		Info:   info,
 		Active: true,
 	}

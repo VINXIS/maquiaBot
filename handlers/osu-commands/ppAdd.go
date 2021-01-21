@@ -1,19 +1,23 @@
 package osucommands
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"math"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	osuapi "maquiaBot/osu-api"
 	structs "maquiaBot/structs"
+	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // PPAdd calculates final pp after obtaining given pp score
-func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.PlayerData) {
+func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 	ppRegex, _ := regexp.Compile(`(?i)(ppadd|addpp)\s+(.+)`)
 
 	if !ppRegex.MatchString(m.Content) {
@@ -36,8 +40,13 @@ func PPAdd(s *discordgo.Session, m *discordgo.MessageCreate, cache []structs.Pla
 	}
 
 	if username == "" {
+		// Obtain profile cache data
+		var cache []structs.PlayerData
+		f, err := ioutil.ReadFile("./data/osuData/profileCache.json")
+		tools.ErrRead(s, err)
+		_ = json.Unmarshal(f, &cache)
 		for _, player := range cache {
-			if m.Author.ID == player.Discord.ID && player.Osu.Username != "" {
+			if m.Author.ID == player.Discord && player.Osu.Username != "" {
 				username = player.Osu.Username
 				break
 			}

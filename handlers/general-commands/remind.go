@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
-	config "maquiaBot/config"
 	structs "maquiaBot/structs"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // ReminderTimers is the list of all reminders running
@@ -109,7 +109,7 @@ func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Create reminder and add to list of reminders
-	reminder := structs.NewReminder(timeResult, *m.Author, text)
+	reminder := structs.NewReminder(timeResult, m.Author.ID, text)
 	reminders := []structs.Reminder{}
 	_, err := os.Stat("./data/reminders.json")
 	if err == nil {
@@ -189,22 +189,9 @@ func RunReminder(s *discordgo.Session, reminderTimer structs.ReminderTimer) {
 func Reminders(s *discordgo.Session, m *discordgo.MessageCreate) {
 	userTimers := []structs.Reminder{}
 	all := false
-	if strings.Contains(m.Content, "all") {
-		if m.Author.ID != config.Conf.BotHoster.UserID {
-			s.ChannelMessageSend(m.ChannelID, "YOU ARE NOT "+config.Conf.BotHoster.Username+".........")
-			return
-		}
-		all = true
-		for _, reminder := range ReminderTimers {
-			if reminder.Reminder.Active {
-				userTimers = append(userTimers, reminder.Reminder)
-			}
-		}
-	} else {
-		for _, reminder := range ReminderTimers {
-			if reminder.Reminder.User.ID == m.Author.ID && reminder.Reminder.Active {
-				userTimers = append(userTimers, reminder.Reminder)
-			}
+	for _, reminder := range ReminderTimers {
+		if reminder.Reminder.User == m.Author.ID && reminder.Reminder.Active {
+			userTimers = append(userTimers, reminder.Reminder)
 		}
 	}
 
@@ -228,7 +215,7 @@ func Reminders(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 				Name:   strconv.FormatInt(reminder.ID, 10),
-				Value:  "Reminder: " + info + "\nRemind time: " + reminder.Target.Format(time.RFC822) + "\nUser: " + reminder.User.String(),
+				Value:  "Reminder: " + info + "\nRemind time: " + reminder.Target.Format(time.RFC822),
 				Inline: true,
 			})
 		}
@@ -271,12 +258,12 @@ func RemoveReminder(s *discordgo.Session, m *discordgo.MessageCreate) {
 	reminderID := remindRegex.FindStringSubmatch(m.Content)[2]
 	if reminderID == "all" {
 		for i, reminder := range ReminderTimers {
-			if reminder.Reminder.User.ID == m.Author.ID {
+			if reminder.Reminder.User == m.Author.ID {
 				ReminderTimers[i].Reminder.Active = false
 			}
 		}
 		for i, reminder := range reminders {
-			if reminder.User.ID == m.Author.ID {
+			if reminder.User == m.Author.ID {
 				reminders[i].Active = false
 			}
 		}
@@ -313,7 +300,7 @@ func RemoveReminder(s *discordgo.Session, m *discordgo.MessageCreate) {
 // ReminderMessage will send the user their reminder
 func ReminderMessage(s *discordgo.Session, reminderTimer structs.ReminderTimer) {
 	linkRegex, _ := regexp.Compile(`(?i)https?:\/\/\S+`)
-	dm, _ := s.UserChannelCreate(reminderTimer.Reminder.User.ID)
+	dm, _ := s.UserChannelCreate(reminderTimer.Reminder.User)
 	if reminderTimer.Reminder.Info == "" {
 		s.ChannelMessageSend(dm.ID, "Reminder!")
 	} else if linkRegex.MatchString(reminderTimer.Reminder.Info) {

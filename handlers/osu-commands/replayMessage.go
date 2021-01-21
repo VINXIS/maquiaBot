@@ -21,7 +21,7 @@ import (
 )
 
 // ReplayMessage posts replay information fopr a given replay
-func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp, cache []structs.PlayerData) {
+func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *regexp.Regexp) {
 	scorePostRegex, _ := regexp.Compile(`(?i)-sp`)
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
@@ -266,6 +266,6 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		if fcRegex.MatchString(m.Content) {
 			params = append(params, "fc")
 		}
-		ScorePost(s, &discordgo.MessageCreate{message}, cache, url, addition, params...)
+		ScorePost(s, &discordgo.MessageCreate{message}, url, addition, params...)
 	}
 }
