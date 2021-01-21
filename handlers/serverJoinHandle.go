@@ -49,11 +49,11 @@ func ServerJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 		return
 	}
 
-	_, err = s.ChannelMessageSend(g.ID, "Hello! My default prefix is `$` but you can change it by using `$prefix` or `maquiaprefix`\nFor information about this bot's commands, check out `$help` to see the variety of commands created.\nFor any questions or concerns about this bot, please contact @vinxis1 on twitter, or VINXIS#1000 on discord.")
+	_, err = s.ChannelMessageSend(g.ID, "Hello! My default prefix is `$` but you can change it by using `$prefix` or `maquiaprefix`\nFor information about this bot's commands, check out `$help` to see the variety of commands created.\nFor any questions or concerns about this bot, please contact `@vinxis1` on twitter, or `VINXIS#1000` on discord.")
 	if err != nil {
 		for _, channel := range g.Channels {
 			serverData.AnnounceChannel = channel.ID
-			_, err := s.ChannelMessageSend(channel.ID, "Hello! My default prefix is `$` but you can change it by using `$prefix` or `maquiaprefix`\nFor information about this bot's commands, check out `$help` to see the variety of commands created.\nFor any questions or concerns about this bot, please contact @vinxis1 on twitter, or VINXIS#1000 on discord.")
+			_, err := s.ChannelMessageSend(channel.ID, "Hello! My default prefix is `$` but you can change it by using `$prefix` or `maquiaprefix`\nFor information about this bot's commands, check out `$help` to see the variety of commands created.\nFor any questions or concerns about this bot, please contact `@vinxis1` on twitter, or `VINXIS#1000` on discord.")
 			if err == nil {
 				break
 			}
