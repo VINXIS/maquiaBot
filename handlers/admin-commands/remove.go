@@ -1,6 +1,8 @@
 package admincommands
 
 import (
+	"bytes"
+	"encoding/json"
 	"maquiaBot/tools"
 
 	"github.com/bwmarrin/discordgo"
@@ -26,11 +28,24 @@ func RemoveChannel(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain channel data
-	_, new := tools.GetChannel(*channel, s)
+	channelData, new := tools.GetChannel(*channel, s)
 	if new {
 		s.ChannelMessageSend(m.ChannelID, "There is currently no data stored for this channel.")
 		return
 	}
+
+	b, err := json.Marshal(channelData)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Error in parsing the channel data. Please contact `@vinxis1` on twitter or `VINXIS#1000` on discord about this!")
+		return
+	}
+	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+		Content: "Here is the data stored for the channel in case you wish to re-add anything from it.",
+		File: &discordgo.File{
+			Name:   channel.Name + ".json",
+			Reader: bytes.NewReader(b),
+		},
+	})
 
 	tools.DeleteFile("./data/channelData/" + m.ChannelID + ".json")
 	s.ChannelMessageSend(m.ChannelID, "Removed data for this channel!")
@@ -51,11 +66,24 @@ func RemoveServer(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	_, new := tools.GetServer(*server, s)
+	serverData, new := tools.GetServer(*server, s)
 	if new {
 		s.ChannelMessageSend(m.ChannelID, "There is currently no data stored for this server.")
 		return
 	}
+
+	b, err := json.Marshal(serverData)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Error in parsing the server data. Please contact `@vinxis1` on twitter or `VINXIS#1000` on discord about this!")
+		return
+	}
+	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+		Content: "Here is the data stored for the server in case you wish to re-add anything from it.",
+		File: &discordgo.File{
+			Name:   server.Name + ".json",
+			Reader: bytes.NewReader(b),
+		},
+	})
 
 	tools.DeleteFile("./data/serverData/" + m.GuildID + ".json")
 	s.ChannelMessageSend(m.ChannelID, "Removed data for this server!")
