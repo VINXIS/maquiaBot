@@ -49,7 +49,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if err != nil {
 		server = &discordgo.Guild{}
 	}
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 	serverPrefix := serverData.Prefix
 
 	// Generate regexes for message parsing
@@ -141,12 +141,14 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Counter checks
+	change := false
 	for i, counter := range serverData.Counters {
 		counter.Text = `(?i)` + counter.Text
 		reg, err := regexp.Compile(counter.Text)
 		count := false
 		if (err != nil && strings.Contains(strings.ToLower(m.Content), counter.Text)) || reg.MatchString(strings.ToLower(m.Content)) {
 			count = true
+			change = true
 		}
 
 		if count {
@@ -169,11 +171,13 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
-	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(s, err)
+	if change {
+		jsonCache, err := json.Marshal(serverData)
+		tools.ErrRead(s, err)
 
-	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(s, err)
+		err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
+		tools.ErrRead(s, err)
+	}
 
 	// Command checks
 	if strings.HasPrefix(m.Content, "maquiaprefix") {
@@ -230,10 +234,18 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Admin commands
 		case "counter":
 			go admincommands.Counter(s, m)
+		case "dlch", "dlchannel", "downloadch", "downloadchannel":
+			go admincommands.DownloadChannel(s, m)
+		case "dlsv", "dlserver", "downloadsv", "downloadserver":
+			go admincommands.DownloadServer(s, m)
 		case "prefix", "newprefix":
 			go admincommands.Prefix(s, m)
 		case "purge":
 			go admincommands.Purge(s, m)
+		case "rmch", "rmchannel", "removech", "removechannel":
+			go admincommands.RemoveChannel(s, m)
+		case "rmsv", "rmserver", "removesv", "removeserver":
+			go admincommands.RemoveServer(s, m)
 		case "rolea", "roleauto", "roleautomation":
 			go admincommands.RoleAutomation(s, m)
 		case "toggle":
@@ -282,6 +294,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Daily(s, m)
 		case "decrypt":
 			go gencommands.Decrypt(s, m)
+		case "dl", "download":
+			go gencommands.Download(s, m)
 		case "e", "emoji", "emote":
 			go gencommands.Emoji(s, m)
 		case "encrypt":
@@ -376,6 +390,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Twitch(s, m)
 		case "twitter", "twitterdl":
 			go gencommands.Twitter(s, m)
+		case "u", "unlink":
+			go gencommands.Unlink(s, m)
 		case "vagina":
 			if serverData.Daily {
 				go gencommands.Vagina(s, m)

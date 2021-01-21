@@ -172,7 +172,7 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Get role
 	if !roleRegex.MatchString(m.Content) {
-		serverData := tools.GetServer(*server, s)
+		serverData, _ := tools.GetServer(*server, s)
 		embed := &discordgo.MessageEmbed{
 			Author: &discordgo.MessageEmbedAuthor{
 				Name:    server.Name,
@@ -287,7 +287,6 @@ func RoleInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // ServerInfo gives information about the server
 func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
-
 	var server *discordgo.Guild
 	for _, stateServer := range s.State.Guilds {
 		if m.GuildID == stateServer.ID {
@@ -301,11 +300,11 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Stats info
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 	statsInfo := strconv.Itoa(len(serverData.Nouns)) + " nouns\n" + strconv.Itoa(len(serverData.Adjectives)) + " adjectives\n" + strconv.Itoa(len(serverData.Skills)) + " skills\nAllowAnyoneAdd: " + strconv.FormatBool(serverData.AllowAnyoneStats)
 
 	// Server Options Information
-	serverOptions := "Daily: " + strconv.FormatBool(serverData.Daily) + "\n" +
+	serverOptions := "Daily refreshing commands: " + strconv.FormatBool(serverData.Daily) + "\n" +
 		"osu!: " + strconv.FormatBool(serverData.OsuToggle) + "\n" +
 		"Vibe Check: " + strconv.FormatBool(serverData.Vibe) + "\n"
 	if serverData.AnnounceChannel == "" {
@@ -316,7 +315,6 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			serverOptions += "Announcements: #" + announceChannel.Name + "\n"
 		} else {
 			serverOptions += "Announcements: N/A\n"
-			serverData.AnnounceChannel = ""
 		}
 	}
 
@@ -508,12 +506,4 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			},
 		},
 	})
-
-	// Save new server data
-	serverData.Time = time.Now()
-	jsonCache, err := json.Marshal(serverData)
-	tools.ErrRead(s, err)
-
-	err = ioutil.WriteFile("./data/serverData/"+m.GuildID+".json", jsonCache, 0644)
-	tools.ErrRead(s, err)
 }

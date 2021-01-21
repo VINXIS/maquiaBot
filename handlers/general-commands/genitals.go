@@ -11,8 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 type genitals struct {
@@ -560,7 +561,7 @@ func History(s *discordgo.Session, m *discordgo.MessageCreate) {
 			s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 			return
 		}
-		serverData := tools.GetServer(*server, s)
+		serverData, _ := tools.GetServer(*server, s)
 		genitalRecord.Penis = serverData.Genital.Penis
 		genitalRecord.Vagina = serverData.Genital.Vagina
 	}
@@ -657,7 +658,7 @@ func records(s *discordgo.Session, m *discordgo.MessageCreate, size float64, use
 	if err != nil {
 		return
 	}
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 	recordBroken = false
 
 	if genital == "penis" {

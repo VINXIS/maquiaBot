@@ -4,9 +4,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	config "maquiaBot/config"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Announce announces new stuff
@@ -29,7 +30,7 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 			continue
 		}
 
-		server := tools.GetServer(*guild, s)
+		server, _ := tools.GetServer(*guild, s)
 		if server.AnnounceChannel != "" {
 			s.ChannelMessageSend(server.AnnounceChannel, "Admins of the server can always toggle announcements from the bot creator on/off by using `toggle -a`.\n\n**Announcement below:**\n"+announcement)
 		}

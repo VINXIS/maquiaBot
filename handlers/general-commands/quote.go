@@ -30,7 +30,7 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 	if len(serverData.Quotes) == 0 {
 		s.ChannelMessageSend(m.ChannelID, "No quotes saved for this server! Please see `help quoteadd` to see how to add quotes!")
 		return
@@ -196,7 +196,7 @@ func QuoteAdd(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 
 	// Get message
 	message := &discordgo.Message{}
@@ -380,7 +380,7 @@ func QuoteRemove(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 
 	mID := ""
 	if quoteRemoveRegex.MatchString(m.Content) {
@@ -420,7 +420,7 @@ func Quotes(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 	serverImg := "https://cdn.discordapp.com/icons/" + server.ID + "/" + server.Icon
 	if strings.Contains(server.Icon, "a_") {
 		serverImg += ".gif"

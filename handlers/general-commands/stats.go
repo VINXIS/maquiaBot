@@ -11,8 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Stats creates and outputs randomized stats for the user in question
@@ -24,7 +25,7 @@ func Stats(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "This is not a server!")
 		return
 	}
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 	prefix := serverData.Prefix
 
 	// Parse emssage to see if a skill count was given/object of reference
@@ -130,7 +131,7 @@ func Adjectives(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 
 	if !serverData.AllowAnyoneStats && !tools.AdminCheck(s, m, *server) {
 		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
@@ -198,7 +199,7 @@ func Nouns(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 
 	if !serverData.AllowAnyoneStats && !tools.AdminCheck(s, m, *server) {
 		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")
@@ -266,7 +267,7 @@ func Skills(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 
 	if !serverData.AllowAnyoneStats && !tools.AdminCheck(s, m, *server) {
 		s.ChannelMessageSend(m.ChannelID, "You must be an admin, server manager, or server owner!")

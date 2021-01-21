@@ -36,6 +36,7 @@ func Track(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Obtain channel data
 	channelData, new := tools.GetChannel(*channel, s)
+	channelData.OsuTracking = true
 
 	// Get params
 	args := strings.Split(m.Content, " ")[1:]

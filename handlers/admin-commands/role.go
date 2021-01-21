@@ -31,7 +31,7 @@ func RoleAutomation(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 
 	// Check if params were given
 	if !roleRegex.MatchString(m.Content) {

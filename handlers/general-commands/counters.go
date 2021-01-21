@@ -27,7 +27,7 @@ func Counters(s *discordgo.Session, m *discordgo.MessageCreate) {
 		serverImg += ".png"
 	}
 
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 	embed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
 			Name:    server.Name,
@@ -112,7 +112,7 @@ func CountRank(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 	if len(serverData.Counters) == 0 {
 		s.ChannelMessageSend(m.ChannelID, "This server has no counters!")
 		return

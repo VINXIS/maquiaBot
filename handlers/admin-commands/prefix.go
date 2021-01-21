@@ -31,7 +31,7 @@ func Prefix(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Obtain server data
-	serverData := tools.GetServer(*server, s)
+	serverData, _ := tools.GetServer(*server, s)
 
 	// Set new information in server data
 	oldPrefix := serverData.Prefix

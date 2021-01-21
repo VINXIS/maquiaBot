@@ -27,8 +27,12 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			&discordgo.MessageEmbedField{
 				Name: "Admin commands:",
 				Value: "`counter`, " +
+					"`downloadchannel`, " +
+					"`downloadserver`, " +
 					"`maquiaprefix`, " +
 					"`purge`, " +
+					"`removechannel`, " +
+					"`removeserver`, " +
 					"`roleautomation`, " +
 					"`toggle`, " +
 					"`track`, " +
@@ -50,6 +54,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`counters`, " +
 					"`crab`, " +
 					"`decrypt`, " +
+					"`download`, " +
 					"`emote`, " +
 					"`encrypt`, " +
 					"`face`, " +
@@ -85,7 +90,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`roll`, " +
 					"`serverinfo`, " +
 					"`skills`, " +
-					"`source`" +
+					"`source`, " +
 					"`stats`, " +
 					"`swap`, " +
 					"`title`, " +
@@ -93,6 +98,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`tts`, " +
 					"`twitchdl`, " +
 					"`twitterdl`, " +
+					"`unlink`, " +
 					"`vagina`, " +
 					"`vibecheck`, " +
 					"`weather`",
@@ -151,10 +157,18 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 		// Admin commands
 		case "counter":
 			embed = helpcommands.Counter(embed)
+		case "dlch", "dlchannel", "downloadch", "downloadchannel":
+			embed = helpcommands.DownloadChannel(embed)
+		case "dlsv", "dlserver", "downloadsv", "downloadserver":
+			embed = helpcommands.DownloadServer(embed)
 		case "prefix", "maquiaprefix", "newprefix":
 			embed = helpcommands.Prefix(embed)
 		case "purge":
 			embed = helpcommands.Purge(embed)
+		case "rmch", "rmchannel", "removech", "removechannel":
+			embed = helpcommands.RemoveChannel(embed)
+		case "rmsv", "rmserver", "removesv", "removeserver":
+			embed = helpcommands.RemoveServer(embed)
 		case "rolea", "roleauto", "roleautomation":
 			embed = helpcommands.RoleAutomation(embed)
 		case "toggle":
@@ -193,6 +207,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Crab(embed)
 		case "decrypt":
 			embed = helpcommands.Decrypt(embed)
+		case "dl", "download":
+			embed = helpcommands.Download(embed)
 		case "e", "emoji", "emote":
 			embed = helpcommands.Emoji(embed)
 		case "encrypt":
@@ -279,6 +295,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Twitter(embed)
 		case "tts":
 			embed = helpcommands.TTS(embed)
+		case "u", "unlink":
+			embed = helpcommands.Unlink(embed)
 		case "vagina":
 			embed = helpcommands.Vagina(embed)
 		case "vibe", "vibec", "vibecheck":
