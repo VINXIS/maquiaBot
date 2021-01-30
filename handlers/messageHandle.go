@@ -27,7 +27,7 @@ import (
 // MessageHandler handles any incoming messages
 func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself or by kambojk
-	if m.Author.ID == s.State.User.ID || m.Author.ID == "304444747068604416" {
+	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
