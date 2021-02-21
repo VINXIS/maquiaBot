@@ -177,6 +177,8 @@ func TTS(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		return
 	}
+	waveform := resObj.Waveforms[0][0][1]
+	b, err = json.Marshal(waveform)
 	err = ioutil.WriteFile("./test.json", b, 0644)
 	tools.ErrRead(s, err)
 

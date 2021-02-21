@@ -16,7 +16,16 @@ func Servers(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	dm, _ := s.UserChannelCreate(config.Conf.BotHoster.UserID)
+	dm, err := s.UserChannelCreate(config.Conf.BotHoster.UserID)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Could not create DM channel!")
+		return
+	}
+	msg, err := s.ChannelMessageSend(dm.ID, "Fetching servers...")
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "Could not send message in the DM channel!")
+		return
+	}
 	message := "ID,Name,Owner,Date Joined\n"
 	for _, guild := range s.State.Guilds {
 		owner, _ := s.User(guild.OwnerID)
@@ -36,6 +45,7 @@ func Servers(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		message += guild.ID + "," + guild.Name + "," + owner.String() + "," + joinDateString + "\n"
 	}
+	go s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 	s.ChannelMessageSendComplex(dm.ID, &discordgo.MessageSend{
 		Files: []*discordgo.File{
 			{

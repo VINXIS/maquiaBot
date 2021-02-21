@@ -23,6 +23,11 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	msg, err := s.ChannelMessageSend(m.ChannelID, "Sending announcement to servers...")
+	if err != nil {
+		return
+	}
+
 	announcement := announceRegex.FindStringSubmatch(m.Content)[1] + strings.Join(strings.Split(m.Content, "\n")[1:], "\n")
 
 	for _, guild := range s.State.Guilds {
@@ -35,6 +40,8 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 			s.ChannelMessageSend(server.AnnounceChannel, "Admins of the server can always toggle announcements from the bot creator on/off by using `toggle -a`.\n\n**Announcement below:**\n"+announcement)
 		}
 	}
+
+	go s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 	s.ChannelMessageSend(m.ChannelID, "Sent announcement to all servers!")
 	return
 }

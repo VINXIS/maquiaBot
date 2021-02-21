@@ -23,4 +23,6 @@ func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	text := updateRegex.FindStringSubmatch(m.Content)[2]
 	s.UpdateStatus(0, text)
+
+	s.ChannelMessageSend(m.ChannelID, "Updated status.")
 }
