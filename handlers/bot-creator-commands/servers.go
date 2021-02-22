@@ -28,22 +28,21 @@ func Servers(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	message := "ID,Name,Owner,Date Joined\n"
 	for _, guild := range s.State.Guilds {
-		owner, _ := s.User(guild.OwnerID)
+		ownerName := s.State.User.String()
+		owner, err := s.User(guild.OwnerID)
+		if err == nil {
+			ownerName = owner.String()
+		}
 
 		var joinDate discordgo.Timestamp
-		members, err := s.GuildMembers(guild.ID, "", 1000)
+		member, err := s.GuildMember(guild.ID, s.State.User.ID)
 		if err == nil {
-			for _, member := range members {
-				if member.User.ID == s.State.User.ID {
-					joinDate = member.JoinedAt
-					break
-				}
-			}
+			joinDate = member.JoinedAt
 		}
 		joinDateDate, _ := joinDate.Parse()
 		joinDateString := strings.Replace(joinDateDate.Format(time.RFC822Z), " +0000", "", -1)
 
-		message += guild.ID + "," + guild.Name + "," + owner.String() + "," + joinDateString + "\n"
+		message += guild.ID + "," + guild.Name + "," + ownerName + "," + joinDateString + "\n"
 	}
 	go s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 	s.ChannelMessageSendComplex(dm.ID, &discordgo.MessageSend{
