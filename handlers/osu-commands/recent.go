@@ -294,6 +294,9 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string) {
 	} else if score.Score.FullCombo { // If play was a perfect combo
 		pp = "**" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp**/" + strconv.FormatFloat(score.PP, 'f', 2, 64) + "pp "
 	} else { // If map was finished, but play was not a perfect combo
+		if score.CountMiss == 1 && score.MaxCombo == beatmap.MaxCombo-1 {
+			mapCompletion += "**WHAT IS THAT CHOKE LMFAO** \n"
+		}
 		ppValues := make(chan string, 1)
 		go osutools.PPCalc(beatmap, osuapi.Score{
 			MaxCombo: beatmap.MaxCombo,

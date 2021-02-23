@@ -326,17 +326,6 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate) {
 			mods = strings.Replace(mods, "DTNC", "NC", 1)
 		}
 
-		var combo string
-		if score.MaxCombo == beatmap.MaxCombo {
-			if accCalc == 100.0 {
-				combo = " **SS** "
-			} else {
-				combo = " **FC** "
-			}
-		} else {
-			combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
-		}
-
 		mapCompletion := ""
 		if i == 0 { // Only matters for the top pp score Lol
 			orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
@@ -369,6 +358,20 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate) {
 					break
 				}
 			}
+		}
+
+		var combo string
+		if score.MaxCombo == beatmap.MaxCombo {
+			if accCalc == 100.0 {
+				combo = " **SS** "
+			} else {
+				combo = " **FC** "
+			}
+		} else {
+			if score.CountMiss == 1 && score.MaxCombo == beatmap.MaxCombo-1 {
+				mapCompletion += "**WHAT IS THAT CHOKE LMFAO** \n"
+			}
+			combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 		}
 
 		// Get pp values

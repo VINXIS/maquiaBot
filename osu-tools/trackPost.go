@@ -96,16 +96,6 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 					}
 					mods = " **+" + mods + "** "
 
-					if score.MaxCombo == beatmap.MaxCombo {
-						if accCalc == 100.0 {
-							combo = " **SS** "
-						} else {
-							combo = " **FC** "
-						}
-					} else {
-						combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
-					}
-
 					mapCompletion := ""
 					topNum := 101
 					leaderboardNum := 101
@@ -136,6 +126,19 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 							mapCompletion += "**#" + strconv.Itoa(topNum) + "** on leaderboard! \n"
 							break
 						}
+					}
+
+					if score.MaxCombo == beatmap.MaxCombo {
+						if accCalc == 100.0 {
+							combo = " **SS** "
+						} else {
+							combo = " **FC** "
+						}
+					} else {
+						if score.CountMiss == 1 && score.MaxCombo == beatmap.MaxCombo-1 {
+							mapCompletion += "**WHAT IS THAT CHOKE LMFAO** \n"
+						}
+						combo = " **" + strconv.Itoa(score.MaxCombo) + "**/" + strconv.Itoa(beatmap.MaxCombo) + "x "
 					}
 
 					// Get pp values

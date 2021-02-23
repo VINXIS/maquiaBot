@@ -120,17 +120,6 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		}
 	}
 
-	var combo string
-	if replay.Score.MaxCombo == replay.Beatmap.MaxCombo {
-		if accCalc == 100.0 {
-			combo = " **SS** "
-		} else {
-			combo = " **FC** "
-		}
-	} else if replay.Beatmap.MaxCombo != 0 {
-		combo = " **x" + strconv.Itoa(replay.Score.MaxCombo) + "**/" + strconv.Itoa(replay.Beatmap.MaxCombo) + " "
-	}
-
 	mapCompletion := ""
 	if replay.Beatmap.Approved > 0 {
 		orderedScores, err := OsuAPI.GetUserBest(osuapi.GetUserScoresOpts{
@@ -159,6 +148,20 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 				}
 			}
 		}
+	}
+
+	var combo string
+	if replay.Score.MaxCombo == replay.Beatmap.MaxCombo {
+		if accCalc == 100.0 {
+			combo = " **SS** "
+		} else {
+			combo = " **FC** "
+		}
+	} else if replay.Beatmap.MaxCombo != 0 {
+		if replay.Score.CountMiss == 1 && replay.Score.MaxCombo == replay.Beatmap.MaxCombo-1 {
+			mapCompletion += "**WHAT IS THAT CHOKE LMFAO** \n"
+		}
+		combo = " **x" + strconv.Itoa(replay.Score.MaxCombo) + "**/" + strconv.Itoa(replay.Beatmap.MaxCombo) + " "
 	}
 
 	replay.Score.Rank = strings.Replace(replay.Score.Rank, "X", "SS", -1)
