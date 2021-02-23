@@ -17,7 +17,7 @@ func Update(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	updateRegex, _ := regexp.Compile(`(?i)up(date)?\s+(.+)`)
 	if !updateRegex.MatchString(m.Content) {
-		s.UpdateStatus(0, strconv.Itoa(len(s.State.Guilds))+" servers")
+		s.UpdateStatus(0, "maquiahelp | maquiaprefix | "+strconv.Itoa(len(s.State.Guilds))+" servers")
 		return
 	}
 

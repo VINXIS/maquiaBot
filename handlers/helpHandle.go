@@ -437,7 +437,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 	}
 
 	s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-		Content: "All commands in PM will use the bot's default prefix `$` instead!\nFor any questions or concerns about this bot, please contact `@vinxis1` on twitter, or `VINXIS#1000` on discord.",
+		Content: "**This server's prefix: " + prefix + "**\nAll commands in PM will use the bot's default prefix `$` instead!\nFor any questions or concerns about this bot, please contact `@vinxis1` on twitter, or `VINXIS#1000` on discord.",
 		Embed:   embed,
 	})
 }

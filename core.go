@@ -82,7 +82,7 @@ func main() {
 		}
 	}
 	log.Println("Bot is now running in " + strconv.Itoa(len(discord.State.Guilds)) + " servers.")
-	discord.UpdateStatus(0, strconv.Itoa(len(discord.State.Guilds))+" servers")
+	discord.UpdateStatus(0, "maquiahelp | maquiaprefix | "+strconv.Itoa(len(discord.State.Guilds))+" servers")
 
 	// Resume all reminder timers
 	reminders := []structs.Reminder{}

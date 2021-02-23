@@ -187,15 +187,24 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Command checks
-	if strings.HasPrefix(m.Content, "maquiaprefix") {
-		go admincommands.Prefix(s, m)
-		return
-	} else if strings.HasPrefix(m.Content, "maquiacleanf") || strings.Contains(m.Content, "maquiacleanfarm") {
-		go botcreatorcommands.CleanFarm(s, m)
-		return
-	} else if strings.HasPrefix(m.Content, "maquiaclean") {
-		go botcreatorcommands.Clean(s, m)
-		return
+	if strings.HasPrefix(m.Content, "maquia") {
+		args := strings.Split(strings.Split(m.Content, "\n")[0], " ")
+		switch strings.ToLower(strings.Replace(args[0], "maquia", "", 1)) {
+		case "clean":
+			go botcreatorcommands.Clean(s, m)
+		case "cleanf", "cleanfarm":
+			go botcreatorcommands.CleanFarm(s, m)
+
+		case "prefix", "newprefix":
+			prefixArgs := strings.Split(m.Content, " ")
+			if len(prefixArgs) < 2 {
+				go s.ChannelMessageSend(m.ChannelID, "The server prefix is "+serverPrefix)
+			} else {
+				go admincommands.Prefix(s, m)
+			}
+		case "help":
+			go HelpHandle(s, m, serverPrefix)
+		}
 	} else if strings.HasPrefix(m.Content, serverPrefix) {
 		args := strings.Split(strings.Split(m.Content, "\n")[0], " ")
 		switch strings.ToLower(strings.Replace(args[0], serverPrefix, "", 1)) {
@@ -476,13 +485,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "b", "berry":
 			go pokemoncommands.Berry(s, m)
 		}
-		return
 	} else if beatmapRegex.MatchString(m.Content) && (serverData.OsuToggle || channelData.OsuToggle) { // If a beatmap was linked
 		go osucommands.BeatmapMessage(s, m, beatmapRegex)
-		return
 	} else if profileRegex.MatchString(m.Content) && (serverData.OsuToggle || channelData.OsuToggle) { // If a profile was linked
 		go osucommands.ProfileMessage(s, m, profileRegex)
-		return
 	}
 
 	// Dont mention me mate. Ill fuck u up
