@@ -52,6 +52,13 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	serverData, _ := tools.GetServer(*server, s)
 	serverPrefix := serverData.Prefix
 
+	// Obtain channel data
+	channel, err := s.Channel(m.ChannelID)
+	if err != nil {
+		channel = &discordgo.Channel{}
+	}
+	channelData, _ := tools.GetChannel(*channel, s)
+
 	// Generate regexes for message parsing
 	profileRegex, _ := regexp.Compile(`(?i)(osu|old)\.ppy\.sh\/(u|users)\/(\S+)`)
 	beatmapRegex, _ := regexp.Compile(`(?i)(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
@@ -59,12 +66,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	timestampRegex, _ := regexp.Compile(`(?i)(\d+):(\d{2}):(\d{3})\s*(\(((\d\,?)+)\))?`)
 
 	// Timestamp conversions
-	if timestampRegex.MatchString(noEmoji) && serverData.OsuToggle {
+	if timestampRegex.MatchString(noEmoji) && (serverData.TimestampToggle || channelData.TimestampToggle) {
 		go osucommands.TimestampMessage(s, m, timestampRegex)
 	}
 
 	// Vibe check (1/100000 chance if vibe is on in the server)
-	if serverData.Vibe {
+	if serverData.Vibe || channelData.Vibe {
 		roll, _ := rand.Int(rand.Reader, big.NewInt(100000))
 		number := roll.Int64()
 		if number == 0 {
@@ -196,7 +203,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "complain":
 			go s.ChannelMessageSend(m.ChannelID, "Shut up hoe")
 		case "dubs", "doubles", "trips", "triples", "quads", "quadruples", "quints", "quintuples", "sexts", "sextuples", "septs", "septuples", "octs", "octuples", "nons", "nontuples":
-			go s.ChannelMessageSend(m.ChannelID, "Ur retarded")
+			go s.ChannelMessageSend(m.ChannelID, "Fuck you")
 		case "k", "key":
 			go s.ChannelMessageSend(m.ChannelID, "``` Default AES encryption key: Nxb]^NSc;L*qn3K(/tN{6N7%4n32fF#@```\n This key is given out publicly and I use it for all of my encryption tools, so please do not use me for sensitive data.\n To use your own key, make sure you add a `-k` flag!")
 		case "noncesize", "nsize":
@@ -271,13 +278,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "cap", "caps", "upper":
 			go gencommands.TextManipulation(s, m, "allCaps")
 		case "cp", "comparep", "comparepenis":
-			if serverData.Daily {
+			if serverData.Daily || channelData.Daily {
 				go gencommands.PenisCompare(s, m)
 			}
 		case "cv", "comparev", "comparevagina":
-			if serverData.Daily {
+			if serverData.Daily || channelData.Daily {
 				go gencommands.VaginaCompare(s, m)
 			}
+		case "cinfo", "chinfo", "channelinfo":
+			go gencommands.ChannelInfo(s, m)
 		case "ch", "choose":
 			go gencommands.Choose(s, m)
 		case "cheers":
@@ -303,7 +312,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "face":
 			go gencommands.Face(s, m)
 		case "history":
-			if serverData.Daily {
+			if serverData.Daily || channelData.Daily {
 				go gencommands.History(s, m)
 			}
 		case "idea", "niceidea":
@@ -337,7 +346,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "parse":
 			go gencommands.Parse(s, m)
 		case "penis":
-			if serverData.Daily {
+			if serverData.Daily || channelData.Daily {
 				go gencommands.Penis(s, m)
 			}
 		case "ping":
@@ -353,7 +362,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "rcap", "rcaps", "rupper", "rlower", "randomcap", "randomcaps", "randomupper", "randomlower":
 			go gencommands.TextManipulation(s, m, "random")
 		case "rp", "rankp", "rankpenis":
-			if serverData.Daily {
+			if serverData.Daily || channelData.Daily {
 				go gencommands.PenisRank(s, m)
 			}
 		case "remind", "reminder":
@@ -367,7 +376,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "roll":
 			go gencommands.Roll(s, m)
 		case "rv", "rankv", "rankvagina":
-			if serverData.Daily {
+			if serverData.Daily || channelData.Daily {
 				go gencommands.VaginaRank(s, m)
 			}
 		case "sinfo", "serverinfo":
@@ -393,7 +402,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "u", "unlink":
 			go gencommands.Unlink(s, m)
 		case "vagina":
-			if serverData.Daily {
+			if serverData.Daily || channelData.Daily {
 				go gencommands.Vagina(s, m)
 			}
 		case "vibe", "vibec", "vibecheck":
@@ -431,7 +440,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "bfarm", "bottomfarm":
 			go osucommands.BottomFarm(s, m)
 		case "bpm":
-			if serverData.Daily {
+			if serverData.Daily || channelData.Daily {
 				go osucommands.BPM(s, m)
 			}
 		case "c", "compare":
@@ -468,10 +477,10 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go pokemoncommands.Berry(s, m)
 		}
 		return
-	} else if beatmapRegex.MatchString(m.Content) && serverData.OsuToggle { // If a beatmap was linked
+	} else if beatmapRegex.MatchString(m.Content) && (serverData.OsuToggle || channelData.OsuToggle) { // If a beatmap was linked
 		go osucommands.BeatmapMessage(s, m, beatmapRegex)
 		return
-	} else if profileRegex.MatchString(m.Content) && serverData.OsuToggle { // If a profile was linked
+	} else if profileRegex.MatchString(m.Content) && (serverData.OsuToggle || channelData.OsuToggle) { // If a profile was linked
 		go osucommands.ProfileMessage(s, m, profileRegex)
 		return
 	}
@@ -500,7 +509,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Check if an image was linked
 	if len(m.Attachments) > 0 || linkRegex.MatchString(m.Content) || (len(m.Embeds) > 0 && m.Embeds[0].Image != nil) {
-		if serverData.OsuToggle {
+		if serverData.OsuToggle || channelData.OsuToggle {
 			go osucommands.OsuImageParse(s, m, linkRegex)
 		}
 		go osucommands.ReplayMessage(s, m, linkRegex)

@@ -13,6 +13,7 @@ type ServerData struct {
 	Prefix           string
 	Daily            bool
 	OsuToggle        bool
+	TimestampToggle  bool
 	Vibe             bool
 	AnnounceChannel  string
 	Adjectives       []string
@@ -57,9 +58,10 @@ type CounterTrack struct {
 // NewServer creates a new ServerData
 func NewServer() ServerData {
 	return ServerData{
-		Prefix:    "$",
-		OsuToggle: true,
-		Daily:     true,
+		Prefix:          "$",
+		OsuToggle:       true,
+		TimestampToggle: true,
+		Daily:           true,
 		Genital: GenitalRecordData{
 			Penis: struct {
 				Largest  GenitalData

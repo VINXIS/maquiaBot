@@ -15,7 +15,7 @@ func Info(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:  "Related Commands:",
-			Value: "`roleinfo`, `serverinfo`",
+			Value: "`channelinfo`, `roleinfo`, `serverinfo`",
 		},
 	}
 	return embed
@@ -32,7 +32,20 @@ func RoleInfo(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:  "Related Commands:",
-			Value: "`info`, `serverinfo`",
+			Value: "`info`, `channelinfo`, `serverinfo`",
+		},
+	}
+	return embed
+}
+
+// ChannelInfo explains the channel info functionality
+func ChannelInfo(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
+	embed.Author.Name = "Command: cinfo / chinfo / channelinfo"
+	embed.Description = "`(cinfo|chinfo|channelinfo)` gets the information for this channel."
+	embed.Fields = []*discordgo.MessageEmbedField{
+		{
+			Name:  "Related Commands:",
+			Value: "`info`, `roleinfo`, `serverinfo`",
 		},
 	}
 	return embed
@@ -45,7 +58,7 @@ func ServerInfo(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:  "Related Commands:",
-			Value: "`info`, `roleinfo`",
+			Value: "`info`, `channelinfo`, `roleinfo`",
 		},
 	}
 	return embed

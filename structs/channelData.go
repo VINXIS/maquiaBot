@@ -9,18 +9,22 @@ import (
 
 // ChannelData stores information regarding the discord channel so that tracking for osu! plays may occur in that channel
 type ChannelData struct {
-	Time           time.Time
-	PPReq          float64
-	LeaderboardReq int
-	TopReq         int
-	Ranked         bool
-	Loved          bool
-	Qualified      bool
-	Users          []osuapi.User
-	Mode           osuapi.Mode
-	Pixiv          PixivData
-	OsuTracking    bool
-	PixivTracking  bool
+	Time            time.Time
+	PPReq           float64
+	LeaderboardReq  int
+	TopReq          int
+	Ranked          bool
+	Loved           bool
+	Qualified       bool
+	Users           []osuapi.User
+	Mode            osuapi.Mode
+	Pixiv           PixivData
+	Daily           bool
+	OsuToggle       bool
+	TimestampToggle bool
+	Vibe            bool
+	OsuTracking     bool
+	PixivTracking   bool
 }
 
 // PixivData stores pixiv tracking

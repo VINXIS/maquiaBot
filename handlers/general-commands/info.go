@@ -306,6 +306,7 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Server Options Information
 	serverOptions := "Daily refreshing commands: " + strconv.FormatBool(serverData.Daily) + "\n" +
 		"osu!: " + strconv.FormatBool(serverData.OsuToggle) + "\n" +
+		"osu! timestamps: " + strconv.FormatBool(serverData.TimestampToggle) + "\n" +
 		"Vibe Check: " + strconv.FormatBool(serverData.Vibe) + "\n"
 	if serverData.AnnounceChannel == "" {
 		serverOptions += "Announcements: N/A\n"
@@ -502,6 +503,79 @@ func ServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 			{
 				Name:   "Quotes (" + quoteCount + ")",
 				Value:  quoteInfo,
+				Inline: true,
+			},
+		},
+	})
+}
+
+// ChannelInfo gives information about the channel
+func ChannelInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
+	// Get channel
+	channel, err := s.Channel(m.ChannelID)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "This is not an allowed channel!")
+		return
+	}
+
+	channelData, _ := tools.GetChannel(*channel, s)
+
+	// Created at date
+	createdAt, _ := discordgo.SnowflakeTimestamp(channel.ID)
+
+	// Last pin timestamp
+	lastPin, _ := channel.LastPinTimestamp.Parse()
+
+	// Channel Options Information
+	channelOptions := "Daily refreshing commands: " + strconv.FormatBool(channelData.Daily) + "\n" +
+		"osu!: " + strconv.FormatBool(channelData.OsuToggle) + "\n" +
+		"osu! timestamps: " + strconv.FormatBool(channelData.TimestampToggle) + "\n" +
+		"Vibe Check: " + strconv.FormatBool(channelData.Vibe) + "\n" +
+		"Options are default false since server options overwrite."
+
+	s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+		Author: &discordgo.MessageEmbedAuthor{
+			Name: "#" + channel.Name,
+		},
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:   "ID",
+				Value:  channel.ID,
+				Inline: true,
+			},
+			{
+				Name:   "Topic",
+				Value:  channel.Topic,
+				Inline: true,
+			},
+			{
+				Name:   "Channel Created",
+				Value:  createdAt.UTC().Format(time.RFC822Z),
+				Inline: true,
+			},
+			{
+				Name:   "Last Pin Timestamp",
+				Value:  lastPin.UTC().Format(time.RFC822Z),
+				Inline: true,
+			},
+			{
+				Name:   "Rate Limit Per User",
+				Value:  strconv.Itoa(channel.RateLimitPerUser),
+				Inline: true,
+			},
+			{
+				Name:   "NSFW",
+				Value:  strconv.FormatBool(channel.NSFW),
+				Inline: true,
+			},
+			{
+				Name:   "Channel Position",
+				Value:  strconv.Itoa(channel.Position),
+				Inline: true,
+			},
+			{
+				Name:   "Channel Options",
+				Value:  channelOptions,
 				Inline: true,
 			},
 		},

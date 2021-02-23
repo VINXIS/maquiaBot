@@ -47,6 +47,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 					"`caps`, " +
 					"`comparepenis`, " +
 					"`comparevagina`, " +
+					"`channelinfo`, " +
 					"`choose`, " +
 					"`cheers`, " +
 					"`colour`, " +
@@ -193,6 +194,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.PenisCompare(embed)
 		case "cv", "comparev", "comparevagina":
 			embed = helpcommands.VaginaCompare(embed)
+		case "cinfo", "chinfo", "channelinfo":
+			embed = helpcommands.ChannelInfo(embed)
 		case "ch", "choose":
 			embed = helpcommands.Choose(embed)
 		case "cheers":
