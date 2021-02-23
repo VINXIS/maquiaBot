@@ -148,12 +148,12 @@ func OCR(s *discordgo.Session, m *discordgo.MessageCreate) {
 	text, err := ioutil.ReadFile(name + ".txt")
 	tools.ErrRead(s, err)
 
-	// Parse result
-	str := string(text)
-
 	// Delete files
 	tools.DeleteFile("./" + name + ".png")
 	tools.DeleteFile("./" + name + ".txt")
+
+	// Parse result
+	str := string(text)
 
 	if len(strings.TrimSpace(str)) <= 1 {
 		s.ChannelMessageSend(m.ChannelID, "No text found...")

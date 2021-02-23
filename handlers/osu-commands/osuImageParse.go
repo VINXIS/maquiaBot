@@ -89,18 +89,24 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 
 	// Run tesseract to parse the image
 	_, err = exec.Command("tesseract", "./"+name+".png", name, "--dpi", "96").Output()
-	tools.ErrRead(s, err)
+	if err != nil {
+		tools.DeleteFile("./" + name + ".png")
+		tools.DeleteFile("./" + name + ".txt")
+		return
+	}
 
 	// Read result and parse it
 	text, err := ioutil.ReadFile(name + ".txt")
 	tools.ErrRead(s, err)
 
+	// Delete files
+	tools.DeleteFile("./" + name + ".png")
+	tools.DeleteFile("./" + name + ".txt")
+
 	// Parse result
 	raw := string(text)
 	str := strings.Split(raw, "\n")
 	if len(str) < 2 {
-		tools.DeleteFile("./" + name + ".png")
-		tools.DeleteFile("./" + name + ".txt")
 		return
 	}
 
@@ -123,15 +129,11 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	}
 
 	if mapperName == "" || title == "" {
-		tools.DeleteFile("./" + name + ".png")
-		tools.DeleteFile("./" + name + ".txt")
 		return
 	}
 
 	message, err := s.ChannelMessageSend(m.ChannelID, "Processing image...")
 	if err != nil {
-		tools.DeleteFile("./" + name + ".png")
-		tools.DeleteFile("./" + name + ".txt")
 		return
 	}
 	var beatmap osuapi.Beatmap
@@ -144,8 +146,6 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		} else {
 			s.ChannelMessageDelete(message.ChannelID, message.ID)
 		}
-		tools.DeleteFile("./" + name + ".png")
-		tools.DeleteFile("./" + name + ".txt")
 		return
 	}
 
@@ -187,8 +187,6 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 			} else {
 				s.ChannelMessageDelete(message.ChannelID, message.ID)
 			}
-			tools.DeleteFile("./" + name + ".png")
-			tools.DeleteFile("./" + name + ".txt")
 			return
 		}
 	}
@@ -202,8 +200,6 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	})
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")
-		tools.DeleteFile("./" + name + ".png")
-		tools.DeleteFile("./" + name + ".txt")
 		return
 	}
 
@@ -279,9 +275,5 @@ func OsuImageParse(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		ID:      message.ID,
 		Channel: message.ChannelID,
 	})
-
-	// Close files
-	tools.DeleteFile("./" + name + ".png")
-	tools.DeleteFile("./" + name + ".txt")
 	return
 }
