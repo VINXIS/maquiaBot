@@ -118,7 +118,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		trigger.Cause = `(?i)` + trigger.Cause
 		reg, err := regexp.Compile(trigger.Cause)
 		send := false
-		if (err != nil && strings.Contains(strings.ToLower(m.Content), trigger.Cause)) || reg.MatchString(strings.ToLower(m.Content)) {
+		if (err != nil && strings.Contains(strings.ToLower(m.Content), trigger.Cause)) || (err == nil && reg.MatchString(strings.ToLower(m.Content))) {
 			send = true
 		}
 
