@@ -265,7 +265,7 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string) {
 	var pp string
 	totalObjs := beatmap.Circles + beatmap.Sliders + beatmap.Spinners
 	if score.PP == 0 { // If map was not finished
-		if objCount == playObjCount && mapCompletion == "" {
+		if objCount == playObjCount && mapCompletion == "" && score.Rank == "F" {
 			mapCompletion = "**FAILED RIGHT AT THE END LMFAO** \n"
 		}
 		ppValues := make(chan string, 2)
