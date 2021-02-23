@@ -26,7 +26,7 @@ func Toggle(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:   "[-os]",
-			Value:  "Toggle whether map links, profile links, and timestamps should be read by the bot.",
+			Value:  "Toggle whether map links, and profile links should be read by the bot.",
 			Inline: true,
 		},
 		{
