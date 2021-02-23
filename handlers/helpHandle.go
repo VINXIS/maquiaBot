@@ -25,123 +25,12 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			"Help information format: `(cmd|names) <args> [optional args]`",
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
-				Name: "Admin commands:",
-				Value: "`counter`, " +
-					"`downloadchannel`, " +
-					"`downloadserver`, " +
-					"`maquiaprefix`, " +
-					"`purge`, " +
-					"`removechannel`, " +
-					"`removeserver`, " +
-					"`roleautomation`, " +
-					"`toggle`, " +
-					"`track`, " +
-					"`trigger`, " +
-					"`tracktoggle`",
-			},
-			&discordgo.MessageEmbedField{
-				Name: "General commands:",
-				Value: "`adjectives`, " +
-					"`avatar`, " +
-					"`avatarquote`, " +
-					"`caps`, " +
-					"`comparepenis`, " +
-					"`comparevagina`, " +
-					"`channelinfo`, " +
-					"`choose`, " +
-					"`cheers`, " +
-					"`colour`, " +
-					"`countrank`, " +
-					"`counters`, " +
-					"`crab`, " +
-					"`decrypt`, " +
-					"`download`, " +
-					"`emote`, " +
-					"`encrypt`, " +
-					"`face`, " +
-					"`history`, " +
-					"`idea`, " +
-					"`info`, " +
-					"`kanye`, " +
-					"`late`, " +
-					"`levenshtein`, " +
-					"`list`, " +
-					"`lower`, " +
-					"`meme`, " +
-					"`merge`, " +
-					"`nouns`, " +
-					"`ntw`, " +
-					"`ocr`, " +
-					"`over`, " +
-					"`percentage`, " +
-					"`parse`, " +
-					"`penis`, " +
-					"`ping`, " +
-					"`quote`, " +
-					"`quoteadd`, " +
-					"`quotedelete`, " +
-					"`quotes`, " +
-					"`randomcaps`, " +
-					"`rankpenis`, " +
-					"`rankvagina`, " +
-					"`reminder`, " +
-					"`reminders`, " +
-					"`remindremove`, " +
-					"`roleinfo`, " +
-					"`roll`, " +
-					"`serverinfo`, " +
-					"`skills`, " +
-					"`source`, " +
-					"`stats`, " +
-					"`swap`, " +
-					"`title`, " +
-					"`triggers`, " +
-					"`tts`, " +
-					"`twitchdl`, " +
-					"`twitterdl`, " +
-					"`unlink`, " +
-					"`vagina`, " +
-					"`vibecheck`, " +
-					"`weather`",
-			},
-			&discordgo.MessageEmbedField{
-				Name: "math commands:",
-				Value: "`average`, " +
-					"`distance`, " +
-					"`degreesradians`, " +
-					"`radiansdegrees`, " +
-					"`standarddeviation`, " +
-					"`vectoradd`, " +
-					"`vectorcross`, " +
-					"`vectordivide`, " +
-					"`vectordot`, " +
-					"`vectormultiply`, " +
-					"`vectorsubtract`",
-			},
-			&discordgo.MessageEmbedField{
-				Name: "osu! commands:",
-				Value: "`bottomfarm`, " +
-					"`bpm`, " +
-					"`compare`, " +
-					"`farm`, " +
-					"`leaderboard`, " +
-					"`link`, " +
-					"`map`, " +
-					"`osu`, " +
-					"`osudetail`, " +
-					"`osutop`, " +
-					"`ppadd`, " +
-					"`recent`, " +
-					"`recentbest`, " +
-					"`scorepost`, " +
-					"`top`, " +
-					"`topfarm`, " +
-					"`trackinfo`",
-			},
-			&discordgo.MessageEmbedField{
-				Name: "Pokemon commands:",
-				Value: "`berry`, " +
-					"`pokemon`",
+				Name: "Categories:",
+				Value: "`admin`\n" +
+					"`general`\n" +
+					"`math`\n" +
+					"`osucmd`\n" +
+					"`pokemoncmd`",
 			},
 		},
 		Color: osutools.ModeColour(osuapi.ModeOsu),
@@ -155,6 +44,142 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			arg = args[1]
 		}
 		switch arg {
+		// Categories
+		case "admin":
+			embed.Fields = []*discordgo.MessageEmbedField{
+				&discordgo.MessageEmbedField{
+					Name: "Admin commands:",
+					Value: "`counter`, " +
+						"`downloadchannel`, " +
+						"`downloadserver`, " +
+						"`maquiaprefix`, " +
+						"`purge`, " +
+						"`removechannel`, " +
+						"`removeserver`, " +
+						"`roleautomation`, " +
+						"`toggle`, " +
+						"`track`, " +
+						"`trigger`, " +
+						"`tracktoggle`",
+				},
+			}
+		case "general":
+			embed.Fields = []*discordgo.MessageEmbedField{
+				&discordgo.MessageEmbedField{
+					Name: "General commands:",
+					Value: "`adjectives`, " +
+						"`avatar`, " +
+						"`avatarquote`, " +
+						"`caps`, " +
+						"`comparepenis`, " +
+						"`comparevagina`, " +
+						"`channelinfo`, " +
+						"`choose`, " +
+						"`cheers`, " +
+						"`colour`, " +
+						"`countrank`, " +
+						"`counters`, " +
+						"`crab`, " +
+						"`decrypt`, " +
+						"`download`, " +
+						"`emote`, " +
+						"`encrypt`, " +
+						"`face`, " +
+						"`history`, " +
+						"`idea`, " +
+						"`info`, " +
+						"`kanye`, " +
+						"`late`, " +
+						"`levenshtein`, " +
+						"`list`, " +
+						"`lower`, " +
+						"`meme`, " +
+						"`merge`, " +
+						"`nouns`, " +
+						"`ntw`, " +
+						"`ocr`, " +
+						"`over`, " +
+						"`percentage`, " +
+						"`parse`, " +
+						"`penis`, " +
+						"`ping`, " +
+						"`quote`, " +
+						"`quoteadd`, " +
+						"`quotedelete`, " +
+						"`quotes`, " +
+						"`randomcaps`, " +
+						"`rankpenis`, " +
+						"`rankvagina`, " +
+						"`reminder`, " +
+						"`reminders`, " +
+						"`remindremove`, " +
+						"`roleinfo`, " +
+						"`roll`, " +
+						"`serverinfo`, " +
+						"`skills`, " +
+						"`source`, " +
+						"`stats`, " +
+						"`swap`, " +
+						"`title`, " +
+						"`triggers`, " +
+						"`tts`, " +
+						"`twitchdl`, " +
+						"`twitterdl`, " +
+						"`unlink`, " +
+						"`vagina`, " +
+						"`vibecheck`, " +
+						"`weather`",
+				},
+			}
+		case "math":
+			embed.Fields = []*discordgo.MessageEmbedField{
+				&discordgo.MessageEmbedField{
+					Name: "Math commands:",
+					Value: "`average`, " +
+						"`distance`, " +
+						"`degreesradians`, " +
+						"`radiansdegrees`, " +
+						"`standarddeviation`, " +
+						"`vectoradd`, " +
+						"`vectorcross`, " +
+						"`vectordivide`, " +
+						"`vectordot`, " +
+						"`vectormultiply`, " +
+						"`vectorsubtract`",
+				},
+			}
+		case "osucmd":
+			embed.Fields = []*discordgo.MessageEmbedField{
+				&discordgo.MessageEmbedField{
+					Name: "osu! commands:",
+					Value: "`bottomfarm`, " +
+						"`bpm`, " +
+						"`compare`, " +
+						"`farm`, " +
+						"`leaderboard`, " +
+						"`link`, " +
+						"`map`, " +
+						"`profile`, " +
+						"`osudetail`, " +
+						"`osutop`, " +
+						"`ppadd`, " +
+						"`recent`, " +
+						"`recentbest`, " +
+						"`scorepost`, " +
+						"`top`, " +
+						"`topfarm`, " +
+						"`trackinfo`",
+				},
+			}
+		case "pokemoncmd":
+			embed.Fields = []*discordgo.MessageEmbedField{
+				&discordgo.MessageEmbedField{
+					Name: "Pokemon commands:",
+					Value: "`berry`, " +
+						"`pokemon`",
+				},
+			}
+
 		// Admin commands
 		case "counter":
 			embed = helpcommands.Counter(embed)
