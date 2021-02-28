@@ -15,7 +15,7 @@ import (
 )
 
 // BeatmapMessage is a handler executed when a message contains a beatmap link
-func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp.Regexp) {
+func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, extraContent string, regex *regexp.Regexp) {
 	modRegex, _ := regexp.Compile(`(?i)-m\s*(\S+)`)
 	accRegex, _ := regexp.Compile(`(?i)-acc\s*(\S+)`)
 	comboRegex, _ := regexp.Compile(`(?i)-c\s*(\S+)`)
@@ -81,24 +81,24 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 	if diffMods&2 != 0 && diffMods&16 != 0 { // Remove EZHR
 		diffMods -= 18
 	}
-	switch submatches[2] {
+	switch submatches[3] {
 	case "s":
-		beatmap = osutools.BeatmapParse(submatches[3], "set", &diffMods)
+		beatmap = osutools.BeatmapParse(submatches[4], "set", &diffMods)
 	case "b":
-		beatmap = osutools.BeatmapParse(submatches[3], "map", &diffMods)
+		beatmap = osutools.BeatmapParse(submatches[4], "map", &diffMods)
 	case "beatmaps":
-		beatmap = osutools.BeatmapParse(submatches[3], "map", &diffMods)
+		beatmap = osutools.BeatmapParse(submatches[4], "map", &diffMods)
 	case "beatmapsets":
-		if len(submatches[6]) > 0 {
-			beatmap = osutools.BeatmapParse(submatches[6], "map", &diffMods)
+		if len(submatches[7]) > 0 {
+			beatmap = osutools.BeatmapParse(submatches[7], "map", &diffMods)
 		} else {
-			beatmap = osutools.BeatmapParse(submatches[3], "set", &diffMods)
+			beatmap = osutools.BeatmapParse(submatches[4], "set", &diffMods)
 		}
 	}
 
 	// Check if a beatmap was even obtained
 	if beatmap.BeatmapID == 0 {
-		s.ChannelMessageDelete(message.ChannelID, message.ID)
+		go s.ChannelMessageDelete(message.ChannelID, message.ID)
 		return
 	}
 
@@ -110,8 +110,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 		BeatmapSetID: beatmap.BeatmapSetID,
 	})
 	if err != nil {
-		s.ChannelMessageEdit(message.ChannelID, message.ID, "")
-		s.ChannelMessageEdit(message.ChannelID, message.ID, "The osu! API just owned me. Please try again!")
+		go s.ChannelMessageEdit(message.ChannelID, message.ID, "The osu! API just owned me. Please try again!")
 		return
 	}
 
@@ -274,12 +273,10 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, regex *reg
 			URL: "https://cdn.discordapp.com/emojis/510169818893385729.gif",
 		}
 	}
-	content := ""
-	s.ChannelMessageEditComplex(&discordgo.MessageEdit{
-		Content: &content,
+	go s.ChannelMessageDelete(message.ChannelID, message.ID)
+	go s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+		Content: extraContent,
 		Embed:   embed,
-		ID:      message.ID,
-		Channel: message.ChannelID,
 	})
 	return
 }

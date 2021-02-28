@@ -39,7 +39,7 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string) 
 		case "link", "set":
 			go osucommands.Link(s, m, args)
 		case "m", "map":
-			go osucommands.BeatmapMessage(s, m, beatmapRegex)
+			go osucommands.BeatmapMessage(s, m, "", beatmapRegex)
 		case "ppadd", "addpp":
 			go osucommands.PPAdd(s, m)
 		case "r", "rs", "recent":
@@ -48,6 +48,8 @@ func OsuHandle(s *discordgo.Session, m *discordgo.MessageCreate, args []string) 
 			go osucommands.Recent(s, m, "best")
 		case "s", "sc", "scorepost":
 			go osucommands.ScorePost(s, m, "scorePost", "")
+		case "similar":
+			go osucommands.Similar(s, m)
 		case "t", "top":
 			go osucommands.Top(s, m)
 		case "tfarm", "topfarm":

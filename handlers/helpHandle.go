@@ -166,6 +166,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 						"`recent`, " +
 						"`recentbest`, " +
 						"`scorepost`, " +
+						"`similar`, " +
 						"`top`, " +
 						"`topfarm`, " +
 						"`trackinfo`",
@@ -385,6 +386,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.RecentBest(embed)
 		case "s", "sc", "scorepost":
 			embed = helpcommands.ScorePost(embed)
+		case "similar":
+			embed = helpcommands.Similar(embed)
 		case "t", "top":
 			embed = helpcommands.Top(embed)
 		case "tfarm", "topfarm":

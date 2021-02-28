@@ -61,7 +61,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Generate regexes for message parsing
 	profileRegex, _ := regexp.Compile(`(?i)(osu|old)\.ppy\.sh\/(u|users)\/(\S+)`)
-	beatmapRegex, _ := regexp.Compile(`(?i)(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
+	beatmapRegex, _ := regexp.Compile(`(?i)(https:\/\/)?(osu|old)\.ppy\.sh\/(s|b|beatmaps|beatmapsets)\/(\d+)(#(osu|taiko|fruits|mania)\/(\d+))?`)
 	linkRegex, _ := regexp.Compile(`(?i)https?:\/\/\S*`)
 	timestampRegex, _ := regexp.Compile(`(?i)(\d+):(\d{2}):(\d{3})\s*(\(((\d\,?)+)\))?`)
 
@@ -461,7 +461,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		case "link", "set":
 			go osucommands.Link(s, m, args)
 		case "m", "map":
-			go osucommands.BeatmapMessage(s, m, beatmapRegex)
+			go osucommands.BeatmapMessage(s, m, "", beatmapRegex)
 		case "osutop", "osudetail":
 			go osucommands.ProfileMessage(s, m, profileRegex)
 		case "ppadd", "addpp":
@@ -474,6 +474,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go osucommands.Recent(s, m, "best")
 		case "s", "sc", "scorepost":
 			go osucommands.ScorePost(s, m, "scorePost", "")
+		case "similar":
+			go osucommands.Similar(s, m)
 		case "t", "top":
 			go osucommands.Top(s, m)
 		case "tfarm", "topfarm":
@@ -486,7 +488,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go pokemoncommands.Berry(s, m)
 		}
 	} else if beatmapRegex.MatchString(m.Content) && (serverData.OsuToggle || channelData.OsuToggle) { // If a beatmap was linked
-		go osucommands.BeatmapMessage(s, m, beatmapRegex)
+		go osucommands.BeatmapMessage(s, m, "", beatmapRegex)
 	} else if profileRegex.MatchString(m.Content) && (serverData.OsuToggle || channelData.OsuToggle) { // If a profile was linked
 		go osucommands.ProfileMessage(s, m, profileRegex)
 	}
