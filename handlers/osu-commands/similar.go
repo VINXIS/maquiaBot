@@ -122,7 +122,7 @@ func Similar(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if !noList {
 		message := "Results from https://omm.xarib.ch/api/knn/search?id=" + strconv.Itoa(beatmap.BeatmapID) + ":\n"
 		for _, result := range searchResult {
-			message += "**" + result.Artist + " - " + result.Title + "** hosted by **" + result.Mapper + "**: <" + result.Link + "> (KDistance: " + strconv.FormatFloat(result.KDistance, 'f', 2, 64) + ")\n"
+			message += "**" + result.Artist + " - " + result.Title + "** hosted by **" + result.Mapper + " [" + result.DifficultyName + "]**: <" + result.Link + "> (KDistance: " + strconv.FormatFloat(result.KDistance, 'f', 2, 64) + ")\n"
 		}
 		go s.ChannelMessageSend(m.ChannelID, message)
 	} else {
