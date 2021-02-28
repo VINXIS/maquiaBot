@@ -115,7 +115,7 @@ func Similar(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var searchResult []SimilarObject
 	err = json.Unmarshal(byteArray, &searchResult)
 	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "Error in formatting search results into readable JSON from https://omm.xarib.ch/api/knn/search?id="+strconv.Itoa(beatmap.BeatmapID))
+		s.ChannelMessageSend(m.ChannelID, "Error in formatting search results into readable JSON from https://omm.xarib.ch/api/knn/search?id="+strconv.Itoa(beatmap.BeatmapID)+"\nPlease note that this feature only works for ranked/approved/loved beatmaps that are not **recently** ranked/approved/loved as well.")
 		return
 	}
 
