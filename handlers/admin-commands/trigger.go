@@ -16,7 +16,7 @@ import (
 // Trigger adds / removes triggers
 func Trigger(s *discordgo.Session, m *discordgo.MessageCreate) {
 	triggerRegex, _ := regexp.Compile(`(?i)trigger\s+(.+)`)
-	deleteRegex, _ := regexp.Compile(`(?i)-d`)
+	deleteRegex, _ := regexp.Compile(`(?i)\s+-d`)
 
 	// Check if params were given
 	if !triggerRegex.MatchString(m.Content) {
