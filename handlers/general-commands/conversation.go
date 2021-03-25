@@ -53,7 +53,7 @@ func Conversation(s *discordgo.Session, m *discordgo.MessageCreate) {
 		roll, _ := rand.Int(rand.Reader, big.NewInt(int64(len(serverData.Quotes))))
 		j := roll.Int64()
 		if len(serverData.Quotes[j].Attachments) <= 0 || excludeLinks {
-			text := serverData.Quotes[j].Content
+			text := serverData.Quotes[j].ContentWithMentionsReplaced()
 			if linkRegex.MatchString(text) {
 				text = strings.TrimSpace(linkRegex.ReplaceAllString(text, ""))
 			}
@@ -61,9 +61,9 @@ func Conversation(s *discordgo.Session, m *discordgo.MessageCreate) {
 				i--
 				continue
 			}
-			convo = append(convo, "**"+serverData.Quotes[j].Author.Username+"**: "+serverData.Quotes[j].Content)
+			convo = append(convo, "**"+serverData.Quotes[j].Author.Username+"**: "+serverData.Quotes[j].ContentWithMentionsReplaced())
 		} else if len(serverData.Quotes[j].Attachments) > 0 {
-			convo = append(convo, "**"+serverData.Quotes[j].Author.Username+"**: "+serverData.Quotes[j].Content+" "+serverData.Quotes[j].Attachments[0].URL)
+			convo = append(convo, "**"+serverData.Quotes[j].Author.Username+"**: "+serverData.Quotes[j].ContentWithMentionsReplaced()+" "+serverData.Quotes[j].Attachments[0].URL)
 		} else {
 			i--
 			continue
