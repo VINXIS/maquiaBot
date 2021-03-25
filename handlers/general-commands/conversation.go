@@ -33,7 +33,7 @@ func Conversation(s *discordgo.Session, m *discordgo.MessageCreate) {
 	excludeLinks := true
 	if convoRegex.MatchString(m.Content) {
 		num, err = strconv.Atoi(convoRegex.FindStringSubmatch(m.Content)[2])
-		if err != nil {
+		if err != nil || num < 2 {
 			num = 2
 		}
 	}
