@@ -77,6 +77,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 						"`choose`, " +
 						"`cheers`, " +
 						"`colour`, " +
+						"`conversation`, " +
 						"`countrank`, " +
 						"`counters`, " +
 						"`crab`, " +
@@ -216,6 +217,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.AvatarQuote(embed)
 		case "cap", "caps", "upper":
 			embed = helpcommands.AllCaps(embed)
+		case "conv", "convo", "conversation":
+			embed = helpcommands.Conversation(embed)
 		case "cp", "comparep", "comparepenis":
 			embed = helpcommands.PenisCompare(embed)
 		case "cv", "comparev", "comparevagina":

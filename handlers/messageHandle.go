@@ -26,8 +26,8 @@ import (
 
 // MessageHandler handles any incoming messages
 func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	// Ignore all messages created by the bot itself or by kambojk
-	if m.Author.ID == s.State.User.ID {
+	// Ignore all messages created by the bot itself or by other bots
+	if m.Author.ID == s.State.User.ID || m.Author.Bot {
 		return
 	}
 
@@ -282,10 +282,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if len(strings.Split(m.Content, " ")) < 2 {
 				m.Content += " " + m.Author.Username
 			}
-			gencommands.Avatar(s, m)
-			gencommands.Quote(s, m)
+			go gencommands.Avatar(s, m)
+			go gencommands.Quote(s, m)
 		case "cap", "caps", "upper":
 			go gencommands.TextManipulation(s, m, "allCaps")
+		case "conv", "convo", "conversation":
+			go gencommands.Conversation(s, m)
 		case "cp", "comparep", "comparepenis":
 			if serverData.Daily || channelData.Daily {
 				go gencommands.PenisCompare(s, m)

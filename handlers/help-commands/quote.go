@@ -21,7 +21,7 @@ func Quote(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:  "Related Commands:",
-			Value: "`quoteadd`, `quoteremove`, `quotes`, `avatarquote",
+			Value: "`quoteadd`, `quoteremove`, `quotes`, `avatarquote`",
 		},
 	}
 	return embed
