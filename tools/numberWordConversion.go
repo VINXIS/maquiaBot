@@ -15,35 +15,31 @@ var tens = []string{
 }
 
 var scales = []string{
-	"", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion",
+	"", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion", "sexdecillion", "septendecillion", "octodecillion", "novemdecillion", "vigintillion",
 }
 
 // Ntow changes numbers to words
-func Ntow(n int64) (w string) {
+func Ntow(n float64) (w string) {
 	// Zero
 	if n == 0 {
-		return base[n]
+		return base[0]
 	}
 
-	// Negative
-	if n < 0 {
-		w = "negative "
-	}
-	pos := math.Abs(float64(n))
+	pos := math.Abs(n)
 
 	// groups of 3
-	var groups [7]int64
-	for i := 0; i < 7; i++ {
-		groups[i] = int64(math.Mod(pos, 1000))
+	var groups [22]float64
+	for i := 0; i < 22; i++ {
+		groups[i] = math.Mod(pos, 1000)
 		pos /= 1000
 	}
 
 	// text version of each group
-	var groupsText [7]string
-	for i := 0; i < 7; i++ {
+	var groupsText [22]string
+	for i := 0; i < 22; i++ {
 		group := groups[i]
 
-		hundred := group / 100
+		hundred := int64(group / 100)
 		tenUnits := int64(math.Mod(float64(group), 100))
 
 		if hundred != 0 {
@@ -54,7 +50,7 @@ func Ntow(n int64) (w string) {
 			}
 		}
 
-		ten := tenUnits / 10
+		ten := int64(tenUnits / 10)
 		units := int64(math.Mod(float64(tenUnits), 10))
 
 		if ten >= 2 {
@@ -70,8 +66,8 @@ func Ntow(n int64) (w string) {
 
 	// Combining the groups
 	w += groupsText[0]
-	for i := 1; i < 7; i++ {
-		if groups[i] != 0 {
+	for i := 1; i < 22; i++ {
+		if int64(groups[i]) != 0 {
 			p := groupsText[i] + " " + scales[i]
 
 			if len(w) != 0 {
@@ -80,6 +76,11 @@ func Ntow(n int64) (w string) {
 
 			w = p + w
 		}
+	}
+
+	// Negative
+	if n < 0 {
+		w = "negative " + w
 	}
 
 	return

@@ -115,7 +115,7 @@ func TTS(s *discordgo.Session, m *discordgo.MessageCreate) {
 	words := strings.Split(text, " ")
 	for j, word := range words {
 		if i, err := strconv.Atoi(word); err == nil {
-			words[j] = tools.Ntow(int64(i))
+			words[j] = tools.Ntow(float64(i))
 		}
 	}
 	text = strings.Join(words, " ")

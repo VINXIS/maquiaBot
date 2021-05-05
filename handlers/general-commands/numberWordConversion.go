@@ -13,8 +13,8 @@ func Ntow(s *discordgo.Session, m *discordgo.MessageCreate) {
 	parts := strings.Split(m.Content, " ")[1:]
 	converted := ""
 	for _, part := range parts {
-		if num, err := strconv.Atoi(part); err == nil {
-			converted = tools.Ntow(int64(num))
+		if num, err := strconv.ParseFloat(part, 64); err == nil {
+			converted = tools.Ntow(num)
 			break
 		}
 	}
