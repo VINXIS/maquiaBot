@@ -19,6 +19,11 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	m.Content = m.ContentWithMentionsReplaced()
+	for _, mention := range m.Mentions {
+		m.Content = strings.Replace(m.Content, "@"+mention.Username, "", -1)
+	}
+
 	url := memeRegex.FindStringSubmatch(m.Content)[1]
 	topText := strings.TrimSpace(memeRegex.FindStringSubmatch(m.Content)[3])
 	split := strings.TrimSpace(memeRegex.FindStringSubmatch(m.Content)[4]) != ""
@@ -55,8 +60,6 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 		url = m.Embeds[0].Image.URL
 	} else if len(m.Mentions) > 0 {
 		url = m.Mentions[0].AvatarURL("")
-		topText = strings.Replace(topText, m.Mentions[0].Mention(), "", -1)
-		bottomText = strings.Replace(bottomText, m.Mentions[0].Mention(), "", -1)
 	}
 
 	// Look at prev messages if no url is given
