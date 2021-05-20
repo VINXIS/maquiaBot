@@ -80,8 +80,14 @@ func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
 			date := dateRegex.FindStringSubmatch(m.Content)[1]
 			t, err := tools.TimeParse(date)
 			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "Invalid datetime format!")
+				s.ChannelMessageSend(m.ChannelID, "Invalid datetime format! Error: "+err.Error())
 				return
+			}
+
+			if t.Year() == 0 {
+				t = t.AddDate(time.Now().Year(), 0, 0)
+			} else if t.Year() == 1 {
+				t = t.AddDate(time.Now().Year()+1, 0, 0)
 			}
 
 			reminderTime = t.Sub(time.Now())
@@ -92,7 +98,7 @@ func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
 		reminderTime = time.Second * time.Duration(300)
 	}
 	// Check if time duration is dumb as hell
-	if reminderTime.Hours() > 8760 {
+	if reminderTime.Hours() > 17520 {
 		s.ChannelMessageSend(m.ChannelID, "Ur really funny mate")
 		return
 	}

@@ -1,11 +1,14 @@
 package tools
 
-import "time"
-
-import "strings"
+import (
+	"strings"
+	"time"
+)
 
 // TimeParse tries to parses a date / time
 func TimeParse(datetime string) (timestamp time.Time, err error) {
+	datetime = strings.Replace(datetime, "am", "AM", -1)
+	datetime = strings.Replace(datetime, "pm", "PM", -1)
 	timeFormats := []string{
 		time.ANSIC,
 		time.UnixDate,
@@ -25,36 +28,55 @@ func TimeParse(datetime string) (timestamp time.Time, err error) {
 	}
 
 	customDate := []string{
-		"january 2 2006",
-		"jan 2 2006",
+		"January 2 2006",
+		"Jan 2 2006",
 		"1 2 2006",
 		"01 2 2006",
 		"1 02 2006",
 		"01 02 2006",
 
-		"2 january 2006",
-		"2 jan 2006",
+		"2 January 2006",
+		"2 Jan 2006",
 		"2 1 2006",
 		"2 01 2006",
 		"02 1 2006",
 		"02 01 2006",
 
-		"2006 january 2",
-		"2006 jan 2",
+		"2006 January 2",
+		"2006 Jan 2",
 		"2006 1 2",
 		"2006 01 2",
 		"2006 1 02",
 		"2006 01 02",
+
+		"January 2",
+		"Jan 2",
+		"1 2",
+		"01 2",
+		"1 02",
+		"01 02",
+
+		"2 January",
+		"2 Jan",
+		"2 1",
+		"2 01",
+		"02 1",
+		"02 01",
 	}
 
 	customTime := []string{
 		"15:04:05",
+		"15:04",
+
 		"3:04 PM",
 		"03:04 PM",
-		"3:04PM",
-		"03:04PM",
 		"3 PM",
 		"03 PM",
+
+		"3:04PM",
+		"03:04PM",
+		"3PM",
+		"03PM",
 	}
 
 	customZone := []string{
@@ -82,6 +104,7 @@ func TimeParse(datetime string) (timestamp time.Time, err error) {
 		for _, timer := range customTime {
 			timestamp, err = time.Parse(timer, datetime)
 			if err == nil {
+				timestamp = timestamp.AddDate(time.Now().Year(), int(time.Now().Month())-1, time.Now().Day())
 				return timestamp, nil
 			}
 
@@ -103,6 +126,7 @@ func TimeParse(datetime string) (timestamp time.Time, err error) {
 
 				timestamp, err = time.Parse(timer+" "+zone, datetime)
 				if err == nil {
+					timestamp = timestamp.AddDate(time.Now().Year(), int(time.Now().Month())-1, time.Now().Day())
 					return timestamp, nil
 				}
 
@@ -113,6 +137,7 @@ func TimeParse(datetime string) (timestamp time.Time, err error) {
 
 				timestamp, err = time.Parse(zone+" "+timer, datetime)
 				if err == nil {
+					timestamp = timestamp.AddDate(time.Now().Year(), int(time.Now().Month())-1, time.Now().Day())
 					return timestamp, nil
 				}
 
