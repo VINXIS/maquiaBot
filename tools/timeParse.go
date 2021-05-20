@@ -81,10 +81,18 @@ func TimeParse(datetime string) (timestamp time.Time, err error) {
 
 	customZone := []string{
 		"MST",
-		"-0700",
-		"-07",
-		"-07:00",
-		"-7:00",
+
+		"GMT-0700",
+		"GMT-7",
+		"GMT-07",
+		"GMT-07:00",
+		"GMT-7:00",
+
+		"UTC-0700",
+		"UTC-7",
+		"UTC-07",
+		"UTC-07:00",
+		"UTC-7:00",
 	}
 
 	for _, timeFormat := range timeFormats {
