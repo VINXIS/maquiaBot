@@ -7,7 +7,7 @@ import (
 // Purge explains the purge functionality
 func Purge(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: purge"
-	embed.Description = "`purge [users] [num]` lets admins delete previous messages."
+	embed.Description = "`purge [users] ([num]| <since <time>>)` lets admins delete previous messages."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[users]",
@@ -17,6 +17,11 @@ func Purge(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		{
 			Name:   "[num]",
 			Value:  "The number of previous messages to delete. (Default: 3)",
+			Inline: true,
+		},
+		{
+			Name:   "<since <time>>",
+			Value:  "The time to delete messages to.",
 			Inline: true,
 		},
 	}
