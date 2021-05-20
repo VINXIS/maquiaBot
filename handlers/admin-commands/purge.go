@@ -28,6 +28,7 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Get username(s) and number of messages
 	userRegex, _ := regexp.Compile(`(?i)purge\s+(.+)`)
 	dateRegex, _ := regexp.Compile(`(?i)since\s+(.+)`)
+	timeRegex, _ := regexp.Compile(`(?i)\s(\d+) (month|week|day|h(ou)?r|min(ute)?|sec(ond)?)s?`)
 
 	userText := ""
 	num := 4
@@ -37,22 +38,73 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// See if we use date instead of counting
 	if dateRegex.MatchString(m.Content) {
-		// Parse date
-		date := dateRegex.FindStringSubmatch(m.Content)[1]
-		dateTime, err = tools.TimeParse(date)
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "Invalid datetime format! Error: "+err.Error())
-			return
+		if timeRegex.MatchString(m.Content) {
+			times := timeRegex.FindAllStringSubmatch(m.Content, -1)
+			reminderTime := time.Duration(0)
+			months := 0
+			weeks := 0
+			days := 0
+			hours := 0
+			minutes := 0
+			seconds := 0
+			m.Content = strings.TrimSpace(strings.Replace(m.Content, "since", "", -1))
+			m.Content = strings.TrimSpace(strings.TrimSuffix(m.Content, "ago"))
+			for _, timeString := range times {
+				timeVal, err := strconv.Atoi(timeString[1])
+				if err != nil {
+					break
+				}
+				timeUnit := timeString[2]
+				switch timeUnit {
+				case "month":
+					months += timeVal
+				case "week":
+					weeks += timeVal
+				case "day":
+					days += timeVal
+				case "hour", "hr":
+					hours += timeVal
+				case "minute", "min":
+					minutes += timeVal
+				case "second", "sec":
+					seconds += timeVal
+				}
+				m.Content = strings.Replace(m.Content, strings.TrimSpace(timeString[0]), "", 1)
+				m.Content = strings.TrimSpace(m.Content)
+				m.Content = strings.TrimSuffix(m.Content, "and")
+				m.Content = strings.TrimSuffix(m.Content, ",")
+			}
+			m.Content = strings.TrimSpace(m.Content)
+			m.Content = strings.TrimSuffix(m.Content, "in")
+			m.Content = strings.TrimSpace(m.Content)
+			reminderTime += time.Second * time.Duration(months) * 2629744
+			reminderTime += time.Second * time.Duration(weeks) * 604800
+			reminderTime += time.Second * time.Duration(days) * 86400
+			reminderTime += time.Second * time.Duration(hours) * 3600
+			reminderTime += time.Second * time.Duration(minutes) * 60
+			reminderTime += time.Second * time.Duration(seconds)
+			dateTime = time.Now().UTC().Add(-1 * reminderTime)
+			method = "date"
+
+		} else {
+			// Parse date
+			date := dateRegex.FindStringSubmatch(m.Content)[1]
+			dateTime, err = tools.TimeParse(date)
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "Invalid datetime format! Error: "+err.Error())
+				return
+			}
+
+			if dateTime.Year() == 0 {
+				dateTime = dateTime.AddDate(time.Now().Year(), 0, 0)
+			} else if dateTime.Year() == 1 {
+				dateTime = dateTime.AddDate(time.Now().Year()+1, 0, 0)
+			}
+
+			method = "date"
+			m.Content = strings.TrimSpace(strings.Replace(m.Content, dateRegex.FindStringSubmatch(m.Content)[0], "", -1))
 		}
 
-		if dateTime.Year() == 0 {
-			dateTime = dateTime.AddDate(time.Now().Year(), 0, 0)
-		} else if dateTime.Year() == 1 {
-			dateTime = dateTime.AddDate(time.Now().Year()+1, 0, 0)
-		}
-
-		method = "date"
-		m.Content = strings.TrimSpace(strings.Replace(m.Content, dateRegex.FindStringSubmatch(m.Content)[0], "", -1))
 	}
 
 	// Get user (and count)
