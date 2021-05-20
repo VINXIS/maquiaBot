@@ -6,8 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	tools "maquiaBot/tools"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Purge lets admins purge messages including their purge command
@@ -26,10 +27,35 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Get username(s) and number of messages
 	userRegex, _ := regexp.Compile(`(?i)purge\s+(.+)`)
+	dateRegex, _ := regexp.Compile(`(?i)since\s+(.+)`)
 
 	userText := ""
 	num := 4
+	dateTime := time.Time{}
+	method := "count"
 	var usernames []string
+
+	// See if we use date instead of counting
+	if dateRegex.MatchString(m.Content) {
+		// Parse date
+		date := dateRegex.FindStringSubmatch(m.Content)[1]
+		dateTime, err = tools.TimeParse(date)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "Invalid datetime format! Error: "+err.Error())
+			return
+		}
+
+		if dateTime.Year() == 0 {
+			dateTime = dateTime.AddDate(time.Now().Year(), 0, 0)
+		} else if dateTime.Year() == 1 {
+			dateTime = dateTime.AddDate(time.Now().Year()+1, 0, 0)
+		}
+
+		method = "date"
+		m.Content = strings.TrimSpace(strings.Replace(m.Content, dateRegex.FindStringSubmatch(m.Content)[0], "", -1))
+	}
+
+	// Get user (and count)
 	if userRegex.MatchString(m.Content) {
 		userNum := userRegex.FindStringSubmatch(strings.Replace(m.ContentWithMentionsReplaced(), "@", "", -1))[1]
 		args := strings.Split(userNum, " ")
@@ -62,12 +88,21 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 	lastID := ""
 	prevLength := 0
 	recurring := 0
+	done := false
 	for {
-		messages, err = s.ChannelMessages(m.ChannelID, -1, lastID, "", "")
-		if err != nil {
-			break
-		}
 		for _, msg := range messages {
+			if method == "date" {
+				msgTime, err := msg.Timestamp.Parse()
+				if err != nil {
+					s.ChannelMessageSend(m.ChannelID, "Somehow an error occured in parsing a message timestamp. Please try again.")
+					return
+				}
+				if dateTime.After(msgTime) {
+					done = true
+					num = len(messageIDs)
+					break
+				}
+			}
 			if len(usernames) == 0 {
 				messageIDs = append(messageIDs, msg.ID)
 			} else {
@@ -78,12 +113,13 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 					}
 				}
 			}
-			if len(messageIDs) == num {
+			if method == "count" && len(messageIDs) == num {
+				done = true
 				break
 			}
 			lastID = msg.ID
 		}
-		if len(messageIDs) == num {
+		if done {
 			break
 		}
 		if prevLength == len(messageIDs) {
@@ -94,6 +130,10 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		if recurring == 5 {
 			num = len(messageIDs)
+			break
+		}
+		messages, err = s.ChannelMessages(m.ChannelID, -1, lastID, "", "")
+		if err != nil {
 			break
 		}
 	}
