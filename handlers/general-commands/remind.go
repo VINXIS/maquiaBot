@@ -194,7 +194,6 @@ func RunReminder(s *discordgo.Session, reminderTimer structs.ReminderTimer) {
 // Reminders lists the person's reminders
 func Reminders(s *discordgo.Session, m *discordgo.MessageCreate) {
 	userTimers := []structs.Reminder{}
-	all := false
 	for _, reminder := range ReminderTimers {
 		if reminder.Reminder.User == m.Author.ID && reminder.Reminder.Active {
 			userTimers = append(userTimers, reminder.Reminder)
@@ -213,30 +212,16 @@ func Reminders(s *discordgo.Session, m *discordgo.MessageCreate) {
 		},
 		Description: "Please use `rremove <ID>` or `remindremove <ID>` to remove a reminder",
 	}
-	if all {
-		for _, reminder := range userTimers {
-			info := reminder.Info
-			if info == "" {
-				info = "N/A"
-			}
-			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-				Name:   strconv.FormatInt(reminder.ID, 10),
-				Value:  "Reminder: " + info + "\nRemind time: " + reminder.Target.Format(time.RFC822),
-				Inline: true,
-			})
+	for _, reminder := range userTimers {
+		info := reminder.Info
+		if info == "" {
+			info = "N/A"
 		}
-	} else {
-		for _, reminder := range userTimers {
-			info := reminder.Info
-			if info == "" {
-				info = "N/A"
-			}
-			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-				Name:   strconv.FormatInt(reminder.ID, 10),
-				Value:  "Reminder: " + info + "\nRemind time: " + reminder.Target.Format(time.RFC822),
-				Inline: true,
-			})
-		}
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+			Name:   strconv.FormatInt(reminder.ID, 10),
+			Value:  "Reminder: " + info + "\nRemind time: " + reminder.Target.Format(time.RFC822),
+			Inline: true,
+		})
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, embed)
 }
