@@ -42,6 +42,13 @@ func Task(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// Remove date text so suffix removal works properly
+	dateText := ""
+	if dateRegex.MatchString(m.Content) {
+		dateText = dateRegex.FindStringSubmatch(m.Content)[2]
+		text = dateRegex.ReplaceAllString(text, "")
+	}
+
 	times := timeRegex.FindAllStringSubmatch(m.Content, -1)
 	months := 0
 	weeks := 0
@@ -82,7 +89,7 @@ func Task(s *discordgo.Session, m *discordgo.MessageCreate) {
 	taskDuration += time.Second * time.Duration(minutes) * 60
 	taskDuration += time.Second * time.Duration(seconds)
 
-	if dateRegex.MatchString(m.Content) {
+	if dateText != "" {
 		// Parse date
 		date := dateRegex.FindStringSubmatch(m.Content)[2]
 		t, err := tools.TimeParse(date)
@@ -102,7 +109,6 @@ func Task(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		startTime = t
-		text = dateRegex.ReplaceAllString(text, "")
 	} else {
 		startTime = startTime.Add(taskDuration)
 	}
