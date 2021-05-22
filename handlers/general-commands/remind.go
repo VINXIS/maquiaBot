@@ -106,7 +106,7 @@ func Remind(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Obtain date
 	timeResult := time.Now().UTC().Add(reminderTime)
 	timeResultString = timeResult.Format(time.UnixDate)
-	text = strings.ReplaceAll(text, "`", "")
+	text = strings.TrimSpace(strings.ReplaceAll(text, "`", ""))
 
 	// People can add huge time durations where the time may go backward
 	if timeResult.Before(time.Now()) {

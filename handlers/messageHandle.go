@@ -398,6 +398,12 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Stats(s, m)
 		case "swap":
 			go gencommands.TextManipulation(s, m, "swap")
+		case "task":
+			go gencommands.Task(s, m)
+		case "tasks":
+			go gencommands.Tasks(s, m)
+		case "taskremove", "tremove":
+			go gencommands.RemoveTask(s, m)
 		case "title":
 			go gencommands.TextManipulation(s, m, "title")
 		case "transfer":

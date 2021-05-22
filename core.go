@@ -38,6 +38,9 @@ func main() {
 		err = ioutil.WriteFile("./data/reminders.json", []byte{}, 0644)
 		readErr(err)
 		log.Println("Created data/reminders.json.")
+		err = ioutil.WriteFile("./data/tasks.json", []byte{}, 0644)
+		readErr(err)
+		log.Println("Created data/tasks.json.")
 
 		err = os.MkdirAll("./data/channelData", 0755)
 		readErr(err)
@@ -104,6 +107,27 @@ func main() {
 		go gencommands.RunReminder(discord, reminderTimer)
 	}
 	gencommands.ReminderTimers = reminderTimers
+
+	// Resume all tasks
+	tasks := []structs.Task{}
+	_, err = os.Stat("./data/tasks.json")
+	if err == nil {
+		f, err := ioutil.ReadFile("./data/tasks.json")
+		readErr(err)
+		_ = json.Unmarshal(f, &tasks)
+	} else {
+		readErr(err)
+	}
+	taskCache := []structs.TaskCache{}
+	for _, task := range tasks {
+		activeTask := structs.TaskCache{
+			Task:   task,
+			Active: true,
+		}
+		taskCache = append(taskCache, activeTask)
+		go gencommands.RunTask(discord, task)
+	}
+	gencommands.TaskCache = taskCache
 
 	// Get osu! tracking data for channels
 	var channels []string

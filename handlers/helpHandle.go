@@ -121,6 +121,9 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 						"`source`, " +
 						"`stats`, " +
 						"`swap`, " +
+						"`task`, " +
+						"`tasks`, " +
+						"`taskremove`, " +
 						"`title`, " +
 						"`triggers`, " +
 						"`tts`, " +
@@ -317,6 +320,12 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Stats(embed)
 		case "swap":
 			embed = helpcommands.Swap(embed)
+		case "task":
+			embed = helpcommands.Task(embed)
+		case "tasks":
+			embed = helpcommands.Tasks(embed)
+		case "taskremove", "tremove":
+			embed = helpcommands.TaskRemove(embed)
 		case "title":
 			embed = helpcommands.Title(embed)
 		case "triggers":
