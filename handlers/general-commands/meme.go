@@ -59,7 +59,7 @@ func Meme(s *discordgo.Session, m *discordgo.MessageCreate) {
 	} else if len(m.Embeds) > 0 && m.Embeds[0].Image != nil {
 		url = m.Embeds[0].Image.URL
 	} else if len(m.Mentions) > 0 {
-		url = m.Mentions[0].AvatarURL("")
+		url = m.Mentions[0].AvatarURL("2048")
 	}
 
 	// Look at prev messages if no url is given
