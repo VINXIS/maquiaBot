@@ -26,7 +26,7 @@ var TaskCache []structs.TaskCache
 func Task(s *discordgo.Session, m *discordgo.MessageCreate) {
 	taskRegex, _ := regexp.Compile(`(?i)task\s+(.+)`)
 	timeRegex, _ := regexp.Compile(`(?i)\s(\d+) (month|week|day|h(ou)?r|min(ute)?|sec(ond)?)s?`)
-	dateRegex, _ := regexp.Compile(`(?i)starting\s+(at)?\s+(.+)`)
+	dateRegex, _ := regexp.Compile(`(?i)starting\s+(at\s+)?(.+)`)
 	taskDuration := time.Duration(0)
 	startTime := time.Now().UTC()
 
