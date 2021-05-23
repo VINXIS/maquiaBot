@@ -235,12 +235,13 @@ func Tasks(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	for _, task := range userTimers {
 		info := task.Info
+		interval := time.Second * time.Duration(task.Seconds)
 		if info == "" {
 			info = "N/A"
 		}
 		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 			Name:   strconv.FormatInt(task.ID, 10),
-			Value:  "Task: " + info + "\nTask interval (seconds): " + strconv.FormatFloat(task.Seconds, 'f', 0, 64) + "\nLast Run: " + task.LastRun.Format(time.RFC822),
+			Value:  "Task: " + info + "\nTask interval (seconds): " + interval.String() + "\nLast Run: " + task.LastRun.Format(time.RFC822),
 			Inline: true,
 		})
 	}
