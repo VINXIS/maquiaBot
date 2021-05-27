@@ -1,13 +1,15 @@
 package gencommands
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
+	"image"
+	"image/png"
 	"net/http"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -94,25 +96,33 @@ func Decrypt(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	resultText := string(result)
 	if linkRegex.MatchString(resultText) {
-		client := http.Client{
-			Timeout: 10 * time.Second,
-		}
-		response, err := client.Get(linkRegex.FindStringSubmatch(resultText)[0])
+		response, err := http.Get(linkRegex.FindStringSubmatch(resultText)[0])
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
 			response.Body.Close()
 			return
 		}
 		defer response.Body.Close()
-		_, err = s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-			Files: []*discordgo.File{
-				{
-					Name:   "image.png",
-					Reader: response.Body,
+		if img, _, err := image.Decode(response.Body); err == nil {
+			imgBytes := new(bytes.Buffer)
+			err = png.Encode(imgBytes, img)
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
+				return
+			}
+			_, err = s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+				Files: []*discordgo.File{
+					{
+						Name:   "image.png",
+						Reader: imgBytes,
+					},
 				},
-			},
-		})
-		if err != nil {
+			})
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
+				return
+			}
+		} else {
 			s.ChannelMessageSend(m.ChannelID, "```"+resultText+"```")
 		}
 		return
