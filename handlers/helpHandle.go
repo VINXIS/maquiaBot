@@ -232,6 +232,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.ChannelInfo(embed)
 		case "ch", "choose":
 			embed = helpcommands.Choose(embed)
+		case "count", "ccount", "charcount", "char":
+			embed = helpcommands.CharCount(embed)
 		case "cheers":
 			embed = helpcommands.Cheers(embed)
 		case "col", "color", "colour":
@@ -346,6 +348,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 			embed = helpcommands.Vibe(embed)
 		case "w", "weather":
 			embed = helpcommands.Weather(embed)
+		case "wcount", "wordcount", "word":
+			embed = helpcommands.WordCount(embed)
 
 		// Math commands
 		case "ave", "average", "mean":
