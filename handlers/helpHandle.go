@@ -74,6 +74,7 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 						"`comparepenis`, " +
 						"`comparevagina`, " +
 						"`channelinfo`, " +
+						"`charcount`, " +
 						"`choose`, " +
 						"`cheers`, " +
 						"`colour`, " +
@@ -132,7 +133,8 @@ func HelpHandle(s *discordgo.Session, m *discordgo.MessageCreate, prefix string)
 						"`unlink`, " +
 						"`vagina`, " +
 						"`vibecheck`, " +
-						"`weather`",
+						"`weather`, " +
+						"`wordcount`",
 				},
 			}
 		case "math":

@@ -286,6 +286,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Quote(s, m)
 		case "cap", "caps", "upper":
 			go gencommands.TextManipulation(s, m, "allCaps")
+		case "count", "ccount", "charcount":
+			go gencommands.CharCount(s, m)
 		case "conv", "convo", "conversation":
 			go gencommands.Conversation(s, m)
 		case "cp", "comparep", "comparepenis":
@@ -426,6 +428,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			go gencommands.Vibe(s, m, "notRandom")
 		case "w", "weather":
 			go gencommands.Weather(s, m)
+		case "wcount", "wordcount":
+			go gencommands.WordCount(s, m)
 		case "wtn", "wtnum", "wton", "wordtn", "wtonum", "wordtnum", "wordton", "wordtonum", "wordtonumber":
 			go gencommands.Wton(s, m)
 
