@@ -45,8 +45,6 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		username = quoteRegex.FindStringSubmatch(m.Content)[4]
 		if discordUser, err := s.User(username); err == nil {
 			username = discordUser.Username
-		} else if len(m.Mentions) > 0 {
-			username = m.Mentions[0].Username
 		}
 		if len(strings.Split(username, " ")) > 1 {
 			if number, err = strconv.Atoi(strings.Split(username, " ")[1]); err == nil {
@@ -70,8 +68,13 @@ func Quote(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		if user.ID == "" {
-			s.ChannelMessageSend(m.ChannelID, "No user with the name **"+username+"** found!")
-			return
+			if len(m.Mentions) > 0 {
+				username = m.Mentions[0].Username
+				user = m.Mentions[0]
+			} else {
+				s.ChannelMessageSend(m.ChannelID, "No user with the name **"+username+"** found!")
+				return
+			}
 		}
 
 		userQuotes = []discordgo.Message{}
