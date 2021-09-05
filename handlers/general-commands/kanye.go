@@ -68,6 +68,10 @@ func Kanye(s *discordgo.Session, m *discordgo.MessageCreate) {
 		"```\nSuper inspired by my visit to Ikea today , really amazing company... my mind is racing with the possibilities...``` - Kanye West on Twitter",
 		"```\nI need a room full of mirrors so I can be surrounded by winners.``` - Kanye West on Twitter",
 		"```\nI understand they you don't like me but I need you to understand that I don't care.``` - Kanye West on Twitter",
+		"```\nI forgor 💀``` - Kanye West on Twitter",
+		"```\nCome and get me ... this is the exodus``` - Kanye West on Twitter",
+		"```\nJunya Watanabe on my WRI``` - Kanye West on Junya",
+		"```\nMan, it's too early / What the hell you doin' wakin' me up at 5:30? / Why the hell are you worried? / Play somethin' that is very, very vibe-worthy``` - Kanye West on Believe What I Say",
 	}
 	roll, _ := rand.Int(rand.Reader, big.NewInt(int64(len(KanyeLines))))
 	s.ChannelMessageSend(m.ChannelID, KanyeLines[roll.Int64()])
