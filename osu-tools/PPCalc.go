@@ -20,6 +20,8 @@ func PPCalc(beatmap osuapi.Beatmap, score osuapi.Score, store chan<- string) {
 	totalPP := 0.00
 	switch beatmap.Mode {
 	case osuapi.ModeOsu:
+		effectiveMissCount := calculateEffectiveMissCount(beatmap, score)
+
 		multiplier := 1.12
 		if score.Mods&osuapi.ModNoFail != 0 {
 			multiplier *= math.Max(0.9, 1.0-0.02*float64(score.CountMiss))
@@ -27,9 +29,13 @@ func PPCalc(beatmap osuapi.Beatmap, score osuapi.Score, store chan<- string) {
 		if score.Mods&osuapi.ModSpunOut != 0 {
 			multiplier *= 1.0 - math.Pow(float64(beatmap.Spinners)/float64(beatmap.Circles+beatmap.Sliders+beatmap.Spinners), 0.85)
 		}
+		if score.Mods&osuapi.ModRelax != 0 {
+			effectiveMissCount = int(math.Min(float64(effectiveMissCount+score.Count100+score.Count50), float64(beatmap.Circles+beatmap.Sliders+beatmap.Spinners)))
+			multiplier *= 0.6
+		}
 
-		aimPP := aimPP(beatmap, score)
-		speedPP := speedPP(beatmap, score)
+		aimPP := aimPP(beatmap, score, effectiveMissCount)
+		speedPP := speedPP(beatmap, score, effectiveMissCount)
 		accPP := accSTDPP(beatmap, score)
 		totalPP = multiplier * math.Pow(math.Pow(aimPP, 1.1)+math.Pow(speedPP, 1.1)+math.Pow(accPP, 1.1), 1.0/1.1)
 	case osuapi.ModeTaiko:
@@ -71,7 +77,21 @@ func convertSTDSR(SR float64) float64 {
 	return math.Pow(5.0*math.Max(1.0, SR/0.0675)-4.0, 3.0) / 100000.0
 }
 
-func aimPP(beatmap osuapi.Beatmap, score osuapi.Score) float64 {
+func calculateEffectiveMissCount(beatmap osuapi.Beatmap, score osuapi.Score) int {
+	comboBasedMissCount := 0.0
+
+	if beatmap.Sliders > 0 {
+		fullComboThreshold := float64(beatmap.MaxCombo) - 0.1*float64(beatmap.Sliders)
+		if float64(score.MaxCombo) < fullComboThreshold {
+			comboBasedMissCount = fullComboThreshold / math.Max(1, float64(score.MaxCombo))
+		}
+	}
+
+	comboBasedMissCount = math.Min(comboBasedMissCount, float64(beatmap.Circles+beatmap.Sliders+beatmap.Spinners))
+	return int(math.Max(float64(score.CountMiss), math.Floor(comboBasedMissCount)))
+}
+
+func aimPP(beatmap osuapi.Beatmap, score osuapi.Score, effectiveMissCount int) float64 {
 	rawAim := beatmap.DifficultyAim
 	totalHits := float64(beatmap.Circles + beatmap.Sliders + beatmap.Spinners)
 	accuracy := float64(score.Count50+2*score.Count100+6*score.Count300) / float64(6*(score.CountMiss+score.Count50+score.Count100+score.Count300))
@@ -88,8 +108,8 @@ func aimPP(beatmap osuapi.Beatmap, score osuapi.Score) float64 {
 	}
 	aimValue *= lengthBonus
 
-	if score.CountMiss > 0 {
-		aimValue *= 0.97 * math.Pow(1.0-math.Pow(float64(score.CountMiss)/totalHits, 0.775), float64(score.CountMiss))
+	if effectiveMissCount > 0 {
+		aimValue *= 0.97 * math.Pow(1.0-math.Pow(float64(effectiveMissCount)/totalHits, 0.775), float64(effectiveMissCount))
 	}
 
 	if beatmap.MaxCombo > 0 {
@@ -98,34 +118,23 @@ func aimPP(beatmap osuapi.Beatmap, score osuapi.Score) float64 {
 
 	ARBonus := 0.0
 	if beatmap.ApproachRate > 10.33 {
-		ARBonus += 0.4 * (beatmap.ApproachRate - 10.33)
+		ARBonus += 0.3 * (beatmap.ApproachRate - 10.33)
 	} else if beatmap.ApproachRate < 8.0 {
-		ARBonus += 0.01 * (8.0 - beatmap.ApproachRate)
+		ARBonus += 0.1 * (8.0 - beatmap.ApproachRate)
 	}
-	aimValue *= 1.0 + math.Min(ARBonus, ARBonus*(totalHits/1000.0))
+	aimValue *= 1.0 + ARBonus*lengthBonus
 
 	if score.Mods&osuapi.ModHidden != 0 {
 		aimValue *= 1.0 + 0.04*(12.0-beatmap.ApproachRate)
 	}
 
-	if score.Mods&osuapi.ModFlashlight != 0 {
-		FLBonus := 1.0 + 0.35*math.Min(1.0, totalHits/200.0)
-		if totalHits > 200 {
-			FLBonus += 0.3 * math.Min(1.0, (totalHits-200)/300.0)
-			if totalHits > 500 {
-				FLBonus += (totalHits - 500) / 1200.0
-			}
-		}
-		aimValue *= FLBonus
-	}
-
-	aimValue *= 0.5 + accuracy/2.0
+	aimValue *= accuracy
 	aimValue *= 0.98 + math.Pow(beatmap.OverallDifficulty, 2.0)/2500
 
 	return aimValue
 }
 
-func speedPP(beatmap osuapi.Beatmap, score osuapi.Score) float64 {
+func speedPP(beatmap osuapi.Beatmap, score osuapi.Score, effectiveMissCount int) float64 {
 	speedValue := convertSTDSR(beatmap.DifficultySpeed)
 	totalHits := float64(beatmap.Circles + beatmap.Sliders + beatmap.Spinners)
 	accuracy := float64(score.Count50+2*score.Count100+6*score.Count300) / float64(6*(score.CountMiss+score.Count50+score.Count100+score.Count300))
@@ -136,8 +145,8 @@ func speedPP(beatmap osuapi.Beatmap, score osuapi.Score) float64 {
 	}
 	speedValue *= lengthBonus
 
-	if score.CountMiss > 0 {
-		speedValue *= 0.97 * math.Pow(1.0-math.Pow(float64(score.CountMiss)/totalHits, 0.775), math.Pow(float64(score.CountMiss), 0.875))
+	if effectiveMissCount > 0 {
+		speedValue *= 0.97 * math.Pow(1.0-math.Pow(float64(effectiveMissCount)/totalHits, 0.775), math.Pow(float64(effectiveMissCount), 0.875))
 	}
 
 	if beatmap.MaxCombo > 0 {
@@ -146,26 +155,27 @@ func speedPP(beatmap osuapi.Beatmap, score osuapi.Score) float64 {
 
 	ARBonus := 0.0
 	if beatmap.ApproachRate > 10.33 {
-		ARBonus += 0.4 * (beatmap.ApproachRate - 10.33)
+		ARBonus += 0.3 * (beatmap.ApproachRate - 10.33)
 	}
-	speedValue *= 1.0 + math.Min(ARBonus, ARBonus*(totalHits/1000.0))
+	speedValue *= 1.0 + ARBonus*lengthBonus
 
 	if score.Mods&osuapi.ModHidden != 0 {
 		speedValue *= 1.0 + 0.04*(12.0-beatmap.ApproachRate)
 	}
 
 	speedValue *= (0.95 + math.Pow(beatmap.OverallDifficulty, 2.0)/750) * math.Pow(accuracy, (14.5-math.Max(beatmap.OverallDifficulty, 8))/2)
-
-	mehPunisher := float64(score.Count50) - totalHits/500.0
-	if float64(score.Count50) < totalHits/500.0 {
-		mehPunisher = 0
+	if float64(score.Count50) >= totalHits/500.0 {
+		speedValue *= math.Pow(0.98, float64(score.Count50)-totalHits/500.0)
 	}
-	speedValue *= math.Pow(0.98, mehPunisher)
 
 	return speedValue
 }
 
 func accSTDPP(beatmap osuapi.Beatmap, score osuapi.Score) float64 {
+	if score.Mods&osuapi.ModRelax != 0 {
+		return 0
+	}
+
 	trueAcc := 0.0
 	totalHits := float64(beatmap.Circles + beatmap.Sliders + beatmap.Spinners)
 
