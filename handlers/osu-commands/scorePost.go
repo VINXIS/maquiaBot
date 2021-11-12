@@ -281,7 +281,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string
 		}
 		replayData.ParseReplay(OsuAPI)
 		if replayData.Beatmap.BeatmapID != 0 {
-			diffMods := osuapi.Mods(338) & replayData.Score.Mods
+			diffMods := osuapi.Mods(1362) & replayData.Score.Mods
 			replayData.Beatmap = osutools.BeatmapParse(strconv.Itoa(replayData.Beatmap.BeatmapID), "map", &diffMods)
 		}
 		replayData.UnstableRate = replayData.GetUnstableRate()
@@ -308,7 +308,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string
 	}
 
 	if replayData.UnstableRate == 0 {
-		diffMods := 338 & score.Mods
+		diffMods := 1362 & score.Mods
 		if diffMods&256 != 0 && diffMods&64 != 0 { // Remove DTHT
 			diffMods -= 320
 		}

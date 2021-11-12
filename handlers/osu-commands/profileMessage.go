@@ -176,6 +176,7 @@ func ProfileMessage(s *discordgo.Session, m *discordgo.MessageCreate, profileReg
 
 			beatmaps, err := OsuAPI.GetBeatmaps(osuapi.GetBeatmapsOpts{
 				BeatmapID: score.BeatmapID,
+				Mods:      &score.Mods,
 			})
 			if err != nil {
 				s.ChannelMessageSend(m.ChannelID, "The osu! API just owned me. Please try again!")

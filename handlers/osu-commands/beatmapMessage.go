@@ -74,7 +74,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, extraConte
 	}
 
 	// Check if the format uses a /b/, /s/, /beatmaps/, or /beatmapsets/ link
-	diffMods := 338 & osuapi.ParseMods(mods)
+	diffMods := 1362 & osuapi.ParseMods(mods)
 	if diffMods&256 != 0 && diffMods&64 != 0 { // Remove DTHT
 		diffMods -= 320
 	}
@@ -129,6 +129,9 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, extraConte
 	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64)
 	if beatmap.Mode == osuapi.ModeOsu {
 		sr += " **Aim:** " + strconv.FormatFloat(beatmap.DifficultyAim, 'f', 2, 64) + " **Speed:** " + strconv.FormatFloat(beatmap.DifficultySpeed, 'f', 2, 64)
+		if diffMods&osuapi.ModFlashlight != 0 {
+			sr += " **FL:** " + strconv.FormatFloat(beatmap.DifficultyFlashlight, 'f', 2, 64)
+		}
 	}
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + totalSeconds + " (" + fmt.Sprint(hitMinutes) + ":" + hitSeconds + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "

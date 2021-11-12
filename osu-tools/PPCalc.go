@@ -36,8 +36,9 @@ func PPCalc(beatmap osuapi.Beatmap, score osuapi.Score, store chan<- string) {
 
 		aimPP := aimPP(beatmap, score, effectiveMissCount)
 		speedPP := speedPP(beatmap, score, effectiveMissCount)
+		flPP := flPP(beatmap, score, effectiveMissCount)
 		accPP := accSTDPP(beatmap, score)
-		totalPP = multiplier * math.Pow(math.Pow(aimPP, 1.1)+math.Pow(speedPP, 1.1)+math.Pow(accPP, 1.1), 1.0/1.1)
+		totalPP = multiplier * math.Pow(math.Pow(aimPP, 1.1)+math.Pow(speedPP, 1.1)+math.Pow(accPP, 1.1)+math.Pow(flPP, 1.1), 1.0/1.1)
 	case osuapi.ModeTaiko:
 		multiplier := 1.1
 		if score.Mods&osuapi.ModNoFail != 0 {
@@ -169,6 +170,45 @@ func speedPP(beatmap osuapi.Beatmap, score osuapi.Score, effectiveMissCount int)
 	}
 
 	return speedValue
+}
+
+func flPP(beatmap osuapi.Beatmap, score osuapi.Score, effectiveMissCount int) float64 {
+	if score.Mods&osuapi.ModFlashlight == 0 {
+		return 0
+	}
+
+	totalHits := float64(beatmap.Circles + beatmap.Sliders + beatmap.Spinners)
+	accuracy := float64(score.Count50+2*score.Count100+6*score.Count300) / float64(6*(score.CountMiss+score.Count50+score.Count100+score.Count300))
+
+	rawFlashlight := beatmap.DifficultyFlashlight
+	if score.Mods&osuapi.ModTouchDevice != 0 {
+		rawFlashlight = math.Pow(rawFlashlight, 0.8)
+	}
+
+	flashlightValue := math.Pow(rawFlashlight, 2.0) * 25.0
+
+	if score.Mods&osuapi.ModHidden != 0 {
+		flashlightValue *= 1.3
+	}
+
+	if effectiveMissCount > 0 {
+		flashlightValue *= 0.97 * math.Pow(1-math.Pow(float64(effectiveMissCount)/totalHits, 0.775), math.Pow(float64(effectiveMissCount), 0.875))
+	}
+
+	if beatmap.MaxCombo > 0 {
+		flashlightValue *= math.Min(math.Pow(float64(score.MaxCombo), 0.8)/math.Pow(float64(beatmap.MaxCombo), 0.8), 1.0)
+	}
+
+	lengthBonus := 0.0
+	if totalHits > 200 {
+		lengthBonus = 0.2 * math.Min(1.0, (totalHits-200)/200.0)
+	}
+	flashlightValue *= 0.7 + 0.1*math.Min(1.0, totalHits/200.0) + lengthBonus
+
+	flashlightValue *= 0.5 + accuracy/2.0
+	flashlightValue *= 0.98 + math.Pow(beatmap.OverallDifficulty, 2)/2500
+
+	return flashlightValue
 }
 
 func accSTDPP(beatmap osuapi.Beatmap, score osuapi.Score) float64 {

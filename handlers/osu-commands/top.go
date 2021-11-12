@@ -144,7 +144,7 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate) {
 	score = scoreList[index-1]
 
 	// Get beatmap, acc, and mods
-	diffMods := osuapi.Mods(338) & score.Mods
+	diffMods := osuapi.Mods(1362) & score.Mods
 	beatmap := osutools.BeatmapParse(strconv.Itoa(score.BeatmapID), "map", &diffMods)
 	accCalc := 100.0 * float64(score.Count50+2*score.Count100+6*score.Count300) / float64(6*(score.CountMiss+score.Count50+score.Count100+score.Count300))
 	mods = score.Mods.String()
@@ -174,6 +174,9 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate) {
 	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64)
 	if beatmap.Mode == osuapi.ModeOsu {
 		sr += " **Aim:** " + strconv.FormatFloat(beatmap.DifficultyAim, 'f', 2, 64) + " **Speed:** " + strconv.FormatFloat(beatmap.DifficultySpeed, 'f', 2, 64)
+		if diffMods&osuapi.ModFlashlight != 0 {
+			sr += " **FL:** " + strconv.FormatFloat(beatmap.DifficultyFlashlight, 'f', 2, 64)
+		}
 	}
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "

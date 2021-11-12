@@ -83,7 +83,7 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 	}
 
 	// Get the map
-	diffMods := 338 & parsedMods
+	diffMods := 1362 & parsedMods
 	if diffMods&256 != 0 && diffMods&64 != 0 { // Remove DTHT
 		diffMods -= 320
 	}
@@ -185,6 +185,9 @@ func Leaderboard(s *discordgo.Session, m *discordgo.MessageCreate, regex *regexp
 	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64)
 	if beatmap.Mode == osuapi.ModeOsu {
 		sr += " **Aim:** " + strconv.FormatFloat(beatmap.DifficultyAim, 'f', 2, 64) + " **Speed:** " + strconv.FormatFloat(beatmap.DifficultySpeed, 'f', 2, 64)
+		if diffMods&osuapi.ModFlashlight != 0 {
+			sr += " **FL:** " + strconv.FormatFloat(beatmap.DifficultyFlashlight, 'f', 2, 64)
+		}
 	}
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + totalSeconds + " (" + fmt.Sprint(hitMinutes) + ":" + hitSeconds + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "

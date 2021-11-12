@@ -34,41 +34,42 @@ type GetBeatmapsOpts struct {
 
 // Beatmap is an osu! beatmap.
 type Beatmap struct {
-	BeatmapSetID      int            `json:"beatmapset_id,string"`
-	BeatmapID         int            `json:"beatmap_id,string"`
-	Approved          ApprovedStatus `json:"approved,string"`
-	TotalLength       int            `json:"total_length,string"`
-	HitLength         int            `json:"hit_length,string"`
-	DiffName          string         `json:"version"`
-	FileMD5           string         `json:"file_md5"`
-	CircleSize        float64        `json:"diff_size,string"`
-	OverallDifficulty float64        `json:"diff_overall,string"`
-	ApproachRate      float64        `json:"diff_approach,string"`
-	HPDrain           float64        `json:"diff_drain,string"`
-	Mode              Mode           `json:"mode,string"`
-	Circles           int            `json:"count_normal,string"`
-	Sliders           int            `json:"count_slider,string"`
-	Spinners          int            `json:"count_spinner,string"`
-	SubmitDate        MySQLDate      `json:"submit_date"`
-	ApprovedDate      MySQLDate      `json:"approved_date"`
-	LastUpdate        MySQLDate      `json:"last_update"`
-	Artist            string         `json:"artist"`
-	Title             string         `json:"title"`
-	Creator           string         `json:"creator"`
-	CreatorID         int            `json:"creator_id,string"`
-	BPM               float64        `json:"bpm,string"`
-	Source            string         `json:"source"`
-	Tags              string         `json:"tags"`
-	Genre             Genre          `json:"genre_id,string"`
-	Language          Language       `json:"language_id,string"`
-	FavouriteCount    int            `json:"favourite_count,string"`
-	Rating            float64        `json:"rating,string"`
-	Playcount         int            `json:"playcount,string"`
-	Passcount         int            `json:"passcount,string"`
-	MaxCombo          int            `json:"max_combo,string"`
-	DifficultyAim     float64        `json:"diff_aim,string"`
-	DifficultySpeed   float64        `json:"diff_speed,string"`
-	DifficultyRating  float64        `json:"difficultyrating,string"`
+	BeatmapSetID         int            `json:"beatmapset_id,string"`
+	BeatmapID            int            `json:"beatmap_id,string"`
+	Approved             ApprovedStatus `json:"approved,string"`
+	TotalLength          int            `json:"total_length,string"`
+	HitLength            int            `json:"hit_length,string"`
+	DiffName             string         `json:"version"`
+	FileMD5              string         `json:"file_md5"`
+	CircleSize           float64        `json:"diff_size,string"`
+	OverallDifficulty    float64        `json:"diff_overall,string"`
+	ApproachRate         float64        `json:"diff_approach,string"`
+	HPDrain              float64        `json:"diff_drain,string"`
+	Mode                 Mode           `json:"mode,string"`
+	Circles              int            `json:"count_normal,string"`
+	Sliders              int            `json:"count_slider,string"`
+	Spinners             int            `json:"count_spinner,string"`
+	SubmitDate           MySQLDate      `json:"submit_date"`
+	ApprovedDate         MySQLDate      `json:"approved_date"`
+	LastUpdate           MySQLDate      `json:"last_update"`
+	Artist               string         `json:"artist"`
+	Title                string         `json:"title"`
+	Creator              string         `json:"creator"`
+	CreatorID            int            `json:"creator_id,string"`
+	BPM                  float64        `json:"bpm,string"`
+	Source               string         `json:"source"`
+	Tags                 string         `json:"tags"`
+	Genre                Genre          `json:"genre_id,string"`
+	Language             Language       `json:"language_id,string"`
+	FavouriteCount       int            `json:"favourite_count,string"`
+	Rating               float64        `json:"rating,string"`
+	Playcount            int            `json:"playcount,string"`
+	Passcount            int            `json:"passcount,string"`
+	MaxCombo             int            `json:"max_combo,string"`
+	DifficultyAim        float64        `json:"diff_aim,string"`
+	DifficultySpeed      float64        `json:"diff_speed,string"`
+	DifficultyRating     float64        `json:"difficultyrating,string"`
+	DifficultyFlashlight float64
 }
 
 // GetBeatmaps makes a get_beatmaps request to the osu! API.

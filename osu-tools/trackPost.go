@@ -60,7 +60,7 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 					}
 
 					// Save beatmap
-					diffMods := osuapi.Mods(338) & score.Mods
+					diffMods := osuapi.Mods(1362) & score.Mods
 					beatmap := BeatmapParse(strconv.Itoa(score.BeatmapID), "map", &diffMods)
 
 					// Assign timing variables for values below
@@ -81,6 +81,9 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 					sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64)
 					if beatmap.Mode == osuapi.ModeOsu {
 						sr += " **Aim:** " + strconv.FormatFloat(beatmap.DifficultyAim, 'f', 2, 64) + " **Speed:** " + strconv.FormatFloat(beatmap.DifficultySpeed, 'f', 2, 64)
+						if diffMods&osuapi.ModFlashlight != 0 {
+							sr += " **FL:** " + strconv.FormatFloat(beatmap.DifficultyFlashlight, 'f', 2, 64)
+						}
 					}
 					length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 					bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "

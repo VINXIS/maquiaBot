@@ -218,7 +218,7 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Get the beatmap but with mods applied if not all
 	if !allRegex.MatchString(m.Content) {
-		diffMods := 338 & scores[0].Mods
+		diffMods := 1362 & scores[0].Mods
 		if diffMods&256 != 0 && diffMods&64 != 0 { // Remove DTHT
 			diffMods -= 320
 		}
@@ -243,6 +243,9 @@ func Compare(s *discordgo.Session, m *discordgo.MessageCreate) {
 	sr := "**SR:** " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64)
 	if beatmap.Mode == osuapi.ModeOsu {
 		sr += " **Aim:** " + strconv.FormatFloat(beatmap.DifficultyAim, 'f', 2, 64) + " **Speed:** " + strconv.FormatFloat(beatmap.DifficultySpeed, 'f', 2, 64)
+		if scores[0].Mods&osuapi.ModFlashlight != 0 {
+			sr += " **FL:** " + strconv.FormatFloat(beatmap.DifficultyFlashlight, 'f', 2, 64)
+		}
 	}
 	length := "**Length:** " + fmt.Sprint(totalMinutes) + ":" + fmt.Sprint(totalSeconds) + " (" + fmt.Sprint(hitMinutes) + ":" + fmt.Sprint(hitSeconds) + ") "
 	bpm := "**BPM:** " + fmt.Sprint(beatmap.BPM) + " "

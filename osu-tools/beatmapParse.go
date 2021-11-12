@@ -47,15 +47,15 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 	}
 
 	// Mod scaling
-	scaleMods := *mods
+	diffMods := *mods
 
 	// HR / EZ scaling
-	if scaleMods&osuapi.ModHardRock != 0 {
+	if diffMods&osuapi.ModHardRock != 0 {
 		beatmap.CircleSize = math.Min(10.0, beatmap.CircleSize*1.3)
 		beatmap.ApproachRate = math.Min(10.0, beatmap.ApproachRate*1.4)
 		beatmap.OverallDifficulty = math.Min(10.0, beatmap.OverallDifficulty*1.4)
 		beatmap.HPDrain = math.Min(10.0, beatmap.HPDrain*1.4)
-	} else if scaleMods&osuapi.ModEasy != 0 {
+	} else if diffMods&osuapi.ModEasy != 0 {
 		beatmap.CircleSize /= 2.0
 		beatmap.ApproachRate /= 2.0
 		beatmap.OverallDifficulty /= 2.0
@@ -64,9 +64,9 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 
 	// DT / HT scaling
 	clock := 1.0
-	if scaleMods&osuapi.ModDoubleTime != 0 {
+	if diffMods&osuapi.ModDoubleTime != 0 {
 		clock = 1.5
-	} else if scaleMods&osuapi.ModHalfTime != 0 {
+	} else if diffMods&osuapi.ModHalfTime != 0 {
 		clock = 0.75
 	}
 
@@ -80,7 +80,19 @@ func BeatmapParse(id, format string, mods *osuapi.Mods) (beatmap osuapi.Beatmap)
 	beatmap.ApproachRate = diffValue(ARMS)
 	beatmap.HPDrain = diffValue(HPMS)
 
+	if diffMods&osuapi.ModFlashlight != 0 {
+		beatmap.DifficultyFlashlight = calcFLSR(beatmap)
+	}
+
 	return beatmap
+}
+
+// Inversing functions from https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Osu/Difficulty/OsuDifficultyCalculator.cs#L36 to obtain FLRating
+func calcFLSR(beatmap osuapi.Beatmap) float64 {
+	baseAimPerformance := convertSTDSR(beatmap.DifficultyAim)
+	baseSpeedPerformance := convertSTDSR(beatmap.DifficultySpeed)
+	basePerformance := math.Pow((beatmap.DifficultyRating/(math.Cbrt(1.12)*0.027))-4, 3.0) * math.Pow(2, 1/1.1) / 100000
+	return math.Sqrt(math.Pow(math.Pow(basePerformance, 1.1)-math.Pow(baseAimPerformance, 1.1)-math.Pow(baseSpeedPerformance, 1.1), 1/1.1) / 25.0)
 }
 
 func diffRange(value float64) float64 {
