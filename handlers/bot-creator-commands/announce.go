@@ -28,7 +28,7 @@ func Announce(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	announcement := announceRegex.FindStringSubmatch(m.Content)[1] + strings.Join(strings.Split(m.Content, "\n")[1:], "\n")
+	announcement := announceRegex.FindStringSubmatch(m.Content)[1] + strings.Join(strings.Split(m.Content, "\n")[1:], "\n\n")
 
 	for _, guild := range s.State.Guilds {
 		if guild.ID == m.GuildID {
