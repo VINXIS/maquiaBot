@@ -78,7 +78,7 @@ func Transfer(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Get number of points to transfer
 	val := 0.00
-	if val, err = strconv.ParseFloat(strings.Split(m.Content, " ")[len(strings.Split(m.Content, " "))-1], 64); err != nil {
+	if val, err = strconv.ParseFloat(strings.Split(m.Content, " ")[len(strings.Split(m.Content, " "))-1], 64); err != nil || val < 0 || math.IsInf(val, 1) || math.IsInf(val, -1) || math.IsNaN(val) {
 		s.ChannelMessageSend(m.ChannelID, "Please provide a number at the end of your message!")
 		return
 	}
