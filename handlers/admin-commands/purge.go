@@ -203,7 +203,7 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			err = s.ChannelMessagesBulkDelete(m.ChannelID, messageIDs[i-100:i])
 			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "Could not delete messages! Please make sure I have the proper permissions!\n"+err.Error())
+				s.ChannelMessageSend(m.ChannelID, "Could not delete messages! Please make sure I have the proper permissions!\n```\n"+err.Error()+"\n```")
 				return
 			}
 			if i == len(messageIDs)-1 {
@@ -214,7 +214,7 @@ func Purge(s *discordgo.Session, m *discordgo.MessageCreate) {
 	} else {
 		err = s.ChannelMessagesBulkDelete(m.ChannelID, messageIDs)
 		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "Could not delete messages! Please make sure I have the proper permissions!\n"+err.Error())
+			s.ChannelMessageSend(m.ChannelID, "Could not delete messages! Please make sure I have the proper permissions!\n```\n"+err.Error()+"\n```")
 			return
 		}
 	}
