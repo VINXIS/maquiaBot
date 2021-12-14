@@ -82,33 +82,33 @@ func postAva(s *discordgo.Session, m *discordgo.MessageCreate, name, avatarURL [
 	negateRegex, _ := regexp.Compile(`-(np|noprev(iew)?)`)
 	if len(name) == 0 {
 		if negateRegex.MatchString(m.Content) {
-			s.ChannelMessageSend(m.ChannelID, "Your avatar is: <"+avatarURL[0]+">")
+			s.ChannelMessageSend(m.ChannelID, "Your general avatar is: <"+avatarURL[0]+">")
 		} else {
-			s.ChannelMessageSend(m.ChannelID, "Your avatar is: "+avatarURL[0])
+			s.ChannelMessageSend(m.ChannelID, "Your general avatar is: "+avatarURL[0])
 		}
 	} else if len(name) == 1 {
 		if found {
 			if negateRegex.MatchString(m.Content) {
-				s.ChannelMessageSend(m.ChannelID, name[0]+"'s avatar is: <"+avatarURL[0]+">")
+				s.ChannelMessageSend(m.ChannelID, name[0]+"'s general avatar is: <"+avatarURL[0]+">")
 			} else {
-				s.ChannelMessageSend(m.ChannelID, name[0]+"'s avatar is: "+avatarURL[0])
+				s.ChannelMessageSend(m.ChannelID, name[0]+"'s general avatar is: "+avatarURL[0])
 			}
 		} else {
 			if negateRegex.MatchString(m.Content) {
-				s.ChannelMessageSend(m.ChannelID, "No person named "+name[0]+", Your avatar is: <"+avatarURL[0]+">")
+				s.ChannelMessageSend(m.ChannelID, "No person named "+name[0]+", Your general avatar is: <"+avatarURL[0]+">")
 			} else {
-				s.ChannelMessageSend(m.ChannelID, "No person named "+name[0]+", Your avatar is: "+avatarURL[0])
+				s.ChannelMessageSend(m.ChannelID, "No person named "+name[0]+", Your general avatar is: "+avatarURL[0])
 			}
 		}
 	} else {
 		message := ""
 		if negateRegex.MatchString(m.Content) {
 			for i := range name {
-				message += name[i] + "'s avatar is: <" + avatarURL[i] + ">\n"
+				message += name[i] + "'s general avatar is: <" + avatarURL[i] + ">\n"
 			}
 		} else {
 			for i := range name {
-				message += name[i] + "'s avatar is: " + avatarURL[i] + "\n"
+				message += name[i] + "'s general avatar is: " + avatarURL[i] + "\n"
 			}
 		}
 		s.ChannelMessageSend(m.ChannelID, message)
