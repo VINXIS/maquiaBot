@@ -71,6 +71,7 @@ func Kanye(s *discordgo.Session, m *discordgo.MessageCreate) {
 		"```\nI forgor 💀``` - Kanye West on Twitter",
 		"```\nCome and get me ... this is the exodus``` - Kanye West on Twitter",
 		"```\nJunya Watanabe on my WRI``` - Kanye West on Junya",
+		"```\nI'm nice at ping pong``` - Kanye West on Twitter",
 		"```\nMan, it's too early / What the hell you doin' wakin' me up at 5:30? / Why the hell are you worried? / Play somethin' that is very, very vibe-worthy``` - Kanye West on Believe What I Say",
 	}
 	roll, _ := rand.Int(rand.Reader, big.NewInt(int64(len(KanyeLines))))
