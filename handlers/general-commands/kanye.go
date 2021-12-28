@@ -42,6 +42,7 @@ func Kanye(s *discordgo.Session, m *discordgo.MessageCreate) {
 		"```\nClosed on Sunday, you my Chick-fil-A``` - Kanye West on Closed On Sunday",
 		"```\nLost in translation with a whole fuckin' nation / They say I was the abomination of Obama's nation / Well that's a pretty bad way to start the conversation``` - Kanye West on POWER",
 		"```\nBa-ba-ba-ba-bwa-ba / Ga-ba-ba-ba / Rude-rude-rude-rude-woo!``` - Kanye West on Feel the Love",
+		"```\nNow, I ain't sayin' she a gold digger / But she ain't messin' with no broke niggas``` - Kanye West on Gold Digger",
 		"```\nGet down girl, go 'head, get down``` - Kanye West on Gold Digger",
 		"```\nMayonnaise colored Benz, I push Miracle Whips``` - Kanye West on Wack Niggaz",
 		"```\nYou should be honored by my lateness / That I would even show up to this fake shit``` - Kanye West on Stronger",
