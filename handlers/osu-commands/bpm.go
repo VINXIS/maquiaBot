@@ -43,7 +43,7 @@ func BPM(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 	if username == "" {
-		s.ChannelMessageSend(m.ChannelID, "No user found for you! Use `link` or `set` to link your account!")
+		s.ChannelMessageSend(m.ChannelID, "No osu! user found for you! Use `link` or `set` to link your account!")
 		return
 	}
 
