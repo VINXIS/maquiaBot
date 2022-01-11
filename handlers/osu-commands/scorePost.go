@@ -374,7 +374,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string
 
 	mapperSR := " (" + strings.Replace(beatmap.Creator, "_", `\_`, -1) + " | " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + "★)"
 	if commaRegex.MatchString(m.Content) || comma {
-		mapperSR = " (" + strings.Replace(beatmap.Creator, "_", `\_`, -1) + ", " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + "*)"
+		mapperSR = " " + strings.Replace(beatmap.Creator, "_", `\_`, -1) + ", " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + "*"
 	}
 	if starRegex.MatchString(m.Content) || !sr {
 		mapperSR = " (mapset by " + strings.Replace(beatmap.Creator, "_", `\_`, -1) + ")"
