@@ -42,7 +42,7 @@ func Daily(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	newAmount := math.Max(10, 1.01*player.Currency.Amount)
+	newAmount := math.Max(10, 0.01*player.Currency.Amount)
 	player.Currency.Amount += newAmount
 	player.Currency.LastDaily = time.Now()
 	player.Time = time.Now()
