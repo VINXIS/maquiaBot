@@ -30,6 +30,8 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
 	fcRegex, _ := regexp.Compile(`(?i)-fc`)
+	commaRegex, _ := regexp.Compile(`(?i)-c`)
+	modCommaRegex, _ := regexp.Compile(`(?i)-mc`)
 	addRegex, _ := regexp.Compile(`(?i)-add\s+(.+)`)
 
 	var beatmap osuapi.Beatmap
@@ -335,7 +337,7 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string
 	newModText := ""
 	for i := range modText {
 		newModText += string(modText[i])
-		if i > 0 && (i-1)%2 == 0 && i != len(modText)-1 {
+		if i > 0 && (i-1)%2 == 0 && i != len(modText)-1 && !modCommaRegex.MatchString(m.Content) {
 			newModText += ","
 		}
 	}
@@ -358,6 +360,9 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string
 	}
 
 	mapperSR := " (" + strings.Replace(beatmap.Creator, "_", `\_`, -1) + " | " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + "★)"
+	if commaRegex.MatchString(m.Content) {
+		mapperSR = " (" + strings.Replace(beatmap.Creator, "_", `\_`, -1) + ", " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + "★)"
+	}
 	if starRegex.MatchString(m.Content) || !sr {
 		mapperSR = " (mapset by " + strings.Replace(beatmap.Creator, "_", `\_`, -1) + ")"
 	}

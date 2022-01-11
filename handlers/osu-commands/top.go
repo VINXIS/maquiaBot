@@ -30,6 +30,8 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate) {
 	mapperRegex, _ := regexp.Compile(`(?i)-mapper`)
 	starRegex, _ := regexp.Compile(`(?i)-sr`)
 	fcRegex, _ := regexp.Compile(`(?i)-fc`)
+	commaRegex, _ := regexp.Compile(`(?i)-c`)
+	modCommaRegex, _ := regexp.Compile(`(?i)-mc`)
 	addRegex, _ := regexp.Compile(`(?i)-add\s+(.+)`)
 
 	username := ""
@@ -64,6 +66,12 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		if fcRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, fcRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if commaRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, commaRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if modCommaRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, modCommaRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 		if addRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, addRegex.FindStringSubmatch(m.Content)[0], "", 1))
