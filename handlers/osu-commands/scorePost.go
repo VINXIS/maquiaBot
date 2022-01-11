@@ -32,6 +32,8 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string
 	fcRegex, _ := regexp.Compile(`(?i)-fc`)
 	commaRegex, _ := regexp.Compile(`(?i)-c`)
 	modCommaRegex, _ := regexp.Compile(`(?i)-mc`)
+	asteriskRegex, _ := regexp.Compile(`(?i)-star`)
+	bracketsRegex, _ := regexp.Compile(`(?i)-b`)
 	addRegex, _ := regexp.Compile(`(?i)-add\s+(.+)`)
 
 	var beatmap osuapi.Beatmap
@@ -68,6 +70,12 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string
 		}
 		if modCommaRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, modCommaRegex.FindStringSubmatch(username)[0], "", 1))
+		}
+		if asteriskRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, asteriskRegex.FindStringSubmatch(username)[0], "", 1))
+		}
+		if bracketsRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, bracketsRegex.FindStringSubmatch(username)[0], "", 1))
 		}
 		if addRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, addRegex.FindStringSubmatch(username)[0], "", 1))
@@ -344,6 +352,8 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string
 	fc := false
 	comma := false
 	modComma := false
+	brackets := false
+	star := "*"
 	for _, param := range params {
 		switch param {
 		case "mapper":
@@ -356,6 +366,10 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string
 			comma = true
 		case "modcomma":
 			modComma = true
+		case "brackets":
+			brackets = true
+		case "star":
+			star = "★"
 		}
 	}
 
@@ -372,18 +386,23 @@ func ScorePost(s *discordgo.Session, m *discordgo.MessageCreate, postType string
 		text += " (" + acc + ")"
 	}
 
-	mapperSR := " (" + strings.Replace(beatmap.Creator, "_", `\_`, -1) + " | " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + "★)"
+	bracketSlice := []string{" ", ""}
+	if bracketsRegex.MatchString(m.Content) || brackets {
+		bracketSlice = []string{" (", ")"}
+	}
+
+	mapperSR := bracketSlice[0] + strings.Replace(beatmap.Creator, "_", `\_`, -1) + " | " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + star + bracketSlice[1]
 	if commaRegex.MatchString(m.Content) || comma {
-		mapperSR = " " + strings.Replace(beatmap.Creator, "_", `\_`, -1) + ", " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + "*"
+		mapperSR = bracketSlice[0] + strings.Replace(beatmap.Creator, "_", `\_`, -1) + ", " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + star + bracketSlice[1]
 	}
 	if starRegex.MatchString(m.Content) || !sr {
-		mapperSR = " (mapset by " + strings.Replace(beatmap.Creator, "_", `\_`, -1) + ")"
+		mapperSR = bracketSlice[0] + "mapset by " + strings.Replace(beatmap.Creator, "_", `\_`, -1) + bracketSlice[1]
 	}
 	if mapperRegex.MatchString(m.Content) || !mapper {
-		mapperSR = " " + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + "★"
+		mapperSR = bracketSlice[0] + strconv.FormatFloat(beatmap.DifficultyRating, 'f', 2, 64) + star + bracketSlice[1]
 	}
 	if (starRegex.MatchString(m.Content) && mapperRegex.MatchString(m.Content)) || (!mapper && !sr) {
-		mapperSR = ""
+		mapperSR = bracketSlice[0] + bracketSlice[1]
 	}
 	text += mapperSR
 

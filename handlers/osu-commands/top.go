@@ -32,6 +32,8 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate) {
 	fcRegex, _ := regexp.Compile(`(?i)-fc`)
 	commaRegex, _ := regexp.Compile(`(?i)-c`)
 	modCommaRegex, _ := regexp.Compile(`(?i)-mc`)
+	asteriskRegex, _ := regexp.Compile(`(?i)-star`)
+	bracketsRegex, _ := regexp.Compile(`(?i)-b`)
 	addRegex, _ := regexp.Compile(`(?i)-add\s+(.+)`)
 
 	username := ""
@@ -72,6 +74,12 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		if modCommaRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, modCommaRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if asteriskRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, asteriskRegex.FindStringSubmatch(m.Content)[0], "", 1))
+		}
+		if bracketsRegex.MatchString(m.Content) {
+			username = strings.TrimSpace(strings.Replace(username, bracketsRegex.FindStringSubmatch(m.Content)[0], "", 1))
 		}
 		if addRegex.MatchString(m.Content) {
 			username = strings.TrimSpace(strings.Replace(username, addRegex.FindStringSubmatch(m.Content)[0], "", 1))
@@ -340,6 +348,12 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		if modCommaRegex.MatchString(m.Content) {
 			params = append(params, "modcomma")
+		}
+		if asteriskRegex.MatchString(m.Content) {
+			params = append(params, "star")
+		}
+		if bracketsRegex.MatchString(m.Content) {
+			params = append(params, "brackets")
 		}
 		ScorePost(s, &discordgo.MessageCreate{message}, "", addition, params...)
 	}

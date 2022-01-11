@@ -28,6 +28,8 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 	fcRegex, _ := regexp.Compile(`(?i)-fc`)
 	commaRegex, _ := regexp.Compile(`(?i)-c`)
 	modCommaRegex, _ := regexp.Compile(`(?i)-mc`)
+	asteriskRegex, _ := regexp.Compile(`(?i)-star`)
+	bracketsRegex, _ := regexp.Compile(`(?i)-b`)
 	addRegex, _ := regexp.Compile(`(?i)-add\s+(.+)`)
 
 	addition := ""
@@ -279,6 +281,12 @@ func ReplayMessage(s *discordgo.Session, m *discordgo.MessageCreate, linkRegex *
 		}
 		if modCommaRegex.MatchString(m.Content) {
 			params = append(params, "modcomma")
+		}
+		if asteriskRegex.MatchString(m.Content) {
+			params = append(params, "star")
+		}
+		if bracketsRegex.MatchString(m.Content) {
+			params = append(params, "brackets")
 		}
 		ScorePost(s, &discordgo.MessageCreate{message}, url, addition, params...)
 	}
