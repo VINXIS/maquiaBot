@@ -335,6 +335,12 @@ func Top(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if fcRegex.MatchString(m.Content) {
 			params = append(params, "fc")
 		}
+		if commaRegex.MatchString(m.Content) {
+			params = append(params, "comma")
+		}
+		if modCommaRegex.MatchString(m.Content) {
+			params = append(params, "modcomma")
+		}
 		ScorePost(s, &discordgo.MessageCreate{message}, "", addition, params...)
 	}
 }

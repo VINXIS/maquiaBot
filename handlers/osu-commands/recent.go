@@ -447,6 +447,12 @@ func Recent(s *discordgo.Session, m *discordgo.MessageCreate, option string) {
 		if fcRegex.MatchString(m.Content) {
 			params = append(params, "fc")
 		}
+		if commaRegex.MatchString(m.Content) {
+			params = append(params, "comma")
+		}
+		if modCommaRegex.MatchString(m.Content) {
+			params = append(params, "modcomma")
+		}
 		if option == "best" {
 			ScorePost(s, &discordgo.MessageCreate{message}, "recentBest", addition, params...)
 		} else if option == "recent" {
