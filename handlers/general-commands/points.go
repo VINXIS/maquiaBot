@@ -43,11 +43,12 @@ func Daily(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	newAmount := math.Max(10, 0.01*player.Currency.Amount)
-	if int64(player.Currency.Amount)%445 == 0 {
+	switch {
+	case int64(player.Currency.Amount)%445 == 0:
 		newAmount = 1.1 * player.Currency.Amount
-	} else if int64(player.Currency.Amount)%727 == 0 {
+	case int64(player.Currency.Amount)%727 == 0:
 		newAmount = 1.01 * player.Currency.Amount
-	} else if int64(player.Currency.Amount)%2 == 1 {
+	case int64(player.Currency.Amount)%2 == 1:
 		newAmount = -0.01 * player.Currency.Amount
 	}
 	player.Currency.Amount += newAmount
