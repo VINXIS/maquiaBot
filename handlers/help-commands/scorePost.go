@@ -7,7 +7,7 @@ import (
 // ScorePost explains the score post functionality
 func ScorePost(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: s / sc / scorepost"
-	embed.Description = "`[osu] (s|sc|scorepost) [link] [osu! username] [-m <mod>] [-mapper] [-sr] [-fc] [-add <text>]` prints out a scorepost."
+	embed.Description = "`[osu] (s|sc|scorepost) [link] [osu! username] [-m <mod>] [-mapper] [-sr] [-fc] [-c] [-mc] [-star] [-b] [-add <text>]` prints out a scorepost."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[link]",
@@ -37,6 +37,26 @@ func ScorePost(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		{
 			Name:   "[-fc]",
 			Value:  "Adds pp for if the score was an FC for the scoprepost generation.",
+			Inline: true,
+		},
+		{
+			Name:   "[-c]",
+			Value:  "Adds commas instead of a | between mapper and SR.",
+			Inline: true,
+		},
+		{
+			Name:   "[-mc]",
+			Value:  "Adds commas between each mod the play used.",
+			Inline: true,
+		},
+		{
+			Name:   "[-star]",
+			Value:  "Adds a unicode star ★ instead of *.",
+			Inline: true,
+		},
+		{
+			Name:   "[-b]",
+			Value:  "Adds brackets around the mapper and SR.",
 			Inline: true,
 		},
 		{
