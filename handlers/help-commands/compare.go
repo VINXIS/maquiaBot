@@ -7,11 +7,11 @@ import (
 // Compare explains the compare functionality
 func Compare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 	embed.Author.Name = "Command: c / compare"
-	embed.Description = "`[osu] (c|compare) [link] <osu! username> [-m <mod> [-nostrict]|-all] [-sp [-mapper] [-sr] [-fc] [-add <text>]]` lets you show your score(s) on a map."
+	embed.Description = "`[osu] (c|compare) [link] <osu! username> [-m <mod> [-nostrict]|-all] [-sp [-mapper] [-sr] [-fc] [-add <text>]]` lets you show your score(s) on a difficulty."
 	embed.Fields = []*discordgo.MessageEmbedField{
 		{
 			Name:   "[link]",
-			Value:  "The map to find the score for. No link will look for a score on the most recently linked map previously.",
+			Value:  "The map to find the score for. No link will look for a score on the most recently linked difficulty previously.",
 			Inline: true,
 		},
 		{
@@ -26,12 +26,12 @@ func Compare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:   "[-nostrict]",
-			Value:  "If the score should have that mod combination exactly, or if it can have other mods included.",
+			Value:  "If the score should have that mod combination exactly, instead of if it can have other mods included.",
 			Inline: true,
 		},
 		{
 			Name:   "[-all]",
-			Value:  "Show all scores the user has made on the map.",
+			Value:  "Show scores of all mod combinations that the user has made on the difficulty.",
 			Inline: true,
 		},
 		{
@@ -51,12 +51,12 @@ func Compare(embed *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 		},
 		{
 			Name:   "[-fc]",
-			Value:  "Adds pp for if the score was an FC for the scoprepost generation.",
+			Value:  "Adds pp for if the score was an FC for the scorepost generation.",
 			Inline: true,
 		},
 		{
 			Name:   "[-add text]",
-			Value:  "Any text to append to the end for the scoprepost generation.",
+			Value:  "Any text to append to the end for the scorepost generation.",
 			Inline: true,
 		},
 	}
