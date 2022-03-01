@@ -1,6 +1,8 @@
 # maquiaBot
 Discord bot that does a bunch of osu! stuff PROPERLY (sooner or later)
 
+# IF YOU WANT TO INVITE THE ALREADY RUNNING INSTANCE OF THE BOT USE THE `HELP` COMMAND IT'S IN THERE... BELOW IS FOR SETTING UP YOUR OWN INSTANCES ONLY
+
 [![buddy pipeline](https://app.buddy.works/nyquillppysh/maquiabot/pipelines/pipeline/300684/badge.svg?token=82ffef6998b4d03ae05429bee692027ed1bf6c628ea54cbf1838ecd5e8b3a7a4 "buddy pipeline")](https://app.buddy.works/nyquillppysh/maquiabot/pipelines/pipeline/300684)
 
 ## Installation
