@@ -25,7 +25,7 @@ func BeatmapMessage(s *discordgo.Session, m *discordgo.MessageCreate, extraConte
 	mapRegex, _ := regexp.Compile(`(?i)[^-]m`)
 	scoreRegex, _ := regexp.Compile(`(?i)-s\s*(\S+)`)
 
-	// See if map was linked or if the map command was used
+	// See if a map was linked or if the map command was used
 	var submatches []string
 	if (strings.Contains(m.Content, "map") || mapRegex.MatchString(m.Content)) && !regex.MatchString(m.Content) {
 		// Get prev messages
