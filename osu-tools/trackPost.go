@@ -183,10 +183,10 @@ func TrackPost(channel discordgo.Channel, s *discordgo.Session) {
 					}
 
 					// Check params
-					rankCheck := ch.Ranked && (beatmap.Approved == osuapi.StatusRanked || beatmap.Approved == osuapi.StatusApproved)
-					qualCheck := ch.Qualified && beatmap.Approved == osuapi.StatusQualified
-					loveCheck := ch.Loved && beatmap.Approved == osuapi.StatusLoved
-					mapCheck := rankCheck || qualCheck || loveCheck
+					rankCheck := beatmap.Approved == osuapi.StatusRanked || beatmap.Approved == osuapi.StatusApproved
+					qualCheck := beatmap.Approved == osuapi.StatusQualified
+					loveCheck := beatmap.Approved == osuapi.StatusLoved
+					mapCheck := (ch.Ranked && rankCheck) || (ch.Qualified && qualCheck) || (ch.Loved && loveCheck)
 
 					// score checking is a bit more complicated than map checking since we should be ignoring parameters if they were not technically given
 					ppCheck := score.PP >= ch.PPReq
