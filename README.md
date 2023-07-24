@@ -1,12 +1,12 @@
-This bot is not being worked on anymore. The bot will be replaced by [Corsace's discord bot](https://github.com/Corsace/Corsace/tree/master/DiscordBot)
+This bot is not being worked on anymore. The bot will be replaced by [Corsace's discord bot](https://github.com/Corsace/Corsace/tree/master/DiscordBot) within a few months of archiving this repository.
+
+
 # maquiaBot (ARCHIVED)
 If you want to invite the bot, there is an instance already running, you can invite it with this [link](https://discordapp.com/oauth2/authorize?&client_id=551667572723023893&scope=bot&permissions=0): 
 
 Discord bot that does a bunch of osu! stuff.
 
 [![buddy pipeline](https://app.buddy.works/nyquillppysh/maquiabot/pipelines/pipeline/300684/badge.svg?token=82ffef6998b4d03ae05429bee692027ed1bf6c628ea54cbf1838ecd5e8b3a7a4 "buddy pipeline")](https://app.buddy.works/nyquillppysh/maquiabot/pipelines/pipeline/300684)
-
-This bot will be replaced by [Corsace](https://github.com/Corsace/Corsace) in the future
 
 ## Installation
  1. [Install golang](https://golang.org/doc/install) and [Tesseract](https://github.com/UB-Mannheim/tesseract/wiki). Ideally you have Go version 1.13 or newer. 
